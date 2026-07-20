@@ -1,0 +1,15 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+.superpowers/
+node_modules/
+.astro/
+dist/
+.wrangler/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+coverage/
