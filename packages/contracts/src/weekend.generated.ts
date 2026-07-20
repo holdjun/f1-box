@@ -19,7 +19,10 @@ export interface WeekendPayload {
   constructorStandings: ConstructorStanding[];
   history: HistoryEntry[];
   seasonSchedule: ScheduleEntry[];
-  sources: Source[];
+  /**
+   * @minItems 1
+   */
+  sources: [Source, ...Source[]];
 }
 export interface Event {
   season: number;

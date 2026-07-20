@@ -6,7 +6,7 @@
 
 架构：`packages/contracts/weekend.schema.json` 是唯一数据结构真源。TypeScript 类型由 Schema 自动生成并用 Ajv 校验；Python 直接读取同一 Schema 并用 `jsonschema` 校验。生成类型禁止手写。首轮只建立契约，不访问 Jolpica、不创建页面、不接入 Cloudflare。
 
-技术栈：Node.js 22+、pnpm 11.9.0、TypeScript、Vitest、Ajv、ajv-formats、json-schema-to-typescript、Python 3.12、uv、pytest、jsonschema、Ruff。
+技术栈：Node.js >=22.12.0、pnpm 11.9.0、TypeScript、Vitest、Ajv、ajv-formats、json-schema-to-typescript、Python 3.12、uv、pytest、jsonschema、Ruff。
 
 ## 全局约束
 
@@ -67,9 +67,10 @@ f1-box/
 
 步骤：
 
-- [ ] 根 `package.json` 设置 `private: true`、`packageManager: pnpm@11.9.0`、`engines.node: >=22`。
+- [ ] 根 `package.json` 设置 `private: true`、`packageManager: pnpm@11.9.0`、`engines.node: >=22.12.0`。
 - [ ] workspace 仅包含 `apps/*` 与 `packages/*`；Python 服务不伪装为 pnpm 包。
 - [ ] contracts 包使用 ESM，并提供 `check` 与 `test` 脚本。
+- [ ] contracts 包通过 `exports` 暴露 `./weekend` 与明确的 Schema 子路径，不新增构建系统。
 - [ ] contracts 的 TypeScript 配置启用 `strict`、`noEmit`、`resolveJsonModule`、`moduleResolution: Bundler`。
 - [ ] `src/weekend.ts` 仅写入 `export {};`，让工作区在行为实现前可独立类型检查。
 - [ ] `.gitignore` 增加 `.data/`、Python 虚拟环境、测试报告和覆盖率目录。
@@ -118,17 +119,19 @@ WeekendPayload
 └── sources[]: name, url, fetchedAt
 ```
 
+`sources` 至少包含一项，空数组必须在 TypeScript 与 Python 中被拒绝。
+
 可空规则：排位赛的 `q1`、`q2`、`q3` 和正赛的 `time`、`fastestLap` 必须存在，值可为字符串或 `null`。积分允许小数。分类通过 `sessionKey` 的 `const` 值组成可辨识联合，只允许 `qualifying` 与 `race`。
 
 测试顺序：
 
 - [ ] 先写有效样例测试；由于 validator 尚不存在，预期测试失败。
-- [ ] 写四个无效样例：错误版本、缺少来源、未知场次状态、排位分类缺少 `q3`；每个都必须被拒绝。
+- [ ] 写五个无效样例：错误版本、缺少来源、空来源数组、未知场次状态、排位分类缺少 `q3`；每个都必须被拒绝。
 - [ ] 运行 `pnpm --filter @f1-box/contracts test`，确认失败原因来自缺少实现。
 - [ ] 安装 Ajv、ajv-formats 与 json-schema-to-typescript；Schema 标题固定为 `WeekendPayload`，用包脚本生成类型文件。
 - [ ] `check` 必须先重新生成类型再执行 TypeScript 检查，保证生成物不依赖人工同步。
 - [ ] `parseWeekendPayload` 成功时返回同一已校验对象；失败时抛出包含 Ajv 错误路径的 `TypeError`。
-- [ ] 运行 `pnpm --filter @f1-box/contracts test`；预期 5 个测试全部通过。
+- [ ] 运行 `pnpm --filter @f1-box/contracts test`；预期 6 个测试全部通过。
 - [ ] 运行 `pnpm --filter @f1-box/contracts check`；预期无类型错误。
 - [ ] 提交信息：`feat: define weekend payload contract`。
 
@@ -152,13 +155,13 @@ def validate_weekend(value: object) -> dict[str, object]: ...
 
 步骤：
 
-- [ ] 配置 Python 3.12，运行依赖仅含 `jsonschema`，开发依赖仅含 `pytest` 与 `ruff`。
+- [ ] 配置 Python 3.12 与最小 `hatchling` build-system，运行依赖仅含 `jsonschema`，开发依赖仅含 `pytest` 与 `ruff`；测试不使用 `pythonpath` 绕过安装。
 - [ ] fixture 使用 Task 2 的完整 2024 比利时大奖赛有效样例，不复制 Schema。
-- [ ] 先写测试：有效 fixture 原样返回；错误 `schemaVersion` 和未知状态抛出 `jsonschema.ValidationError`。
+- [ ] 先写测试：有效 fixture 原样返回；错误 `schemaVersion`、未知状态、空来源数组和非字典输入抛出 `jsonschema.ValidationError`；Schema 查找失败抛出包含目标文件名的 `RuntimeError`。
 - [ ] 运行 `uv run --project services/ingest pytest services/ingest/tests/test_contracts.py -v`，确认因实现缺失而失败。
-- [ ] `contracts.py` 从仓库根定位并加载共享 Schema；模块级缓存已解析的 validator，不缓存业务数据。
+- [ ] `contracts.py` 向上有界查找并加载共享 Schema；找不到时抛出包含目标文件名的 `RuntimeError`。模块级缓存已解析的 validator，不缓存业务数据。
 - [ ] `validate_weekend` 先校验再返回输入；非字典输入同样由 Schema 拒绝。
-- [ ] 运行 Python 测试；预期 3 个测试全部通过。
+- [ ] 运行 Python 测试；预期 6 个测试全部通过。
 - [ ] 运行 `uv run --project services/ingest ruff check services/ingest`；预期无错误。
 - [ ] 运行 `pnpm check && pnpm test`；预期 TypeScript 验证保持通过。
 - [ ] 提交信息：`feat: validate weekend contract in python`。

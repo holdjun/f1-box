@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./weekend": "./src/weekend.ts",
+    "./weekend.schema.json": "./weekend.schema.json"
+  },
   "scripts": {
     "generate": "json2ts --input weekend.schema.json --output src/weekend.generated.ts",
     "check": "pnpm run generate && tsc --project tsconfig.json",

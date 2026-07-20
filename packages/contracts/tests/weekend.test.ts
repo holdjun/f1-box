@@ -116,6 +116,12 @@ describe("parseWeekendPayload", () => {
     expectInvalidPayload(invalid, "/sources");
   });
 
+  test("rejects a payload with no sources", () => {
+    const invalid = { ...validWeekend, sources: [] };
+
+    expectInvalidPayload(invalid, "/sources");
+  });
+
   test("rejects an unknown session state", () => {
     const invalid = {
       ...validWeekend,
