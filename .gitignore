@@ -8,9 +8,12 @@ node_modules/
 .astro/
 dist/
 .wrangler/
+.data/
 .venv/
+venv/
 __pycache__/
 .pytest_cache/
 .ruff_cache/
 *.pyc
 coverage/
+test-results/

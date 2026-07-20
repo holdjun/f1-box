@@ -1,0 +1,12 @@
+{
+  "name": "f1-box",
+  "private": true,
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check": "pnpm -r check",
+    "test": "pnpm -r test"
+  }
+}

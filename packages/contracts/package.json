@@ -1,0 +1,13 @@
+{
+  "name": "@f1-box/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --project tsconfig.json",
+    "test": "tsc --project tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
