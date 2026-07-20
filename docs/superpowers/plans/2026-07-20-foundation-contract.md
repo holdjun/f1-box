@@ -69,6 +69,7 @@ f1-box/
 
 - [ ] 根 `package.json` 设置 `private: true`、`packageManager: pnpm@11.9.0`、`engines.node: >=22.12.0`。
 - [ ] workspace 仅包含 `apps/*` 与 `packages/*`；Python 服务不伪装为 pnpm 包。
+- [ ] pnpm 仅允许 Vitest/Vite 所需的 `esbuild` 构建脚本，不开放其他依赖脚本。
 - [ ] contracts 包使用 ESM，并提供 `check` 与 `test` 脚本。
 - [ ] contracts 包通过 `exports` 暴露 `./weekend` 与明确的 Schema 子路径，不新增构建系统。
 - [ ] contracts 的 TypeScript 配置启用 `strict`、`noEmit`、`resolveJsonModule`、`moduleResolution: Bundler`。
