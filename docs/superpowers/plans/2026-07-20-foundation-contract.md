@@ -4,9 +4,9 @@
 
 目标：建立最小 monorepo，并交付一份由 TypeScript 与 Python 共用、可运行时校验的比赛周末 JSON Schema，为后续采集和页面实现提供稳定边界。
 
-架构：`packages/contracts/weekend.schema.json` 是唯一数据结构真源。TypeScript 从 Schema 推导类型并用 Ajv 校验；Python 直接读取同一 Schema 并用 `jsonschema` 校验。首轮只建立契约，不访问 Jolpica、不创建页面、不接入 Cloudflare。
+架构：`packages/contracts/weekend.schema.json` 是唯一数据结构真源。TypeScript 类型由 Schema 自动生成并用 Ajv 校验；Python 直接读取同一 Schema 并用 `jsonschema` 校验。生成类型禁止手写。首轮只建立契约，不访问 Jolpica、不创建页面、不接入 Cloudflare。
 
-技术栈：Node.js 22+、pnpm 11.9.0、TypeScript、Vitest、Ajv、json-schema-to-ts、Python 3.12、uv、pytest、jsonschema、Ruff。
+技术栈：Node.js 22+、pnpm 11.9.0、TypeScript、Vitest、Ajv、ajv-formats、json-schema-to-typescript、Python 3.12、uv、pytest、jsonschema、Ruff。
 
 ## 全局约束
 
@@ -34,6 +34,7 @@ f1-box/
 │   ├── package.json
 │   ├── tsconfig.json
 │   ├── weekend.schema.json
+│   ├── src/weekend.generated.ts
 │   ├── src/weekend.ts
 │   └── tests/weekend.test.ts
 └── services/ingest/
@@ -81,6 +82,7 @@ f1-box/
 文件：
 
 - 创建 `packages/contracts/weekend.schema.json`
+- 创建 `packages/contracts/src/weekend.generated.ts`（自动生成）
 - 修改 `packages/contracts/src/weekend.ts`
 - 创建 `packages/contracts/tests/weekend.test.ts`
 - 修改 `packages/contracts/package.json`
@@ -90,7 +92,7 @@ f1-box/
 输出接口：
 
 ```ts
-export type WeekendPayload = FromSchema<typeof weekendSchema>;
+export type { WeekendPayload } from "./weekend.generated.js";
 export function parseWeekendPayload(value: unknown): WeekendPayload;
 ```
 
@@ -123,7 +125,8 @@ WeekendPayload
 - [ ] 先写有效样例测试；由于 validator 尚不存在，预期测试失败。
 - [ ] 写四个无效样例：错误版本、缺少来源、未知场次状态、排位分类缺少 `q3`；每个都必须被拒绝。
 - [ ] 运行 `pnpm --filter @f1-box/contracts test`，确认失败原因来自缺少实现。
-- [ ] 安装 Ajv 与 json-schema-to-ts，导入 JSON Schema，编译一次 validator。
+- [ ] 安装 Ajv、ajv-formats 与 json-schema-to-typescript；Schema 标题固定为 `WeekendPayload`，用包脚本生成类型文件。
+- [ ] `check` 必须先重新生成类型再执行 TypeScript 检查，保证生成物不依赖人工同步。
 - [ ] `parseWeekendPayload` 成功时返回同一已校验对象；失败时抛出包含 Ajv 错误路径的 `TypeError`。
 - [ ] 运行 `pnpm --filter @f1-box/contracts test`；预期 5 个测试全部通过。
 - [ ] 运行 `pnpm --filter @f1-box/contracts check`；预期无类型错误。
