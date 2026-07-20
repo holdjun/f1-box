@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://f1-box.dev/schemas/weekend.schema.json",
+  "title": "WeekendPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "freshness",
+    "event",
+    "sessions",
+    "classifications",
+    "driverStandings",
+    "constructorStandings",
+    "history",
+    "seasonSchedule",
+    "sources"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "$ref": "#/$defs/utcTimestamp" },
+    "freshness": {
+      "enum": ["fresh", "stale", "delayed", "unavailable"]
+    },
+    "event": { "$ref": "#/$defs/event" },
+    "sessions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/session" }
+    },
+    "classifications": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/classification" }
+    },
+    "driverStandings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/driverStanding" }
+    },
+    "constructorStandings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/constructorStanding" }
+    },
+    "history": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/historyEntry" }
+    },
+    "seasonSchedule": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/scheduleEntry" }
+    },
+    "sources": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/source" }
+    }
+  },
+  "$defs": {
+    "utcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["season", "round", "slug", "raceName", "startsAt", "circuit"],
+      "properties": {
+        "season": { "type": "integer" },
+        "round": { "type": "integer" },
+        "slug": { "type": "string" },
+        "raceName": { "type": "string" },
+        "startsAt": { "$ref": "#/$defs/utcTimestamp" },
+        "circuit": { "$ref": "#/$defs/circuit" }
+      }
+    },
+    "circuit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "locality", "country", "latitude", "longitude"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "locality": { "type": "string" },
+        "country": { "type": "string" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" }
+      }
+    },
+    "session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "name", "startsAt", "state"],
+      "properties": {
+        "key": { "type": "string" },
+        "name": { "type": "string" },
+        "startsAt": { "$ref": "#/$defs/utcTimestamp" },
+        "state": {
+          "enum": ["scheduled", "provisional", "complete", "delayed", "unavailable"]
+        }
+      }
+    },
+    "classification": {
+      "oneOf": [
+        { "$ref": "#/$defs/qualifyingClassification" },
+        { "$ref": "#/$defs/raceClassification" }
+      ]
+    },
+    "qualifyingClassification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sessionKey", "rows"],
+      "properties": {
+        "sessionKey": { "const": "qualifying" },
+        "rows": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/qualifyingRow" }
+        }
+      }
+    },
+    "qualifyingRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "position",
+        "driverCode",
+        "driverName",
+        "constructorName",
+        "q1",
+        "q2",
+        "q3"
+      ],
+      "properties": {
+        "position": { "type": "integer" },
+        "driverCode": { "type": "string" },
+        "driverName": { "type": "string" },
+        "constructorName": { "type": "string" },
+        "q1": { "type": ["string", "null"] },
+        "q2": { "type": ["string", "null"] },
+        "q3": { "type": ["string", "null"] }
+      }
+    },
+    "raceClassification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sessionKey", "rows"],
+      "properties": {
+        "sessionKey": { "const": "race" },
+        "rows": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/raceRow" }
+        }
+      }
+    },
+    "raceRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "position",
+        "driverCode",
+        "driverName",
+        "constructorName",
+        "laps",
+        "status",
+        "points",
+        "time",
+        "fastestLap"
+      ],
+      "properties": {
+        "position": { "type": "integer" },
+        "driverCode": { "type": "string" },
+        "driverName": { "type": "string" },
+        "constructorName": { "type": "string" },
+        "laps": { "type": "integer" },
+        "status": { "type": "string" },
+        "points": { "type": "number" },
+        "time": { "type": ["string", "null"] },
+        "fastestLap": { "type": ["string", "null"] }
+      }
+    },
+    "driverStanding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "name", "code", "points", "wins"],
+      "properties": {
+        "position": { "type": "integer" },
+        "name": { "type": "string" },
+        "code": { "type": "string" },
+        "points": { "type": "number" },
+        "wins": { "type": "integer" }
+      }
+    },
+    "constructorStanding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "name", "points", "wins"],
+      "properties": {
+        "position": { "type": "integer" },
+        "name": { "type": "string" },
+        "points": { "type": "number" },
+        "wins": { "type": "integer" }
+      }
+    },
+    "historyEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["season", "round", "raceName", "winnerName", "winnerConstructor"],
+      "properties": {
+        "season": { "type": "integer" },
+        "round": { "type": "integer" },
+        "raceName": { "type": "string" },
+        "winnerName": { "type": "string" },
+        "winnerConstructor": { "type": "string" }
+      }
+    },
+    "scheduleEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["round", "raceName", "slug", "startsAt", "circuitName", "country"],
+      "properties": {
+        "round": { "type": "integer" },
+        "raceName": { "type": "string" },
+        "slug": { "type": "string" },
+        "startsAt": { "$ref": "#/$defs/utcTimestamp" },
+        "circuitName": { "type": "string" },
+        "country": { "type": "string" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "url", "fetchedAt"],
+      "properties": {
+        "name": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "fetchedAt": { "$ref": "#/$defs/utcTimestamp" }
+      }
+    }
+  }
+}

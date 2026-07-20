@@ -4,10 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "tsc --project tsconfig.json",
-    "test": "tsc --project tsconfig.json"
+    "generate": "json2ts --input weekend.schema.json --output src/weekend.generated.ts",
+    "check": "pnpm run generate && tsc --project tsconfig.json",
+    "test": "pnpm run generate && vitest run"
   },
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "json-schema-to-typescript": "^15.0.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1"
   }
 }
