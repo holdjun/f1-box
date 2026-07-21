@@ -11,6 +11,7 @@ from pathlib import Path
 
 from f1box_ingest.client import JolpicaClient
 from f1box_ingest.normalize import build_season
+from f1box_ingest.release import write_release
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -19,6 +20,7 @@ def _parser() -> argparse.ArgumentParser:
     season = commands.add_parser("season", help="build a normalized season payload")
     season.add_argument("--season", type=int, required=True)
     season.add_argument("--output", type=Path, required=True)
+    season.add_argument("--release-dir", type=Path)
     season.add_argument("--raw-dir", type=Path, default=Path(".data/raw"))
     return parser
 
@@ -50,13 +52,17 @@ def _write_json_atomic(output: Path, payload: dict[str, object]) -> None:
             temporary_path.unlink(missing_ok=True)
 
 
-async def _build_and_write(*, season: int, output: Path, raw_dir: Path) -> None:
+async def _build_and_write(
+    *, season: int, output: Path, raw_dir: Path, release_dir: Path | None
+) -> None:
     async with JolpicaClient(raw_dir=raw_dir) as client:
         payload = await build_season(
             season=season,
             client=client,
             generated_at=_utc_now(),
         )
+    if release_dir is not None:
+        write_release(payload, release_dir)
     _write_json_atomic(output, payload)
 
 
@@ -68,6 +74,7 @@ def main(argv: list[str] | None = None) -> int:
                 season=args.season,
                 output=args.output,
                 raw_dir=args.raw_dir,
+                release_dir=args.release_dir,
             )
         )
     except Exception as error:
