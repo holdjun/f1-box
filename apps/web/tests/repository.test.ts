@@ -81,6 +81,14 @@ describe("createSeasonRepository", () => {
       { payloadKey: "v1/seasons/2026/b.json" },
     ],
     ["an invalid generated time", { generatedAt: "yesterday" }],
+    [
+      "a normalized overflow date",
+      { generatedAt: "2026-02-31T00:00:00Z" },
+    ],
+    [
+      "a normalized 24-hour time",
+      { generatedAt: "2026-01-01T24:00:00Z" },
+    ],
   ])("rejects a manifest with %s before reading a payload", async (_, overrides) => {
     const reads: string[] = [];
     const repository = createSeasonRepository(

@@ -116,14 +116,27 @@ function parseManifest(
     typeof checksum !== "string" ||
     !/^[a-f0-9]{64}$/.test(checksum) ||
     payloadKey !== `v1/seasons/${year}/${checksum}.json` ||
-    typeof generatedAt !== "string" ||
-    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(generatedAt) ||
-    !Number.isFinite(Date.parse(generatedAt))
+    !isCanonicalUtcTimestamp(generatedAt)
   ) {
     throw invalidManifest(key);
   }
 
   return { schemaVersion, season, checksum, payloadKey, generatedAt };
+}
+
+function isCanonicalUtcTimestamp(value: unknown): value is string {
+  if (
+    typeof value !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(value)
+  ) {
+    return false;
+  }
+
+  const timestamp = Date.parse(value);
+  return (
+    Number.isFinite(timestamp) &&
+    new Date(timestamp).toISOString().replace(".000Z", "Z") === value
+  );
 }
 
 function invalidManifest(key: string): Error {

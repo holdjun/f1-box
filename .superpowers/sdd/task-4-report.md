@@ -47,3 +47,55 @@
 ## Concerns
 
 无阻塞项。`worker-configuration.d.ts` 包含 Wrangler 生成的完整 runtime 类型，文件较大且 Wrangler 4.112.0 当前输出含 5 处行尾空格；该文件不手工修正，后续 binding 或 compatibility 配置变化时由所有 Web scripts 自动重生成。
+
+## Important 修复：严格 UTC manifest 与 Wrangler 固定版本
+
+问题一：manifest 的 generatedAt 只检查格式和 `Date.parse` 可解析，JavaScript 会把 `2026-02-31T00:00:00Z` 和 `2026-01-01T24:00:00Z` 自动归一化，因此 repository 会错误地读取 payload。
+
+RED：先增加两项测试，并断言只读取 latest manifest：
+
+```text
+pnpm --filter @f1-box/web exec vitest run tests/repository.test.ts -t normalized
+2 failed, 18 skipped
+```
+
+两个失败都实际进入 payload 读取，收到 `Invalid season payload ... disagrees with manifest`，证明拒绝时机错误。
+
+GREEN：generatedAt 现在同时满足固定 `YYYY-MM-DDTHH:mm:ssZ` 格式，并要求 `Date.parse` 后转为 ISO、移除固定 `.000` 的结果与原字符串完全一致，不接受自动归一化。
+
+```text
+同一聚焦命令：2 passed, 18 skipped
+repository 全套：20 passed
+```
+
+问题二：`apps/web/package.json` 的 Wrangler 范围过宽。现已精确固定为 `4.112.0`，lockfile importer 同步为 `specifier: 4.112.0`、`version: 4.112.0`。
+
+```text
+pnpm install --lockfile-only
+pnpm --filter @f1-box/web types
+git diff --exit-code -- apps/web/worker-configuration.d.ts
+```
+
+Wrangler 报告版本 `4.112.0`，类型生成成功，生成文件无漂移。
+
+修复后完整验证：
+
+```text
+pnpm --filter @f1-box/web test
+2 files / 23 tests passed
+
+pnpm --filter @f1-box/web check
+8 files / 0 errors / 0 warnings / 0 hints
+
+pnpm --filter @f1-box/web build
+Cloudflare server build complete
+
+pnpm test
+contracts 13 tests / Web 23 tests passed
+
+pnpm check
+contracts TypeScript / Web Astro check passed
+
+pnpm build
+Cloudflare server build complete
+```
