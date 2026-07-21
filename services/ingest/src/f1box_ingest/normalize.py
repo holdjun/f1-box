@@ -95,21 +95,39 @@ def _races(result: FetchResult) -> list[dict[str, object]]:
     return [_dict(race, "race") for race in races]
 
 
-def _first_race(result: FetchResult) -> dict[str, object] | None:
+def _first_race(
+    result: FetchResult, *, expected_season: int, expected_round: int
+) -> dict[str, object] | None:
     races = _races(result)
-    return races[0] if races else None
+    if not races:
+        return None
+    for race in races:
+        actual_season = _integer(race.get("season"), "classification season")
+        actual_round = _integer(race.get("round"), "classification round")
+        if (actual_season, actual_round) != (expected_season, expected_round):
+            raise NormalizationError(
+                "classification identity mismatch: "
+                f"expected {expected_season}/{expected_round}, "
+                f"got {actual_season}/{actual_round}"
+            )
+    return races[0]
 
 
 def _driver_name(driver: dict[str, object]) -> str:
     return f"{_string(driver.get('givenName'), 'Driver.givenName')} {_string(driver.get('familyName'), 'Driver.familyName')}"
 
 
-def _qualifying_classification(result: FetchResult) -> dict[str, object] | None:
-    race = _first_race(result)
+def _qualifying_classification(
+    result: FetchResult, *, season: int, round_number: int
+) -> dict[str, object] | None:
+    race = _first_race(result, expected_season=season, expected_round=round_number)
     if race is None or "QualifyingResults" not in race:
         return None
+    raw_rows = _list(race["QualifyingResults"], "QualifyingResults")
+    if not raw_rows:
+        return None
     rows = []
-    for raw_row in _list(race["QualifyingResults"], "QualifyingResults"):
+    for raw_row in raw_rows:
         row = _dict(raw_row, "QualifyingResults row")
         driver = _dict(row.get("Driver"), "QualifyingResults.Driver")
         constructor = _dict(row.get("Constructor"), "QualifyingResults.Constructor")
@@ -127,12 +145,17 @@ def _qualifying_classification(result: FetchResult) -> dict[str, object] | None:
     return {"sessionKey": "qualifying", "rows": rows}
 
 
-def _race_classification(result: FetchResult) -> dict[str, object] | None:
-    race = _first_race(result)
+def _race_classification(
+    result: FetchResult, *, season: int, round_number: int
+) -> dict[str, object] | None:
+    race = _first_race(result, expected_season=season, expected_round=round_number)
     if race is None or "Results" not in race:
         return None
+    raw_rows = _list(race["Results"], "Results")
+    if not raw_rows:
+        return None
     rows = []
-    for raw_row in _list(race["Results"], "Results"):
+    for raw_row in raw_rows:
         row = _dict(raw_row, "Results row")
         driver = _dict(row.get("Driver"), "Results.Driver")
         constructor = _dict(row.get("Constructor"), "Results.Constructor")
@@ -212,11 +235,23 @@ def _event(
     race: dict[str, object],
     generated: datetime,
     classifications: tuple[FetchResult, FetchResult] | None,
+    season: int,
 ) -> dict[str, object]:
+    round_number = _integer(race.get("round"), "round")
     qualifying = (
-        _qualifying_classification(classifications[0]) if classifications else None
+        _qualifying_classification(
+            classifications[0], season=season, round_number=round_number
+        )
+        if classifications
+        else None
     )
-    result = _race_classification(classifications[1]) if classifications else None
+    result = (
+        _race_classification(
+            classifications[1], season=season, round_number=round_number
+        )
+        if classifications
+        else None
+    )
     complete = qualifying is not None and result is not None
     starts_at = _timestamp(race.get("date"), race.get("time"), "Race")
     started = _parse_timestamp(starts_at, "Race") <= generated
@@ -225,7 +260,7 @@ def _event(
     race_name = _string(race.get("raceName"), "raceName")
 
     return {
-        "round": _integer(race.get("round"), "round"),
+        "round": round_number,
         "slug": _slug(race_name),
         "raceName": race_name,
         "startsAt": starts_at,
@@ -293,11 +328,13 @@ def _constructor_standings(result: FetchResult) -> list[dict[str, object]]:
     return rows
 
 
-def _freshness(generated: datetime, results: list[FetchResult]) -> str:
-    newest = max(
-        _parse_timestamp(result.fetched_at, "fetched_at") for result in results
-    )
-    age = max(generated - newest, timedelta(0))
+def _source_times(results: list[FetchResult]) -> list[datetime]:
+    return [_parse_timestamp(result.fetched_at, "fetched_at") for result in results]
+
+
+def _freshness(reference: datetime, results: list[FetchResult]) -> str:
+    oldest = min(_source_times(results))
+    age = max(reference - oldest, timedelta(0))
     if age <= timedelta(hours=2):
         return "fresh"
     if age <= timedelta(hours=24):
@@ -359,6 +396,7 @@ async def build_season(
             race,
             generated,
             classifications.get(_integer(race.get("round"), "round")),
+            season,
         )
         for race in races
     ]
@@ -372,13 +410,14 @@ async def build_season(
     all_results = [calendar, drivers, constructors]
     for _, qualifying, race in round_results:
         all_results.extend((qualifying, race))
+    reference_time = max(generated, max(_source_times(all_results)))
 
     payload: dict[str, object] = {
         "schemaVersion": 1,
-        "generatedAt": generated.replace(microsecond=0)
+        "generatedAt": reference_time.replace(microsecond=0)
         .isoformat()
         .replace("+00:00", "Z"),
-        "freshness": _freshness(generated, all_results),
+        "freshness": _freshness(reference_time, all_results),
         "season": season,
         "currentRound": max(completed_rounds) if completed_rounds else None,
         "nextRound": next_round,

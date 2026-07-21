@@ -115,12 +115,12 @@ class JolpicaClient:
         fetched_at = _utc_timestamp(self._clock())
         url = str(response.url)
         self._write_snapshot(
-            checksum,
-            {
+            checksum=checksum,
+            content=response.content,
+            metadata={
                 "url": url,
                 "fetchedAt": fetched_at,
                 "checksum": checksum,
-                "payload": payload,
             },
         )
         return FetchResult(
@@ -154,21 +154,34 @@ class JolpicaClient:
 
         raise RuntimeError("retry loop exhausted")
 
-    def _write_snapshot(self, checksum: str, snapshot: dict[str, object]) -> None:
+    def _write_snapshot(
+        self,
+        *,
+        checksum: str,
+        content: bytes,
+        metadata: dict[str, object],
+    ) -> None:
         self._raw_dir.mkdir(parents=True, exist_ok=True)
-        destination = self._raw_dir / f"{checksum}.json"
+        self._write_immutable(self._raw_dir / f"{checksum}.json", content)
+        metadata_bytes = (
+            json.dumps(metadata, ensure_ascii=False, sort_keys=True) + "\n"
+        ).encode()
+        self._write_immutable(
+            self._raw_dir / f"{checksum}.meta.json",
+            metadata_bytes,
+        )
+
+    def _write_immutable(self, destination: Path, content: bytes) -> None:
         temporary_path: Path | None = None
         try:
             with tempfile.NamedTemporaryFile(
-                "w",
-                encoding="utf-8",
+                "wb",
                 dir=self._raw_dir,
-                prefix=f".{checksum}.",
+                prefix=f".{destination.name}.",
                 suffix=".tmp",
                 delete=False,
             ) as temporary_file:
-                json.dump(snapshot, temporary_file, ensure_ascii=False, sort_keys=True)
-                temporary_file.write("\n")
+                temporary_file.write(content)
                 temporary_file.flush()
                 os.fsync(temporary_file.fileno())
                 temporary_path = Path(temporary_file.name)

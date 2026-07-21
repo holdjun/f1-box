@@ -41,16 +41,17 @@ def test_fetch_returns_object_and_writes_content_addressed_snapshot(
     assert result.fetched_at == "2026-07-21T12:00:00Z"
     assert result.url == "https://api.jolpi.ca/ergast/f1/2026.json?limit=100"
 
-    with (tmp_path / f"{checksum}.json").open() as snapshot_file:
-        snapshot = json.load(snapshot_file)
+    raw_path = tmp_path / f"{checksum}.json"
+    metadata_path = tmp_path / f"{checksum}.meta.json"
 
-    assert snapshot == {
+    assert raw_path.read_bytes() == body
+    assert hashlib.sha256(raw_path.read_bytes()).hexdigest() == checksum
+    assert json.loads(metadata_path.read_text()) == {
         "url": result.url,
         "fetchedAt": result.fetched_at,
         "checksum": checksum,
-        "payload": result.payload,
     }
-    assert str(tmp_path) not in json.dumps(snapshot)
+    assert str(tmp_path) not in metadata_path.read_text()
 
 
 def test_repeated_content_keeps_the_first_immutable_snapshot(tmp_path: Path) -> None:
@@ -76,9 +77,11 @@ def test_repeated_content_keeps_the_first_immutable_snapshot(tmp_path: Path) -> 
             return first.checksum
 
     checksum = run(scenario())
-    snapshot = json.loads((tmp_path / f"{checksum}.json").read_text())
+    raw = (tmp_path / f"{checksum}.json").read_bytes()
+    metadata = json.loads((tmp_path / f"{checksum}.meta.json").read_text())
 
-    assert snapshot["fetchedAt"] == "2026-07-21T12:00:00Z"
+    assert raw == body
+    assert metadata["fetchedAt"] == "2026-07-21T12:00:00Z"
 
 
 @pytest.mark.parametrize("status_code", [429, 503])

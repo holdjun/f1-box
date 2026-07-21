@@ -1,10 +1,13 @@
 import asyncio
+import copy
 import json
 from pathlib import Path
 
+import pytest
+
 from f1box_ingest.client import FetchResult
 from f1box_ingest.contracts import validate_season
-from f1box_ingest.normalize import build_season
+from f1box_ingest.normalize import NormalizationError, build_season
 
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures" / "jolpica"
@@ -22,9 +25,22 @@ def load_fixture(name: str) -> dict[str, object]:
     return value
 
 
+def first_race(payload: dict[str, object]) -> dict[str, object]:
+    mr_data = payload["MRData"]
+    assert isinstance(mr_data, dict)
+    race_table = mr_data["RaceTable"]
+    assert isinstance(race_table, dict)
+    races = race_table["Races"]
+    assert isinstance(races, list)
+    race = races[0]
+    assert isinstance(race, dict)
+    return race
+
+
 class FixtureClient:
-    def __init__(self) -> None:
+    def __init__(self, fetched_at_by_path: dict[str, str] | None = None) -> None:
         self.calls: list[str] = []
+        self.fetched_at_by_path = fetched_at_by_path or {}
         self.payloads = {
             CALENDAR_PATH: load_fixture("calendar.json"),
             DRIVERS_PATH: load_fixture("driver_standings.json"),
@@ -37,7 +53,7 @@ class FixtureClient:
         self.calls.append(path)
         return FetchResult(
             url=f"https://api.jolpi.ca{path}",
-            fetched_at="2026-03-10T00:00:00Z",
+            fetched_at=self.fetched_at_by_path.get(path, "2026-03-10T00:00:00Z"),
             payload=self.payloads[path],
             checksum="a" * 64,
         )
@@ -221,3 +237,147 @@ def test_build_season_marks_old_source_data_stale() -> None:
     )
 
     assert payload["freshness"] == "stale"
+
+
+def test_build_season_uses_oldest_required_source_for_freshness() -> None:
+    client = FixtureClient(
+        fetched_at_by_path={
+            CALENDAR_PATH: "2026-03-07T23:59:59Z",
+            DRIVERS_PATH: "2026-03-10T00:00:00Z",
+            CONSTRUCTORS_PATH: "2026-03-10T00:00:00Z",
+            QUALIFYING_PATH: "2026-03-10T00:00:00Z",
+            RACE_PATH: "2026-03-10T00:00:00Z",
+        }
+    )
+
+    payload = asyncio.run(
+        build_season(
+            season=2026,
+            client=client,  # type: ignore[arg-type]
+            generated_at="2026-03-10T00:00:00Z",
+        )
+    )
+
+    assert payload["freshness"] == "stale"
+
+
+def test_build_season_generated_at_is_not_earlier_than_any_source() -> None:
+    client = FixtureClient(
+        fetched_at_by_path={
+            DRIVERS_PATH: "2026-03-10T00:05:00Z",
+            CONSTRUCTORS_PATH: "2026-03-10T00:03:00Z",
+        }
+    )
+
+    payload = asyncio.run(
+        build_season(
+            season=2026,
+            client=client,  # type: ignore[arg-type]
+            generated_at="2026-03-10T00:00:00Z",
+        )
+    )
+
+    assert payload["generatedAt"] == "2026-03-10T00:05:00Z"
+    assert payload["freshness"] == "fresh"
+
+
+@pytest.mark.parametrize(
+    ("path", "field", "wrong_value"),
+    [
+        (QUALIFYING_PATH, "season", "2025"),
+        (QUALIFYING_PATH, "round", "2"),
+        (RACE_PATH, "season", "2025"),
+        (RACE_PATH, "round", "2"),
+    ],
+)
+def test_build_season_rejects_classification_for_another_event(
+    path: str, field: str, wrong_value: str
+) -> None:
+    client = FixtureClient()
+    first_race(client.payloads[path])[field] = wrong_value
+
+    with pytest.raises(NormalizationError, match="classification identity mismatch"):
+        asyncio.run(
+            build_season(
+                season=2026,
+                client=client,  # type: ignore[arg-type]
+                generated_at="2026-03-10T00:00:00Z",
+            )
+        )
+
+
+def test_build_season_rejects_any_extra_race_with_the_wrong_identity() -> None:
+    client = FixtureClient()
+    payload = client.payloads[QUALIFYING_PATH]
+    mr_data = payload["MRData"]
+    assert isinstance(mr_data, dict)
+    race_table = mr_data["RaceTable"]
+    assert isinstance(race_table, dict)
+    races = race_table["Races"]
+    assert isinstance(races, list)
+    extra_race = copy.deepcopy(races[0])
+    assert isinstance(extra_race, dict)
+    extra_race["round"] = "2"
+    races.append(extra_race)
+
+    with pytest.raises(NormalizationError, match="classification identity mismatch"):
+        asyncio.run(
+            build_season(
+                season=2026,
+                client=client,  # type: ignore[arg-type]
+                generated_at="2026-03-10T00:00:00Z",
+            )
+        )
+
+
+@pytest.mark.parametrize(
+    ("path", "result_key", "classification_key"),
+    [
+        (QUALIFYING_PATH, "QualifyingResults", "qualifyingClassification"),
+        (RACE_PATH, "Results", "raceClassification"),
+    ],
+)
+def test_build_season_treats_empty_classification_as_unavailable(
+    path: str, result_key: str, classification_key: str
+) -> None:
+    client = FixtureClient()
+    first_race(client.payloads[path])[result_key] = []
+
+    payload = asyncio.run(
+        build_season(
+            season=2026,
+            client=client,  # type: ignore[arg-type]
+            generated_at="2026-03-10T00:00:00Z",
+        )
+    )
+    events = payload["events"]
+    assert isinstance(events, list)
+    first = events[0]
+    assert isinstance(first, dict)
+
+    assert first[classification_key] is None
+    assert first["state"] == "provisional"
+
+
+@pytest.mark.parametrize("path", [QUALIFYING_PATH, RACE_PATH])
+def test_build_season_allows_empty_race_table_as_provisional(path: str) -> None:
+    client = FixtureClient()
+    mr_data = client.payloads[path]["MRData"]
+    assert isinstance(mr_data, dict)
+    race_table = mr_data["RaceTable"]
+    assert isinstance(race_table, dict)
+    race_table["Races"] = []
+
+    payload = asyncio.run(
+        build_season(
+            season=2026,
+            client=client,  # type: ignore[arg-type]
+            generated_at="2026-03-10T00:00:00Z",
+        )
+    )
+    events = payload["events"]
+    assert isinstance(events, list)
+    first = events[0]
+    assert isinstance(first, dict)
+
+    assert first["state"] == "provisional"
