@@ -4,11 +4,14 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./fixtures/season-2026.json": "./fixtures/season-2026.json",
+    "./season": "./src/season.ts",
+    "./season.schema.json": "./season.schema.json",
     "./weekend": "./src/weekend.ts",
     "./weekend.schema.json": "./weekend.schema.json"
   },
   "scripts": {
-    "generate": "json2ts --input weekend.schema.json --output src/weekend.generated.ts",
+    "generate": "json2ts --input weekend.schema.json --output src/weekend.generated.ts && json2ts --input season.schema.json --output src/season.generated.ts",
     "check": "pnpm run generate && tsc --project tsconfig.json",
     "test": "pnpm run generate && vitest run"
   },
