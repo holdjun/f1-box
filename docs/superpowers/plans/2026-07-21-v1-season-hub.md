@@ -126,6 +126,8 @@ manifest 仅包含 schemaVersion、season、checksum、payloadKey、generatedAt�
 - 创建 `apps/web/astro.config.mjs`
 - 创建 `apps/web/tsconfig.json`
 - 创建 `apps/web/src/env.d.ts`
+- 创建 `apps/web/wrangler.jsonc`
+- 创建 `apps/web/worker-configuration.d.ts`（Wrangler 生成）
 - 创建 `apps/web/src/lib/season-repository.ts`
 - 创建 `apps/web/src/lib/time.ts`
 - 创建 `apps/web/tests/repository.test.ts`
@@ -138,14 +140,19 @@ export interface SeasonRepository {
   getSeason(year: number): Promise<SeasonPayload>;
 }
 
-export function createSeasonRepository(runtime?: RuntimeEnv): SeasonRepository;
+export interface SeasonObjectStore {
+  get(key: string): Promise<{ text(): Promise<string> } | null>;
+}
+
+export function createSeasonRepository(store?: SeasonObjectStore): SeasonRepository;
 ```
 
-本地 repository 读取 fixture；Worker repository 从 R2 读取 latest manifest，再读取 payload，并执行 `parseSeasonPayload`。生产不得静默回退到 fixture。
+本地 repository 读取 fixture；Worker 页面通过 `cloudflare:workers` 的生成类型 `env.F1_DATA` 创建 repository，从 R2 读取 latest manifest 和 payload，并执行 `parseSeasonPayload`。生产不得静默回退到 fixture；不得手写 Env binding 类型。
 
 步骤：
 
 - [ ] 安装 Astro 7.1.3、`@astrojs/cloudflare` 14.1.4、`@fontsource-variable/space-grotesk` 5.3.0、`@fontsource/barlow-condensed` 5.3.0、Vitest。
+- [ ] 创建最小 Wrangler JSONC：`compatibility_date` 为 `2026-07-21`、启用 `nodejs_compat`、声明 `F1_DATA` R2 binding 和 observability；所有 Web scripts 先运行 `wrangler types`。
 - [ ] 先写本地读取、R2 manifest/payload、无效 payload 和缺失 manifest 的失败测试。
 - [ ] 实现 repository、UTC/本地时间格式化和可诊断错误。
 - [ ] 配置 Cloudflare server output，不增加 React。
@@ -181,7 +188,7 @@ export function createSeasonRepository(runtime?: RuntimeEnv): SeasonRepository;
 
 文件：
 
-- 创建 `apps/web/wrangler.jsonc`
+- 修改 `apps/web/wrangler.jsonc`
 - 创建 `apps/web/src/pages/api/health.ts`
 - 创建 `scripts/publish-release.sh`
 - 修改 `.gitignore`
