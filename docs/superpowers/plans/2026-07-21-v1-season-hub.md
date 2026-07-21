@@ -144,16 +144,19 @@ export interface SeasonObjectStore {
   get(key: string): Promise<{ text(): Promise<string> } | null>;
 }
 
-export function createSeasonRepository(store?: SeasonObjectStore): SeasonRepository;
+export function createSeasonRepository(
+  store?: SeasonObjectStore,
+  clock?: () => Date,
+): SeasonRepository;
 ```
 
-本地 repository 读取 fixture；Worker 页面通过 `cloudflare:workers` 的生成类型 `env.F1_DATA` 创建 repository，从 R2 读取 latest manifest 和 payload，并执行 `parseSeasonPayload`。生产不得静默回退到 fixture；不得手写 Env binding 类型。
+本地 repository 读取 fixture；Worker 页面通过 `cloudflare:workers` 的生成类型 `env.F1_DATA` 创建 repository，从 R2 读取 latest manifest 和 payload，并执行 `parseSeasonPayload`。每次读取按最旧来源和注入时钟重新计算有效 freshness，使 last-known-good 随时间变为 delayed/stale。生产不得静默回退到 fixture；不得手写 Env binding 类型。
 
 步骤：
 
 - [ ] 安装 Astro 7.1.3、`@astrojs/cloudflare` 14.1.4、`@fontsource-variable/space-grotesk` 5.3.0、`@fontsource/barlow-condensed` 5.3.0、Vitest。
 - [ ] 创建最小 Wrangler JSONC：`compatibility_date` 为 `2026-07-21`、启用 `nodejs_compat`、声明 `F1_DATA` R2 binding 和 observability；所有 Web scripts 先运行 `wrangler types`。
-- [ ] 先写本地读取、R2 manifest/payload、无效 payload 和缺失 manifest 的失败测试。
+- [ ] 先写本地读取、R2 manifest/payload、无效 payload、缺失 manifest 和旧 payload 动态 stale 的失败测试。
 - [ ] 实现 repository、UTC/本地时间格式化和可诊断错误。
 - [ ] 配置 Cloudflare server output，不增加 React。
 - [ ] 运行 Web test、Astro check 和 build；提交 `feat: establish cloudflare web app`。
