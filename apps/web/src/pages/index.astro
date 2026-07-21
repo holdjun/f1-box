@@ -1,0 +1,19 @@
+---
+import { env } from "cloudflare:workers";
+
+import { createSeasonRepository } from "../lib/season-repository.js";
+
+createSeasonRepository(env.F1_DATA);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>F1 Box</title>
+  </head>
+  <body>
+    <main>F1 Box web runtime is ready.</main>
+  </body>
+</html>
