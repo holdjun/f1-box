@@ -51,6 +51,31 @@ def _write_bytes_atomic(path: Path, content: bytes) -> None:
             temporary_path.unlink(missing_ok=True)
 
 
+def _write_payload_immutable(path: Path, content: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "wb",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary_file:
+            temporary_file.write(content)
+            temporary_file.flush()
+            os.fsync(temporary_file.fileno())
+            temporary_path = Path(temporary_file.name)
+        try:
+            os.link(temporary_path, path)
+        except FileExistsError:
+            if path.read_bytes() != content:
+                raise RuntimeError(f"immutable payload checksum mismatch: {path}")
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+
+
 def write_release(payload: dict[str, object], output_dir: Path) -> ReleaseFiles:
     """Write the immutable payload before atomically updating its latest manifest."""
     validated_payload = validate_season(payload)
@@ -68,6 +93,6 @@ def write_release(payload: dict[str, object], output_dir: Path) -> ReleaseFiles:
         "generatedAt": validated_payload["generatedAt"],
     }
 
-    _write_bytes_atomic(payload_path, payload_bytes)
+    _write_payload_immutable(payload_path, payload_bytes)
     _write_bytes_atomic(manifest_path, _encode_json(manifest))
     return ReleaseFiles(checksum, payload_path, manifest_path)

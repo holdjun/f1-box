@@ -46,17 +46,32 @@ def test_write_release_creates_a_latest_manifest_without_payload(
     assert release_files.manifest_path == tmp_path / "v1/seasons/2026/latest.json"
 
 
-def test_write_release_is_idempotent_for_the_same_payload(tmp_path: Path) -> None:
+def test_write_release_keeps_existing_immutable_payload_metadata(tmp_path: Path) -> None:
     payload = json.loads(FIXTURE_PATH.read_text())
 
     first = write_release(payload, tmp_path)
+    before = first.payload_path.stat()
     second = write_release(payload, tmp_path)
+    after = first.payload_path.stat()
 
     assert second == first
+    assert after.st_ino == before.st_ino
+    assert after.st_mtime_ns == before.st_mtime_ns
     assert sorted(path.name for path in first.payload_path.parent.iterdir()) == [
         f"{first.checksum}.json",
         "latest.json",
     ]
+
+
+def test_write_release_rejects_tampered_immutable_payload(tmp_path: Path) -> None:
+    payload = json.loads(FIXTURE_PATH.read_text())
+    release_files = write_release(payload, tmp_path)
+    release_files.payload_path.write_bytes(b"tampered")
+
+    with pytest.raises(RuntimeError, match="immutable payload checksum mismatch"):
+        write_release(payload, tmp_path)
+
+    assert release_files.payload_path.read_bytes() == b"tampered"
 
 
 def test_write_release_rejects_invalid_payload_before_creating_output(
