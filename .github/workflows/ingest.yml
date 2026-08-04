@@ -1,0 +1,59 @@
+name: ingest
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        default: "2026"
+  schedule:
+    # UTC：周五至周日每 30 分钟（比赛周末），周一至周四每天一次
+    - cron: "*/30 * * * 5,6,0"
+    - cron: "17 6 * * 1-4"
+
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: uv sync --project services/ingest
+      - name: Build season release
+        run: >
+          uv run --project services/ingest f1box-ingest season
+          --season "${{ inputs.season || '2026' }}"
+          --output .data/season.json
+          --release-dir .data/release
+      - name: Publish to R2 if changed
+        run: |
+          set -euo pipefail
+          season="${{ inputs.season || '2026' }}"
+          release_dir=".data/release/v1/seasons/$season"
+          payload=$(ls "$release_dir" | grep -E '^[a-f0-9]{64}\.json$' | head -1)
+          wrangler() { pnpm --filter @f1-box/web exec wrangler "$@"; }
+          current=""
+          if wrangler r2 object get "f1-box-data/v1/seasons/$season/latest.json" --file=.data/latest-before.json >/dev/null 2>&1; then
+            current=$(node -p "require('./.data/latest-before.json').checksum")
+          fi
+          if [ "$current" = "${payload%.json}" ]; then
+            echo "checksum unchanged ($current); skipping publish"
+            exit 0
+          fi
+          wrangler r2 object put "f1-box-data/v1/seasons/$season/$payload" --file="$release_dir/$payload"
+          wrangler r2 object put "f1-box-data/v1/seasons/$season/latest.json" --file="$release_dir/latest.json"
+          echo "published v1/seasons/$season/$payload"
