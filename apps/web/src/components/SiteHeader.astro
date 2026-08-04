@@ -1,0 +1,22 @@
+---
+interface Props {
+  active?: "home" | "season";
+}
+
+const { active } = Astro.props;
+---
+
+<header class="site-header">
+  <div class="site-header__inner page-shell">
+    <a class="wordmark" href="/" aria-label="F1 Box home">
+      <span>F1</span> Box
+    </a>
+    <nav aria-label="Primary navigation">
+      <a href="/" aria-current={active === "home" ? "page" : undefined}>Home</a>
+      <a
+        href="/seasons/2026"
+        aria-current={active === "season" ? "page" : undefined}
+      >2026 Season</a>
+    </nav>
+  </div>
+</header>

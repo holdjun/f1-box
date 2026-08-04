@@ -1,0 +1,33 @@
+---
+import FreshnessBadge from "./FreshnessBadge.astro";
+import { formatUtcDateTime } from "../lib/time.js";
+
+interface Props {
+  season?: number;
+  sourceName?: string;
+  fetchedAt?: string;
+  freshness?: "fresh" | "delayed" | "stale" | "unavailable";
+}
+
+const {
+  season = 2026,
+  sourceName,
+  fetchedAt,
+  freshness,
+} = Astro.props;
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner page-shell">
+    <p>{season} season data</p>
+    {sourceName && fetchedAt ? (
+      <div class="site-footer__source">
+        {freshness && <FreshnessBadge freshness={freshness} />}
+        <p>Source: <span>{sourceName}</span></p>
+        <p>Fetched {formatUtcDateTime(fetchedAt)}</p>
+      </div>
+    ) : (
+      <p class="muted">Night Grid edition</p>
+    )}
+  </div>
+</footer>

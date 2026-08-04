@@ -1,0 +1,49 @@
+---
+import type { SeasonPayload } from "@f1-box/contracts/season";
+
+import { formatUtcDateTime } from "../lib/time.js";
+
+type SeasonEvent = SeasonPayload["events"][number];
+
+interface Props {
+  event: SeasonEvent;
+  season: number;
+  density?: "compact" | "full";
+}
+
+const { event, season, density = "compact" } = Astro.props;
+const href = `/seasons/${season}/races/${event.round}-${event.slug}`;
+const pole = event.qualifyingClassification?.rows[0];
+const winner = event.raceClassification?.rows[0];
+const round = String(event.round).padStart(2, "0");
+---
+
+<article class:list={["race-card", `race-card--${density}`, `race-card--${event.state}`]}>
+  <a href={href} aria-label={`Round ${round}: ${event.raceName}`}>
+    <div class="race-card__topline">
+      <span class="race-card__round" aria-hidden="true">{round}</span>
+      <span class="status-label">{event.state.toUpperCase()}</span>
+    </div>
+    <div class="race-card__body">
+      <h3>{event.raceName}</h3>
+      <time datetime={event.startsAt}>{formatUtcDateTime(event.startsAt)}</time>
+      <p>{event.circuit.locality}, {event.circuit.country}</p>
+      {density === "full" && <p class="race-card__circuit">{event.circuit.name}</p>}
+    </div>
+    {density === "full" && event.state === "complete" && (
+      <dl class="race-card__results">
+        <div>
+          <dt>Winner</dt>
+          <dd>{winner?.driverName ?? "—"}</dd>
+        </div>
+        <div>
+          <dt>Pole</dt>
+          <dd>{pole?.driverName ?? "—"}</dd>
+        </div>
+      </dl>
+    )}
+    <svg class="race-card__arrow" viewBox="0 0 28 16" aria-hidden="true">
+      <path d="M1 8h24M18 1l7 7-7 7" />
+    </svg>
+  </a>
+</article>

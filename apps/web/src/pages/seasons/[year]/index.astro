@@ -1,0 +1,96 @@
+---
+import type { SeasonPayload } from "@f1-box/contracts/season";
+
+import FreshnessBadge from "../../../components/FreshnessBadge.astro";
+import RaceCard from "../../../components/RaceCard.astro";
+import StandingsTable from "../../../components/StandingsTable.astro";
+import StatusPage from "../../../components/StatusPage.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getSeason } from "../../../lib/page-data.js";
+
+const year = Number(Astro.params.year);
+const isNotFound = year !== 2026;
+let season: SeasonPayload | undefined;
+
+if (isNotFound) {
+  Astro.response.status = 404;
+} else {
+  try {
+    season = await getSeason(year);
+  } catch {
+    Astro.response.status = 503;
+  }
+}
+
+const nextRace = season?.events.find((event) => event.round === season?.nextRound);
+const source = season?.sources[0];
+---
+
+<BaseLayout
+  title={isNotFound ? "Lap not found" : "2026 Season Hub"}
+  active="season"
+  season={season?.season}
+  sourceName={source?.name}
+  fetchedAt={source?.fetchedAt}
+  freshness={season?.freshness}
+>
+  {isNotFound ? (
+    <StatusPage code="404" title="Lap not found" message="This route is outside the 2026 season data." />
+  ) : season ? (
+    <main id="main-content">
+      <header class="page-hero page-shell">
+        <div>
+          <p class="section-kicker">SEASON HUB</p>
+          <h1>{season.season} Season</h1>
+          <p class="page-hero__summary">
+            {season.events.length} rounds · Next: {nextRace?.raceName ?? "Season complete"}
+          </p>
+        </div>
+        <FreshnessBadge freshness={season.freshness} />
+      </header>
+
+      <section class="page-shell section-block" aria-labelledby="season-calendar-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">FULL GRID</p>
+            <h2 id="season-calendar-title">Season calendar</h2>
+          </div>
+          <p class="section-count">{String(season.events.length).padStart(2, "0")} ROUNDS</p>
+        </div>
+        <div class="race-grid">
+          {season.events.map((event) => (
+            <RaceCard event={event} season={season.season} density="full" />
+          ))}
+        </div>
+      </section>
+
+      <section id="driver-standings" class="standings-section section-band">
+        <div class="page-shell">
+          <div class="section-heading section-heading--light">
+            <div>
+              <p class="section-kicker">CHAMPIONSHIP ORDER</p>
+              <h2>Driver standings</h2>
+            </div>
+          </div>
+          <StandingsTable kind="drivers" rows={season.driverStandings} />
+        </div>
+      </section>
+
+      <section id="constructor-standings" class="page-shell section-block standings-section">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">TEAM ORDER</p>
+            <h2>Constructor standings</h2>
+          </div>
+        </div>
+        <StandingsTable kind="constructors" rows={season.constructorStandings} />
+      </section>
+    </main>
+  ) : (
+    <StatusPage
+      code="503"
+      title="Season data unavailable"
+      message="The latest 2026 season release could not be loaded. Please try again shortly."
+    />
+  )}
+</BaseLayout>

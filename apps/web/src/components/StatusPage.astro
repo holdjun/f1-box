@@ -1,0 +1,18 @@
+---
+interface Props {
+  code: string;
+  title: string;
+  message: string;
+}
+
+const { code, title, message } = Astro.props;
+---
+
+<main class="status-page page-shell">
+  <p class="status-page__code" aria-hidden="true">{code}</p>
+  <div>
+    <h1>{title}</h1>
+    <p>{message}</p>
+    <a class="button button--primary" href="/">Return home</a>
+  </div>
+</main>

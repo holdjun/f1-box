@@ -1,0 +1,18 @@
+---
+import type { SeasonPayload } from "@f1-box/contracts/season";
+
+import RaceCard from "./RaceCard.astro";
+
+interface Props {
+  events: SeasonPayload["events"];
+  season: number;
+}
+
+const { events, season } = Astro.props;
+---
+
+<div class="season-rail" role="region" aria-label={`${season} calendar`} tabindex="0">
+  <div class="season-rail__track">
+    {events.map((event) => <RaceCard event={event} season={season} />)}
+  </div>
+</div>

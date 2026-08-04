@@ -9,6 +9,10 @@ import {
 
 const checksum = "a".repeat(64);
 const payloadKey = `v1/seasons/2026/${checksum}.json`;
+const HOUR = 60 * 60 * 1000;
+const oldestSourceFetchedAt = Math.min(
+  ...seasonFixture.sources.map((source) => Date.parse(source.fetchedAt)),
+);
 
 function object(text: string): { text(): Promise<string> } {
   return { text: async () => text };
@@ -42,7 +46,7 @@ describe("createSeasonRepository", () => {
   test("reads the shared fixture when no object store is provided", async () => {
     const repository = createSeasonRepository(
       undefined,
-      () => new Date("2026-01-01T01:00:00Z"),
+      () => new Date(oldestSourceFetchedAt + 60_000),
     );
 
     const season = await repository.getSeason(2026);
@@ -62,7 +66,7 @@ describe("createSeasonRepository", () => {
         },
         reads,
       ),
-      () => new Date("2026-01-01T01:00:00Z"),
+      () => new Date(oldestSourceFetchedAt + 60_000),
     );
 
     const season = await repository.getSeason(2026);
@@ -159,19 +163,19 @@ describe("createSeasonRepository", () => {
   });
 
   test.each([
-    ["2026-01-01T02:00:00Z", "fresh"],
-    ["2026-01-01T02:00:01Z", "delayed"],
-    ["2026-01-02T00:00:00Z", "delayed"],
-    ["2026-01-02T00:00:01Z", "stale"],
+    [2 * HOUR, "fresh"],
+    [2 * HOUR + 1000, "delayed"],
+    [24 * HOUR, "delayed"],
+    [24 * HOUR + 1000, "stale"],
   ] as const)(
-    "computes %s source data as %s at read time",
-    async (now, expectedFreshness) => {
+    "computes data read %d ms after the oldest source fetch as %s",
+    async (offsetMs, expectedFreshness) => {
       const repository = createSeasonRepository(
         storeWith({
           "v1/seasons/2026/latest.json": manifest(),
           [payloadKey]: JSON.stringify(seasonFixture),
         }),
-        () => new Date(now),
+        () => new Date(oldestSourceFetchedAt + offsetMs),
       );
 
       await expect(repository.getSeason(2026)).resolves.toMatchObject({
