@@ -15,7 +15,7 @@
 - R2 key 固定为 `v1/seasons/{year}/{checksum}.json` 与 `v1/seasons/{year}/latest.json`。
 - payload 校验成功后才能生成 release；manifest 必须最后上传。
 - UTC 存储，页面同时显示赛道当地语义和访客本地时间。
-- UI 不使用官方 F1、车队、车手 Logo、照片、官方字体或转播素材。
+- UI 不使用模型生成图片，可用官方照片等真实图片（注明来源、留意版权）；不使用官方字体。
 - 第一版不引入 React、图表库、D1、FastF1、实时计时和账户。
 - 所有动画支持 `prefers-reduced-motion`。
 - 生产域名切换前必须完成 preview 浏览器验收。

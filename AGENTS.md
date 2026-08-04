@@ -7,3 +7,11 @@
 5. 输出的文档、Markdown 等内容不使用 `**` 加粗语法。
 6. 新行为先写失败测试；提交前运行与改动范围匹配的验证。
 7. 不在访客请求中直接访问上游 F1 数据源。
+
+# 环境
+
+- Node.js >= 22.12.0；pnpm 11.9.0（Node 26 不再自带 corepack，用 `npm install -g pnpm@11.9.0` 安装）。
+- Python 一律走 `uv`（`services/ingest` 下 `uv sync`、`uv run pytest`、`uv run ruff check .`）。
+- 验证命令：`pnpm check`、`pnpm test`、`pnpm -r build`；e2e 用 `pnpm --filter @f1-box/web test:e2e`。
+- 视觉审阅（截图检查）可用 VLM 网关，配置见 `.env.example`；token 只放本地 `.env`，严禁提交。
+- `gh` 已登录 holdjun 账号；仓库为 holdjun/f1-box。Cloudflare 资源（Worker、R2）操作前先用 `wrangler whoami` 确认登录状态，有问题找用户处理。
