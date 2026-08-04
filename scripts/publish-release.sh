@@ -6,7 +6,7 @@ set -euo pipefail
 release_dir="${1:?usage: publish-release.sh <release-dir> [season]}"
 season="${2:-2026}"
 bucket="f1-box-data"
-season_dir="$release_dir/v1/seasons/$season"
+season_dir="$(cd "$release_dir" && pwd)/v1/seasons/$season"
 
 payload_path=$(ls "$season_dir" | grep -E '^[a-f0-9]{64}\.json$' | head -1)
 [ -n "$payload_path" ] || { echo "no checksum payload found in $season_dir" >&2; exit 1; }

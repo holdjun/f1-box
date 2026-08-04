@@ -1,20 +1,5 @@
-import { readFileSync } from "node:fs";
-
+import seasonFixture from "@f1-box/contracts/fixtures/season-2026.json" with { type: "json" };
 import { expect, test } from "@playwright/test";
-
-interface CurrentSeason {
-  events: Array<{ round: number; slug: string }>;
-}
-
-const currentSeason = JSON.parse(
-  readFileSync(
-    new URL(
-      "../../../../.superpowers/designs/night-grid/season-2026-current.json",
-      import.meta.url,
-    ),
-    "utf8",
-  ),
-) as CurrentSeason;
 
 test("@desktop home presents the current season at a glance", async ({ page }) => {
   const browserRequests: string[] = [];
@@ -55,7 +40,7 @@ test("@desktop season route exposes every round and full standings", async ({
   const actualHrefs = await raceLinks.evaluateAll((links) =>
     links.map((link) => link.getAttribute("href")),
   );
-  const expectedHrefs = currentSeason.events.map(
+  const expectedHrefs = seasonFixture.events.map(
     (event) => `/seasons/2026/races/${event.round}-${event.slug}`,
   );
   expect(actualHrefs).toEqual(expectedHrefs);
