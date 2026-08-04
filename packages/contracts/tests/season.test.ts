@@ -42,6 +42,7 @@ describe("parseSeasonPayload", () => {
             ...season2026.events[0],
             state: "complete",
             qualifyingClassification: { sessionKey: "qualifying", rows: [] },
+            raceClassification: null,
           },
           ...season2026.events.slice(1),
         ],
@@ -58,6 +59,7 @@ describe("parseSeasonPayload", () => {
           {
             ...season2026.events[0],
             state: "complete",
+            qualifyingClassification: null,
             raceClassification: { sessionKey: "race", rows: [] },
           },
           ...season2026.events.slice(1),

@@ -1,14 +1,7 @@
-import Ajv2020 from "ajv/dist/2020.js";
-import addFormats from "ajv-formats";
-
-import seasonSchema from "../season.schema.json";
 import type { SeasonPayload } from "./season.generated.js";
+import validateSeasonPayload from "./season.validator.generated.js";
 
 export type { SeasonPayload } from "./season.generated.js";
-
-const ajv = new Ajv2020({ allErrors: true });
-addFormats(ajv);
-const validateSeasonPayload = ajv.compile<SeasonPayload>(seasonSchema);
 
 export function parseSeasonPayload(value: unknown): SeasonPayload {
   if (!validateSeasonPayload(value)) {

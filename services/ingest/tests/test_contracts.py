@@ -112,6 +112,7 @@ def test_season_requires_classifications_for_complete_events() -> None:
     assert isinstance(events, list)
     assert isinstance(events[0], dict)
     events[0]["state"] = "complete"
+    events[0]["qualifyingClassification"] = None
 
     with pytest.raises(ValidationError) as error:
         validate_season(season)

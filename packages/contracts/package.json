@@ -11,7 +11,7 @@
     "./weekend.schema.json": "./weekend.schema.json"
   },
   "scripts": {
-    "generate": "json2ts --input weekend.schema.json --output src/weekend.generated.ts && json2ts --input season.schema.json --output src/season.generated.ts",
+    "generate": "json2ts --input weekend.schema.json --output src/weekend.generated.ts && json2ts --input season.schema.json --output src/season.generated.ts && node scripts/generate-validator.mjs",
     "check": "pnpm run generate && tsc --project tsconfig.json",
     "test": "pnpm run generate && vitest run"
   },
