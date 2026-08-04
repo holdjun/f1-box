@@ -12,7 +12,8 @@ import { getSeason } from "../lib/page-data.js";
 let season: SeasonPayload | undefined;
 try {
   season = await getSeason(2026);
-} catch {
+} catch (error) {
+  console.error("season load failed", error);
   Astro.response.status = 503;
 }
 

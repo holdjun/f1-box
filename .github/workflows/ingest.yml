@@ -47,13 +47,13 @@ jobs:
           payload=$(ls "$release_dir" | grep -E '^[a-f0-9]{64}\.json$' | head -1)
           wrangler() { pnpm --filter @f1-box/web exec wrangler "$@"; }
           current=""
-          if wrangler r2 object get "f1-box-data/v1/seasons/$season/latest.json" --file=.data/latest-before.json >/dev/null 2>&1; then
+          if wrangler r2 object get "f1-box-data/v1/seasons/$season/latest.json" --file=.data/latest-before.json --remote >/dev/null 2>&1; then
             current=$(node -p "require('./.data/latest-before.json').checksum")
           fi
           if [ "$current" = "${payload%.json}" ]; then
             echo "checksum unchanged ($current); skipping publish"
             exit 0
           fi
-          wrangler r2 object put "f1-box-data/v1/seasons/$season/$payload" --file="$release_dir/$payload"
-          wrangler r2 object put "f1-box-data/v1/seasons/$season/latest.json" --file="$release_dir/latest.json"
+          wrangler r2 object put "f1-box-data/v1/seasons/$season/$payload" --file="$release_dir/$payload" --remote
+          wrangler r2 object put "f1-box-data/v1/seasons/$season/latest.json" --file="$release_dir/latest.json" --remote
           echo "published v1/seasons/$season/$payload"
