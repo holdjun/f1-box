@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "f1-box",
+  "name": "f1-box-preview",
   "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-07-21",
   "compatibility_flags": ["nodejs_compat"],
@@ -8,9 +8,6 @@
     "binding": "ASSETS",
     "directory": "./dist"
   },
-  "routes": [
-    { "pattern": "f1-box.com", "custom_domain": true }
-  ],
   "r2_buckets": [
     {
       "binding": "F1_DATA",
@@ -18,14 +15,6 @@
     }
   ],
   "observability": {
-    "enabled": true,
-    "logs": {
-      "enabled": true,
-      "head_sampling_rate": 1
-    },
-    "traces": {
-      "enabled": true,
-      "head_sampling_rate": 0.01
-    }
+    "enabled": true
   }
 }
