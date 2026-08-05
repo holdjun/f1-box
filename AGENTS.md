@@ -22,7 +22,7 @@
 1. 需求：聊天结论写入 `docs/requirements/`（见 TEMPLATE.md）——背景、用户可见行为、验收标准、范围外。
 2. 开发：agent 从 main 建分支，按需求文档实现；新行为先写失败测试；提交前运行与改动范围匹配的验证。
 3. PR：用 `gh pr create` 开 PR；PR 标题和正文会原样成为压缩合并的提交信息，务必写清楚。CI 自动验证，preview worker 自动部署。
-4. 验收与合并：用户在 preview 页面查看效果（桌面和 375px 移动端），在 PR 上 Approve 后压缩合并（squash）。main 是保护分支，禁止直接推送。
+4. 验收与合并：用户在 preview 页面查看效果（桌面和 375px 移动端），检查 PR 改动后压缩合并（squash）。PR 作者无法 Approve 自己的 PR，所以不设强制 Approve；合并门槛是 CI 全绿 + 用户亲自点合并。main 是保护分支，禁止直接推送。
 5. 发布：合并触发 deploy 工作流，用户在 Actions 页面点 Approve，发布到 f1-box.com。
 6. 数据：ingest.yml 定时从 Jolpica 采集并发布到 R2（周五至周日每 30 分钟、周一至周四每天一次，UTC），也可手动触发。
 7. 回滚：数据问题重新上传旧的 latest.json；代码问题重新部署旧提交。
