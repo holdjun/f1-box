@@ -42,6 +42,38 @@ function manifest(overrides: Record<string, unknown> = {}): string {
   });
 }
 
+describe("getIndex", () => {
+  test("exposes the season index from the local fixture", async () => {
+    const repository = createSeasonRepository();
+    const index = await repository.getIndex();
+    expect(index.activeSeason).toBe(2026);
+    expect(index.availableYears).toContain(2026);
+  });
+
+  test("derives available years and active season from the store listing", async () => {
+    const repository = createSeasonRepository({
+      get: async () => null,
+      list: async () => ({
+        delimitedPrefixes: ["v1/seasons/2026/", "v1/seasons/2024/", "v1/seasons/2025/"],
+      }),
+    });
+
+    const index = await repository.getIndex();
+
+    expect(index.activeSeason).toBe(2026);
+    expect(index.availableYears).toEqual([2024, 2025, 2026]);
+  });
+
+  test("rejects when the store lists no seasons", async () => {
+    const repository = createSeasonRepository({
+      get: async () => null,
+      list: async () => ({ delimitedPrefixes: [] }),
+    });
+
+    await expect(repository.getIndex()).rejects.toThrow(/No seasons/);
+  });
+});
+
 describe("createSeasonRepository", () => {
   test("reads the shared fixture when no object store is provided", async () => {
     const repository = createSeasonRepository(

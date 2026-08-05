@@ -17,3 +17,7 @@ __pycache__/
 *.pyc
 coverage/
 test-results/
+
+# research reference binaries (copyrighted / large)
+docs/research/shots/
+docs/research/assets/

@@ -5,7 +5,9 @@
   "type": "module",
   "exports": {
     "./fixtures/season-2026.json": "./fixtures/season-2026.json",
+    "./fixtures/season-index.json": "./fixtures/season-index.json",
     "./season": "./src/season.ts",
+    "./season-index": "./src/season-index.ts",
     "./season.schema.json": "./season.schema.json",
     "./weekend": "./src/weekend.ts",
     "./weekend.schema.json": "./weekend.schema.json"

@@ -1,153 +1,111 @@
-import seasonFixture from "@f1-box/contracts/fixtures/season-2026.json" with { type: "json" };
 import { expect, test } from "@playwright/test";
 
-test("@desktop home presents the current season at a glance", async ({ page }) => {
+test("@desktop root redirects to active season racing page", async ({ page }) => {
   const browserRequests: string[] = [];
   page.on("request", (request) => browserRequests.push(request.url()));
 
   await page.goto("/");
+  await page.waitForURL(/\/2026\/racing$/);
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Hungarian Grand Prix",
-  );
-  await expect(page.getByText("2026 SEASON / ROUND 11")).toBeVisible();
-  await expect(page.getByRole("link", { name: "View race" })).toHaveAttribute(
-    "href",
-    "/seasons/2026/races/11-hungarian-grand-prix",
-  );
-  await expect(page.getByRole("region", { name: "2026 calendar" })).toBeVisible();
-  await expect(page.getByText("LATEST ROUND", { exact: true })).toBeVisible();
-  await expect(page.getByText("Andrea Kimi Antonelli", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("204", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Mercedes", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("358", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Jolpica F1 API", { exact: true }).last()).toBeVisible();
-  await expect(page.getByText(/Fetched 21 Jul 2026, 04:40 UTC/)).toBeVisible();
   expect(browserRequests.some((url) => /jolpi|ergast/i.test(url))).toBe(false);
 });
 
-test("@desktop season route exposes every round and full standings", async ({
-  page,
-}) => {
-  await page.goto("/seasons/2026");
-
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("2026 Season");
-  const raceLinks = page.locator(
-    'main a[href^="/seasons/2026/races/"]',
-  );
+test("@desktop racing page lists the full calendar", async ({ page }) => {
+  await page.goto("/2026/racing");
+  const raceLinks = page.locator('main a[href^="/2026/racing/"]');
   await expect(raceLinks).toHaveCount(22);
-
-  const actualHrefs = await raceLinks.evaluateAll((links) =>
-    links.map((link) => link.getAttribute("href")),
-  );
-  const expectedHrefs = seasonFixture.events.map(
-    (event) => `/seasons/2026/races/${event.round}-${event.slug}`,
-  );
-  expect(actualHrefs).toEqual(expectedHrefs);
-
-  const driverTable = page.getByRole("table", { name: "Driver standings" });
-  const constructorTable = page.getByRole("table", {
-    name: "Constructor standings",
-  });
-  await expect(driverTable.getByRole("row")).toHaveCount(23);
-  await expect(constructorTable.getByRole("row")).toHaveCount(12);
-  await expect(driverTable.getByRole("rowheader", { name: /Andrea Kimi Antonelli/ })).toBeVisible();
-  await expect(constructorTable.getByRole("rowheader", { name: "Mercedes" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Season" })).toBeVisible();
 });
 
-test("@desktop completed race shows qualifying and race classification", async ({
+test("@desktop race detail shows schedule and classifications", async ({
   page,
 }) => {
-  await page.goto("/seasons/2026/races/10-belgian-grand-prix");
+  await page.goto("/2026/racing/10-belgian-grand-prix");
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Belgian Grand Prix",
   );
-  await expect(page.getByText("COMPLETE", { exact: true }).first()).toBeVisible();
-
-  const qualifying = page.getByRole("table", {
-    name: "Qualifying classification",
-  });
-  const race = page.getByRole("table", { name: "Race classification" });
-  await expect(qualifying.getByRole("row")).toHaveCount(23);
-  await expect(race.getByRole("row")).toHaveCount(23);
-  await expect(qualifying.getByRole("cell", { name: "1:44.361" })).toBeVisible();
-  await expect(race.getByRole("cell", { name: "1:24:42.479" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Previous · British Grand Prix/ })).toHaveAttribute(
-    "href",
-    "/seasons/2026/races/9-british-grand-prix",
-  );
-  await expect(page.getByRole("link", { name: /Next · Hungarian Grand Prix/ })).toHaveAttribute(
-    "href",
-    "/seasons/2026/races/11-hungarian-grand-prix",
-  );
-});
-
-test("@desktop future race keeps schedule useful without invented results", async ({
-  page,
-}) => {
-  await page.goto("/seasons/2026/races/11-hungarian-grand-prix");
-
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Hungarian Grand Prix",
-  );
   await expect(page.getByRole("heading", { name: "Weekend schedule" })).toBeVisible();
-  await expect(page.getByText("25 Jul 2026, 14:00 UTC")).toBeVisible();
-  await expect(page.getByText("Qualifying results are not available yet.")).toBeVisible();
-  await expect(page.getByText("Race results are not available yet.")).toBeVisible();
+  await expect(page.getByRole("table", { name: "Qualifying classification" })).toBeVisible();
+  await expect(page.getByRole("table", { name: "Race classification" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /Next · Hungarian Grand Prix/ }),
+  ).toHaveAttribute("href", "/2026/racing/11-hungarian-grand-prix");
 });
 
-test("@desktop unknown season and race routes return the editorial 404", async ({
-  page,
-}) => {
-  for (const path of [
-    "/seasons/2025",
-    "/seasons/2026/races/99-lap-not-found",
-    "/not-on-the-calendar",
-  ]) {
-    const response = await page.goto(path);
-    expect(response?.status()).toBe(404);
-    await expect(page.getByRole("heading", { level: 1, name: "Lap not found" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Return home" })).toHaveAttribute("href", "/");
-  }
+test("@desktop unknown race under a valid year returns 404", async ({ page }) => {
+  const response = await page.goto("/2026/racing/99-not-a-race");
+  expect(response?.status()).toBe(404);
 });
 
-test("@mobile 375px layout has no page overflow and keeps the calendar rail scrollable", async ({
+test("@desktop results pages show races, drivers and teams tables", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/2026/results/races");
+  await expect(page.getByRole("navigation", { name: "Results" })).toBeVisible();
+  await expect(page.getByRole("table", { name: "2026 race results" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Belgian Grand Prix" }).first(),
+  ).toBeVisible();
+
+  await page.goto("/2026/results/drivers");
+  await expect(page.getByRole("table", { name: "Driver standings" })).toBeVisible();
+
+  await page.goto("/2026/results/teams");
+  await expect(page.getByRole("table", { name: "Constructor standings" })).toBeVisible();
+});
+
+test("@desktop results index redirects to races", async ({ page }) => {
+  await page.goto("/2026/results");
+  await page.waitForURL(/\/2026\/results\/races$/);
+});
+
+test("@desktop drivers and teams directories link to detail pages", async ({
+  page,
+}) => {
+  await page.goto("/2026/drivers");
+  const driverLinks = page.locator('main a[href^="/2026/drivers/"]');
+  await expect(driverLinks.first()).toBeVisible();
+  await driverLinks.first().click();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(page.getByRole("img", { name: /Finishing position by round/ })).toBeVisible();
+
+  await page.goto("/2026/teams");
+  const teamLinks = page.locator('main a[href^="/2026/teams/"]');
+  await expect(teamLinks.first()).toBeVisible();
+  await teamLinks.first().click();
+  await expect(page.getByRole("img", { name: /Points scored by round/ })).toBeVisible();
+});
+
+test("@desktop unknown driver under a valid year returns 404", async ({ page }) => {
+  const response = await page.goto("/2026/drivers/NOTREAL");
+  expect(response?.status()).toBe(404);
+});
+
+test("@desktop unknown year returns 404", async ({ page }) => {
+  const response = await page.goto("/2019/racing");
+  expect(response?.status()).toBe(404);
+});
+
+test("@mobile 375px layout has no page overflow", async ({ page }) => {
+  await page.goto("/2026/racing");
 
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   const hasPageOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
   );
   expect(hasPageOverflow).toBe(false);
-
-  const rail = page.getByRole("region", { name: "2026 calendar" });
-  await expect(rail).toBeVisible();
-  expect(await rail.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
-
-  const viewRace = page.getByRole("link", { name: "View race" });
-  expect((await viewRace.boundingBox())?.height).toBeGreaterThanOrEqual(44);
-
-  await page.goto("/seasons/2026/races/10-belgian-grand-prix");
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
-    ),
-  ).toBe(false);
-  await expect(page.getByRole("table", { name: "Race classification" })).toBeVisible();
 });
 
 test("@reduced reduced motion leaves key content immediately visible", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
+  await page.goto("/2026/racing");
 
   const hero = page.getByRole("heading", { level: 1 });
   await expect(hero).toBeVisible();
-  await expect(page.getByRole("region", { name: "2026 calendar" })).toBeVisible();
   await expect(hero).toHaveCSS("animation-name", "none");
   await expect(page.locator("html")).toHaveCSS("scroll-behavior", "auto");
 });

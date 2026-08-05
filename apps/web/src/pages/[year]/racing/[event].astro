@@ -1,58 +1,34 @@
 ---
-import type { SeasonPayload } from "@f1-box/contracts/season";
+import FreshnessBadge from "../../../components/FreshnessBadge.astro";
+import ResultTable from "../../../components/ResultTable.astro";
+import SeasonError from "../../../components/SeasonError.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { resolveYearContext } from "../../../lib/year-context.js";
+import { formatUtcDateTime } from "../../../lib/time.js";
 
-import FreshnessBadge from "../../../../components/FreshnessBadge.astro";
-import ResultTable from "../../../../components/ResultTable.astro";
-import StatusPage from "../../../../components/StatusPage.astro";
-import BaseLayout from "../../../../layouts/BaseLayout.astro";
-import { getSeason } from "../../../../lib/page-data.js";
-import { formatUtcDateTime } from "../../../../lib/time.js";
-
-const year = Number(Astro.params.year);
+const ctx = await resolveYearContext(Astro);
 const eventKey = Astro.params.event ?? "";
-const invalidYear = year !== 2026;
-let season: SeasonPayload | undefined;
-
-if (!invalidYear) {
-  try {
-    season = await getSeason(year);
-  } catch (error) {
-    console.error("season load failed", error);
-    Astro.response.status = 503;
-  }
-}
-
-const event = season?.events.find(
+const event = ctx.season?.events.find(
   (candidate) => `${candidate.round}-${candidate.slug}` === eventKey,
 );
-const isNotFound = invalidYear || (season !== undefined && event === undefined);
+const missingEntity = ctx.season !== undefined && event === undefined;
+if (ctx.status || missingEntity) Astro.response.status = 404;
+const { year, index, season, rest } = ctx;
+const errStatus = ctx.status ?? 404;
 
-if (isNotFound) {
-  Astro.response.status = 404;
-}
-
-const eventIndex = event ? season?.events.indexOf(event) ?? -1 : -1;
+const eventIndex = event && season ? season.events.indexOf(event) : -1;
 const previous = eventIndex > 0 ? season?.events[eventIndex - 1] : undefined;
 const next = eventIndex >= 0 ? season?.events[eventIndex + 1] : undefined;
-const source = season?.sources[0];
 const round = event ? String(event.round).padStart(2, "0") : "";
+const raceBase = `/${year}/racing`;
 ---
 
-<BaseLayout
-  title={event?.raceName ?? (isNotFound ? "Lap not found" : "Season data unavailable")}
-  active="season"
-  season={season?.season}
-  sourceName={source?.name}
-  fetchedAt={source?.fetchedAt}
-  freshness={season?.freshness}
->
-  {isNotFound ? (
-    <StatusPage code="404" title="Lap not found" message="This route is outside the 2026 season data." />
-  ) : season && event ? (
+{season && event && !ctx.status && !missingEntity ? (
+  <BaseLayout title={event.raceName} year={year} availableYears={index.availableYears} rest={rest}>
     <main id="main-content">
       <header class="race-hero page-shell">
         <nav class="breadcrumbs" aria-label="Breadcrumb">
-          <a href="/seasons/2026">2026 Season</a>
+          <a href={raceBase}>{season.season} Season</a>
           <span aria-hidden="true">/</span>
           <span>Round {round}</span>
         </nav>
@@ -118,25 +94,21 @@ const round = event ? String(event.round).padStart(2, "0") : "";
 
       <nav class="race-navigation page-shell" aria-label="Race navigation">
         {previous && (
-          <a href={`/seasons/2026/races/${previous.round}-${previous.slug}`}>
+          <a href={`${raceBase}/${previous.round}-${previous.slug}`}>
             <span>Previous ·</span>
             {previous.raceName}
           </a>
         )}
-        <a class="race-navigation__season" href="/seasons/2026">Back to 2026 season</a>
+        <a class="race-navigation__season" href={raceBase}>Back to {season.season} season</a>
         {next && (
-          <a class="race-navigation__next" href={`/seasons/2026/races/${next.round}-${next.slug}`}>
+          <a class="race-navigation__next" href={`${raceBase}/${next.round}-${next.slug}`}>
             <span>Next ·</span>
             {next.raceName}
           </a>
         )}
       </nav>
     </main>
-  ) : (
-    <StatusPage
-      code="503"
-      title="Season data unavailable"
-      message="The latest 2026 season release could not be loaded. Please try again shortly."
-    />
-  )}
-</BaseLayout>
+  </BaseLayout>
+) : (
+  <SeasonError year={year} index={index} rest={rest} status={errStatus} />
+)}

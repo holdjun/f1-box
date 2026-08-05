@@ -1,0 +1,23 @@
+---
+import ResultsNav from "../../../components/ResultsNav.astro";
+import SeasonError from "../../../components/SeasonError.astro";
+import StandingsTable from "../../../components/StandingsTable.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { resolveYearContext } from "../../../lib/year-context.js";
+
+const ctx = await resolveYearContext(Astro);
+if (ctx.status) Astro.response.status = ctx.status;
+const { year, index, season, rest } = ctx;
+---
+
+{season ? (
+  <BaseLayout title={`${season.season} Team Standings`} active="results" year={year} availableYears={index.availableYears} rest={rest}>
+    <main id="main-content" class="page-shell">
+      <h1>{season.season} Team Standings</h1>
+      <ResultsNav year={year} active="teams" />
+      <StandingsTable kind="constructors" rows={season.constructorStandings} />
+    </main>
+  </BaseLayout>
+) : (
+  <SeasonError year={year} index={index} rest={rest} status={ctx.status ?? 503} />
+)}
