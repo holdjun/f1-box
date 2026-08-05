@@ -17,7 +17,8 @@ if (isNotFound) {
 } else {
   try {
     season = await getSeason(year);
-  } catch {
+  } catch (error) {
+    console.error("season load failed", error);
     Astro.response.status = 503;
   }
 }

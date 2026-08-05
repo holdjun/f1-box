@@ -19,7 +19,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @f1-box/web build
-      - run: pnpm --filter @f1-box/web exec wrangler deploy -c wrangler.preview.jsonc
+        env:
+          F1BOX_WRANGLER_CONFIG: ./wrangler.preview.jsonc
+      - run: pnpm --filter @f1-box/web exec wrangler deploy
 
   production:
     if: github.ref == 'refs/heads/main'

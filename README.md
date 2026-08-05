@@ -34,7 +34,17 @@ Jolpica → Python 采集 → 共享 Schema 校验 → R2 不可变 payload + la
 
 设计细节见 `docs/superpowers/specs/2026-07-21-v1-season-hub-design.md`。
 
+## 开发与发布流程
+
+1. 需求写入 `docs/requirements/`（模板见 `docs/requirements/TEMPLATE.md`）。
+2. agent 建分支开发，开 PR；CI 自动验证（类型、测试、e2e、Python），preview worker 自动部署。
+3. 用户在 preview 页面验收后合并到 main。
+4. deploy 工作流在 Actions 页面经一次 Approve 后发布到 f1-box.com。
+5. ingest 工作流定时从 Jolpica 采集并发布到 R2：周五至周日每 30 分钟、周一至周四每天一次（UTC），支持手动触发。
+
+回滚：数据问题重新上传旧的 latest.json；代码问题重新部署旧提交。
+
 ## 当前状态
 
-- 已完成：数据契约、采集与归一化、不可变 release、Web 数据层、Night Grid 首版页面（本地验证通过）。
-- 待办：Cloudflare R2 真实资源与 preview 验收、GitHub Actions（CI / 定时采集 / 部署）、生产域名切换。
+- 已上线：站点（f1-box.com）、真实 2026 赛季数据（R2）、CI、定时采集、preview/生产部署流程。
+- 待办：真实比赛图片接入、浏览器视觉验收后的 UI 细节迭代。

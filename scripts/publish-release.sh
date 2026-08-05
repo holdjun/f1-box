@@ -12,6 +12,6 @@ payload_path=$(ls "$season_dir" | grep -E '^[a-f0-9]{64}\.json$' | head -1)
 [ -n "$payload_path" ] || { echo "no checksum payload found in $season_dir" >&2; exit 1; }
 
 cd "$(dirname "$0")/../apps/web"
-pnpm exec wrangler r2 object put "$bucket/v1/seasons/$season/$payload_path" --file "$season_dir/$payload_path"
-pnpm exec wrangler r2 object put "$bucket/v1/seasons/$season/latest.json" --file "$season_dir/latest.json"
+pnpm exec wrangler r2 object put "$bucket/v1/seasons/$season/$payload_path" --file "$season_dir/$payload_path" --remote
+pnpm exec wrangler r2 object put "$bucket/v1/seasons/$season/latest.json" --file "$season_dir/latest.json" --remote
 echo "published v1/seasons/$season/$payload_path"
