@@ -42,6 +42,15 @@ function manifest(overrides: Record<string, unknown> = {}): string {
   });
 }
 
+describe("getIndex", () => {
+  test("exposes the season index from the local fixture", async () => {
+    const repository = createSeasonRepository();
+    const index = await repository.getIndex();
+    expect(index.activeSeason).toBe(2026);
+    expect(index.availableYears).toContain(2026);
+  });
+});
+
 describe("createSeasonRepository", () => {
   test("reads the shared fixture when no object store is provided", async () => {
     const repository = createSeasonRepository(

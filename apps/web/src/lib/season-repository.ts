@@ -1,10 +1,13 @@
+import seasonIndexFixture from "@f1-box/contracts/fixtures/season-index.json";
 import seasonFixture from "@f1-box/contracts/fixtures/season-2026.json";
 import {
   parseSeasonPayload,
   type SeasonPayload,
 } from "@f1-box/contracts/season";
+import { parseSeasonIndex, type SeasonIndex } from "@f1-box/contracts/season-index";
 
 export interface SeasonRepository {
+  getIndex(): Promise<SeasonIndex>;
   getSeason(year: number): Promise<SeasonPayload>;
 }
 
@@ -33,6 +36,15 @@ export function createSeasonRepository(
   clock: () => Date = () => new Date(),
 ): SeasonRepository {
   return {
+    async getIndex() {
+      if (store) {
+        const key = "v1/seasons/index.json";
+        const object = await store.get(key);
+        if (!object) throw new Error(`Season index not found: ${key}`);
+        return parseSeasonIndex(parseJson(await object.text(), key));
+      }
+      return parseSeasonIndex(seasonIndexFixture);
+    },
     async getSeason(year) {
       if (store) {
         const manifestKey = `v1/seasons/${year}/latest.json`;
