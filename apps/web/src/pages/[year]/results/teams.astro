@@ -1,0 +1,29 @@
+---
+import ResultsNav from "../../../components/ResultsNav.astro";
+import StandingsTable from "../../../components/StandingsTable.astro";
+import StatusPage from "../../../components/StatusPage.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getIndex, getSeason } from "../../../lib/page-data.js";
+import { splitYearPath } from "../../../lib/routing.js";
+
+const year = Number(Astro.params.year);
+const index = await getIndex();
+const validYear = index.availableYears.includes(year);
+const season = validYear ? await getSeason(year) : undefined;
+if (!validYear) Astro.response.status = 404;
+const { rest } = splitYearPath(Astro.url.pathname);
+---
+
+{season ? (
+  <BaseLayout title={`${season.season} Team Standings`} active="results" year={year} availableYears={index.availableYears} rest={rest}>
+    <main id="main-content" class="page-shell">
+      <h1>{season.season} Team Standings</h1>
+      <ResultsNav year={year} active="teams" />
+      <StandingsTable kind="constructors" rows={season.constructorStandings} />
+    </main>
+  </BaseLayout>
+) : (
+  <BaseLayout title="Season not found" year={year} availableYears={index.availableYears} rest={rest}>
+    <StatusPage code="404" title="Season not found" message="This season is not available yet." />
+  </BaseLayout>
+)}

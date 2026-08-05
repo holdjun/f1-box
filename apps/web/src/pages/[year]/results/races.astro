@@ -1,0 +1,66 @@
+---
+import ResultsNav from "../../../components/ResultsNav.astro";
+import StatusPage from "../../../components/StatusPage.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getIndex, getSeason } from "../../../lib/page-data.js";
+import { splitYearPath } from "../../../lib/routing.js";
+import { formatUtcDateTime } from "../../../lib/time.js";
+
+const year = Number(Astro.params.year);
+const index = await getIndex();
+const validYear = index.availableYears.includes(year);
+const season = validYear ? await getSeason(year) : undefined;
+if (!validYear) Astro.response.status = 404;
+
+const { rest } = splitYearPath(Astro.url.pathname);
+const completed = season?.events.filter((event) => event.raceClassification !== null) ?? [];
+const dateOf = (iso: string) => formatUtcDateTime(iso).split(",")[0];
+---
+
+{season ? (
+  <BaseLayout title={`${season.season} Results`} active="results" year={year} availableYears={index.availableYears} rest={rest}>
+    <main id="main-content" class="page-shell">
+      <h1>{season.season} Results</h1>
+      <ResultsNav year={year} active="races" />
+      <div class="table-scroll" tabindex="0">
+        <table class="result-table" aria-label={`${season.season} race results`}>
+          <thead>
+            <tr>
+              <th scope="col">Grand Prix</th>
+              <th scope="col">Date</th>
+              <th scope="col">Winner</th>
+              <th scope="col">Team</th>
+              <th scope="col">Laps</th>
+              <th scope="col">Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {completed.length === 0 ? (
+              <tr><td class="empty-cell" colspan="6">No completed rounds yet.</td></tr>
+            ) : (
+              completed.map((event) => {
+                const winner = event.raceClassification?.rows[0];
+                return (
+                  <tr>
+                    <th scope="row">
+                      <a href={`/${year}/racing/${event.round}-${event.slug}`}>{event.raceName}</a>
+                    </th>
+                    <td>{dateOf(event.startsAt)}</td>
+                    <td>{winner?.driverName ?? "—"}</td>
+                    <td>{winner?.constructorName ?? "—"}</td>
+                    <td>{winner?.laps ?? "—"}</td>
+                    <td>{winner?.time ?? "—"}</td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </BaseLayout>
+) : (
+  <BaseLayout title="Season not found" year={year} availableYears={index.availableYears} rest={rest}>
+    <StatusPage code="404" title="Season not found" message="This season is not available yet." />
+  </BaseLayout>
+)}

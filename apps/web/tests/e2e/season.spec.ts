@@ -39,6 +39,28 @@ test("@desktop unknown race under a valid year returns 404", async ({ page }) =>
   expect(response?.status()).toBe(404);
 });
 
+test("@desktop results pages show races, drivers and teams tables", async ({
+  page,
+}) => {
+  await page.goto("/2026/results/races");
+  await expect(page.getByRole("navigation", { name: "Results" })).toBeVisible();
+  await expect(page.getByRole("table", { name: "2026 race results" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Belgian Grand Prix" }).first(),
+  ).toBeVisible();
+
+  await page.goto("/2026/results/drivers");
+  await expect(page.getByRole("table", { name: "Driver standings" })).toBeVisible();
+
+  await page.goto("/2026/results/teams");
+  await expect(page.getByRole("table", { name: "Constructor standings" })).toBeVisible();
+});
+
+test("@desktop results index redirects to races", async ({ page }) => {
+  await page.goto("/2026/results");
+  await page.waitForURL(/\/2026\/results\/races$/);
+});
+
 test("@desktop unknown year returns 404", async ({ page }) => {
   const response = await page.goto("/2019/racing");
   expect(response?.status()).toBe(404);

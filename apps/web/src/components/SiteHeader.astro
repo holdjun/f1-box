@@ -21,6 +21,18 @@ const { active = "racing", year, availableYears, rest = "/racing" } = Astro.prop
         href={year ? `/${year}/racing` : "/"}
         aria-current={active === "racing" ? "page" : undefined}
       >Racing</a>
+      <a
+        href={year ? `/${year}/results/races` : "/"}
+        aria-current={active === "results" ? "page" : undefined}
+      >Results</a>
+      <a
+        href={year ? `/${year}/drivers` : "/"}
+        aria-current={active === "drivers" ? "page" : undefined}
+      >Drivers</a>
+      <a
+        href={year ? `/${year}/teams` : "/"}
+        aria-current={active === "teams" ? "page" : undefined}
+      >Teams</a>
     </nav>
     {year !== undefined && availableYears !== undefined ? (
       <YearSelector current={year} available={availableYears} rest={rest} />
