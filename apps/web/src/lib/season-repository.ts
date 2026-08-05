@@ -13,6 +13,10 @@ export interface SeasonRepository {
 
 export interface SeasonObjectStore {
   get(key: string): Promise<{ text(): Promise<string> } | null>;
+  list?(options?: {
+    prefix?: string;
+    delimiter?: string;
+  }): Promise<{ delimitedPrefixes?: string[] }>;
 }
 
 interface SeasonManifest {
@@ -38,10 +42,15 @@ export function createSeasonRepository(
   return {
     async getIndex() {
       if (store) {
-        const key = "v1/seasons/index.json";
-        const object = await store.get(key);
-        if (!object) throw new Error(`Season index not found: ${key}`);
-        return parseSeasonIndex(parseJson(await object.text(), key));
+        const years = await listSeasonYears(store);
+        if (years.length === 0) {
+          throw new Error("No seasons available in the object store");
+        }
+        return {
+          schemaVersion: 1,
+          activeSeason: years[years.length - 1],
+          availableYears: years,
+        };
       }
       return parseSeasonIndex(seasonIndexFixture);
     },
@@ -79,6 +88,20 @@ export function createSeasonRepository(
       return withEffectiveFreshness(payload, clock());
     },
   };
+}
+
+async function listSeasonYears(store: SeasonObjectStore): Promise<number[]> {
+  const listing = await store.list?.({
+    prefix: "v1/seasons/",
+    delimiter: "/",
+  });
+  const prefixes = listing?.delimitedPrefixes ?? [];
+
+  return prefixes
+    .map((prefix) => prefix.replace(/^v1\/seasons\//, "").replace(/\/$/, ""))
+    .filter((year) => /^\d{4}$/.test(year))
+    .map(Number)
+    .sort((a, b) => a - b);
 }
 
 function parseStoredPayload(
