@@ -1,0 +1,56 @@
+---
+import StatusPage from "../../../components/StatusPage.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { teamGrid } from "../../../lib/derive.js";
+import { getIndex, getSeason } from "../../../lib/page-data.js";
+import { splitYearPath } from "../../../lib/routing.js";
+import { teamColor } from "../../../lib/tokens.js";
+
+const year = Number(Astro.params.year);
+const index = await getIndex();
+const validYear = index.availableYears.includes(year);
+const season = validYear ? await getSeason(year) : undefined;
+if (!validYear) Astro.response.status = 404;
+const { rest } = splitYearPath(Astro.url.pathname);
+const grid = season ? teamGrid(season) : [];
+const slug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
+---
+
+{season ? (
+  <BaseLayout title={`${season.season} Teams`} active="teams" year={year} availableYears={index.availableYears} rest={rest}>
+    <main id="main-content" class="page-shell">
+      <h1>{season.season} Teams</h1>
+      <div class="team-grid">
+        {grid.map((team) => (
+          <a
+            class="team-card"
+            style={`--team-color: ${teamColor(team.name)}`}
+            href={`/${year}/teams/${slug(team.name)}`}
+          >
+            <span class="team-card__pos">{String(team.position).padStart(2, "0")}</span>
+            <span class="team-card__name">{team.name}</span>
+            <span class="team-card__drivers">{team.drivers.join(" · ")}</span>
+            <span class="team-card__pts">{team.points} PTS</span>
+          </a>
+        ))}
+      </div>
+    </main>
+  </BaseLayout>
+) : (
+  <BaseLayout title="Season not found" active="teams" year={year} availableYears={index.availableYears} rest={rest}>
+    <StatusPage code="404" title="Season not found" message="This season is not available yet." />
+  </BaseLayout>
+)}
+
+<style>
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+  .team-card {
+    display: flex; flex-direction: column; gap: 0.25rem; padding: 1.25rem; border-radius: 10px;
+    color: #fff; text-decoration: none;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--team-color) 70%, black), var(--team-color));
+  }
+  .team-card__pos { font-size: 0.8rem; opacity: 0.8; }
+  .team-card__name { font-weight: 700; font-size: 1.1rem; }
+  .team-card__drivers { font-size: 0.85rem; opacity: 0.9; }
+  .team-card__pts { font-size: 0.8rem; margin-top: 0.5rem; }
+</style>

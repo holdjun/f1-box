@@ -61,6 +61,28 @@ test("@desktop results index redirects to races", async ({ page }) => {
   await page.waitForURL(/\/2026\/results\/races$/);
 });
 
+test("@desktop drivers and teams directories link to detail pages", async ({
+  page,
+}) => {
+  await page.goto("/2026/drivers");
+  const driverLinks = page.locator('main a[href^="/2026/drivers/"]');
+  await expect(driverLinks.first()).toBeVisible();
+  await driverLinks.first().click();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(page.getByRole("img", { name: /Finishing position by round/ })).toBeVisible();
+
+  await page.goto("/2026/teams");
+  const teamLinks = page.locator('main a[href^="/2026/teams/"]');
+  await expect(teamLinks.first()).toBeVisible();
+  await teamLinks.first().click();
+  await expect(page.getByRole("img", { name: /Points scored by round/ })).toBeVisible();
+});
+
+test("@desktop unknown driver under a valid year returns 404", async ({ page }) => {
+  const response = await page.goto("/2026/drivers/NOTREAL");
+  expect(response?.status()).toBe(404);
+});
+
 test("@desktop unknown year returns 404", async ({ page }) => {
   const response = await page.goto("/2019/racing");
   expect(response?.status()).toBe(404);

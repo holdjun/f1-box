@@ -1,0 +1,57 @@
+---
+import type { RoundPoint } from "../lib/derive.js";
+
+interface Props {
+  points: RoundPoint[];
+  invert?: boolean; // true 时数值越小越靠上（如名次）
+  color?: string;
+  label: string;
+}
+
+const { points, invert = false, color = "var(--accent, #e10600)", label } = Astro.props;
+
+const W = 300;
+const H = 120;
+const PAD = 14;
+const values = points.map((p) => p.value);
+const min = Math.min(...values);
+const max = Math.max(...values);
+const span = max - min || 1;
+
+function x(index: number): number {
+  if (points.length === 1) return W / 2;
+  return PAD + (index / (points.length - 1)) * (W - PAD * 2);
+}
+function y(value: number): number {
+  const t = (value - min) / span; // 0..1
+  const up = invert ? t : 1 - t; // invert: 小值靠上
+  return PAD + up * (H - PAD * 2);
+}
+
+const coords = points.map((p, i) => [x(i), y(p.value)] as const);
+const polyline = coords.map(([cx, cy]) => `${cx},${cy}`).join(" ");
+---
+
+{points.length > 0 ? (
+  <figure class="trend-chart">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
+      {points.length > 1 && (
+        <polyline points={polyline} fill="none" stroke={color} stroke-width="2" />
+      )}
+      {coords.map(([cx, cy], i) => (
+        <circle cx={cx} cy={cy} r="3.5" fill={color}>
+          <title>{`${points[i].label}: ${points[i].value}`}</title>
+        </circle>
+      ))}
+    </svg>
+    <figcaption>{label}</figcaption>
+  </figure>
+) : (
+  <p class="empty-state">No completed rounds yet.</p>
+)}
+
+<style>
+  .trend-chart { margin-block: 1rem; }
+  .trend-chart svg { width: 100%; height: auto; background: color-mix(in srgb, currentColor 4%, transparent); border-radius: 8px; }
+  .trend-chart figcaption { font-size: 0.8rem; opacity: 0.7; margin-top: 0.25rem; }
+</style>
