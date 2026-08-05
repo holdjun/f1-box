@@ -1,34 +1,29 @@
 ---
-import StatusPage from "../../../components/StatusPage.astro";
+import SeasonError from "../../../components/SeasonError.astro";
 import TrendChart from "../../../components/TrendChart.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { driverGrid, driverSeries } from "../../../lib/derive.js";
-import { getIndex, getSeason } from "../../../lib/page-data.js";
-import { splitYearPath } from "../../../lib/routing.js";
+import { resolveYearContext } from "../../../lib/year-context.js";
 import { teamColor } from "../../../lib/tokens.js";
 
-const year = Number(Astro.params.year);
+const ctx = await resolveYearContext(Astro);
 const code = (Astro.params.driver ?? "").toUpperCase();
-const index = await getIndex();
-const validYear = index.availableYears.includes(year);
-const season = validYear ? await getSeason(year) : undefined;
-
-const driver = season ? driverGrid(season).find((d) => d.code === code) : undefined;
-const standing = season?.driverStandings.find((row) => row.code === code);
-const isNotFound = !validYear || (season !== undefined && driver === undefined);
-if (isNotFound) Astro.response.status = 404;
-
-const { rest } = splitYearPath(Astro.url.pathname);
+const driver = ctx.season ? driverGrid(ctx.season).find((d) => d.code === code) : undefined;
+const standing = ctx.season?.driverStandings.find((row) => row.code === code);
+const missingEntity = ctx.season !== undefined && driver === undefined;
+if (ctx.status || missingEntity) Astro.response.status = 404;
+const { year, index, season, rest } = ctx;
+const errStatus = ctx.status ?? 404;
 const series = season && driver ? driverSeries(season, driver.code) : [];
 ---
 
-{season && driver && !isNotFound ? (
+{season && driver && !ctx.status && !missingEntity ? (
   <BaseLayout title={driver.name} active="drivers" year={year} availableYears={index.availableYears} rest={rest}>
     <main id="main-content" class="page-shell">
       <p class="crumb"><a href={`/${year}/drivers`}>All drivers</a></p>
       <header class="driver-hero" style={`--team-color: ${teamColor(driver.team)}`}>
         <h1>{driver.name}</h1>
-        <p>{driver.team} · #{driver.code}</p>
+        <p>{driver.team} · {driver.code}</p>
       </header>
 
       <section class="stat-row" aria-label="Season statistics">
@@ -44,9 +39,7 @@ const series = season && driver ? driverSeries(season, driver.code) : [];
     </main>
   </BaseLayout>
 ) : (
-  <BaseLayout title="Driver not found" active="drivers" year={year} availableYears={index.availableYears} rest={rest}>
-    <StatusPage code="404" title="Driver not found" message="This driver is not on the grid for this season." />
-  </BaseLayout>
+  <SeasonError year={year} index={index} rest={rest} status={errStatus} />
 )}
 
 <style>

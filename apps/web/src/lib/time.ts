@@ -7,6 +7,19 @@ export function formatUtcDateTime(
   return formatDateTime(value, locale, "UTC");
 }
 
+export function formatUtcDate(value: Timestamp, locale = "en-GB"): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(date.getTime())) {
+    throw new TypeError(`Invalid timestamp: ${String(value)}`);
+  }
+  return new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}
+
 export function formatLocalDateTime(
   value: Timestamp,
   timeZone?: string,

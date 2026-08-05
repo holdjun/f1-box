@@ -23,6 +23,17 @@ describe("driverGrid", () => {
     expect(grid[0].name).toBe(season.driverStandings[0].name);
     expect(grid.every((card) => typeof card.team === "string")).toBe(true);
   });
+
+  test("team comes from the latest completed race classification", () => {
+    const grid = driverGrid(season);
+    const latest = season.events
+      .filter((event) => event.raceClassification !== null)
+      .at(-1);
+    const expectedTeam = latest?.raceClassification?.rows.find(
+      (row) => row.driverCode === grid[0].code,
+    )?.constructorName;
+    expect(grid[0].team).toBe(expectedTeam);
+  });
 });
 
 describe("driverSeries", () => {
@@ -31,6 +42,16 @@ describe("driverSeries", () => {
     const series = driverSeries(season, code);
     expect(series).toHaveLength(completedCount);
     expect(series.every((point) => point.value >= 1)).toBe(true);
+  });
+
+  test("each point is the driver's finishing position in that round", () => {
+    const code = season.driverStandings[0].code;
+    const series = driverSeries(season, code);
+    const first = season.events[0];
+    const expected = first.raceClassification?.rows.find(
+      (row) => row.driverCode === code,
+    )?.position;
+    expect(series[0].value).toBe(expected);
   });
 });
 

@@ -46,11 +46,11 @@ export function createSeasonRepository(
         if (years.length === 0) {
           throw new Error("No seasons available in the object store");
         }
-        return {
+        return parseSeasonIndex({
           schemaVersion: 1,
           activeSeason: years[years.length - 1],
           availableYears: years,
-        };
+        });
       }
       return parseSeasonIndex(seasonIndexFixture);
     },

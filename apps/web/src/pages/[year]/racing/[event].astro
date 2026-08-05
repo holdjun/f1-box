@@ -1,33 +1,29 @@
 ---
 import FreshnessBadge from "../../../components/FreshnessBadge.astro";
 import ResultTable from "../../../components/ResultTable.astro";
-import StatusPage from "../../../components/StatusPage.astro";
+import SeasonError from "../../../components/SeasonError.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
-import { getIndex, getSeason } from "../../../lib/page-data.js";
-import { splitYearPath } from "../../../lib/routing.js";
+import { resolveYearContext } from "../../../lib/year-context.js";
 import { formatUtcDateTime } from "../../../lib/time.js";
 
-const year = Number(Astro.params.year);
+const ctx = await resolveYearContext(Astro);
 const eventKey = Astro.params.event ?? "";
-const index = await getIndex();
-const validYear = index.availableYears.includes(year);
-let season = validYear ? await getSeason(year) : undefined;
-
-const event = season?.events.find(
+const event = ctx.season?.events.find(
   (candidate) => `${candidate.round}-${candidate.slug}` === eventKey,
 );
-const isNotFound = !validYear || (season !== undefined && event === undefined);
-if (isNotFound) Astro.response.status = 404;
+const missingEntity = ctx.season !== undefined && event === undefined;
+if (ctx.status || missingEntity) Astro.response.status = 404;
+const { year, index, season, rest } = ctx;
+const errStatus = ctx.status ?? 404;
 
 const eventIndex = event && season ? season.events.indexOf(event) : -1;
 const previous = eventIndex > 0 ? season?.events[eventIndex - 1] : undefined;
 const next = eventIndex >= 0 ? season?.events[eventIndex + 1] : undefined;
 const round = event ? String(event.round).padStart(2, "0") : "";
-const { rest } = splitYearPath(Astro.url.pathname);
 const raceBase = `/${year}/racing`;
 ---
 
-{season && event && !isNotFound ? (
+{season && event && !ctx.status && !missingEntity ? (
   <BaseLayout title={event.raceName} year={year} availableYears={index.availableYears} rest={rest}>
     <main id="main-content">
       <header class="race-hero page-shell">
@@ -114,7 +110,5 @@ const raceBase = `/${year}/racing`;
     </main>
   </BaseLayout>
 ) : (
-  <BaseLayout title="Lap not found" year={year} availableYears={index.availableYears} rest={rest}>
-    <StatusPage code="404" title="Lap not found" message="This route is outside the available season data." />
-  </BaseLayout>
+  <SeasonError year={year} index={index} rest={rest} status={errStatus} />
 )}

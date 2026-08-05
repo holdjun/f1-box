@@ -1,30 +1,25 @@
 ---
-import StatusPage from "../../../components/StatusPage.astro";
+import SeasonError from "../../../components/SeasonError.astro";
 import TrendChart from "../../../components/TrendChart.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { teamGrid, teamSeries } from "../../../lib/derive.js";
-import { getIndex, getSeason } from "../../../lib/page-data.js";
-import { splitYearPath } from "../../../lib/routing.js";
+import { resolveYearContext } from "../../../lib/year-context.js";
 import { teamColor } from "../../../lib/tokens.js";
 
-const year = Number(Astro.params.year);
+const ctx = await resolveYearContext(Astro);
 const slug = (Astro.params.team ?? "").toLowerCase();
-const index = await getIndex();
-const validYear = index.availableYears.includes(year);
-const season = validYear ? await getSeason(year) : undefined;
-
-const team = season
-  ? teamGrid(season).find((t) => t.name.toLowerCase().replace(/\s+/g, "-") === slug)
+const team = ctx.season
+  ? teamGrid(ctx.season).find((t) => t.name.toLowerCase().replace(/\s+/g, "-") === slug)
   : undefined;
-const standing = season?.constructorStandings.find((row) => row.name === team?.name);
-const isNotFound = !validYear || (season !== undefined && team === undefined);
-if (isNotFound) Astro.response.status = 404;
-
-const { rest } = splitYearPath(Astro.url.pathname);
+const standing = ctx.season?.constructorStandings.find((row) => row.name === team?.name);
+const missingEntity = ctx.season !== undefined && team === undefined;
+if (ctx.status || missingEntity) Astro.response.status = 404;
+const { year, index, season, rest } = ctx;
+const errStatus = ctx.status ?? 404;
 const series = season && team ? teamSeries(season, team.name) : [];
 ---
 
-{season && team && !isNotFound ? (
+{season && team && !ctx.status && !missingEntity ? (
   <BaseLayout title={team.name} active="teams" year={year} availableYears={index.availableYears} rest={rest}>
     <main id="main-content" class="page-shell">
       <p class="crumb"><a href={`/${year}/teams`}>All teams</a></p>
@@ -46,9 +41,7 @@ const series = season && team ? teamSeries(season, team.name) : [];
     </main>
   </BaseLayout>
 ) : (
-  <BaseLayout title="Team not found" active="teams" year={year} availableYears={index.availableYears} rest={rest}>
-    <StatusPage code="404" title="Team not found" message="This team is not on the grid for this season." />
-  </BaseLayout>
+  <SeasonError year={year} index={index} rest={rest} status={errStatus} />
 )}
 
 <style>

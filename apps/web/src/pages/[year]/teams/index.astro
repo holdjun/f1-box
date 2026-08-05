@@ -1,17 +1,13 @@
 ---
-import StatusPage from "../../../components/StatusPage.astro";
+import SeasonError from "../../../components/SeasonError.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { teamGrid } from "../../../lib/derive.js";
-import { getIndex, getSeason } from "../../../lib/page-data.js";
-import { splitYearPath } from "../../../lib/routing.js";
+import { resolveYearContext } from "../../../lib/year-context.js";
 import { teamColor } from "../../../lib/tokens.js";
 
-const year = Number(Astro.params.year);
-const index = await getIndex();
-const validYear = index.availableYears.includes(year);
-const season = validYear ? await getSeason(year) : undefined;
-if (!validYear) Astro.response.status = 404;
-const { rest } = splitYearPath(Astro.url.pathname);
+const ctx = await resolveYearContext(Astro);
+if (ctx.status) Astro.response.status = ctx.status;
+const { year, index, season, rest } = ctx;
 const grid = season ? teamGrid(season) : [];
 const slug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
 ---
@@ -37,9 +33,7 @@ const slug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
     </main>
   </BaseLayout>
 ) : (
-  <BaseLayout title="Season not found" active="teams" year={year} availableYears={index.availableYears} rest={rest}>
-    <StatusPage code="404" title="Season not found" message="This season is not available yet." />
-  </BaseLayout>
+  <SeasonError year={year} index={index} rest={rest} status={ctx.status ?? 503} />
 )}
 
 <style>

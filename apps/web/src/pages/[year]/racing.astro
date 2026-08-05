@@ -1,19 +1,12 @@
 ---
 import RaceCard from "../../components/RaceCard.astro";
-import StatusPage from "../../components/StatusPage.astro";
+import SeasonError from "../../components/SeasonError.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getIndex, getSeason } from "../../lib/page-data.js";
-import { splitYearPath } from "../../lib/routing.js";
+import { resolveYearContext } from "../../lib/year-context.js";
 
-const year = Number(Astro.params.year);
-const index = await getIndex();
-
-if (!index.availableYears.includes(year)) {
-  Astro.response.status = 404;
-}
-
-const season = index.availableYears.includes(year) ? await getSeason(year) : undefined;
-const { rest } = splitYearPath(Astro.url.pathname);
+const ctx = await resolveYearContext(Astro);
+if (ctx.status) Astro.response.status = ctx.status;
+const { year, index, season, rest } = ctx;
 ---
 
 {season ? (
@@ -28,7 +21,5 @@ const { rest } = splitYearPath(Astro.url.pathname);
     </main>
   </BaseLayout>
 ) : (
-  <BaseLayout title="Season not found" year={year} availableYears={index.availableYears} rest={rest}>
-    <StatusPage code="404" title="Season not found" message="This season is not available yet." />
-  </BaseLayout>
+  <SeasonError year={year} index={index} rest={rest} status={ctx.status ?? 503} />
 )}
