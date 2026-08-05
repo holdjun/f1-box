@@ -56,15 +56,17 @@ description: Use when 开发完成要提交 PR 交付验收：用户说"提 PR"/
 
 ## 5. 创建 PR
 
+标题和正文都用英文（squash 后进入 git 历史，与现有提交保持一致）：
+
 ```bash
-gh pr create --title "<英文标题：概括本次需求>" --body "$(cat <<'EOF'
-## 内容
+gh pr create --title "<English subject summarizing the requirement>" --body "$(cat <<'EOF'
+## Changes
 
-<改了什么、为什么；有需求文档则引用 docs/requirements 路径>
+<What changed and why; cite docs/requirements path when a requirement doc exists.>
 
-## 验证
+## Verification
 
-<跑过的命令与结果；页面级变化给出 preview 地址>
+<Commands run with results; for page-level changes include the preview URL.>
 EOF
 )"
 ```

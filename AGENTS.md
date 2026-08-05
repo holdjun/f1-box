@@ -33,7 +33,7 @@
 - Commit：Conventional Commits 英文标题，祈使语气，≤72 字符；正文只在需要时解释"为什么"。
 - 提交前快速自查：diff 无 secrets、调试代码、无关改动、不应入库的文件；运行与改动范围匹配的验证。
 - `git add` 具体文件，不用 `git add -A`。
-- PR 标题和正文就是压缩合并的提交信息：标题英文、正文中文。完整 PR 流程与自查清单见 `.claude/skills/submit/SKILL.md`。
+- PR 标题和正文就是压缩合并的提交信息，统一用英文（与 git 历史保持一致）；对话和仓库文档仍用中文。完整 PR 流程与自查清单见 `.claude/skills/submit/SKILL.md`。
 
 # 代码卫生
 
