@@ -39,7 +39,7 @@ Jolpica → Python 采集 → 共享 Schema 校验 → R2 不可变 payload + la
 1. 需求写入 `docs/requirements/`（模板见 `docs/requirements/TEMPLATE.md`）。
 2. agent 建分支开发，开 PR；CI 自动验证（类型、测试、e2e、Python），preview worker 自动部署。
 3. 用户在 preview 页面验收后合并到 main。
-4. deploy 工作流在 Actions 页面经一次 Approve 后发布到 f1-box.com。
+4. 合并到 main 后 deploy 工作流自动发布到 f1-box.com（预览验收已在合并前完成）。
 5. ingest 工作流定时从 Jolpica 采集并发布到 R2：周五至周日每 30 分钟、周一至周四每天一次（UTC），支持手动触发。
 
 回滚：数据问题重新上传旧的 latest.json；代码问题重新部署旧提交。
