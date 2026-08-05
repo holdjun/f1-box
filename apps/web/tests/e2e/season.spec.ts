@@ -18,6 +18,27 @@ test("@desktop racing page lists the full calendar", async ({ page }) => {
   await expect(page.getByRole("navigation", { name: "Season" })).toBeVisible();
 });
 
+test("@desktop race detail shows schedule and classifications", async ({
+  page,
+}) => {
+  await page.goto("/2026/racing/10-belgian-grand-prix");
+
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Belgian Grand Prix",
+  );
+  await expect(page.getByRole("heading", { name: "Weekend schedule" })).toBeVisible();
+  await expect(page.getByRole("table", { name: "Qualifying classification" })).toBeVisible();
+  await expect(page.getByRole("table", { name: "Race classification" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /Next · Hungarian Grand Prix/ }),
+  ).toHaveAttribute("href", "/2026/racing/11-hungarian-grand-prix");
+});
+
+test("@desktop unknown race under a valid year returns 404", async ({ page }) => {
+  const response = await page.goto("/2026/racing/99-not-a-race");
+  expect(response?.status()).toBe(404);
+});
+
 test("@desktop unknown year returns 404", async ({ page }) => {
   const response = await page.goto("/2019/racing");
   expect(response?.status()).toBe(404);
