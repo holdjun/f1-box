@@ -18,11 +18,6 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Diagnose token (temporary)
-        run: |
-          status=$(curl -s -o /tmp/resp.json -w "%{http_code}" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/services")
-          echo "HTTP $status"
-          head -c 400 /tmp/resp.json
       - run: pnpm --filter @f1-box/web build
         env:
           F1BOX_WRANGLER_CONFIG: ./wrangler.preview.jsonc
