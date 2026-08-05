@@ -1,4 +1,4 @@
-// 车队色为事实数据；国旗用公共领域 emoji 兜底，后续可换 SVG。
+// 车队色为事实数据；国旗用公共领域 emoji 兜底。
 const TEAM_COLORS: Record<string, string> = {
   Mercedes: "#27f4d2",
   Ferrari: "#f41919",
