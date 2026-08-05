@@ -9,10 +9,12 @@ interface Props {
   event: SeasonEvent;
   season: number;
   density?: "compact" | "full";
+  hrefBase?: string;
 }
 
-const { event, season, density = "compact" } = Astro.props;
-const href = `/seasons/${season}/races/${event.round}-${event.slug}`;
+const { event, season, density = "compact", hrefBase } = Astro.props;
+const base = hrefBase ?? `/seasons/${season}/races`;
+const href = `${base}/${event.round}-${event.slug}`;
 const pole = event.qualifyingClassification?.rows[0];
 const winner = event.raceClassification?.rows[0];
 const round = String(event.round).padStart(2, "0");
