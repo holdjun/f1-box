@@ -17,7 +17,7 @@ const ALPHA3_TO_ALPHA2: Record<string, string> = {
   GBR: "GB", ITA: "IT", NED: "NL", MON: "MC", AUS: "AU", FRA: "FR",
   NZL: "NZ", ARG: "AR", BRA: "BR", ESP: "ES", JPN: "JP", CAN: "CA",
   USA: "US", BEL: "BE", HUN: "HU", AUT: "AT", GER: "DE", MEX: "MX",
-  CHN: "CN", BAH: "BS", AZE: "AZ", QAT: "QA", UAE: "AE", SIN: "SG",
+  CHN: "CN", BAH: "BH", AZE: "AZ", QAT: "QA", UAE: "AE", SIN: "SG",
 };
 
 export function teamColor(name: string): string {

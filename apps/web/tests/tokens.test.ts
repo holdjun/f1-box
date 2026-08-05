@@ -9,6 +9,7 @@ describe("tokens", () => {
 
   it("maps country codes to flag emoji with a fallback", () => {
     expect(countryFlag("GBR")).toBe("🇬🇧");
+    expect(countryFlag("BAH")).toBe("🇧🇭");
     expect(countryFlag("XXX")).toBe("🏳️");
   });
 });
