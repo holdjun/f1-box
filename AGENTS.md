@@ -16,6 +16,8 @@
 - 视觉审阅（截图检查）可用 VLM 网关，配置见 `.env.example`；token 只放本地 `.env`，严禁提交。
 - `gh` 已登录 holdjun 账号；仓库为 holdjun/f1-box。Cloudflare 资源（Worker、R2）操作前先用 `wrangler whoami` 确认登录状态，有问题找用户处理。
 - wrangler 的 `r2 object` / `kv key` 命令不带参数时默认操作本地模拟存储；操作真实云端必须加 `--remote`。
+- 地址：生产 https://f1-box.com，预览 https://f1-box-preview.rj7c4mhzcp.workers.dev（账号子域 rj7c4mhzcp）。
+- 仓库目前为 public（Actions 免费）；用户 GitHub Pro 生效后改回 private。
 
 # 开发流程
 
