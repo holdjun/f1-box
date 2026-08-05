@@ -27,7 +27,13 @@
 6. 数据：ingest.yml 定时从 Jolpica 采集并发布到 R2（周五至周日每 30 分钟、周一至周四每天一次，UTC），也可手动触发。
 7. 回滚：数据问题重新上传旧的 latest.json；代码问题重新部署旧提交。
 
-commit 与 PR 的具体操作规范（自查清单、验证范围、信息格式）见 `.claude/skills/submit/SKILL.md`。
+# 提交与分支规范
+
+- 分支：从 origin/main 切出，命名 `<type>/<slug>`（feat/fix/docs/chore）；一个需求一条分支，合并后自动删除，不复用过期分支。
+- Commit：Conventional Commits 英文标题，祈使语气，≤72 字符；正文只在需要时解释"为什么"。
+- 提交前快速自查：diff 无 secrets、调试代码、无关改动、不应入库的文件；运行与改动范围匹配的验证。
+- `git add` 具体文件，不用 `git add -A`。
+- PR 标题和正文就是压缩合并的提交信息：标题英文、正文中文。完整 PR 流程与自查清单见 `.claude/skills/submit/SKILL.md`。
 
 # 代码卫生
 
