@@ -17,6 +17,12 @@
       "bucket_name": "f1-box-data"
     }
   ],
+  "kv_namespaces": [
+    {
+      "binding": "SESSION",
+      "id": "785a3e7856964828a15458eefdb7ee7b"
+    }
+  ],
   "observability": {
     "enabled": true,
     "logs": {
