@@ -13,7 +13,10 @@ import SiteHeader from "../components/SiteHeader.astro";
 interface Props {
   title: string;
   description?: string;
-  active?: "home" | "season";
+  active?: "racing" | "results" | "drivers" | "teams";
+  year?: number;
+  availableYears?: number[];
+  rest?: string;
   season?: number;
   sourceName?: string;
   fetchedAt?: string;
@@ -24,6 +27,9 @@ const {
   title,
   description = "The 2026 Formula 1 season, race by race.",
   active,
+  year,
+  availableYears,
+  rest,
   season,
   sourceName,
   fetchedAt,
@@ -43,7 +49,7 @@ const {
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <SiteHeader active={active} />
+    <SiteHeader active={active} year={year} availableYears={availableYears} rest={rest} />
     <slot />
     <SiteFooter
       season={season}

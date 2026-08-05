@@ -40,7 +40,7 @@ const round = event ? String(event.round).padStart(2, "0") : "";
 
 <BaseLayout
   title={event?.raceName ?? (isNotFound ? "Lap not found" : "Season data unavailable")}
-  active="season"
+  active="racing"
   season={season?.season}
   sourceName={source?.name}
   fetchedAt={source?.fetchedAt}
