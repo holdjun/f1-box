@@ -29,6 +29,20 @@ jobs:
             "f1-dash-main/dashboard/public/country-flags" \
             "f1-dash-main/dashboard/public/tires"
 
+      - name: Download Fast-F1 team colors
+        run: |
+          curl -sSL -o fastf1-constants.json https://raw.githubusercontent.com/theOehrly/Fast-F1/main/fastf1/plotting/constants.json
+
+      - name: Download 2026 team logos (official white)
+        run: |
+          mkdir -p logos-2026
+          declare -A MAP=( [alpine]=alpine [astonmartin]=aston-martin [audi]=audi [cadillac]=cadillac [ferrari]=ferrari [haasf1team]=haas [mclaren]=mclaren [mercedes]=mercedes [racingbulls]=racing-bulls [redbullracing]=red-bull [williams]=williams )
+          for slug in "${!MAP[@]}"; do
+            curl -sS -o "logos-2026/${MAP[$slug]}.webp" \
+              "https://media.formula1.com/image/upload/c_lfill,w_200/q_auto/v1740000001/common/f1/2026/$slug/2026${slug}logowhite.webp"
+          done
+          ls -la logos-2026
+
       - name: Publish vendor data to R2
         run: |
           npm install -g wrangler >/dev/null 2>&1
@@ -49,6 +63,16 @@ jobs:
           for f in f1-dash-main/dashboard/public/tires/*.svg; do
             wrangler r2 object put --remote "$BUCKET/vendor/f1-dash/tires/$(basename "$f")" --file "$f"
           done
+          wrangler r2 object put --remote "$BUCKET/vendor/fast-f1/constants.json" --file fastf1-constants.json
+          printf '{"source":"Fast-F1","repo":"https://github.com/theOehrly/Fast-F1","ref":"main","fetchedAt":"%s","license":"MIT","artifact":"vendor/fast-f1/constants.json"}\n' \
+            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > fast-f1-release.json
+          wrangler r2 object put --remote "$BUCKET/vendor/fast-f1/release.json" --file fast-f1-release.json
+          for f in logos-2026/*.webp; do
+            wrangler r2 object put --remote "$BUCKET/vendor/team-logos/2026/$(basename "$f")" --file "$f"
+          done
+          printf '{"source":"formula1.com CDN","fetchedAt":"%s","license":"trademarked, identification use","season":2026,"artifacts":["vendor/team-logos/2026/"]}\n' \
+            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > team-logos-release.json
+          wrangler r2 object put --remote "$BUCKET/vendor/team-logos/release.json" --file team-logos-release.json
 
       - name: Verify
         run: |
