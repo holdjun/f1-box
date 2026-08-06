@@ -1,0 +1,56 @@
+name: data-sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 4 * * *"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Download f1db release
+        run: |
+          curl -sSL -o f1db-json-splitted.zip https://github.com/f1db/f1db/releases/latest/download/f1db-json-splitted.zip
+          curl -sSL https://api.github.com/repos/f1db/f1db/releases/latest \
+            | python3 -c "import json,sys; print(json.load(sys.stdin)['tag_name'])" > f1db-tag.txt
+          cat f1db-tag.txt
+
+      - name: Download f1-dash static assets
+        run: |
+          curl -sSL -o f1-dash.tar.gz https://codeload.github.com/slowlydev/f1-dash/tar.gz/refs/heads/main
+          tar -xzf f1-dash.tar.gz \
+            "f1-dash-main/dashboard/public/team-logos" \
+            "f1-dash-main/dashboard/public/country-flags" \
+            "f1-dash-main/dashboard/public/tires"
+
+      - name: Publish vendor data to R2
+        run: |
+          npm install -g wrangler >/dev/null 2>&1
+          BUCKET=f1-box-data
+          wrangler r2 object put --remote "$BUCKET/vendor/f1db/f1db-json-splitted.zip" --file f1db-json-splitted.zip
+          printf '{"source":"f1db","repo":"https://github.com/f1db/f1db","tag":"%s","fetchedAt":"%s","license":"CC-BY-4.0","artifact":"vendor/f1db/f1db-json-splitted.zip"}\n' \
+            "$(cat f1db-tag.txt)" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > f1db-release.json
+          wrangler r2 object put --remote "$BUCKET/vendor/f1db/release.json" --file f1db-release.json
+          printf '{"source":"f1-dash","repo":"https://github.com/slowlydev/f1-dash","ref":"main","fetchedAt":"%s","license":"AGPL-3.0 (assets: public-domain flags, trademarked logos)","artifacts":["vendor/f1-dash/team-logos/","vendor/f1-dash/country-flags/","vendor/f1-dash/tires/"]}\n' \
+            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > f1-dash-release.json
+          wrangler r2 object put --remote "$BUCKET/vendor/f1-dash/release.json" --file f1-dash-release.json
+          for f in f1-dash-main/dashboard/public/team-logos/*.svg; do
+            wrangler r2 object put --remote "$BUCKET/vendor/f1-dash/team-logos/$(basename "$f")" --file "$f"
+          done
+          for f in f1-dash-main/dashboard/public/country-flags/*.svg; do
+            wrangler r2 object put --remote "$BUCKET/vendor/f1-dash/country-flags/$(basename "$f")" --file "$f"
+          done
+          for f in f1-dash-main/dashboard/public/tires/*.svg; do
+            wrangler r2 object put --remote "$BUCKET/vendor/f1-dash/tires/$(basename "$f")" --file "$f"
+          done
+
+      - name: Verify
+        run: |
+          wrangler r2 object get --remote f1-box-data/vendor/f1db/release.json --file /dev/stdout
+          echo
+          wrangler r2 object get --remote f1-box-data/vendor/f1-dash/release.json --file /dev/stdout
