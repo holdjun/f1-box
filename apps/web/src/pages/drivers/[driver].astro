@@ -187,8 +187,8 @@ const color = teamColor(latestTeam);
     color: #fff;
     background: linear-gradient(
       90deg,
-      color-mix(in srgb, var(--team-color) 70%, black),
-      color-mix(in srgb, var(--team-color) 85%, white)
+      color-mix(in srgb, var(--team-color) 55%, black),
+      color-mix(in srgb, var(--team-color) 90%, white)
     );
   }
   .hero::after {
@@ -214,6 +214,7 @@ const color = teamColor(latestTeam);
   }
   .hero__body { position: relative; max-width: 55cqw; }
   .hero__first {
+    font-family: "Barlow Condensed", sans-serif;
     font-weight: 300;
     font-style: italic;
     transform: skewX(-6deg);

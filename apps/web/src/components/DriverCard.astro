@@ -49,8 +49,8 @@ const last = familyName ?? (spaceIndex > 0 ? name.slice(spaceIndex + 1) : name);
     text-decoration: none;
     background: linear-gradient(
       90deg,
-      color-mix(in srgb, var(--team-color) 70%, black),
-      color-mix(in srgb, var(--team-color) 85%, white)
+      color-mix(in srgb, var(--team-color) 55%, black),
+      color-mix(in srgb, var(--team-color) 90%, white)
     );
   }
 
@@ -75,7 +75,7 @@ const last = familyName ?? (spaceIndex > 0 ? name.slice(spaceIndex + 1) : name);
     font-size: 52cqw;
     line-height: 1;
     color: #fff;
-    opacity: 0.09;
+    opacity: 0.12;
   }
 
   .driver-card__body {
@@ -87,7 +87,11 @@ const last = familyName ?? (spaceIndex > 0 ? name.slice(spaceIndex + 1) : name);
   }
 
   .driver-card__name { display: flex; flex-direction: column; }
-  .driver-card__first { font-weight: 500; font-size: 6.5cqw; }
+  .driver-card__first {
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 500;
+    font-size: 6.5cqw;
+  }
   .driver-card__last {
     font-family: "Barlow Condensed", sans-serif;
     font-weight: 900;
@@ -109,6 +113,7 @@ const last = familyName ?? (spaceIndex > 0 ? name.slice(spaceIndex + 1) : name);
   .driver-card__flag {
     position: relative;
     margin-top: auto;
+    align-self: flex-start;
     width: 8cqw;
     height: 8cqw;
     display: inline-flex;
