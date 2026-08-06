@@ -13,19 +13,19 @@ const TEAM_COLORS: Record<string, string> = {
   Cadillac: "#b80202",
 };
 
-const ALPHA3_TO_ALPHA2: Record<string, string> = {
-  GBR: "GB", ITA: "IT", NED: "NL", MON: "MC", AUS: "AU", FRA: "FR",
-  NZL: "NZ", ARG: "AR", BRA: "BR", ESP: "ES", JPN: "JP", CAN: "CA",
-  USA: "US", BEL: "BE", HUN: "HU", AUT: "AT", GER: "DE", MEX: "MX",
-  CHN: "CN", BAH: "BH", AZE: "AZ", QAT: "QA", UAE: "AE", SIN: "SG",
+const NATIONALITY_TO_ALPHA2: Record<string, string> = {
+  Argentine: "AR", Australian: "AU", Brazilian: "BR", British: "GB",
+  Canadian: "CA", Dutch: "NL", Finnish: "FI", French: "FR", German: "DE",
+  Italian: "IT", Mexican: "MX", Monegasque: "MC", "New Zealander": "NZ",
+  Spanish: "ES", Thai: "TH",
 };
 
 export function teamColor(name: string): string {
   return TEAM_COLORS[name] ?? "#84909e";
 }
 
-export function countryFlag(code: string): string {
-  const alpha2 = ALPHA3_TO_ALPHA2[code];
+export function flagForNationality(nationality: string | undefined): string {
+  const alpha2 = nationality ? NATIONALITY_TO_ALPHA2[nationality] : undefined;
   if (!alpha2) return String.fromCodePoint(0x1f3f3, 0xfe0f);
   return String.fromCodePoint(
     ...[...alpha2.toUpperCase()].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65),
