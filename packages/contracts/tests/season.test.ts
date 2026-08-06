@@ -68,6 +68,40 @@ describe("parseSeasonPayload", () => {
       "/events/0/qualifyingClassification",
     );
   });
+  test("accepts optional driver identity fields and fastest lap rank", () => {
+    const payload = {
+      ...season2026,
+      driverStandings: season2026.driverStandings.map((row, index) =>
+        index === 0
+          ? {
+              ...row,
+              givenName: "George",
+              familyName: "Russell",
+              slug: "george-russell",
+              number: 63,
+              nationality: "British",
+              wikipediaUrl: "https://en.wikipedia.org/wiki/George_Russell_(racing_driver)",
+            }
+          : row,
+      ),
+      events: season2026.events.map((event) =>
+        event.raceClassification
+          ? {
+              ...event,
+              raceClassification: {
+                ...event.raceClassification,
+                rows: event.raceClassification.rows.map((row) => ({
+                  ...row,
+                  fastestLapRank: 1,
+                })),
+              },
+            }
+          : event,
+      ),
+    };
+
+    expect(parseSeasonPayload(payload)).toBe(payload);
+  });
 });
 
 function expectInvalidPayload(value: unknown, errorPath: string): void {

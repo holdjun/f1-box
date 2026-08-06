@@ -77,6 +77,7 @@ export interface RaceRow {
   points: number;
   time: string | null;
   fastestLap: string | null;
+  fastestLapRank?: number | null;
 }
 export interface DriverStanding {
   position: number;
@@ -84,6 +85,12 @@ export interface DriverStanding {
   code: string;
   points: number;
   wins: number;
+  givenName?: string;
+  familyName?: string;
+  slug?: string;
+  number?: number | null;
+  nationality?: string;
+  wikipediaUrl?: string;
 }
 export interface ConstructorStanding {
   position: number;

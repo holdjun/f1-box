@@ -184,7 +184,8 @@
         "status": { "type": "string" },
         "points": { "type": "number" },
         "time": { "type": ["string", "null"] },
-        "fastestLap": { "type": ["string", "null"] }
+        "fastestLap": { "type": ["string", "null"] },
+        "fastestLapRank": { "type": ["integer", "null"] }
       }
     },
     "driverStanding": {
@@ -196,7 +197,13 @@
         "name": { "type": "string" },
         "code": { "type": "string" },
         "points": { "type": "number" },
-        "wins": { "type": "integer" }
+        "wins": { "type": "integer" },
+        "givenName": { "type": "string" },
+        "familyName": { "type": "string" },
+        "slug": { "type": "string" },
+        "number": { "type": ["integer", "null"] },
+        "nationality": { "type": "string" },
+        "wikipediaUrl": { "type": "string" }
       }
     },
     "constructorStanding": {
