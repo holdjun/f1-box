@@ -45,9 +45,8 @@ const series = thisSeason && code ? driverSeries(thisSeason, code) : [];
 const latestTeam =
   thisSeason && code
     ? thisSeason.events
-        .filter((event) => event.raceClassification !== null)
+        .flatMap((ev) => ev.raceClassification?.rows.filter((row) => row.driverCode === code) ?? [])
         .at(-1)
-        ?.raceClassification?.rows.find((row) => row.driverCode === code)
         ?.constructorName ?? "—"
     : "—";
 

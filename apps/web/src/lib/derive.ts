@@ -126,7 +126,7 @@ export interface DriverCareer {
   seasons: CareerSeasonRow[];
 }
 
-const CLASSIFIED_FINISH = /^(Finished|\+\d+ Lap)/;
+const CLASSIFIED_FINISH = /^(Finished|Lapped|\+\d+ Lap)/;
 
 export function driverSeasonStats(
   season: SeasonPayload,
@@ -209,11 +209,10 @@ export function driverCareer(
       }
     }
 
-    const team =
-      completedEvents(s)
-        .at(-1)
-        ?.raceClassification?.rows.find((row) => row.driverCode === code)
-        ?.constructorName ?? "—";
+    const allRows = completedEvents(s).flatMap((ev) =>
+      rowsOf(ev).filter((row) => row.driverCode === code),
+    );
+    const team = allRows.at(-1)?.constructorName ?? "—";
     career.seasons.push({
       year: s.season,
       team,

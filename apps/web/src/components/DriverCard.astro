@@ -30,9 +30,11 @@ const last = familyName ?? (spaceIndex > 0 ? name.slice(spaceIndex + 1) : name);
       <span class="driver-card__number">{number}</span>
     ) : null}
   </span>
-  <span class="driver-card__flag" aria-label={nationality ?? "Unknown nationality"}>
-    {flagForNationality(nationality)}
-  </span>
+  {nationality ? (
+    <span class="driver-card__flag" aria-label={nationality}>
+      {flagForNationality(nationality)}
+    </span>
+  ) : null}
 </a>
 
 <style>

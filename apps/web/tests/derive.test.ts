@@ -91,9 +91,16 @@ describe("driverSeasonStats", () => {
     );
     expect(stats?.podiums).toBe(rows.filter((row) => row.position <= 3).length);
     expect(stats?.top10s).toBe(rows.filter((row) => row.position <= 10).length);
-    expect(stats?.dnfs).toBe(
-      rows.filter((row) => !/^(Finished|\+\d+ Lap)/.test(row.status)).length,
+    // BEA has 3 Retired rows and 5 Lapped rows in the fixture; Lapped must NOT count as DNF.
+    const beaStats = driverSeasonStats(season, "BEA");
+    expect(beaStats?.dnfs).toBe(3);
+    // Semantic: Lapped rows are classified finishes, not DNFs.
+    const beaRows = season.events.flatMap(
+      (event) =>
+        event.raceClassification?.rows.filter((row) => row.driverCode === "BEA") ?? [],
     );
+    expect(beaRows.filter((row) => row.status === "Lapped").length).toBeGreaterThan(0);
+    expect(beaStats?.dnfs).toBe(beaRows.filter((row) => row.status === "Retired" || row.status === "Did not start").length);
     expect(stats?.poles).toBe(
       season.events.filter(
         (event) =>
