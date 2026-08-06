@@ -54,6 +54,10 @@ def _integer(value: object, label: str) -> int:
         raise NormalizationError(f"{label} must be an integer") from error
 
 
+def _optional_integer(value: object, label: str) -> int | None:
+    return None if value is None else _integer(value, label)
+
+
 def _number(value: object, label: str) -> float:
     try:
         return float(_string(value, label))
@@ -167,6 +171,7 @@ def _race_classification(
             else None
         )
         fastest_time = None
+        fastest_rank = None
         if fastest_lap is not None:
             fastest = _dict(fastest_lap, "Results.FastestLap")
             fastest_time_value = fastest.get("Time")
@@ -174,6 +179,9 @@ def _race_classification(
                 fastest_time = _optional_string(
                     _dict(fastest_time_value, "Results.FastestLap.Time").get("time")
                 )
+            fastest_rank = _optional_integer(
+                fastest.get("rank"), "Results.FastestLap.rank"
+            )
         rows.append(
             {
                 "position": _integer(row.get("position"), "Results.position"),
@@ -185,6 +193,7 @@ def _race_classification(
                 "points": _number(row.get("points"), "Results.points"),
                 "time": race_time,
                 "fastestLap": fastest_time,
+                "fastestLapRank": fastest_rank,
             }
         )
     return {"sessionKey": "race", "rows": rows}
@@ -300,6 +309,14 @@ def _driver_standings(result: FetchResult) -> list[dict[str, object]]:
                 "position": _integer(row.get("position"), "DriverStandings.position"),
                 "name": _driver_name(driver),
                 "code": _string(driver.get("code"), "Driver.code"),
+                "givenName": _string(driver.get("givenName"), "Driver.givenName"),
+                "familyName": _string(driver.get("familyName"), "Driver.familyName"),
+                "slug": _slug(_driver_name(driver)),
+                "number": _optional_integer(
+                    driver.get("permanentNumber"), "Driver.permanentNumber"
+                ),
+                "nationality": _optional_string(driver.get("nationality")),
+                "wikipediaUrl": _optional_string(driver.get("url")),
                 "points": _number(row.get("points"), "DriverStandings.points"),
                 "wins": _integer(row.get("wins"), "DriverStandings.wins"),
             }

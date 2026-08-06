@@ -18,7 +18,7 @@
               "positionText": "1",
               "points": "25",
               "wins": "1",
-              "Driver": { "driverId": "norris", "code": "NOR", "givenName": "Lando", "familyName": "Norris" },
+              "Driver": { "driverId": "norris", "code": "NOR", "givenName": "Lando", "familyName": "Norris", "permanentNumber": "1", "nationality": "British", "url": "https://en.wikipedia.org/wiki/Lando_Norris" },
               "Constructors": [{ "constructorId": "mclaren", "name": "McLaren" }]
             },
             {
@@ -26,7 +26,7 @@
               "positionText": "2",
               "points": "18",
               "wins": "0",
-              "Driver": { "driverId": "piastri", "code": "PIA", "givenName": "Oscar", "familyName": "Piastri" },
+              "Driver": { "driverId": "piastri", "code": "PIA", "givenName": "Oscar", "familyName": "Piastri", "permanentNumber": "81", "nationality": "Australian", "url": "https://en.wikipedia.org/wiki/Oscar_Piastri" },
               "Constructors": [{ "constructorId": "mclaren", "name": "McLaren" }]
             }
           ]
