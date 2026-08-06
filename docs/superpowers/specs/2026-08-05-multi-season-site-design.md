@@ -42,7 +42,7 @@
 /{year}/results/teams
 
 /{year}/drivers
-/{year}/drivers/{driver-slug}
+/{year}/drivers/{driver-slug}（已改为全局 /drivers/{slug}，见 2026-08-05-drivers-pages-design.md）
 
 /{year}/teams
 /{year}/teams/{team-slug}
@@ -71,7 +71,7 @@ results/drivers：POS. / DRIVER / NATIONALITY / TEAM / PTS.。
 results/teams：POS. / TEAM / PTS.。
 
 drivers 网格：车手卡（姓名、车队、车号、国旗、队伍色、头像槽位）。
-drivers/{slug}：hero + 当年统计 + Career 统计 + 生涯折线 + stints 时间线。
+drivers/{slug}（已改为全局 /drivers/{slug}，见 2026-08-05-drivers-pages-design.md）：hero + 当年统计 + Career 统计 + 生涯折线 + stints 时间线。
 teams 网格：车队卡（队名、两名车手、队伍色、赛车轮廓槽位、logo 槽位）。
 teams/{slug}：hero + 两名车手 + 当年统计 + 历史摘要 + 跨年折线。
 
