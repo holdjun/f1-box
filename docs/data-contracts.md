@@ -74,13 +74,23 @@ interface Country { id: string; alpha2Code: string; alpha3Code: string; iocCode:
 
 ```ts
 interface Circuit {
-  id: string; name: string; countryId: string | null; locality: string | null;
-  latitude: number | null; longitude: number | null;
-  lengthMetres: number | null; firstGrandPrix: number | null; numberOfLaps: number | null;
-  lapRecord: { time: string; driverId: string | null; year: number | null } | null;
+  id: string;                       // 连字符形态，如 albert-park
+  name: string;
+  fullName: string | null;
+  type: string | null;              // STREET / RACE
+  direction: string | null;         // CLOCKWISE / ANTICLOCKWISE
+  placeName: string | null;
+  countryId: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  lengthMetres: number | null;      // f1db length(km) × 1000 取整
+  turns: number | null;
+  totalRacesHeld: number | null;
   svgKey: string | null;            // 赛道线稿资产键（资产落地前为 null）
 }
 ```
+
+首办年份/圈记录 f1db 电路表不直接提供，需从 races 表派生，本轮不做（字段不预留）。
 
 与 SeasonPayload.events[].circuit 同义但 id 拼写不同（jolpica 下划线 albert_park，f1db 连字符 albert-park）；ingest 生成时已按"下划线→连字符"归一化写入 circuits.id，前端用同一归一化键 join。
 
@@ -107,6 +117,8 @@ interface ConstructorCareer {
 ```
 
 详情页 Career 块改读此产物（f1db 全历史口径），不再用"我们有的赛季"现算；seasons 行可按 constructorId 着色（颜色查各年 directory，缺则中性）。
+
+seasons 行构成：f1db seasons-driver-standings（无 constructorId，用同年 seasons-entrants-drivers join 出车队）；f1db 季中不算积分榜，故活跃赛季行回退 jolpica 积分榜（经 abbreviation↔code 映射到 f1db id）。
 
 ## 降级规则
 
