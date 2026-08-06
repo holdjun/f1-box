@@ -5,7 +5,9 @@ import seasonFixture from "@f1-box/contracts/fixtures/season-2026.json";
 import { parseSeasonPayload } from "@f1-box/contracts/season";
 
 import {
+  driverCareer,
   driverGrid,
+  driverSeasonStats,
   driverSeries,
   teamGrid,
   teamSeries,
@@ -68,5 +70,86 @@ describe("teamSeries", () => {
     const series = teamSeries(season, "Mercedes");
     expect(series).toHaveLength(completedCount);
     expect(series.every((point) => Number.isFinite(point.value))).toBe(true);
+  });
+});
+
+describe("driverSeasonStats", () => {
+  test("aggregates the standings leader's season from classifications", () => {
+    const code = season.driverStandings[0].code;
+    const stats = driverSeasonStats(season, code);
+
+    expect(stats).toMatchObject({
+      position: season.driverStandings[0].position,
+      points: season.driverStandings[0].points,
+      wins: season.driverStandings[0].wins,
+      races: completedCount,
+    });
+
+    const rows = season.events.flatMap(
+      (event) =>
+        event.raceClassification?.rows.filter((row) => row.driverCode === code) ?? [],
+    );
+    expect(stats?.podiums).toBe(rows.filter((row) => row.position <= 3).length);
+    expect(stats?.top10s).toBe(rows.filter((row) => row.position <= 10).length);
+    expect(stats?.dnfs).toBe(
+      rows.filter((row) => !/^(Finished|\+\d+ Lap)/.test(row.status)).length,
+    );
+    expect(stats?.poles).toBe(
+      season.events.filter(
+        (event) =>
+          event.qualifyingClassification?.rows.find(
+            (row) => row.driverCode === code,
+          )?.position === 1,
+      ).length,
+    );
+  });
+
+  test("counts fastest laps only when rank data exists", () => {
+    const code = season.driverStandings[0].code;
+    const stripped = parseSeasonPayload({
+      ...seasonFixture,
+      events: seasonFixture.events.map((event) =>
+        event.raceClassification
+          ? {
+              ...event,
+              raceClassification: {
+                ...event.raceClassification,
+                rows: event.raceClassification.rows.map(({ fastestLapRank, ...row }) => row),
+              },
+            }
+          : event,
+      ),
+    });
+    expect(driverSeasonStats(stripped, code)?.fastestLaps).toBeNull();
+    expect(driverSeasonStats(season, code)?.fastestLaps).toBe(
+      season.events.flatMap(
+        (event) =>
+          event.raceClassification?.rows.filter(
+            (row) => row.driverCode === code && row.fastestLapRank === 1,
+          ) ?? [],
+      ).length,
+    );
+  });
+
+  test("returns undefined for an unknown code", () => {
+    expect(driverSeasonStats(season, "NOPE")).toBeUndefined();
+  });
+});
+
+describe("driverCareer", () => {
+  test("sums seasons and records one row per participated season", () => {
+    const code = season.driverStandings[0].code;
+    const career = driverCareer([season], code);
+    const stats = driverSeasonStats(season, code);
+
+    expect(career.seasons).toHaveLength(1);
+    expect(career.seasons[0]).toMatchObject({
+      year: 2026,
+      position: stats?.position,
+      points: stats?.points,
+    });
+    expect(career.points).toBe(stats?.points);
+    expect(career.bestFinish).toBeGreaterThanOrEqual(1);
+    expect(typeof career.seasons[0].team).toBe("string");
   });
 });
