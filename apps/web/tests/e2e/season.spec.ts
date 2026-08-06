@@ -77,8 +77,34 @@ test("@desktop drivers and teams directories link to detail pages", async ({
   await expect(page.getByRole("img", { name: /Points scored by round/ })).toBeVisible();
 });
 
-test("@desktop unknown driver under a valid year returns 404", async ({ page }) => {
-  const response = await page.goto("/2026/drivers/NOTREAL");
+test("@desktop drivers grid cards link to the global detail page", async ({
+  page,
+}) => {
+  await page.goto("/2026/drivers");
+  const firstCard = page.locator('main a[href^="/drivers/"]').first();
+  await firstCard.click();
+  await expect(page).toHaveURL(/\/drivers\//);
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+});
+
+test("@desktop driver detail shows hero, season stats, career and wiki link", async ({
+  page,
+}) => {
+  await page.goto("/drivers/george-russell");
+
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Wikipedia/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /2026 season/ }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Career/ })).toBeVisible();
+  await expect(
+    page.getByRole("table", { name: "Seasons" }),
+  ).toBeVisible();
+});
+
+test("@desktop unknown driver slug returns 404", async ({ page }) => {
+  const response = await page.goto("/drivers/not-a-driver");
   expect(response?.status()).toBe(404);
 });
 

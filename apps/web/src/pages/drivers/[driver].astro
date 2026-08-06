@@ -1,0 +1,283 @@
+---
+import DriverTag from "../../components/DriverTag.astro";
+import StatusPage from "../../components/StatusPage.astro";
+import TrendChart from "../../components/TrendChart.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  driverCareer,
+  driverSeasonStats,
+  driverSeries,
+} from "../../lib/derive.js";
+import { getIndex, getSeason } from "../../lib/page-data.js";
+import { flagForNationality, teamColor } from "../../lib/tokens.js";
+import type { SeasonPayload } from "@f1-box/contracts/season";
+
+const slug = Astro.params.driver ?? "";
+const index = await getIndex();
+
+const seasons: SeasonPayload[] = [];
+for (const year of index.availableYears) {
+  try {
+    seasons.push(await getSeason(year));
+  } catch (error) {
+    console.error(`season ${year} load failed`, error);
+  }
+}
+
+function codeOf(season: SeasonPayload): string | undefined {
+  return season.driverStandings.find(
+    (row) => (row.slug ?? row.code.toLowerCase()) === slug,
+  )?.code;
+}
+
+const participants = seasons.filter((season) => codeOf(season) !== undefined);
+const thisSeason =
+  participants.find((season) => season.season === index.activeSeason) ??
+  participants.at(-1);
+
+if (!thisSeason) Astro.response.status = 404;
+
+const code = thisSeason ? codeOf(thisSeason) : undefined;
+const standing = thisSeason?.driverStandings.find((row) => row.code === code);
+const stats = thisSeason && code ? driverSeasonStats(thisSeason, code) : undefined;
+const career = driverCareer(seasons, code ?? "");
+const series = thisSeason && code ? driverSeries(thisSeason, code) : [];
+const latestTeam =
+  thisSeason && code
+    ? thisSeason.events
+        .filter((event) => event.raceClassification !== null)
+        .at(-1)
+        ?.raceClassification?.rows.find((row) => row.driverCode === code)
+        ?.constructorName ?? "—"
+    : "—";
+
+const spaceIndex = standing?.name.lastIndexOf(" ") ?? -1;
+const first =
+  standing?.givenName ??
+  (spaceIndex > 0 ? standing?.name.slice(0, spaceIndex) : standing?.name);
+const last =
+  standing?.familyName ??
+  (spaceIndex > 0 ? standing?.name.slice(spaceIndex + 1) : standing?.name);
+const color = teamColor(latestTeam);
+---
+
+{thisSeason && standing && stats ? (
+  <BaseLayout
+    title={standing.name}
+    active="drivers"
+    year={index.activeSeason}
+    availableYears={index.availableYears}
+    rest="/drivers"
+  >
+    <main id="main-content" class="page-shell">
+      <p class="crumb"><a href={`/${index.activeSeason}/drivers`}>All drivers</a></p>
+
+      <header class="hero" style={`--team-color: ${color}`}>
+        <span class="hero__watermark" aria-hidden="true">{standing.number ?? ""}</span>
+        <div class="hero__body">
+          <p class="hero__first">{first}</p>
+          <h1 class="hero__last">{last}</h1>
+          <p class="hero__meta">
+            <span class="hero__flag">{flagForNationality(standing.nationality)}</span>
+            <span>{standing.nationality ?? "—"}</span>
+            <span class="hero__sep" aria-hidden="true"></span>
+            <span>{latestTeam}</span>
+            {standing.number != null ? (
+              <span class="hero__sep" aria-hidden="true"></span>
+            ) : null}
+            {standing.number != null ? (
+              <DriverTag number={standing.number} color={color} />
+            ) : null}
+          </p>
+          {standing.wikipediaUrl ? (
+            <a class="hero__wiki" href={standing.wikipediaUrl} target="_blank" rel="noopener">
+              Wikipedia
+            </a>
+          ) : null}
+        </div>
+      </header>
+
+      <div class="columns">
+        <section aria-labelledby="season-title">
+          <h2 id="season-title">{thisSeason.season} season</h2>
+          <dl class="stat-grid">
+            <div><dt>Season position</dt><dd>{stats.position}</dd></div>
+            <div><dt>Points</dt><dd>{stats.points}</dd></div>
+            <div><dt>Races</dt><dd>{stats.races}</dd></div>
+            <div><dt>Wins</dt><dd>{stats.wins}</dd></div>
+            <div><dt>Podiums</dt><dd>{stats.podiums}</dd></div>
+            <div><dt>Poles</dt><dd>{stats.poles}</dd></div>
+            <div><dt>Top 10s</dt><dd>{stats.top10s}</dd></div>
+            {stats.fastestLaps !== null ? (
+              <div><dt>Fastest laps</dt><dd>{stats.fastestLaps}</dd></div>
+            ) : null}
+            <div><dt>DNFs</dt><dd>{stats.dnfs}</dd></div>
+          </dl>
+
+          <h3>Race-by-race finish</h3>
+          <TrendChart
+            points={series}
+            invert
+            color={color}
+            label={`Finishing position by round, ${thisSeason.season}`}
+          />
+        </section>
+
+        <section aria-labelledby="career-title">
+          <h2 id="career-title">Career</h2>
+          <dl class="stat-grid">
+            <div><dt>Grands prix entered</dt><dd>{career.races}</dd></div>
+            <div><dt>Points</dt><dd>{career.points}</dd></div>
+            <div><dt>Wins</dt><dd>{career.wins}</dd></div>
+            <div><dt>Podiums</dt><dd>{career.podiums}</dd></div>
+            <div><dt>Poles</dt><dd>{career.poles}</dd></div>
+            <div><dt>Best finish</dt><dd>{career.bestFinish ?? "—"}</dd></div>
+          </dl>
+
+          {career.seasons.length >= 2 ? (
+            <TrendChart
+              points={career.seasons.map((row) => ({
+                round: row.year,
+                label: String(row.year),
+                value: row.points,
+              }))}
+              color={color}
+              label="Career points by season"
+            />
+          ) : null}
+
+          <table class="seasons-table" aria-label="Seasons">
+            <thead>
+              <tr><th>Year</th><th>Team</th><th>Pos</th><th>Pts</th></tr>
+            </thead>
+            <tbody>
+              {career.seasons.map((row) => (
+                <tr>
+                  <td><a href={`/${row.year}/drivers`}>{row.year}</a></td>
+                  <td>{row.team}</td>
+                  <td>{row.position}</td>
+                  <td>{row.points}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </BaseLayout>
+) : (
+  <BaseLayout title="Driver not found" year={index.activeSeason} availableYears={index.availableYears} rest="/drivers">
+    <StatusPage
+      code="404"
+      title="Driver not found"
+      message="This driver is outside the available season data."
+    />
+  </BaseLayout>
+)}
+
+<style>
+  .crumb a { color: inherit; opacity: 0.7; }
+
+  .hero {
+    position: relative;
+    container-type: inline-size;
+    overflow: hidden;
+    border-radius: 12px;
+    padding: 6cqw;
+    color: #fff;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--team-color) 70%, black),
+      color-mix(in srgb, var(--team-color) 85%, white)
+    );
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, #fff 0.75px, transparent 0.75px);
+    background-size: 3px 3px;
+    opacity: 0.1;
+    mask-image: linear-gradient(to left, #000 10%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero__watermark {
+    position: absolute;
+    right: -15%;
+    top: 50%;
+    transform: translateY(-50%) skewX(-10deg);
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 900;
+    font-size: 55cqw;
+    line-height: 1;
+    opacity: 0.1;
+  }
+  .hero__body { position: relative; max-width: 55cqw; }
+  .hero__first {
+    font-weight: 300;
+    font-style: italic;
+    transform: skewX(-6deg);
+    font-size: 6cqw;
+    letter-spacing: 0.08em;
+  }
+  .hero__last {
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 12cqw;
+    line-height: 1;
+    margin: 0;
+  }
+  .hero__meta {
+    display: flex;
+    align-items: center;
+    gap: 2cqw;
+    margin-top: 3cqw;
+    font-weight: 500;
+    font-size: 4.5cqw;
+  }
+  .hero__flag { font-size: 4.5cqw; }
+  .hero__sep { width: 1px; height: 0.9em; background: rgb(255 255 255 / 0.4); }
+  .hero__wiki {
+    display: inline-block;
+    margin-top: 3cqw;
+    color: #fff;
+    font-size: 4.5cqw;
+    border: 1px solid rgb(255 255 255 / 0.6);
+    border-radius: 999px;
+    padding: 1cqw 3cqw;
+    text-decoration: none;
+  }
+
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  @media (min-width: 900px) {
+    .columns { grid-template-columns: 3fr 2fr; }
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  .stat-grid dt { font-size: 0.8rem; opacity: 0.7; }
+  .stat-grid dd {
+    margin: 0;
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+  }
+
+  .seasons-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  .seasons-table th, .seasons-table td {
+    text-align: left;
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.15);
+  }
+  .seasons-table a { color: inherit; }
+</style>
