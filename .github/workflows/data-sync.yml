@@ -16,8 +16,9 @@ jobs:
       - name: Download f1db release
         run: |
           curl -sSL -o f1db-json-splitted.zip https://github.com/f1db/f1db/releases/latest/download/f1db-json-splitted.zip
-          curl -sSL https://api.github.com/repos/f1db/f1db/releases/latest \
-            | python3 -c "import json,sys; print(json.load(sys.stdin)['tag_name'])" > f1db-tag.txt
+          # tag 从重定向 URL 解析，避免未认证 API 限流
+          curl -sI -L https://github.com/f1db/f1db/releases/latest/download/f1db-json-splitted.zip \
+            | awk 'tolower($1)=="location:"{u=$2} END{split(u,a,"/download/"); split(a[2],b,"/"); print b[1]}' > f1db-tag.txt
           cat f1db-tag.txt
 
       - name: Download f1-dash static assets
