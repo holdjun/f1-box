@@ -1,0 +1,121 @@
+---
+import { flagForNationality, teamColor } from "../lib/tokens.js";
+
+interface Props {
+  slug: string;
+  name: string;
+  givenName?: string;
+  familyName?: string;
+  team: string;
+  number?: number | null;
+  nationality?: string;
+}
+const { slug, name, givenName, familyName, team, number, nationality } = Astro.props;
+const spaceIndex = name.lastIndexOf(" ");
+const first = givenName ?? (spaceIndex > 0 ? name.slice(0, spaceIndex) : name);
+const last = familyName ?? (spaceIndex > 0 ? name.slice(spaceIndex + 1) : name);
+---
+
+<a class="driver-card" style={`--team-color: ${teamColor(team)}`} href={`/drivers/${slug}`}>
+  {number != null ? (
+    <span class="driver-card__watermark" aria-hidden="true">{number}</span>
+  ) : null}
+  <span class="driver-card__body">
+    <span class="driver-card__name">
+      <span class="driver-card__first">{first}</span>
+      <span class="driver-card__last">{last}</span>
+    </span>
+    <span class="driver-card__team">{team}</span>
+    {number != null ? (
+      <span class="driver-card__number">{number}</span>
+    ) : null}
+  </span>
+  <span class="driver-card__flag" aria-label={nationality ?? "Unknown nationality"}>
+    {flagForNationality(nationality)}
+  </span>
+</a>
+
+<style>
+  .driver-card {
+    position: relative;
+    container-type: inline-size;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: 7 / 5;
+    padding: 6cqw;
+    border-radius: 8px;
+    color: #fff;
+    text-decoration: none;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--team-color) 70%, black),
+      color-mix(in srgb, var(--team-color) 85%, white)
+    );
+  }
+
+  .driver-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, #fff 0.75px, transparent 0.75px);
+    background-size: 3px 3px;
+    opacity: 0.1;
+    mask-image: linear-gradient(to left, #000 10%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .driver-card__watermark {
+    position: absolute;
+    right: -18%;
+    top: 50%;
+    transform: translateY(-50%) skewX(-10deg);
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 900;
+    font-size: 52cqw;
+    line-height: 1;
+    color: #fff;
+    opacity: 0.09;
+  }
+
+  .driver-card__body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2cqw;
+    max-width: 55%;
+  }
+
+  .driver-card__name { display: flex; flex-direction: column; }
+  .driver-card__first { font-weight: 500; font-size: 6.5cqw; }
+  .driver-card__last {
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 8cqw;
+    line-height: 1.05;
+  }
+  .driver-card__team { font-size: 4.5cqw; opacity: 0.9; }
+
+  .driver-card__number {
+    margin-top: 3cqw;
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 900;
+    font-size: 14cqw;
+    line-height: 1;
+    transform: skewX(-10deg);
+  }
+
+  .driver-card__flag {
+    position: relative;
+    margin-top: auto;
+    width: 8cqw;
+    height: 8cqw;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #fff;
+    font-size: 5cqw;
+  }
+</style>

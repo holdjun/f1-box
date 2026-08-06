@@ -1,9 +1,9 @@
 ---
+import DriverCard from "../../../components/DriverCard.astro";
 import SeasonError from "../../../components/SeasonError.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { driverGrid } from "../../../lib/derive.js";
 import { resolveYearContext } from "../../../lib/year-context.js";
-import { teamColor } from "../../../lib/tokens.js";
 
 const ctx = await resolveYearContext(Astro);
 if (ctx.status) Astro.response.status = ctx.status;
@@ -17,16 +17,15 @@ const grid = season ? driverGrid(season) : [];
       <h1>{season.season} Drivers</h1>
       <div class="driver-grid">
         {grid.map((driver) => (
-          <a
-            class="driver-card"
-            style={`--team-color: ${teamColor(driver.team)}`}
-            href={`/${year}/drivers/${driver.code}`}
-          >
-            <span class="driver-card__pos">{String(driver.position).padStart(2, "0")}</span>
-            <span class="driver-card__name">{driver.name}</span>
-            <span class="driver-card__team">{driver.team}</span>
-            <span class="driver-card__pts">{driver.points} PTS</span>
-          </a>
+          <DriverCard
+            slug={driver.slug}
+            name={driver.name}
+            givenName={driver.givenName}
+            familyName={driver.familyName}
+            team={driver.team}
+            number={driver.number}
+            nationality={driver.nationality}
+          />
         ))}
       </div>
     </main>
@@ -36,14 +35,5 @@ const grid = season ? driverGrid(season) : [];
 )}
 
 <style>
-  .driver-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
-  .driver-card {
-    display: flex; flex-direction: column; gap: 0.25rem; padding: 1rem; border-radius: 10px;
-    color: #fff; text-decoration: none;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--team-color) 70%, black), var(--team-color));
-  }
-  .driver-card__pos { font-size: 0.8rem; opacity: 0.8; }
-  .driver-card__name { font-weight: 700; }
-  .driver-card__team { font-size: 0.85rem; opacity: 0.9; }
-  .driver-card__pts { font-size: 0.8rem; margin-top: auto; }
+  .driver-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
 </style>

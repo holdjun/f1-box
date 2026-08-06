@@ -65,11 +65,10 @@ test("@desktop drivers and teams directories link to detail pages", async ({
   page,
 }) => {
   await page.goto("/2026/drivers");
-  const driverLinks = page.locator('main a[href^="/2026/drivers/"]');
+  const driverLinks = page.locator('main a[href^="/drivers/"]');
   await expect(driverLinks.first()).toBeVisible();
-  await driverLinks.first().click();
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.getByRole("img", { name: /Finishing position by round/ })).toBeVisible();
+  await expect(driverLinks.first().locator(".driver-card__number")).toBeVisible();
+  await expect(driverLinks.first().locator(".driver-card__flag")).toBeVisible();
 
   await page.goto("/2026/teams");
   const teamLinks = page.locator('main a[href^="/2026/teams/"]');

@@ -1,0 +1,26 @@
+---
+interface Props {
+  number: number;
+  color: string;
+}
+const { number, color } = Astro.props;
+---
+
+<span class="driver-tag" style={`--team-color: ${color}`}>{number}</span>
+
+<style>
+  .driver-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.2em;
+    padding-inline: 0.5em;
+    border-radius: 999px;
+    background: var(--team-color);
+    color: #fff;
+    font-family: "Barlow Condensed", sans-serif;
+    font-weight: 700;
+    font-size: 0.9em;
+    transform: skewX(-8deg);
+  }
+</style>
