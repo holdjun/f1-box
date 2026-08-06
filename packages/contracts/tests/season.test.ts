@@ -6,7 +6,7 @@ import { parseSeasonPayload } from "../src/season.js";
 describe("parseSeasonPayload", () => {
   test("returns the same valid 2026 season fixture object", () => {
     expect(parseSeasonPayload(season2026)).toBe(season2026);
-    expect(season2026.events).toHaveLength(22);
+    expect(season2026.events).toHaveLength(23);
   });
 
   test("accepts a season without a next round", () => {

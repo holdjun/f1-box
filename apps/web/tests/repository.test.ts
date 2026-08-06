@@ -84,7 +84,7 @@ describe("createSeasonRepository", () => {
     const season = await repository.getSeason(2026);
 
     expect(season.season).toBe(2026);
-    expect(season.events).toHaveLength(22);
+    expect(season.events).toHaveLength(23);
     expect(season.freshness).toBe("fresh");
   });
 

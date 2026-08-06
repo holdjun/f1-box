@@ -14,7 +14,7 @@ test("@desktop root redirects to active season racing page", async ({ page }) =>
 test("@desktop racing page lists the full calendar", async ({ page }) => {
   await page.goto("/2026/racing");
   const raceLinks = page.locator('main a[href^="/2026/racing/"]');
-  await expect(raceLinks).toHaveCount(22);
+  await expect(raceLinks).toHaveCount(23);
   await expect(page.getByRole("navigation", { name: "Season" })).toBeVisible();
 });
 
