@@ -232,7 +232,7 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
       ] = await db.batch([
         { sql: seasonsSql, values: [slug] },
         { sql: roundsSql, values: [slug] },
-        { sql: driversSql, values: [slug, slug] },
+        { sql: driversSql, values: [slug] },
         { sql: resultsSql, values: [slug] },
         { sql: sprintRankSql, values: [slug] },
         { sql: standingsSql, values: [slug] },
