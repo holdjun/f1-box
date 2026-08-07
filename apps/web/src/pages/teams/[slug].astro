@@ -63,60 +63,56 @@ function resultClass(text: string): string {
         </div>
       </header>
 
-      <section class="stat-row" aria-label="Career statistics">
-        <div><span>Entries</span><strong>{team.totals.entries}</strong></div>
-        <div><span>Wins</span><strong>{team.totals.wins}</strong></div>
-        <div><span>Podiums</span><strong>{team.totals.podiums}</strong></div>
-        <div><span>Poles</span><strong>{team.totals.poles}</strong></div>
-        <div>
-          <span>Fastest laps</span><strong>{team.totals.fastestLaps}</strong>
-        </div>
-        <div><span>Points</span><strong>{team.totals.points}</strong></div>
-        <div>
-          <span>Championships</span><strong>{team.totals.championships}</strong>
-        </div>
-        <div>
-          <span>Best position</span
-          ><strong>{team.totals.bestChampionshipPosition ?? "—"}</strong>
-        </div>
-      </section>
-
       <section class="info-panels">
         {team.currentSeason ? (
           <div class="info-panel" aria-label={`${team.currentSeason.year} season`}>
             <h2>{team.currentSeason.year} Season</h2>
+            <div class="season-head">
+              <div>
+                <span>Season Position</span>
+                <strong>{team.currentSeason.position ?? "—"}</strong>
+              </div>
+              <div>
+                <span>Season Points</span>
+                <strong>{team.currentSeason.points ?? "—"}</strong>
+              </div>
+            </div>
+            <h3>Grand Prix</h3>
             <dl>
-              <div><dt>Season Position</dt><dd>{team.currentSeason.position ?? "—"}</dd></div>
-              <div><dt>Season Points</dt><dd>{team.currentSeason.points ?? "—"}</dd></div>
-              <div><dt>Grand Prix Races</dt><dd>{team.currentSeason.grandPrix.races}</dd></div>
-              <div><dt>Grand Prix Points</dt><dd>{team.currentSeason.grandPrix.points}</dd></div>
-              <div><dt>Grand Prix Wins</dt><dd>{team.currentSeason.grandPrix.wins}</dd></div>
-              <div><dt>Grand Prix Podiums</dt><dd>{team.currentSeason.grandPrix.podiums}</dd></div>
-              <div><dt>Grand Prix Poles</dt><dd>{team.currentSeason.grandPrix.poles}</dd></div>
-              <div><dt>Grand Prix Top 10s</dt><dd>{team.currentSeason.grandPrix.top10s}</dd></div>
+              <div><dt>Races</dt><dd>{team.currentSeason.grandPrix.races}</dd></div>
+              <div><dt>Points</dt><dd>{team.currentSeason.grandPrix.points}</dd></div>
+              <div><dt>Wins</dt><dd>{team.currentSeason.grandPrix.wins}</dd></div>
+              <div><dt>Podiums</dt><dd>{team.currentSeason.grandPrix.podiums}</dd></div>
+              <div><dt>Poles</dt><dd>{team.currentSeason.grandPrix.poles}</dd></div>
+              <div><dt>Top 10s</dt><dd>{team.currentSeason.grandPrix.top10s}</dd></div>
               <div><dt>Fastest Laps</dt><dd>{team.currentSeason.grandPrix.fastestLaps}</dd></div>
               <div><dt>DNFs</dt><dd>{team.currentSeason.grandPrix.dnfs}</dd></div>
-              <div><dt>Sprint Races</dt><dd>{team.currentSeason.sprint.races}</dd></div>
-              <div><dt>Sprint Points</dt><dd>{team.currentSeason.sprint.points}</dd></div>
-              <div><dt>Sprint Wins</dt><dd>{team.currentSeason.sprint.wins}</dd></div>
-              <div><dt>Sprint Podiums</dt><dd>{team.currentSeason.sprint.podiums}</dd></div>
-              <div><dt>Sprint Poles</dt><dd>{team.currentSeason.sprint.poles}</dd></div>
-              <div><dt>Sprint Top 10s</dt><dd>{team.currentSeason.sprint.top10s}</dd></div>
+            </dl>
+            <h3>Sprint</h3>
+            <dl>
+              <div><dt>Races</dt><dd>{team.currentSeason.sprint.races}</dd></div>
+              <div><dt>Points</dt><dd>{team.currentSeason.sprint.points}</dd></div>
+              <div><dt>Wins</dt><dd>{team.currentSeason.sprint.wins}</dd></div>
+              <div><dt>Podiums</dt><dd>{team.currentSeason.sprint.podiums}</dd></div>
+              <div><dt>Poles</dt><dd>{team.currentSeason.sprint.poles}</dd></div>
+              <div><dt>Top 10s</dt><dd>{team.currentSeason.sprint.top10s}</dd></div>
             </dl>
           </div>
         ) : null}
         <div class="info-panel" aria-label="Team summary">
           <h2>Team Summary</h2>
           <dl>
-            <div><dt>Full Team Name</dt><dd>{team.fullName}</dd></div>
-            <div><dt>Country</dt><dd>{team.countryName}</dd></div>
-            {team.seasons[0] ? (
-              <>
-                <div><dt>Chassis</dt><dd>{team.seasons[0].chassis.join(" / ")}</dd></div>
-                <div><dt>Power Unit</dt><dd>{team.seasons[0].powerUnits.join(" / ")}</dd></div>
-                <div><dt>Tyres</dt><dd>{team.seasons[0].tyres.join(" / ")}</dd></div>
-              </>
-            ) : null}
+            <div><dt>Entries</dt><dd>{team.totals.entries}</dd></div>
+            <div><dt>Wins</dt><dd>{team.totals.wins}</dd></div>
+            <div><dt>Podiums</dt><dd>{team.totals.podiums}</dd></div>
+            <div><dt>Poles</dt><dd>{team.totals.poles}</dd></div>
+            <div><dt>Fastest laps</dt><dd>{team.totals.fastestLaps}</dd></div>
+            <div><dt>Points</dt><dd>{team.totals.points}</dd></div>
+            <div><dt>Championships</dt><dd>{team.totals.championships}</dd></div>
+            <div>
+              <dt>Best position</dt>
+              <dd>{team.totals.bestChampionshipPosition ?? "—"}</dd>
+            </div>
             <div><dt>First Team Entry</dt><dd>{team.firstEntry}</dd></div>
           </dl>
         </div>
@@ -133,7 +129,7 @@ function resultClass(text: string): string {
           <span class="key"><i class="result-dsq"></i>DSQ</span>
           <span class="key"><sup class="sup-p">P</sup>pole position</span>
           <span class="key"><sup class="sup-f">F</sup>fastest lap</span>
-          <span class="key"><sup class="sup-sprint">n</sup>sprint points</span>
+          <span class="key"><sup class="sup-sprint">n</sup>sprint race position</span>
           <span class="key"><span class="dagger">†</span>retired but classified</span>
         </p>
         {team.seasons.map((season) => (
@@ -168,7 +164,11 @@ function resultClass(text: string): string {
                   <tr>
                     <th scope="col" class="driver-col">Driver</th>
                     {season.rounds.map((round) => (
-                      <th scope="col" title={round.name}>{round.code}</th>
+                      <th scope="col" title={round.name}>
+                        <a class="round-link" href={`/circuits/${round.circuitId}`}>
+                          {round.code}
+                        </a>
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -199,8 +199,8 @@ function resultClass(text: string): string {
                               {cell.classified ? <span class="dagger">†</span> : null}
                               {cell.pole ? <sup class="sup-p">P</sup> : null}
                               {cell.fastest ? <sup class="sup-f">F</sup> : null}
-                              {cell.sprintPoints !== null ? (
-                                <sup class="sup-sprint">{cell.sprintPoints}</sup>
+                              {cell.sprintRank !== null ? (
+                                <sup class="sup-sprint">{cell.sprintRank}</sup>
                               ) : null}
                             </td>
                           ) : (
@@ -272,23 +272,6 @@ function resultClass(text: string): string {
     height: 0.95rem;
     width: auto;
   }
-  .stat-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.25rem 2rem;
-    margin-block: 1.5rem;
-  }
-  .stat-row div {
-    display: flex;
-    flex-direction: column;
-  }
-  .stat-row span {
-    font-size: 0.8rem;
-    opacity: 0.7;
-  }
-  .stat-row strong {
-    font-size: 1.5rem;
-  }
   .info-panels {
     display: flex;
     flex-wrap: wrap;
@@ -304,6 +287,25 @@ function resultClass(text: string): string {
   .info-panel h2 {
     margin: 0 0 0.75rem;
     font-size: 0.95rem;
+  }
+  .info-panel h3 {
+    margin: 0.9rem 0 0.4rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .season-head {
+    display: flex;
+    gap: 2rem;
+  }
+  .season-head span {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+  .season-head strong {
+    font-size: 1.4rem;
   }
   .info-panel dl {
     display: grid;
@@ -370,6 +372,14 @@ function resultClass(text: string): string {
     text-decoration: none;
   }
   .driver-link:hover {
+    color: var(--paper);
+    text-decoration: underline;
+  }
+  .round-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .round-link:hover {
     color: var(--paper);
     text-decoration: underline;
   }

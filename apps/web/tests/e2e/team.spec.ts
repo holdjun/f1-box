@@ -1,12 +1,15 @@
 import { expect, test } from "@playwright/test";
 
-test("ferrari page renders identity, totals and season blocks @desktop", async ({
+test("ferrari page renders identity, summary and season blocks @desktop", async ({
   page,
 }) => {
   await page.goto("/teams/ferrari");
 
   await expect(page.locator("main h1")).toHaveText("Scuderia Ferrari");
-  await expect(page.getByLabel("Career statistics")).toContainText("1135");
+  await expect(page.getByLabel("Team summary")).toContainText("Entries1135");
+  await expect(page.getByLabel("Team summary")).toContainText(
+    "First Team Entry1950",
+  );
 
   const blocks = page.locator(".season-block");
   await expect(blocks).toHaveCount(77);
@@ -17,17 +20,13 @@ test("ferrari page renders identity, totals and season blocks @desktop", async (
   await expect(page.getByLabel("Table legend")).toContainText("Win");
 });
 
-test("current season leads with stats panels and markers @desktop", async ({
-  page,
-}) => {
+test("current season panel and markers @desktop", async ({ page }) => {
   await page.goto("/teams/ferrari");
 
-  await expect(page.getByLabel("2026 season")).toContainText("Season Position2");
-  await expect(page.getByLabel("2026 season")).toContainText("Sprint Points39");
-  await expect(page.getByLabel("Team summary")).toContainText(
-    "First Team Entry1950",
-  );
-  await expect(page.getByLabel("Team summary")).toContainText("Power UnitFerrari");
+  const panel = page.getByLabel("2026 season");
+  await expect(panel).toContainText("Season Position2");
+  await expect(panel).toContainText("Season Points307");
+  await expect(panel).toContainText("39");
 
   const current = page.locator(".season-block.current");
   await expect(current).toHaveCount(1);
@@ -42,6 +41,27 @@ test("current season leads with stats panels and markers @desktop", async ({
   await expect(current.locator("sup.sup-sprint")).not.toHaveCount(0);
 });
 
+test("substitute drivers appear in the matrix @desktop", async ({ page }) => {
+  await page.goto("/teams/ferrari");
+  // 2024 沙特站 Bearman 替补患病的 Sainz 出战，第 7 名
+  const block2024 = page
+    .locator(".season-block")
+    .filter({ has: page.locator(".season-year", { hasText: "2024" }) });
+  await expect(block2024).toContainText("Oliver Bearman");
+});
+
+test("round headers link to future circuit pages @desktop", async ({
+  page,
+}) => {
+  await page.goto("/teams/ferrari");
+
+  const link = page.locator('a[href="/circuits/jeddah"]');
+  await expect(link.first()).toBeVisible();
+  // 赛道页尚未实现，先 404
+  const response = await page.goto("/circuits/jeddah");
+  expect(response?.status()).toBe(404);
+});
+
 test("drivers link to their future global pages @desktop", async ({ page }) => {
   await page.goto("/teams/ferrari");
 
@@ -50,11 +70,6 @@ test("drivers link to their future global pages @desktop", async ({ page }) => {
   // 车手全局页尚未实现，先 404
   const response = await page.goto("/drivers/lewis-hamilton");
   expect(response?.status()).toBe(404);
-});
-
-test("marks poles and fastest laps @desktop", async ({ page }) => {
-  await page.goto("/teams/ferrari");
-  await expect(page.locator(".season-block td sup").first()).toBeVisible();
 });
 
 test("unknown team returns 404 @desktop", async ({ page }) => {

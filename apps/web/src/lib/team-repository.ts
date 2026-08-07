@@ -17,7 +17,7 @@ export interface RaceCell {
   fastest: boolean;
   // 未完成比赛但完成足够赛程、仍有排名（†）
   classified: boolean;
-  sprintPoints: number | null;
+  sprintRank: number | null;
 }
 
 export interface TeamSeasonDriver {
@@ -30,6 +30,7 @@ export interface TeamSeasonDriver {
 export interface SeasonRound {
   code: string;
   name: string;
+  circuitId: string;
 }
 
 export interface TeamSeason {
@@ -129,7 +130,7 @@ WHERE sec.constructor_id = ?
 GROUP BY sec.year`;
 
 const roundsSql = `
-SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name
+SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, ra.circuit_id
 FROM race ra
 JOIN grand_prix gp ON gp.id = ra.grand_prix_id
 WHERE ra.year IN (
@@ -137,13 +138,21 @@ WHERE ra.year IN (
 )
 ORDER BY ra.year, ra.round`;
 
+// 替补/共享车手可能只出现在比赛结果而不在正式阵容（test_driver=0）里，用并集补齐
 const driversSql = `
 SELECT sed.year, d.id, d.name, cn.alpha2_code
 FROM season_entrant_driver sed
 JOIN driver d ON d.id = sed.driver_id
 LEFT JOIN country cn ON cn.id = d.nationality_country_id
 WHERE sed.constructor_id = ? AND sed.test_driver = 0
-ORDER BY sed.year`;
+UNION
+SELECT ra.year, d.id, d.name, cn.alpha2_code
+FROM race ra
+JOIN race_result rr ON rr.race_id = ra.id
+JOIN driver d ON d.id = rr.driver_id
+LEFT JOIN country cn ON cn.id = d.nationality_country_id
+WHERE rr.constructor_id = ?
+ORDER BY 1, 3`;
 
 const resultsSql = `
 SELECT ra.year, ra.round, rr.driver_id, rr.position_text, rr.pole_position,
@@ -152,11 +161,11 @@ FROM race ra
 JOIN race_result rr ON rr.race_id = ra.id
 WHERE rr.constructor_id = ?`;
 
-const sprintPointsSql = `
-SELECT ra.year, ra.round, srr.driver_id, srr.points
+const sprintRankSql = `
+SELECT ra.year, ra.round, srr.driver_id, srr.position_number
 FROM race ra
 JOIN sprint_race_result srr ON srr.race_id = ra.id
-WHERE srr.constructor_id = ? AND srr.points > 0`;
+WHERE srr.constructor_id = ? AND srr.position_number IS NOT NULL`;
 
 const standingsSql = `
 SELECT year, position_text, points, championship_won
@@ -202,14 +211,14 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
       if (identity.results.length === 0) return null;
       const base = parseIdentityRow(identity.results[0]);
 
-      const [firstEntryRows, seasonRows, roundRows, driverRows, resultRows, sprintPointRows, standingRows] =
+      const [firstEntryRows, seasonRows, roundRows, driverRows, resultRows, sprintRankRows, standingRows] =
         await Promise.all([
           db.prepare(firstEntrySql).bind(slug).all(),
           db.prepare(seasonsSql).bind(slug).all(),
           db.prepare(roundsSql).bind(slug).all(),
-          db.prepare(driversSql).bind(slug).all(),
+          db.prepare(driversSql).bind(slug, slug).all(),
           db.prepare(resultsSql).bind(slug).all(),
-          db.prepare(sprintPointsSql).bind(slug).all(),
+          db.prepare(sprintRankSql).bind(slug).all(),
           db.prepare(standingsSql).bind(slug).all(),
         ]);
 
@@ -218,7 +227,7 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         roundRows.results,
         driverRows.results,
         resultRows.results,
-        sprintPointRows.results,
+        sprintRankRows.results,
         standingRows.results,
       );
 
@@ -289,7 +298,7 @@ function mergeSeasons(
   roundRows: unknown[],
   driverRows: unknown[],
   resultRows: unknown[],
-  sprintPointRows: unknown[],
+  sprintRankRows: unknown[],
   standingRows: unknown[],
 ): TeamSeason[] {
   const seasons = new Map<number, TeamSeason>();
@@ -319,20 +328,17 @@ function mergeSeasons(
     season?.rounds.push({
       code: asString(record.code, "round code"),
       name: asString(record.name, "round name"),
+      circuitId: asString(record.circuit_id, "round circuit"),
     });
   }
 
-  const sprintPoints = createFastestSet();
-  const sprintValues = new Map<string, number>();
-  for (const row of sprintPointRows) {
-    const record = asRecord(row, "sprint points row");
-    const key = `${asNumber(record.year, "sprint year")}:${asNumber(record.round, "sprint round")}:${asString(record.driver_id, "sprint driver")}`;
-    sprintPoints.add(
-      asNumber(record.year, "sprint year"),
-      asNumber(record.round, "sprint round"),
-      asString(record.driver_id, "sprint driver"),
+  const sprintRanks = new Map<string, number>();
+  for (const row of sprintRankRows) {
+    const record = asRecord(row, "sprint rank row");
+    sprintRanks.set(
+      `${asNumber(record.year, "sprint year")}:${asNumber(record.round, "sprint round")}:${asString(record.driver_id, "sprint driver")}`,
+      asNumber(record.position_number, "sprint rank"),
     );
-    sprintValues.set(key, asNumber(record.points, "sprint points"));
   }
 
   for (const row of driverRows) {
@@ -356,17 +362,13 @@ function mergeSeasons(
     const season = seasons.get(year);
     const driver = season?.drivers.find((entry) => entry.id === driverId);
     if (!season || !driver) continue;
-    const classified =
-      record.reason_retired !== null && record.position_number !== null;
-    const sprintKey = `${year}:${round}:${driverId}`;
     driver.results[round - 1] = {
       text: asString(record.position_text, "result position"),
       pole: Boolean(record.pole_position),
       fastest: Boolean(record.fastest_lap),
-      classified,
-      sprintPoints: sprintPoints.has(year, round, driverId)
-        ? (sprintValues.get(sprintKey) ?? null)
-        : null,
+      classified:
+        record.reason_retired !== null && record.position_number !== null,
+      sprintRank: sprintRanks.get(`${year}:${round}:${driverId}`) ?? null,
     };
   }
 
@@ -471,6 +473,7 @@ function assertTeamPage(value: unknown): TeamPage {
           return {
             code: asString(roundRecord.code, "round code"),
             name: asString(roundRecord.name, "round name"),
+            circuitId: asString(roundRecord.circuitId, "round circuit"),
           };
         }),
         drivers: asArray(season.drivers, "season drivers").map((driver) => {
@@ -494,10 +497,10 @@ function assertTeamPage(value: unknown): TeamPage {
                 pole: Boolean(cellRecord.pole),
                 fastest: Boolean(cellRecord.fastest),
                 classified: Boolean(cellRecord.classified),
-                sprintPoints:
-                  cellRecord.sprintPoints === null
+                sprintRank:
+                  cellRecord.sprintRank === null
                     ? null
-                    : asNumber(cellRecord.sprintPoints, "sprint points"),
+                    : asNumber(cellRecord.sprintRank, "sprint rank"),
               };
             }),
           };

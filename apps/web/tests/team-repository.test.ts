@@ -48,10 +48,10 @@ const db = fakeDb({
     { year: 1950, chassis: null, engines: null, power_units: "Ferrari", tyres: null },
   ],
   "grand_prix gp": [
-    { year: 2026, round: 1, code: "AUS", name: "Australian Grand Prix" },
-    { year: 2026, round: 2, code: "CHN", name: "Chinese Grand Prix" },
-    { year: 1979, round: 1, code: "ARG", name: "Argentine Grand Prix" },
-    { year: 1950, round: 1, code: "GBR", name: "British Grand Prix" },
+    { year: 2026, round: 1, code: "AUS", name: "Australian Grand Prix", circuit_id: "albert-park" },
+    { year: 2026, round: 2, code: "CHN", name: "Chinese Grand Prix", circuit_id: "shanghai" },
+    { year: 1979, round: 1, code: "ARG", name: "Argentine Grand Prix", circuit_id: "buenos-aires" },
+    { year: 1950, round: 1, code: "GBR", name: "British Grand Prix", circuit_id: "silverstone" },
   ],
   "MIN(year)": [{ first_entry: 1950 }],
   "position_text = 'Ret'": [
@@ -61,9 +61,9 @@ const db = fakeDb({
     { races: 1, points: 10, wins: 0, podiums: 1, poles: 1, top10s: 2 },
   ],
   "sprint_race_result srr": [
-    { year: 2026, round: 1, driver_id: "lewis-hamilton", points: 3 },
+    { year: 2026, round: 1, driver_id: "lewis-hamilton", position_number: 3 },
   ],
-  "test_driver = 0": [
+  "UNION": [
     { year: 2026, id: "charles-leclerc", name: "Charles Leclerc", alpha2_code: "MC" },
     { year: 2026, id: "lewis-hamilton", name: "Lewis Hamilton", alpha2_code: "GB" },
     { year: 1979, id: "jody-scheckter", name: "Jody Scheckter", alpha2_code: "ZA" },
@@ -102,15 +102,15 @@ describe("createTeamRepository with database", () => {
       pole: true,
       fastest: true,
       classified: false,
-      sprintPoints: null,
+      sprintRank: null,
     });
     // 未完赛但有排名 → †
     expect(leclerc.results[1]).toMatchObject({ text: "4", classified: true });
-    // 退赛无排名不标 †；冲刺赛积分挂上标
+    // 退赛无排名不标 †；冲刺赛排名挂上标
     expect(hamilton.results[0]).toMatchObject({
       text: "Ret",
       classified: false,
-      sprintPoints: 3,
+      sprintRank: 3,
     });
     expect(hamilton.results[1]).toBeNull();
 
