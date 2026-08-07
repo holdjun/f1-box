@@ -35,3 +35,8 @@ jobs:
         run: |
           npm install -g wrangler >/dev/null 2>&1 || true
           wrangler r2 object get --remote f1-box-data/vendor/f1db/release.json --file /dev/stdout
+
+      - name: Refresh D1 (f1db subset)
+        run: |
+          ./scripts/f1db-d1-dump.sh f1db-subset.sql
+          wrangler d1 execute f1db --remote -c apps/web/wrangler.jsonc --file f1db-subset.sql
