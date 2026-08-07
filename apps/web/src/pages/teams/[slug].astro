@@ -2,14 +2,24 @@
 import { env } from "cloudflare:workers";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { createTeamRepository } from "../../lib/team-repository.js";
+import { createTeamRepository, type TeamDatabase } from "../../lib/team-repository.js";
 import { alpha2Flag } from "../../lib/tokens.js";
 import { getTeamBranding } from "../../lib/vendor.js";
 
 const slug = (Astro.params.slug ?? "").toLowerCase();
+// D1 batch 需要预编译语句，仓库层接口用 {sql, values} 以便测试替身
+const database: TeamDatabase = {
+  prepare: (sql) => env.F1_DB.prepare(sql),
+  batch: (statements) =>
+    env.F1_DB.batch(
+      statements.map((statement) =>
+        env.F1_DB.prepare(statement.sql).bind(...statement.values),
+      ),
+    ),
+};
 const repository = import.meta.env.DEV
   ? createTeamRepository()
-  : createTeamRepository(env.F1_DB);
+  : createTeamRepository(database);
 const store = import.meta.env.DEV ? undefined : env.F1_DATA;
 
 const [team, branding] = await Promise.all([
@@ -37,8 +47,8 @@ function resultClass(text: string): string {
   if (/^\d+$/.test(text)) {
     return Number(text) <= 10 ? "result-points" : "result-finish";
   }
-  if (text === "Ret" || text === "DNF") return "result-ret";
-  if (text === "DSQ" || text === "EX") return "result-dsq";
+  if (text === "DNF") return "result-ret";
+  if (text === "DSQ") return "result-dsq";
   if (text === "DNQ" || text === "DNPQ") return "result-dnq";
   return "result-other";
 }
@@ -96,15 +106,19 @@ function resultClass(text: string): string {
               <div><dt>Fastest Laps</dt><dd>{team.currentSeason.grandPrix.fastestLaps}</dd></div>
               <div><dt>DNFs</dt><dd>{team.currentSeason.grandPrix.dnfs}</dd></div>
             </dl>
-            <h3>Sprint</h3>
-            <dl>
-              <div><dt>Races</dt><dd>{team.currentSeason.sprint.races}</dd></div>
-              <div><dt>Points</dt><dd>{team.currentSeason.sprint.points}</dd></div>
-              <div><dt>Wins</dt><dd>{team.currentSeason.sprint.wins}</dd></div>
-              <div><dt>Podiums</dt><dd>{team.currentSeason.sprint.podiums}</dd></div>
-              <div><dt>Poles</dt><dd>{team.currentSeason.sprint.poles}</dd></div>
-              <div><dt>Top 10s</dt><dd>{team.currentSeason.sprint.top10s}</dd></div>
-            </dl>
+            {team.currentSeason.sprint.races > 0 ? (
+              <>
+                <h3>Sprint</h3>
+                <dl>
+                  <div><dt>Races</dt><dd>{team.currentSeason.sprint.races}</dd></div>
+                  <div><dt>Points</dt><dd>{team.currentSeason.sprint.points}</dd></div>
+                  <div><dt>Wins</dt><dd>{team.currentSeason.sprint.wins}</dd></div>
+                  <div><dt>Podiums</dt><dd>{team.currentSeason.sprint.podiums}</dd></div>
+                  <div><dt>Poles</dt><dd>{team.currentSeason.sprint.poles}</dd></div>
+                  <div><dt>Top 10s</dt><dd>{team.currentSeason.sprint.top10s}</dd></div>
+                </dl>
+              </>
+            ) : null}
           </div>
         ) : null}
         <div class="info-panel" aria-label="Team summary">
@@ -132,9 +146,11 @@ function resultClass(text: string): string {
           <span class="key"><i class="result-win"></i>Win</span>
           <span class="key"><i class="result-podium"></i>Podium</span>
           <span class="key"><i class="result-points"></i>Points</span>
+          <span class="key"><i class="result-finish"></i>Classified</span>
           <span class="key"><i class="result-ret"></i>Retired</span>
           <span class="key"><i class="result-dnq"></i>DNQ</span>
           <span class="key"><i class="result-dsq"></i>DSQ</span>
+          <span class="key"><i class="result-other"></i>DNS / NC</span>
           <span class="key"><sup class="sup-p">P</sup>pole position</span>
           <span class="key"><sup class="sup-f">F</sup>fastest lap</span>
           <span class="key"><sup class="sup-sprint">n</sup>sprint race position</span>
@@ -162,9 +178,11 @@ function resultClass(text: string): string {
                   {tyre}
                 </span>
               ))}
-              <span class="season-pts">
-                {season.points ?? "—"} pts · P{season.position ?? "—"}
-              </span>
+              {season.points !== null ? (
+                <span class="season-pts">
+                  {season.points} pts · P{season.position ?? "—"}
+                </span>
+              ) : null}
             </h3>
             <div class="table-scroll" tabindex="0">
               <table aria-label={`${season.year} race results`}>
@@ -336,15 +354,20 @@ function resultClass(text: string): string {
     width: 1.15rem;
     height: 1.15rem;
     border-radius: 3px;
+    background: #5a6470;
+    color: #fff;
     font-size: 0.7rem;
     font-weight: 700;
   }
   .tyre-P { background: #ffd12e; color: #c00000; }
-  .tyre-B { background: #cc0000; color: #fff; }
-  .tyre-M { background: #1f6bb5; color: #fff; }
-  .tyre-G { background: #2a8fbd; color: #fff; }
-  .tyre-D { background: #2e8b57; color: #fff; }
-  .tyre-F { background: #b03a2e; color: #fff; }
+  .tyre-B { background: #cc0000; }
+  .tyre-M { background: #1f6bb5; }
+  .tyre-G { background: #2a8fbd; }
+  .tyre-D { background: #2e8b57; }
+  .tyre-F { background: #b03a2e; }
+  .tyre-A { background: #95a5a6; }
+  .tyre-C { background: #e67e22; }
+  .tyre-E { background: #34495e; }
   .sup-p,
   .sup-f,
   .sup-sprint {

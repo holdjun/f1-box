@@ -19,6 +19,7 @@ export const GET: APIRoute = async ({ params }) => {
   const segments = (params.key ?? "").split("/");
   if (
     segments.length === 0 ||
+    segments.some((segment) => segment === "." || segment === "..") ||
     segments.some((segment) => !KEY_SEGMENT.test(segment))
   ) {
     return new Response(null, { status: 404 });
