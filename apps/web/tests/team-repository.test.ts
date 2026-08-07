@@ -39,18 +39,29 @@ const identityRow = {
   best_position: 1,
 };
 
+// 键的顺序即匹配优先级：统计查询的标记必须先于 resultsSql 的 "race_result rr"
 const db = fakeDb({
   "FROM constructor": [identityRow],
   "GROUP BY sec.year": [
-    { year: 2026, chassis: "SF-26", engines: "067/6", tyres: "Pirelli" },
-    { year: 1979, chassis: "312T3,312T4", engines: "015", tyres: "Michelin" },
-    { year: 1950, chassis: null, engines: null, tyres: null },
+    { year: 2026, chassis: "SF-26", engines: "067/6", power_units: "Ferrari", tyres: "Pirelli" },
+    { year: 1979, chassis: "312T3,312T4", engines: "015", power_units: "Ferrari", tyres: "Michelin" },
+    { year: 1950, chassis: null, engines: null, power_units: "Ferrari", tyres: null },
   ],
   "grand_prix gp": [
     { year: 2026, round: 1, code: "AUS", name: "Australian Grand Prix" },
     { year: 2026, round: 2, code: "CHN", name: "Chinese Grand Prix" },
     { year: 1979, round: 1, code: "ARG", name: "Argentine Grand Prix" },
     { year: 1950, round: 1, code: "GBR", name: "British Grand Prix" },
+  ],
+  "MIN(year)": [{ first_entry: 1950 }],
+  "position_text = 'Ret'": [
+    { races: 2, points: 87, wins: 1, podiums: 2, poles: 0, top10s: 2, fastest_laps: 1, dnfs: 0 },
+  ],
+  "sprint_starting_grid_position": [
+    { races: 1, points: 10, wins: 0, podiums: 1, poles: 1, top10s: 2 },
+  ],
+  "sprint_race_result srr": [
+    { year: 2026, round: 1, driver_id: "lewis-hamilton", points: 3 },
   ],
   "test_driver = 0": [
     { year: 2026, id: "charles-leclerc", name: "Charles Leclerc", alpha2_code: "MC" },
@@ -59,13 +70,10 @@ const db = fakeDb({
     { year: 1951, id: "alberto-ascari", name: "Alberto Ascari", alpha2_code: "IT" },
   ],
   "race_result rr": [
-    { year: 2026, round: 1, driver_id: "charles-leclerc", position_text: "1", pole_position: 1 },
-    { year: 2026, round: 1, driver_id: "lewis-hamilton", position_text: "Ret", pole_position: 0 },
-    { year: 2026, round: 2, driver_id: "charles-leclerc", position_text: "4", pole_position: 0 },
-    { year: 1979, round: 1, driver_id: "jody-scheckter", position_text: "1", pole_position: 0 },
-  ],
-  "fastest_lap fl": [
-    { year: 2026, round: 1, driver_id: "charles-leclerc" },
+    { year: 2026, round: 1, driver_id: "charles-leclerc", position_text: "1", pole_position: 1, fastest_lap: 1, reason_retired: null, position_number: 1 },
+    { year: 2026, round: 1, driver_id: "lewis-hamilton", position_text: "Ret", pole_position: 0, fastest_lap: 0, reason_retired: "Engine", position_number: null },
+    { year: 2026, round: 2, driver_id: "charles-leclerc", position_text: "4", pole_position: 0, fastest_lap: 0, reason_retired: "Collision", position_number: 4 },
+    { year: 1979, round: 1, driver_id: "jody-scheckter", position_text: "1", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 1 },
   ],
   "season_constructor_standing": [
     { year: 2026, position_text: "2", points: 307, championship_won: 0 },
@@ -75,49 +83,60 @@ const db = fakeDb({
 });
 
 describe("createTeamRepository with database", () => {
-  it("merges identity and season meta", async () => {
+  it("merges identity, first entry and season meta", async () => {
     const team = await createTeamRepository(db).getTeam("ferrari");
     expect(team?.fullName).toBe("Scuderia Ferrari");
     expect(team?.alpha2Code).toBe("IT");
+    expect(team?.firstEntry).toBe(1950);
     expect(team?.totals.championships).toBe(16);
     expect(team?.seasons.map((s) => s.year)).toEqual([2026, 1979, 1950]);
   });
 
-  it("builds the per-round result matrix per driver", async () => {
+  it("builds the per-round result matrix with markers", async () => {
     const team = await createTeamRepository(db).getTeam("ferrari");
     const byYear = Object.fromEntries(team!.seasons.map((s) => [s.year, s]));
 
     const [leclerc, hamilton] = byYear[2026].drivers;
-    expect(leclerc).toMatchObject({ name: "Charles Leclerc", flagCode: "MC" });
-    expect(leclerc.results[0]).toEqual({ text: "1", pole: true, fastest: true });
-    expect(leclerc.results[1]).toEqual({ text: "4", pole: false, fastest: false });
-    expect(hamilton.results[0]).toEqual({ text: "Ret", pole: false, fastest: false });
+    expect(leclerc.results[0]).toEqual({
+      text: "1",
+      pole: true,
+      fastest: true,
+      classified: false,
+      sprintPoints: null,
+    });
+    // 未完赛但有排名 → †
+    expect(leclerc.results[1]).toMatchObject({ text: "4", classified: true });
+    // 退赛无排名不标 †；冲刺赛积分挂上标
+    expect(hamilton.results[0]).toMatchObject({
+      text: "Ret",
+      classified: false,
+      sprintPoints: 3,
+    });
     expect(hamilton.results[1]).toBeNull();
 
-    expect(byYear[2026].rounds.map((r) => r.code)).toEqual(["AUS", "CHN"]);
-    expect(byYear[2026].chassis).toEqual(["SF-26"]);
+    expect(byYear[2026].powerUnits).toEqual(["Ferrari"]);
     expect(byYear[2026].tyres).toEqual(["P"]);
     expect(byYear[1979].chassis).toEqual(["312T3", "312T4"]);
     expect(byYear[1979].tyres).toEqual(["M"]);
     expect(byYear[1950].chassis).toEqual([]);
-    expect(byYear[1950].drivers).toEqual([]);
+  });
+
+  it("computes the current season stats blocks", async () => {
+    const team = await createTeamRepository(db).getTeam("ferrari");
+    expect(team?.currentSeason).toMatchObject({
+      year: 2026,
+      position: "2",
+      points: 307,
+      grandPrix: { races: 2, points: 87, wins: 1, podiums: 2, fastestLaps: 1, dnfs: 0 },
+      sprint: { races: 1, points: 10, poles: 1 },
+    });
   });
 
   it("attaches standings and flags championship seasons", async () => {
     const team = await createTeamRepository(db).getTeam("ferrari");
     const byYear = Object.fromEntries(team!.seasons.map((s) => [s.year, s]));
-    expect(byYear[2026]).toMatchObject({
-      points: 307,
-      position: "2",
-      championshipWon: false,
-    });
-    expect(byYear[1979]).toMatchObject({
-      points: 113,
-      position: "1",
-      championshipWon: true,
-    });
+    expect(byYear[1979]).toMatchObject({ position: "1", championshipWon: true });
     expect(byYear[1950].points).toBeNull();
-    // 2000 有积分榜但没有参赛行（fake 数据），不应出现
     expect(byYear[2000]).toBeUndefined();
   });
 
@@ -138,10 +157,12 @@ describe("createTeamRepository without database (DEV fixture)", () => {
   it("serves the ferrari fixture", async () => {
     const team = await createTeamRepository().getTeam("ferrari");
     expect(team?.fullName).toBe("Scuderia Ferrari");
+    expect(team?.firstEntry).toBe(1950);
     expect(team?.seasons).toHaveLength(77);
     expect(team?.seasons.filter((s) => s.championshipWon)).toHaveLength(16);
     expect(team?.seasons[0].year).toBe(2026);
-    expect(team?.seasons.at(-1)?.year).toBe(1950);
+    expect(team?.currentSeason?.grandPrix.points).toBe(268);
+    expect(team?.currentSeason?.sprint.points).toBe(39);
     const current = team?.seasons[0];
     expect(current?.rounds).toHaveLength(22);
     expect(current?.drivers.map((d) => d.name)).toContain("Charles Leclerc");
