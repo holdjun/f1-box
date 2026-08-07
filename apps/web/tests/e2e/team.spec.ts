@@ -10,14 +10,14 @@ test("ferrari page renders identity, totals and season blocks @desktop", async (
 
   const blocks = page.locator(".season-block");
   await expect(blocks).toHaveCount(77);
-  await expect(blocks.first()).toContainText("1950");
+  await expect(blocks.first()).toContainText("2026");
+  await expect(blocks.last()).toContainText("1950");
   await expect(page.locator(".season-block.champion")).toHaveCount(16);
   await expect(page.getByText("Historical data: f1db")).toBeVisible();
+  await expect(page.getByLabel("Table legend")).toContainText("Win");
 });
 
-test("current season shows the race-by-race matrix @desktop", async ({
-  page,
-}) => {
+test("current season leads the page @desktop", async ({ page }) => {
   await page.goto("/teams/ferrari");
 
   const current = page.locator(".season-block.current");
@@ -27,6 +27,16 @@ test("current season shows the race-by-race matrix @desktop", async ({
   // 2026 揭幕战勒克莱尔第 3、汉密尔顿第 4
   await expect(current.locator("td.result-podium")).not.toHaveCount(0);
   await expect(current.locator("td.result-points")).not.toHaveCount(0);
+});
+
+test("drivers link to their future global pages @desktop", async ({ page }) => {
+  await page.goto("/teams/ferrari");
+
+  const link = page.locator('a[href="/drivers/lewis-hamilton"]');
+  await expect(link.first()).toBeVisible();
+  // 车手全局页尚未实现，先 404
+  const response = await page.goto("/drivers/lewis-hamilton");
+  expect(response?.status()).toBe(404);
 });
 
 test("marks poles and fastest laps @desktop", async ({ page }) => {

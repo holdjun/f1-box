@@ -259,7 +259,7 @@ function mergeSeasons(
     }
   }
 
-  return [...seasons.values()].sort((a, b) => a.year - b.year);
+  return [...seasons.values()].sort((a, b) => b.year - a.year);
 }
 
 function createFastestSet(): FastestSet {

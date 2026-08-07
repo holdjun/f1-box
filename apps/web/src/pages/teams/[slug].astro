@@ -18,7 +18,7 @@ const [team, branding] = await Promise.all([
 ]);
 if (!team) Astro.response.status = 404;
 
-const currentYear = team?.seasons.at(-1)?.year;
+const currentYear = team?.seasons[0]?.year;
 const flagSrc = store
   ? `/vendor/country-flags/${team?.alpha2Code.toLowerCase()}.svg`
   : null;
@@ -83,8 +83,14 @@ function resultClass(text: string): string {
 
       <section aria-labelledby="history-title">
         <h2 id="history-title">Season results</h2>
-        <p class="legend">
-          P pole position · F fastest lap · Ret retired · DNQ did not qualify
+        <p class="legend" aria-label="Table legend">
+          <span class="key"><i class="result-win"></i>Win</span>
+          <span class="key"><i class="result-podium"></i>Podium</span>
+          <span class="key"><i class="result-points"></i>Points</span>
+          <span class="key"><i class="result-ret"></i>Retired</span>
+          <span class="key"><i class="result-dnq"></i>DNQ</span>
+          <span class="key"><i class="result-dsq"></i>DSQ</span>
+          <span class="key">P pole position · F fastest lap</span>
         </p>
         {team.seasons.map((season) => (
           <section
@@ -137,7 +143,9 @@ function resultClass(text: string): string {
                               {alpha2Flag(driver.flagCode)}
                             </span>
                           ) : null}
-                          {driver.name}
+                          <a class="driver-link" href={`/drivers/${driver.id}`}>
+                            {driver.name}
+                          </a>
                         </th>
                         {driver.results.map((cell) =>
                           cell ? (
@@ -233,12 +241,36 @@ function resultClass(text: string): string {
     font-size: 1.5rem;
   }
   .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
     margin: 0.5rem 0 0;
     font-size: 0.72rem;
     color: var(--muted);
   }
+  .key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .key i {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 3px;
+  }
+  .driver-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .driver-link:hover {
+    color: var(--paper);
+    text-decoration: underline;
+  }
   .season-block {
     margin-top: 1.75rem;
+    /* 77 块全量渲染，视口外的块跳过布局与绘制，滚动时按需生成 */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 14rem;
   }
   .season-block h3 {
     display: flex;

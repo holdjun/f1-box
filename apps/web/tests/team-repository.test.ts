@@ -80,7 +80,7 @@ describe("createTeamRepository with database", () => {
     expect(team?.fullName).toBe("Scuderia Ferrari");
     expect(team?.alpha2Code).toBe("IT");
     expect(team?.totals.championships).toBe(16);
-    expect(team?.seasons.map((s) => s.year)).toEqual([1950, 1979, 2026]);
+    expect(team?.seasons.map((s) => s.year)).toEqual([2026, 1979, 1950]);
   });
 
   it("builds the per-round result matrix per driver", async () => {
@@ -140,9 +140,9 @@ describe("createTeamRepository without database (DEV fixture)", () => {
     expect(team?.fullName).toBe("Scuderia Ferrari");
     expect(team?.seasons).toHaveLength(77);
     expect(team?.seasons.filter((s) => s.championshipWon)).toHaveLength(16);
-    expect(team?.seasons[0].year).toBe(1950);
-    expect(team?.seasons.at(-1)?.year).toBe(2026);
-    const current = team?.seasons.at(-1);
+    expect(team?.seasons[0].year).toBe(2026);
+    expect(team?.seasons.at(-1)?.year).toBe(1950);
+    const current = team?.seasons[0];
     expect(current?.rounds).toHaveLength(22);
     expect(current?.drivers.map((d) => d.name)).toContain("Charles Leclerc");
   });
