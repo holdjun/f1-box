@@ -54,7 +54,7 @@ const db = fakeDb({
     { year: 2026, round: 2, code: "CHN", name: "Chinese Grand Prix", circuit_id: "shanghai" },
     { year: 1979, round: 1, code: "ARG", name: "Argentine Grand Prix", circuit_id: "buenos-aires" },
     { year: 1950, round: 1, code: "GBR", name: "British Grand Prix", circuit_id: "silverstone" },
-    { year: 2026, round: 3, code: "JPN", name: "Japanese Grand Prix", circuit_id: "suzuka", date: "2099-01-01" },
+    { year: 2026, round: 3, code: "JPN", name: "Japanese Grand Prix", circuit_id: "suzuka" },
   ],
   "position_text = 'DNF'": [
     { year: 2026, races: 2, points: 87, wins: 1, podiums: 2, poles: 0, top10s: 2, fastest_laps: 1, dnfs: 1 },
@@ -121,8 +121,9 @@ describe("createTeamRepository with database", () => {
     });
     expect(hamilton.results[1]).toBeNull();
 
-    // 未来赛程（无结果且日期未到）不进表格
-    expect(byYear[2026].rounds.map((r) => r.circuitId)).toEqual(["albert-park", "shanghai"]);
+    // 赛季未结束，将来轮次保留为空列
+    expect(byYear[2026].rounds.map((r) => r.circuitId)).toEqual(["albert-park", "shanghai", "suzuka"]);
+    expect(leclerc.results[2]).toBeNull();
     expect(byYear[2026].powerUnits).toEqual(["Ferrari"]);
     expect(byYear[2026].tyres).toEqual(["P"]);
     expect(byYear[1979].chassis).toEqual(["312T3", "312T4"]);
@@ -160,7 +161,7 @@ describe("createTeamRepository with database", () => {
         { year: 2026, chassis: "SF-26", engines: "067/6", power_units: "Ferrari", tyres: "Pirelli" },
       ],
       "grand_prix gp": [
-        { year: 2026, round: 1, code: "AUS", name: "Australian Grand Prix", circuit_id: "albert-park", date: "2099-01-01" },
+        { year: 2026, round: 1, code: "AUS", name: "Australian Grand Prix", circuit_id: "albert-park" },
       ],
       "position_text = 'DNF'": [],
       "sprint_race_result srr": [],
@@ -203,7 +204,7 @@ describe("createTeamRepository without database (DEV fixture)", () => {
     expect(team?.currentSeason?.grandPrix.dnfs).toBeGreaterThanOrEqual(1);
     expect(team?.currentSeason?.sprint.points).toBe(39);
     const current = team?.seasons[0];
-    expect(current?.rounds).toHaveLength(11);
+    expect(current?.rounds).toHaveLength(22);
     expect(current?.drivers.map((d) => d.name)).toContain("Charles Leclerc");
   });
 

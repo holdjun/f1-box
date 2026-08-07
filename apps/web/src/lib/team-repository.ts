@@ -126,7 +126,7 @@ WHERE sec.constructor_id = ?1
 GROUP BY sec.year`;
 
 const roundsSql = `
-SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, ra.circuit_id, ra.date
+SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, ra.circuit_id
 FROM race ra
 JOIN grand_prix gp ON gp.id = ra.grand_prix_id
 WHERE ra.year IN (
@@ -351,7 +351,7 @@ function mergeSeasons(
 
   const rawRounds = new Map<
     number,
-    { round: number; code: string; name: string; circuitId: string; date: string | null }[]
+    { round: number; code: string; name: string; circuitId: string }[]
   >();
   for (const row of roundRows) {
     const record = asRecord(row, "round row");
@@ -362,7 +362,6 @@ function mergeSeasons(
       code: asString(record.code, "round code"),
       name: asString(record.name, "round name"),
       circuitId: asString(record.circuit_id, "round circuit"),
-      date: record.date == null ? null : asString(record.date, "round date"),
     });
     rawRounds.set(year, list);
   }
@@ -377,7 +376,6 @@ function mergeSeasons(
   }
 
   const results = new Map<string, Map<number, RaceCell>>();
-  const racedRounds = new Set<string>();
   for (const row of resultRows) {
     const record = asRecord(row, "result row");
     const year = asNumber(record.year, "result row year");
@@ -396,21 +394,14 @@ function mergeSeasons(
         record.reason_retired !== null && record.position_number !== null,
       sprintRank: sprintRanks.get(`${year}:${round}:${driverId}`) ?? null,
     });
-    racedRounds.add(`${year}:${round}`);
   }
 
-  // 未举办的比赛（将来赛程）不进表格；无日期或已有结果的轮次保留
-  const today = new Date().toISOString().slice(0, 10);
+  // 赛季未结束时将来轮次保留为空列，与 wiki 一致
   const retainedRounds = new Map<number, number[]>();
   for (const [year, season] of seasons) {
-    const retained = (rawRounds.get(year) ?? []).filter(
-      (r) =>
-        r.date === null ||
-        r.date <= today ||
-        racedRounds.has(`${year}:${r.round}`),
-    );
-    retainedRounds.set(year, retained.map((r) => r.round));
-    season.rounds = retained.map(({ code, name, circuitId }) => ({
+    const rounds = rawRounds.get(year) ?? [];
+    retainedRounds.set(year, rounds.map((r) => r.round));
+    season.rounds = rounds.map(({ code, name, circuitId }) => ({
       code,
       name,
       circuitId,

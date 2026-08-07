@@ -258,40 +258,51 @@ function resultClass(text: string): string {
   .team-hero {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
-    padding: 1.5rem;
-    border-radius: 12px;
+    gap: 1.5rem;
+    padding: 2rem 2.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 14px;
     color: #fff;
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--team-color) 70%, black),
-      var(--team-color)
-    );
+    background:
+      radial-gradient(120% 170% at 88% -30%, rgba(255, 255, 255, 0.25), transparent 55%),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--team-color) 72%, black),
+        var(--team-color)
+      );
+    box-shadow: 0 20px 44px -24px color-mix(in srgb, var(--team-color) 65%, transparent);
   }
   .team-logo {
-    height: 3.5rem;
+    height: 4rem;
     width: auto;
     flex: none;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
   }
   .team-monogram {
     display: grid;
     place-items: center;
-    height: 3.5rem;
-    width: 3.5rem;
+    height: 4rem;
+    width: 4rem;
     flex: none;
-    border-radius: 10px;
+    border-radius: 12px;
     background: rgba(0, 0, 0, 0.3);
-    font-size: 1.4rem;
+    font-family: var(--display);
+    font-size: 1.6rem;
     font-weight: 700;
   }
   .team-hero h1 {
     margin: 0;
+    font-size: clamp(1.9rem, 4vw, 2.7rem);
+    letter-spacing: 0.01em;
   }
   .team-country {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    margin: 0.25rem 0 0;
+    margin: 0.3rem 0 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     opacity: 0.85;
   }
   .flag {
@@ -306,24 +317,36 @@ function resultClass(text: string): string {
   }
   .info-panel {
     flex: 1 1 18rem;
-    padding: 1rem 1.25rem;
+    padding: 1.1rem 1.35rem 1.35rem;
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 12px;
+    background: var(--ink-soft);
   }
   .info-panel h2 {
-    margin: 0 0 0.75rem;
-    font-size: 0.95rem;
+    margin: 0 0 0.9rem;
+    font-family: var(--display);
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .info-panel h2::before {
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-right: 0.5rem;
+    background: var(--coral);
+    content: "";
   }
   .info-panel h3 {
-    margin: 0.9rem 0 0.4rem;
-    font-size: 0.7rem;
-    letter-spacing: 0.08em;
+    margin: 1rem 0 0.45rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
   }
   .season-head {
     display: flex;
-    gap: 2rem;
+    gap: 2.5rem;
   }
   .season-head span {
     display: block;
@@ -331,12 +354,14 @@ function resultClass(text: string): string {
     color: var(--muted);
   }
   .season-head strong {
-    font-size: 1.4rem;
+    font-family: var(--display);
+    font-size: 1.9rem;
+    line-height: 1.1;
   }
   .info-panel dl {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
-    gap: 0.6rem 1rem;
+    gap: 0.7rem 1rem;
     margin: 0;
   }
   .info-panel dt {
@@ -345,7 +370,7 @@ function resultClass(text: string): string {
   }
   .info-panel dd {
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
   }
   .tyre-badge {
@@ -353,7 +378,7 @@ function resultClass(text: string): string {
     place-items: center;
     width: 1.15rem;
     height: 1.15rem;
-    border-radius: 3px;
+    border-radius: 4px;
     background: #5a6470;
     color: #fff;
     font-size: 0.7rem;
@@ -383,27 +408,27 @@ function resultClass(text: string): string {
   .legend {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem 1rem;
-    margin: 0.5rem 0 0;
+    gap: 0.5rem 1.1rem;
+    margin: 0.6rem 0 0;
     font-size: 0.72rem;
     color: var(--muted);
   }
   .key {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.35rem;
   }
   .key i {
-    width: 0.7rem;
-    height: 0.7rem;
-    border-radius: 3px;
+    width: 0.72rem;
+    height: 0.72rem;
+    border-radius: 4px;
   }
   .driver-link {
     color: inherit;
     text-decoration: none;
   }
   .driver-link:hover {
-    color: var(--paper);
+    color: var(--coral);
     text-decoration: underline;
   }
   .round-link {
@@ -411,25 +436,34 @@ function resultClass(text: string): string {
     text-decoration: none;
   }
   .round-link:hover {
-    color: var(--paper);
-    text-decoration: underline;
+    color: var(--coral);
   }
   .season-block {
-    margin-top: 1.75rem;
+    margin-top: 2rem;
+    padding-left: 0.9rem;
+    border-left: 2px solid var(--line);
     /* 77 块全量渲染，视口外的块跳过布局与绘制，滚动时按需生成 */
     content-visibility: auto;
     contain-intrinsic-size: auto 14rem;
+  }
+  .season-block.champion {
+    border-left-color: #ffc72c;
+  }
+  .season-block.current {
+    border-left-color: var(--coral);
   }
   .season-block h3 {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
     gap: 0.75rem;
-    margin: 0 0 0.4rem;
+    margin: 0 0 0.5rem;
   }
   .season-year {
-    font-size: 1.1rem;
+    font-family: var(--display);
+    font-size: 1.45rem;
     font-weight: 700;
+    letter-spacing: 0.02em;
   }
   .season-meta {
     font-size: 0.78rem;
@@ -443,11 +477,6 @@ function resultClass(text: string): string {
   .season-block.champion h3 {
     color: #ffc72c;
   }
-  .season-block.current h3 {
-    color: var(--paper);
-    text-decoration: underline;
-    text-underline-offset: 4px;
-  }
   .driver-col {
     min-width: 11rem;
   }
@@ -456,6 +485,23 @@ function resultClass(text: string): string {
   }
   .flag-emoji {
     margin-right: 0.35rem;
+  }
+  /* 芯片式格子：独立圆角色块，空列也有弱底，网格读起来更整 */
+  .season-block table {
+    border-collapse: separate;
+    border-spacing: 3px 4px;
+  }
+  .season-block th,
+  .season-block td {
+    border-bottom: 0;
+    padding: 0.38rem 0.5rem;
+    border-radius: 5px;
+  }
+  .season-block tbody td {
+    background: rgba(137, 145, 154, 0.08);
+  }
+  .season-block tbody tr:hover td {
+    background: rgba(137, 145, 154, 0.14);
   }
   table th[scope="col"]:not(.driver-col) {
     padding-inline: 0.45rem;
@@ -469,30 +515,34 @@ function resultClass(text: string): string {
     font-size: 0.55rem;
   }
   .result-win {
-    background: rgba(247, 201, 72, 0.32);
+    background: rgba(247, 201, 72, 0.32) !important;
     color: #ffe9a8;
   }
   .result-podium {
-    background: rgba(126, 212, 145, 0.25);
+    background: rgba(126, 212, 145, 0.25) !important;
     color: #c8f2d3;
   }
   .result-points {
-    background: rgba(167, 166, 243, 0.22);
+    background: rgba(167, 166, 243, 0.22) !important;
     color: #d9d8fb;
   }
   .result-finish {
-    color: var(--muted);
+    color: var(--muted-light);
+  }
+  .key .result-finish,
+  .key .result-other {
+    background: rgba(137, 145, 154, 0.18);
   }
   .result-ret {
-    background: rgba(224, 143, 213, 0.22);
+    background: rgba(224, 143, 213, 0.22) !important;
     color: #f0cdea;
   }
   .result-dsq {
-    background: rgba(220, 80, 80, 0.3);
+    background: rgba(220, 80, 80, 0.3) !important;
     color: #ffd7d7;
   }
   .result-dnq {
-    background: rgba(240, 150, 120, 0.22);
+    background: rgba(240, 150, 120, 0.22) !important;
     color: #f8d9cc;
   }
   .result-other {
