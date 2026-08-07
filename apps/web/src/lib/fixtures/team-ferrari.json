@@ -1,0 +1,1458 @@
+{
+ "id": "ferrari",
+ "name": "Ferrari",
+ "fullName": "Scuderia Ferrari",
+ "countryName": "Italy",
+ "alpha2Code": "IT",
+ "totals": {
+  "entries": 1135,
+  "wins": 250,
+  "podiums": 845,
+  "poles": 254,
+  "fastestLaps": 269,
+  "points": 11338,
+  "championships": 16,
+  "bestChampionshipPosition": 1
+ },
+ "seasons": [
+  {
+   "year": 2026,
+   "chassis": [
+    "SF-26"
+   ],
+   "engines": [
+    "067/6"
+   ],
+   "drivers": [
+    "Charles Leclerc",
+    "Lewis Hamilton"
+   ],
+   "points": 307,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 2025,
+   "chassis": [
+    "SF-25"
+   ],
+   "engines": [
+    "066/12"
+   ],
+   "drivers": [
+    "Charles Leclerc",
+    "Lewis Hamilton"
+   ],
+   "points": 398,
+   "position": "4",
+   "championshipWon": false
+  },
+  {
+   "year": 2024,
+   "chassis": [
+    "SF-24"
+   ],
+   "engines": [
+    "066/12"
+   ],
+   "drivers": [
+    "Carlos Sainz Jr.",
+    "Charles Leclerc"
+   ],
+   "points": 652,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 2023,
+   "chassis": [
+    "SF-23"
+   ],
+   "engines": [
+    "066/10"
+   ],
+   "drivers": [
+    "Carlos Sainz Jr.",
+    "Charles Leclerc"
+   ],
+   "points": 406,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 2022,
+   "chassis": [
+    "F1-75"
+   ],
+   "engines": [
+    "066/7"
+   ],
+   "drivers": [
+    "Carlos Sainz Jr.",
+    "Charles Leclerc"
+   ],
+   "points": 554,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 2021,
+   "chassis": [
+    "SF21"
+   ],
+   "engines": [
+    "065/6"
+   ],
+   "drivers": [
+    "Carlos Sainz Jr.",
+    "Charles Leclerc"
+   ],
+   "points": 323.5,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 2020,
+   "chassis": [
+    "SF1000"
+   ],
+   "engines": [
+    "065"
+   ],
+   "drivers": [
+    "Charles Leclerc",
+    "Sebastian Vettel"
+   ],
+   "points": 131,
+   "position": "6",
+   "championshipWon": false
+  },
+  {
+   "year": 2019,
+   "chassis": [
+    "SF90"
+   ],
+   "engines": [
+    "064"
+   ],
+   "drivers": [
+    "Charles Leclerc",
+    "Sebastian Vettel"
+   ],
+   "points": 504,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 2018,
+   "chassis": [
+    "SF71H"
+   ],
+   "engines": [
+    "062 EVO"
+   ],
+   "drivers": [
+    "Kimi Räikkönen",
+    "Sebastian Vettel"
+   ],
+   "points": 571,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 2017,
+   "chassis": [
+    "SF70H"
+   ],
+   "engines": [
+    "062"
+   ],
+   "drivers": [
+    "Kimi Räikkönen",
+    "Sebastian Vettel"
+   ],
+   "points": 522,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 2016,
+   "chassis": [
+    "SF16-H"
+   ],
+   "engines": [
+    "061"
+   ],
+   "drivers": [
+    "Kimi Räikkönen",
+    "Sebastian Vettel"
+   ],
+   "points": 398,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 2015,
+   "chassis": [
+    "SF15-T"
+   ],
+   "engines": [
+    "060"
+   ],
+   "drivers": [
+    "Kimi Räikkönen",
+    "Sebastian Vettel"
+   ],
+   "points": 428,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 2014,
+   "chassis": [
+    "F14 T"
+   ],
+   "engines": [
+    "059/3"
+   ],
+   "drivers": [
+    "Fernando Alonso",
+    "Kimi Räikkönen"
+   ],
+   "points": 216,
+   "position": "4",
+   "championshipWon": false
+  },
+  {
+   "year": 2013,
+   "chassis": [
+    "F138"
+   ],
+   "engines": [
+    "056"
+   ],
+   "drivers": [
+    "Felipe Massa",
+    "Fernando Alonso"
+   ],
+   "points": 354,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 2012,
+   "chassis": [
+    "F2012"
+   ],
+   "engines": [
+    "056"
+   ],
+   "drivers": [
+    "Felipe Massa",
+    "Fernando Alonso"
+   ],
+   "points": 400,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 2011,
+   "chassis": [
+    "150° Italia"
+   ],
+   "engines": [
+    "056"
+   ],
+   "drivers": [
+    "Felipe Massa",
+    "Fernando Alonso"
+   ],
+   "points": 375,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 2010,
+   "chassis": [
+    "F10"
+   ],
+   "engines": [
+    "056"
+   ],
+   "drivers": [
+    "Felipe Massa",
+    "Fernando Alonso"
+   ],
+   "points": 396,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 2009,
+   "chassis": [
+    "F60"
+   ],
+   "engines": [
+    "056"
+   ],
+   "drivers": [
+    "Felipe Massa",
+    "Kimi Räikkönen",
+    "Luca Badoer",
+    "Giancarlo Fisichella"
+   ],
+   "points": 70,
+   "position": "4",
+   "championshipWon": false
+  },
+  {
+   "year": 2008,
+   "chassis": [
+    "F2008"
+   ],
+   "engines": [
+    "056"
+   ],
+   "drivers": [
+    "Felipe Massa",
+    "Kimi Räikkönen"
+   ],
+   "points": 172,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 2007,
+   "chassis": [
+    "F2007"
+   ],
+   "engines": [
+    "056 2007"
+   ],
+   "drivers": [
+    "Felipe Massa",
+    "Kimi Räikkönen"
+   ],
+   "points": 204,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 2006,
+   "chassis": [
+    "248 F1"
+   ],
+   "engines": [
+    "056"
+   ],
+   "drivers": [
+    "Felipe Massa",
+    "Michael Schumacher"
+   ],
+   "points": 201,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 2005,
+   "chassis": [
+    "F2004M",
+    "F2005"
+   ],
+   "engines": [
+    "053",
+    "055"
+   ],
+   "drivers": [
+    "Michael Schumacher",
+    "Rubens Barrichello"
+   ],
+   "points": 100,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 2004,
+   "chassis": [
+    "F2004"
+   ],
+   "engines": [
+    "053"
+   ],
+   "drivers": [
+    "Michael Schumacher",
+    "Rubens Barrichello"
+   ],
+   "points": 262,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 2003,
+   "chassis": [
+    "F2002B",
+    "F2003-GA"
+   ],
+   "engines": [
+    "051B",
+    "052"
+   ],
+   "drivers": [
+    "Michael Schumacher",
+    "Rubens Barrichello"
+   ],
+   "points": 158,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 2002,
+   "chassis": [
+    "F2001B",
+    "F2002"
+   ],
+   "engines": [
+    "050",
+    "051"
+   ],
+   "drivers": [
+    "Michael Schumacher",
+    "Rubens Barrichello"
+   ],
+   "points": 221,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 2001,
+   "chassis": [
+    "F2001"
+   ],
+   "engines": [
+    "050"
+   ],
+   "drivers": [
+    "Michael Schumacher",
+    "Rubens Barrichello"
+   ],
+   "points": 179,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 2000,
+   "chassis": [
+    "F1-2000"
+   ],
+   "engines": [
+    "049"
+   ],
+   "drivers": [
+    "Michael Schumacher",
+    "Rubens Barrichello"
+   ],
+   "points": 170,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 1999,
+   "chassis": [
+    "F399"
+   ],
+   "engines": [
+    "048"
+   ],
+   "drivers": [
+    "Eddie Irvine",
+    "Michael Schumacher",
+    "Mika Salo"
+   ],
+   "points": 128,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 1998,
+   "chassis": [
+    "F300"
+   ],
+   "engines": [
+    "047"
+   ],
+   "drivers": [
+    "Eddie Irvine",
+    "Michael Schumacher"
+   ],
+   "points": 133,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 1997,
+   "chassis": [
+    "F310B"
+   ],
+   "engines": [
+    "046/2"
+   ],
+   "drivers": [
+    "Eddie Irvine",
+    "Michael Schumacher"
+   ],
+   "points": 102,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 1996,
+   "chassis": [
+    "F310"
+   ],
+   "engines": [
+    "046"
+   ],
+   "drivers": [
+    "Eddie Irvine",
+    "Michael Schumacher"
+   ],
+   "points": 70,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 1995,
+   "chassis": [
+    "412T2"
+   ],
+   "engines": [
+    "044/1"
+   ],
+   "drivers": [
+    "Gerhard Berger",
+    "Jean Alesi"
+   ],
+   "points": 73,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 1994,
+   "chassis": [
+    "412T1",
+    "412T1B"
+   ],
+   "engines": [
+    "041",
+    "043"
+   ],
+   "drivers": [
+    "Gerhard Berger",
+    "Jean Alesi",
+    "Nicola Larini"
+   ],
+   "points": 71,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 1993,
+   "chassis": [
+    "F93A"
+   ],
+   "engines": [
+    "041"
+   ],
+   "drivers": [
+    "Gerhard Berger",
+    "Jean Alesi"
+   ],
+   "points": 28,
+   "position": "4",
+   "championshipWon": false
+  },
+  {
+   "year": 1992,
+   "chassis": [
+    "F92A",
+    "F92AT"
+   ],
+   "engines": [
+    "038"
+   ],
+   "drivers": [
+    "Ivan Capelli",
+    "Jean Alesi",
+    "Nicola Larini"
+   ],
+   "points": 21,
+   "position": "4",
+   "championshipWon": false
+  },
+  {
+   "year": 1991,
+   "chassis": [
+    "642",
+    "642/2",
+    "643"
+   ],
+   "engines": [
+    "037"
+   ],
+   "drivers": [
+    "Alain Prost",
+    "Jean Alesi",
+    "Gianni Morbidelli"
+   ],
+   "points": 55.5,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 1990,
+   "chassis": [
+    "641"
+   ],
+   "engines": [
+    "036",
+    "037"
+   ],
+   "drivers": [
+    "Alain Prost",
+    "Nigel Mansell"
+   ],
+   "points": 110,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 1989,
+   "chassis": [
+    "640"
+   ],
+   "engines": [
+    "035/5"
+   ],
+   "drivers": [
+    "Gerhard Berger",
+    "Nigel Mansell"
+   ],
+   "points": 59,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 1988,
+   "chassis": [
+    "F1/87/88C"
+   ],
+   "engines": [
+    "033E"
+   ],
+   "drivers": [
+    "Gerhard Berger",
+    "Michele Alboreto"
+   ],
+   "points": 65,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 1987,
+   "chassis": [
+    "F1/87"
+   ],
+   "engines": [
+    "033D"
+   ],
+   "drivers": [
+    "Gerhard Berger",
+    "Michele Alboreto"
+   ],
+   "points": 53,
+   "position": "4",
+   "championshipWon": false
+  },
+  {
+   "year": 1986,
+   "chassis": [
+    "F1/86"
+   ],
+   "engines": [
+    "032"
+   ],
+   "drivers": [
+    "Michele Alboreto",
+    "Stefan Johansson"
+   ],
+   "points": 37,
+   "position": "4",
+   "championshipWon": false
+  },
+  {
+   "year": 1985,
+   "chassis": [
+    "156/85"
+   ],
+   "engines": [
+    "031"
+   ],
+   "drivers": [
+    "Michele Alboreto",
+    "René Arnoux",
+    "Stefan Johansson"
+   ],
+   "points": 82,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 1984,
+   "chassis": [
+    "126C4"
+   ],
+   "engines": [
+    "031"
+   ],
+   "drivers": [
+    "Michele Alboreto",
+    "René Arnoux"
+   ],
+   "points": 57.5,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 1983,
+   "chassis": [
+    "126C2B",
+    "126C3"
+   ],
+   "engines": [
+    "021"
+   ],
+   "drivers": [
+    "Patrick Tambay",
+    "René Arnoux"
+   ],
+   "points": 89,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 1982,
+   "chassis": [
+    "126C2"
+   ],
+   "engines": [
+    "021"
+   ],
+   "drivers": [
+    "Didier Pironi",
+    "Gilles Villeneuve",
+    "Patrick Tambay",
+    "Mario Andretti"
+   ],
+   "points": 74,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 1981,
+   "chassis": [
+    "126CK"
+   ],
+   "engines": [
+    "021"
+   ],
+   "drivers": [
+    "Didier Pironi",
+    "Gilles Villeneuve"
+   ],
+   "points": 34,
+   "position": "5",
+   "championshipWon": false
+  },
+  {
+   "year": 1980,
+   "chassis": [
+    "312T5"
+   ],
+   "engines": [
+    "015"
+   ],
+   "drivers": [
+    "Gilles Villeneuve",
+    "Jody Scheckter"
+   ],
+   "points": 8,
+   "position": "10",
+   "championshipWon": false
+  },
+  {
+   "year": 1979,
+   "chassis": [
+    "312T3",
+    "312T4",
+    "312T4B"
+   ],
+   "engines": [
+    "015"
+   ],
+   "drivers": [
+    "Gilles Villeneuve",
+    "Jody Scheckter"
+   ],
+   "points": 113,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 1978,
+   "chassis": [
+    "312T2",
+    "312T3"
+   ],
+   "engines": [
+    "015"
+   ],
+   "drivers": [
+    "Carlos Reutemann",
+    "Gilles Villeneuve"
+   ],
+   "points": 58,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 1977,
+   "chassis": [
+    "312T2B"
+   ],
+   "engines": [
+    "015"
+   ],
+   "drivers": [
+    "Carlos Reutemann",
+    "Niki Lauda",
+    "Gilles Villeneuve"
+   ],
+   "points": 95,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 1976,
+   "chassis": [
+    "312T",
+    "312T2"
+   ],
+   "engines": [
+    "015"
+   ],
+   "drivers": [
+    "Clay Regazzoni",
+    "Niki Lauda",
+    "Carlos Reutemann"
+   ],
+   "points": 83,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 1975,
+   "chassis": [
+    "312B3-74",
+    "312T"
+   ],
+   "engines": [
+    "001/11",
+    "015"
+   ],
+   "drivers": [
+    "Clay Regazzoni",
+    "Niki Lauda"
+   ],
+   "points": 72.5,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 1974,
+   "chassis": [
+    "312B3-74"
+   ],
+   "engines": [
+    "001/11"
+   ],
+   "drivers": [
+    "Clay Regazzoni",
+    "Niki Lauda"
+   ],
+   "points": 65,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 1973,
+   "chassis": [
+    "312B2",
+    "312B3"
+   ],
+   "engines": [
+    "001/1",
+    "001/11"
+   ],
+   "drivers": [
+    "Arturo Merzario",
+    "Jacky Ickx"
+   ],
+   "points": 12,
+   "position": "6",
+   "championshipWon": false
+  },
+  {
+   "year": 1972,
+   "chassis": [
+    "312B2"
+   ],
+   "engines": [
+    "001/1"
+   ],
+   "drivers": [
+    "Clay Regazzoni",
+    "Jacky Ickx",
+    "Mario Andretti",
+    "Nanni Galli",
+    "Arturo Merzario"
+   ],
+   "points": 33,
+   "position": "4",
+   "championshipWon": false
+  },
+  {
+   "year": 1971,
+   "chassis": [
+    "312B",
+    "312B2"
+   ],
+   "engines": [
+    "001/1",
+    "001"
+   ],
+   "drivers": [
+    "Clay Regazzoni",
+    "Jacky Ickx",
+    "Mario Andretti"
+   ],
+   "points": 33,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 1970,
+   "chassis": [
+    "312B"
+   ],
+   "engines": [
+    "001"
+   ],
+   "drivers": [
+    "Jacky Ickx",
+    "Ignazio Giunti",
+    "Clay Regazzoni"
+   ],
+   "points": 52,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 1969,
+   "chassis": [
+    "312/68",
+    "312/69"
+   ],
+   "engines": [
+    "255C"
+   ],
+   "drivers": [
+    "Pedro Rodríguez",
+    "Chris Amon",
+    "Pedro Rodríguez",
+    "Ernesto Brambilla"
+   ],
+   "points": 7,
+   "position": "5",
+   "championshipWon": false
+  },
+  {
+   "year": 1968,
+   "chassis": [
+    "312/67",
+    "312/67/68",
+    "312/68"
+   ],
+   "engines": [
+    "242",
+    "242C"
+   ],
+   "drivers": [
+    "Andrea de Adamich",
+    "Chris Amon",
+    "Jacky Ickx",
+    "Derek Bell"
+   ],
+   "points": 32,
+   "position": "4",
+   "championshipWon": false
+  },
+  {
+   "year": 1967,
+   "chassis": [
+    "312/66",
+    "312/67"
+   ],
+   "engines": [
+    "242"
+   ],
+   "drivers": [
+    "Chris Amon",
+    "Lorenzo Bandini",
+    "Ludovico Scarfiotti",
+    "Mike Parkes",
+    "Jonathan Williams"
+   ],
+   "points": 20,
+   "position": "5",
+   "championshipWon": false
+  },
+  {
+   "year": 1966,
+   "chassis": [
+    "246",
+    "312/66"
+   ],
+   "engines": [
+    "228",
+    "218"
+   ],
+   "drivers": [
+    "Giancarlo Baghetti",
+    "John Surtees",
+    "Lorenzo Bandini",
+    "Mike Parkes",
+    "Ludovico Scarfiotti"
+   ],
+   "points": 31,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 1965,
+   "chassis": [
+    "1512",
+    "158"
+   ],
+   "engines": [
+    "205B",
+    "207"
+   ],
+   "drivers": [
+    "Bob Bondurant",
+    "Pedro Rodríguez",
+    "John Surtees",
+    "Lorenzo Bandini",
+    "Nino Vaccarella",
+    "Ludovico Scarfiotti"
+   ],
+   "points": 26,
+   "position": "4",
+   "championshipWon": false
+  },
+  {
+   "year": 1964,
+   "chassis": [
+    "1512",
+    "158",
+    "156"
+   ],
+   "engines": [
+    "205B",
+    "207",
+    "178"
+   ],
+   "drivers": [
+    "John Surtees",
+    "Lorenzo Bandini",
+    "Pedro Rodríguez",
+    "John Surtees",
+    "Lorenzo Bandini",
+    "Ludovico Scarfiotti"
+   ],
+   "points": 45,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 1963,
+   "chassis": [
+    "156"
+   ],
+   "engines": [
+    "178"
+   ],
+   "drivers": [
+    "John Surtees",
+    "Willy Mairesse",
+    "Ludovico Scarfiotti",
+    "Lorenzo Bandini"
+   ],
+   "points": 26,
+   "position": "4",
+   "championshipWon": false
+  },
+  {
+   "year": 1962,
+   "chassis": [
+    "156"
+   ],
+   "engines": [
+    "178"
+   ],
+   "drivers": [
+    "Giancarlo Baghetti",
+    "Phil Hill",
+    "Ricardo Rodríguez",
+    "Lorenzo Bandini",
+    "Willy Mairesse"
+   ],
+   "points": 18,
+   "position": "6",
+   "championshipWon": false
+  },
+  {
+   "year": 1961,
+   "chassis": [
+    "156"
+   ],
+   "engines": [
+    "178",
+    "188"
+   ],
+   "drivers": [
+    "Giancarlo Baghetti",
+    "Phil Hill",
+    "Richie Ginther",
+    "Wolfgang von Trips",
+    "Olivier Gendebien",
+    "Willy Mairesse",
+    "Ricardo Rodríguez",
+    "Giancarlo Baghetti"
+   ],
+   "points": 40,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 1960,
+   "chassis": [
+    "246",
+    "246 P"
+   ],
+   "engines": [
+    "155",
+    "171",
+    "178"
+   ],
+   "drivers": [
+    "Cliff Allison",
+    "José Froilán González",
+    "Phil Hill",
+    "Wolfgang von Trips",
+    "Richie Ginther",
+    "Willy Mairesse"
+   ],
+   "points": 26,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 1959,
+   "chassis": [
+    "156",
+    "246"
+   ],
+   "engines": [
+    "155",
+    "D156"
+   ],
+   "drivers": [
+    "Cliff Allison",
+    "Jean Behra",
+    "Phil Hill",
+    "Tony Brooks",
+    "Dan Gurney",
+    "Olivier Gendebien",
+    "Wolfgang von Trips"
+   ],
+   "points": 32,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 1958,
+   "chassis": [
+    "156",
+    "246"
+   ],
+   "engines": [
+    "143",
+    "D156"
+   ],
+   "drivers": [
+    "Luigi Musso",
+    "Mike Hawthorn",
+    "Peter Collins",
+    "Wolfgang von Trips",
+    "Olivier Gendebien",
+    "Phil Hill"
+   ],
+   "points": 40,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 1957,
+   "chassis": [
+    "500",
+    "801"
+   ],
+   "engines": [
+    "625",
+    "DS50"
+   ],
+   "drivers": [
+    "Alejandro de Tomaso",
+    "Alfonso de Portago",
+    "Cesare Perdisa",
+    "Eugenio Castellotti",
+    "José Froilán González",
+    "Luigi Musso",
+    "Mike Hawthorn",
+    "Peter Collins",
+    "Wolfgang von Trips",
+    "Maurice Trintignant"
+   ],
+   "points": null,
+   "position": null,
+   "championshipWon": false
+  },
+  {
+   "year": 1956,
+   "chassis": [
+    "500",
+    "555"
+   ],
+   "engines": [
+    "500",
+    "555"
+   ],
+   "drivers": [
+    "Giorgio Scarlatti",
+    "Giorgio Scarlatti",
+    "Eugenio Castellotti",
+    "Juan Manuel Fangio",
+    "Luigi Musso",
+    "Olivier Gendebien",
+    "Peter Collins",
+    "André Pilette",
+    "Paul Frère",
+    "Alfonso de Portago",
+    "Wolfgang von Trips"
+   ],
+   "points": null,
+   "position": null,
+   "championshipWon": false
+  },
+  {
+   "year": 1955,
+   "chassis": [
+    "625",
+    "555"
+   ],
+   "engines": [
+    "625",
+    "555"
+   ],
+   "drivers": [
+    "Johnny Claes",
+    "José Froilán González",
+    "Maurice Trintignant",
+    "Nino Farina",
+    "Umberto Maglioli",
+    "Harry Schell",
+    "Paul Frère",
+    "Piero Taruffi",
+    "Eugenio Castellotti",
+    "Mike Hawthorn"
+   ],
+   "points": null,
+   "position": null,
+   "championshipWon": false
+  },
+  {
+   "year": 1954,
+   "chassis": [
+    "500",
+    "625",
+    "553"
+   ],
+   "engines": [
+    "500",
+    "625",
+    "554"
+   ],
+   "drivers": [
+    "Jacques Swaters",
+    "Louis Rosier",
+    "Maurice Trintignant",
+    "Robert Manzon",
+    "Reg Parnell",
+    "José Froilán González",
+    "Mike Hawthorn",
+    "Nino Farina",
+    "Umberto Maglioli",
+    "Maurice Trintignant",
+    "Piero Taruffi",
+    "Robert Manzon",
+    "Alberto Ascari"
+   ],
+   "points": null,
+   "position": null,
+   "championshipWon": false
+  },
+  {
+   "year": 1953,
+   "chassis": [
+    "212",
+    "500",
+    "553"
+   ],
+   "engines": [
+    "166",
+    "500",
+    "553"
+   ],
+   "drivers": [
+    "Kurt Adolff",
+    "Max de Terra",
+    "Peter Hirt",
+    "Charles de Tornaco",
+    "Jacques Swaters",
+    "Louis Rosier",
+    "Alberto Ascari",
+    "Luigi Villoresi",
+    "Mike Hawthorn",
+    "Nino Farina",
+    "Piero Carini",
+    "Umberto Maglioli"
+   ],
+   "points": null,
+   "position": null,
+   "championshipWon": false
+  },
+  {
+   "year": 1952,
+   "chassis": [
+    "212",
+    "500",
+    "166",
+    "125",
+    "375S"
+   ],
+   "engines": [
+    "166",
+    "500",
+    "375"
+   ],
+   "drivers": [
+    "Peter Hirt",
+    "Rudi Fischer",
+    "Rudolf Schoeller",
+    "Hans Stuck",
+    "Charles de Tornaco",
+    "Roger Laurent",
+    "Louis Rosier",
+    "Maurice Trintignant",
+    "Roy Salvadori",
+    "Peter Whitehead",
+    "André Simon",
+    "Nino Farina",
+    "Piero Taruffi",
+    "Alberto Ascari",
+    "Luigi Villoresi",
+    "Franco Comotti",
+    "Piero Carini"
+   ],
+   "points": null,
+   "position": null,
+   "championshipWon": false
+  },
+  {
+   "year": 1951,
+   "chassis": [
+    "212",
+    "375",
+    "125"
+   ],
+   "engines": [
+    "212",
+    "375",
+    "125"
+   ],
+   "drivers": [
+    "Rudi Fischer",
+    "Chico Landi",
+    "Reg Parnell",
+    "Peter Whitehead",
+    "Peter Whitehead",
+    "Peter Whitehead",
+    "Alberto Ascari",
+    "Luigi Villoresi",
+    "Piero Taruffi",
+    "José Froilán González"
+   ],
+   "points": null,
+   "position": null,
+   "championshipWon": false
+  },
+  {
+   "year": 1950,
+   "chassis": [
+    "166S",
+    "125",
+    "166",
+    "275",
+    "375"
+   ],
+   "engines": [
+    "XK",
+    "125",
+    "166",
+    "275",
+    "375"
+   ],
+   "drivers": [
+    "Clemente Biondetti",
+    "Peter Whitehead",
+    "Alberto Ascari",
+    "Luigi Villoresi",
+    "Raymond Sommer",
+    "Dorino Serafini"
+   ],
+   "points": null,
+   "position": null,
+   "championshipWon": false
+  }
+ ]
+}

@@ -1,0 +1,202 @@
+---
+import { env } from "cloudflare:workers";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { createTeamRepository } from "../../lib/team-repository.js";
+import { getTeamBranding } from "../../lib/vendor.js";
+
+const slug = (Astro.params.slug ?? "").toLowerCase();
+const repository = import.meta.env.DEV
+  ? createTeamRepository()
+  : createTeamRepository(env.F1_DB);
+const store = import.meta.env.DEV ? undefined : env.F1_DATA;
+
+const [team, branding] = await Promise.all([
+  repository.getTeam(slug),
+  getTeamBranding(store, slug),
+]);
+if (!team) Astro.response.status = 404;
+
+const currentYear = team?.seasons[0]?.year;
+const flagSrc = store
+  ? `/vendor/country-flags/${team?.alpha2Code.toLowerCase()}.svg`
+  : null;
+---
+
+{team ? (
+  <BaseLayout
+    title={team.name}
+    description={`${team.fullName} — career statistics and complete championship history.`}
+    active="teams"
+  >
+    <main id="main-content" class="page-shell">
+      <header
+        class="team-hero"
+        style={`--team-color: ${branding.color ?? "#84909e"}`}
+      >
+        {branding.logoSrc ? (
+          <img class="team-logo" src={branding.logoSrc} alt="" />
+        ) : (
+          <span class="team-monogram" aria-hidden="true"
+            >{team.name.slice(0, 2).toUpperCase()}</span
+          >
+        )}
+        <div>
+          <h1>{team.fullName}</h1>
+          <p class="team-country">
+            {flagSrc ? <img class="flag" src={flagSrc} alt="" /> : null}
+            {team.countryName}
+          </p>
+        </div>
+      </header>
+
+      <section class="stat-row" aria-label="Career statistics">
+        <div><span>Entries</span><strong>{team.totals.entries}</strong></div>
+        <div><span>Wins</span><strong>{team.totals.wins}</strong></div>
+        <div><span>Podiums</span><strong>{team.totals.podiums}</strong></div>
+        <div><span>Poles</span><strong>{team.totals.poles}</strong></div>
+        <div>
+          <span>Fastest laps</span><strong>{team.totals.fastestLaps}</strong>
+        </div>
+        <div><span>Points</span><strong>{team.totals.points}</strong></div>
+        <div>
+          <span>Championships</span><strong>{team.totals.championships}</strong>
+        </div>
+        <div>
+          <span>Best position</span
+          ><strong>{team.totals.bestChampionshipPosition ?? "—"}</strong>
+        </div>
+      </section>
+
+      <section aria-labelledby="history-title">
+        <h2 id="history-title">Championship history</h2>
+        <div class="table-scroll history-scroll" tabindex="0">
+          <table class="history-table" aria-label={`${team.name} season history`}>
+            <thead>
+              <tr>
+                <th scope="col">Season</th>
+                <th scope="col">Chassis</th>
+                <th scope="col">Engine</th>
+                <th scope="col">Drivers</th>
+                <th scope="col">Points</th>
+                <th scope="col">Pos</th>
+              </tr>
+            </thead>
+            <tbody>
+              {team.seasons.map((season) => (
+                <tr
+                  class:list={[
+                    {
+                      champion: season.championshipWon,
+                      current: season.year === currentYear,
+                    },
+                  ]}
+                >
+                  <th scope="row">{season.year}</th>
+                  <td>{season.chassis.join(", ") || "—"}</td>
+                  <td>{season.engines.join(", ") || "—"}</td>
+                  <td class="drivers-cell">{season.drivers.join(", ") || "—"}</td>
+                  <td class="points-cell">{season.points ?? "—"}</td>
+                  <td class="position-cell">{season.position ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="source-note">Historical data: f1db (CC BY 4.0)</p>
+      </section>
+    </main>
+  </BaseLayout>
+) : (
+  <BaseLayout title="Team not found">
+    <main id="main-content" class="page-shell">
+      <h1>Team not found</h1>
+      <p>No constructor with this identifier exists in the database.</p>
+    </main>
+  </BaseLayout>
+)}
+
+<style>
+  .team-hero {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    border-radius: 12px;
+    color: #fff;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--team-color) 70%, black),
+      var(--team-color)
+    );
+  }
+  .team-logo {
+    height: 3.5rem;
+    width: auto;
+    flex: none;
+  }
+  .team-monogram {
+    display: grid;
+    place-items: center;
+    height: 3.5rem;
+    width: 3.5rem;
+    flex: none;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+  .team-hero h1 {
+    margin: 0;
+  }
+  .team-country {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.25rem 0 0;
+    opacity: 0.85;
+  }
+  .flag {
+    height: 0.95rem;
+    width: auto;
+  }
+  .stat-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem 2rem;
+    margin-block: 1.5rem;
+  }
+  .stat-row div {
+    display: flex;
+    flex-direction: column;
+  }
+  .stat-row span {
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
+  .stat-row strong {
+    font-size: 1.5rem;
+  }
+  .history-scroll {
+    margin-top: 0.75rem;
+  }
+  .history-table .drivers-cell {
+    white-space: normal;
+    min-width: 16rem;
+  }
+  .history-table tr.champion {
+    background: rgba(255, 199, 44, 0.08);
+  }
+  .history-table tr.champion .position-cell {
+    color: #ffc72c;
+    font-weight: 600;
+  }
+  .history-table tr.current {
+    box-shadow: inset 2px 0 0 var(--paper);
+  }
+  .source-note {
+    margin-top: 0.75rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+</style>
