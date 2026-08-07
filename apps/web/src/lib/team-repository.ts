@@ -11,11 +11,31 @@ export interface TeamTotals {
   bestChampionshipPosition: number | null;
 }
 
+export interface RaceCell {
+  text: string;
+  pole: boolean;
+  fastest: boolean;
+}
+
+export interface TeamSeasonDriver {
+  id: string;
+  name: string;
+  flagCode: string | null;
+  results: (RaceCell | null)[];
+}
+
+export interface SeasonRound {
+  code: string;
+  name: string;
+}
+
 export interface TeamSeason {
   year: number;
   chassis: string[];
   engines: string[];
-  drivers: string[];
+  tyres: string[];
+  rounds: SeasonRound[];
+  drivers: TeamSeasonDriver[];
   points: number | null;
   position: string | null;
   championshipWon: boolean;
@@ -57,7 +77,8 @@ WHERE c.id = ?`;
 const seasonsSql = `
 SELECT sec.year,
   GROUP_CONCAT(DISTINCT ch.name) AS chassis,
-  GROUP_CONCAT(DISTINCT en.name) AS engines
+  GROUP_CONCAT(DISTINCT en.name) AS engines,
+  GROUP_CONCAT(DISTINCT tm.name) AS tyres
 FROM season_entrant_constructor sec
 LEFT JOIN season_entrant_chassis sech
   ON sech.year = sec.year AND sech.entrant_id = sec.entrant_id
@@ -69,15 +90,42 @@ LEFT JOIN season_entrant_engine seen
   AND seen.constructor_id = sec.constructor_id
   AND seen.engine_manufacturer_id = sec.engine_manufacturer_id
 LEFT JOIN engine en ON en.id = seen.engine_id
+LEFT JOIN season_entrant_tyre_manufacturer setm
+  ON setm.year = sec.year AND setm.entrant_id = sec.entrant_id
+  AND setm.constructor_id = sec.constructor_id
+  AND setm.engine_manufacturer_id = sec.engine_manufacturer_id
+LEFT JOIN tyre_manufacturer tm ON tm.id = setm.tyre_manufacturer_id
 WHERE sec.constructor_id = ?
 GROUP BY sec.year`;
 
+const roundsSql = `
+SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name
+FROM race ra
+JOIN grand_prix gp ON gp.id = ra.grand_prix_id
+WHERE ra.year IN (
+  SELECT year FROM season_entrant_constructor WHERE constructor_id = ?
+)
+ORDER BY ra.year, ra.round`;
+
 const driversSql = `
-SELECT sed.year, d.name
+SELECT sed.year, d.id, d.name, cn.alpha2_code
 FROM season_entrant_driver sed
 JOIN driver d ON d.id = sed.driver_id
+LEFT JOIN country cn ON cn.id = d.nationality_country_id
 WHERE sed.constructor_id = ? AND sed.test_driver = 0
 ORDER BY sed.year`;
+
+const resultsSql = `
+SELECT ra.year, ra.round, rr.driver_id, rr.position_text, rr.pole_position
+FROM race ra
+JOIN race_result rr ON rr.race_id = ra.id
+WHERE rr.constructor_id = ?`;
+
+const fastestSql = `
+SELECT ra.year, ra.round, fl.driver_id
+FROM race ra
+JOIN fastest_lap fl ON fl.race_id = ra.id
+WHERE fl.constructor_id = ?`;
 
 const standingsSql = `
 SELECT year, position_text, points, championship_won
@@ -95,17 +143,24 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
       if (identity.results.length === 0) return null;
       const base = parseIdentityRow(identity.results[0]);
 
-      const [seasonRows, driverRows, standingRows] = await Promise.all([
-        db.prepare(seasonsSql).bind(slug).all(),
-        db.prepare(driversSql).bind(slug).all(),
-        db.prepare(standingsSql).bind(slug).all(),
-      ]);
+      const [seasonRows, roundRows, driverRows, resultRows, fastestRows, standingRows] =
+        await Promise.all([
+          db.prepare(seasonsSql).bind(slug).all(),
+          db.prepare(roundsSql).bind(slug).all(),
+          db.prepare(driversSql).bind(slug).all(),
+          db.prepare(resultsSql).bind(slug).all(),
+          db.prepare(fastestSql).bind(slug).all(),
+          db.prepare(standingsSql).bind(slug).all(),
+        ]);
 
       return {
         ...base,
         seasons: mergeSeasons(
           seasonRows.results,
+          roundRows.results,
           driverRows.results,
+          resultRows.results,
+          fastestRows.results,
           standingRows.results,
         ),
       };
@@ -113,9 +168,17 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
   };
 }
 
+interface FastestSet {
+  add(year: number, round: number, driverId: string): void;
+  has(year: number, round: number, driverId: string): boolean;
+}
+
 function mergeSeasons(
   seasonRows: unknown[],
+  roundRows: unknown[],
   driverRows: unknown[],
+  resultRows: unknown[],
+  fastestRows: unknown[],
   standingRows: unknown[],
 ): TeamSeason[] {
   const seasons = new Map<number, TeamSeason>();
@@ -127,6 +190,8 @@ function mergeSeasons(
       year,
       chassis: splitNames(record.chassis),
       engines: splitNames(record.engines),
+      tyres: [...new Set(splitNames(record.tyres).map((name) => name.charAt(0).toUpperCase()))].sort(),
+      rounds: [],
       drivers: [],
       points: null,
       position: null,
@@ -134,10 +199,51 @@ function mergeSeasons(
     });
   }
 
+  for (const row of roundRows) {
+    const record = asRecord(row, "round row");
+    const season = seasons.get(asNumber(record.year, "round row year"));
+    season?.rounds.push({
+      code: asString(record.code, "round code"),
+      name: asString(record.name, "round name"),
+    });
+  }
+
+  const fastest: FastestSet = createFastestSet();
+  for (const row of fastestRows) {
+    const record = asRecord(row, "fastest lap row");
+    fastest.add(
+      asNumber(record.year, "fastest lap year"),
+      asNumber(record.round, "fastest lap round"),
+      asString(record.driver_id, "fastest lap driver"),
+    );
+  }
+
   for (const row of driverRows) {
     const record = asRecord(row, "driver row");
     const season = seasons.get(asNumber(record.year, "driver row year"));
-    season?.drivers.push(asString(record.name, "driver name"));
+    if (!season) continue;
+    season.drivers.push({
+      id: asString(record.id, "driver id"),
+      name: asString(record.name, "driver name"),
+      flagCode:
+        record.alpha2_code === null ? null : asString(record.alpha2_code, "driver flag"),
+      results: season.rounds.map(() => null),
+    });
+  }
+
+  for (const row of resultRows) {
+    const record = asRecord(row, "result row");
+    const year = asNumber(record.year, "result row year");
+    const round = asNumber(record.round, "result row round");
+    const driverId = asString(record.driver_id, "result row driver");
+    const season = seasons.get(year);
+    const driver = season?.drivers.find((entry) => entry.id === driverId);
+    if (!season || !driver) continue;
+    driver.results[round - 1] = {
+      text: asString(record.position_text, "result position"),
+      pole: Boolean(record.pole_position),
+      fastest: fastest.has(year, round, driverId),
+    };
   }
 
   for (const row of standingRows) {
@@ -153,7 +259,19 @@ function mergeSeasons(
     }
   }
 
-  return [...seasons.values()].sort((a, b) => b.year - a.year);
+  return [...seasons.values()].sort((a, b) => a.year - b.year);
+}
+
+function createFastestSet(): FastestSet {
+  const keys = new Set<string>();
+  return {
+    add(year, round, driverId) {
+      keys.add(`${year}:${round}:${driverId}`);
+    },
+    has(year, round, driverId) {
+      return keys.has(`${year}:${round}:${driverId}`);
+    },
+  };
 }
 
 function parseIdentityRow(row: unknown): Omit<TeamPage, "seasons"> {
@@ -212,11 +330,46 @@ function assertTeamPage(value: unknown): TeamPage {
     },
     seasons: seasonsRaw.map((entry) => {
       const season = asRecord(entry, "team season");
+      const roundsRaw = season.rounds;
+      if (!Array.isArray(roundsRaw)) {
+        throw new Error("Invalid team season: rounds must be an array");
+      }
       return {
         year: asNumber(season.year, "season year"),
         chassis: asStringArray(season.chassis, "season chassis"),
         engines: asStringArray(season.engines, "season engines"),
-        drivers: asStringArray(season.drivers, "season drivers"),
+        tyres: asStringArray(season.tyres, "season tyres"),
+        rounds: roundsRaw.map((round) => {
+          const roundRecord = asRecord(round, "season round");
+          return {
+            code: asString(roundRecord.code, "round code"),
+            name: asString(roundRecord.name, "round name"),
+          };
+        }),
+        drivers: asArray(season.drivers, "season drivers").map((driver) => {
+          const driverRecord = asRecord(driver, "season driver");
+          const resultsRaw = driverRecord.results;
+          if (!Array.isArray(resultsRaw)) {
+            throw new Error("Invalid season driver: results must be an array");
+          }
+          return {
+            id: asString(driverRecord.id, "driver id"),
+            name: asString(driverRecord.name, "driver name"),
+            flagCode:
+              driverRecord.flagCode === null
+                ? null
+                : asString(driverRecord.flagCode, "driver flag"),
+            results: resultsRaw.map((cell, index) => {
+              if (cell === null) return null;
+              const cellRecord = asRecord(cell, `result cell ${index + 1}`);
+              return {
+                text: asString(cellRecord.text, "result position"),
+                pole: Boolean(cellRecord.pole),
+                fastest: Boolean(cellRecord.fastest),
+              };
+            }),
+          };
+        }),
         points:
           season.points === null ? null : asNumber(season.points, "season points"),
         position:
@@ -242,6 +395,13 @@ function asRecord(value: unknown, label: string): Record<string, unknown> {
     throw new Error(`Invalid team data: expected ${label} to be an object`);
   }
   return value as Record<string, unknown>;
+}
+
+function asArray(value: unknown, label: string): unknown[] {
+  if (!Array.isArray(value)) {
+    throw new Error(`Invalid team data: expected ${label} to be an array`);
+  }
+  return value;
 }
 
 function asString(value: unknown, label: string): string {

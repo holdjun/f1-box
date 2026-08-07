@@ -3,6 +3,7 @@ import { env } from "cloudflare:workers";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { createTeamRepository } from "../../lib/team-repository.js";
+import { alpha2Flag } from "../../lib/tokens.js";
 import { getTeamBranding } from "../../lib/vendor.js";
 
 const slug = (Astro.params.slug ?? "").toLowerCase();
@@ -17,16 +18,28 @@ const [team, branding] = await Promise.all([
 ]);
 if (!team) Astro.response.status = 404;
 
-const currentYear = team?.seasons[0]?.year;
+const currentYear = team?.seasons.at(-1)?.year;
 const flagSrc = store
   ? `/vendor/country-flags/${team?.alpha2Code.toLowerCase()}.svg`
   : null;
+
+function resultClass(text: string): string {
+  if (text === "1") return "result-win";
+  if (text === "2" || text === "3") return "result-podium";
+  if (/^\d+$/.test(text)) {
+    return Number(text) <= 10 ? "result-points" : "result-finish";
+  }
+  if (text === "Ret" || text === "DNF") return "result-ret";
+  if (text === "DSQ" || text === "EX") return "result-dsq";
+  if (text === "DNQ" || text === "DNPQ") return "result-dnq";
+  return "result-other";
+}
 ---
 
 {team ? (
   <BaseLayout
     title={team.name}
-    description={`${team.fullName} — career statistics and complete championship history.`}
+    description={`${team.fullName} — career statistics and complete race-by-race history.`}
     active="teams"
   >
     <main id="main-content" class="page-shell">
@@ -69,40 +82,82 @@ const flagSrc = store
       </section>
 
       <section aria-labelledby="history-title">
-        <h2 id="history-title">Championship history</h2>
-        <div class="table-scroll history-scroll" tabindex="0">
-          <table class="history-table" aria-label={`${team.name} season history`}>
-            <thead>
-              <tr>
-                <th scope="col">Season</th>
-                <th scope="col">Chassis</th>
-                <th scope="col">Engine</th>
-                <th scope="col">Drivers</th>
-                <th scope="col">Points</th>
-                <th scope="col">Pos</th>
-              </tr>
-            </thead>
-            <tbody>
-              {team.seasons.map((season) => (
-                <tr
-                  class:list={[
-                    {
-                      champion: season.championshipWon,
-                      current: season.year === currentYear,
-                    },
-                  ]}
-                >
-                  <th scope="row">{season.year}</th>
-                  <td>{season.chassis.join(", ") || "—"}</td>
-                  <td>{season.engines.join(", ") || "—"}</td>
-                  <td class="drivers-cell">{season.drivers.join(", ") || "—"}</td>
-                  <td class="points-cell">{season.points ?? "—"}</td>
-                  <td class="position-cell">{season.position ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <h2 id="history-title">Season results</h2>
+        <p class="legend">
+          P pole position · F fastest lap · Ret retired · DNQ did not qualify
+        </p>
+        {team.seasons.map((season) => (
+          <section
+            class:list={[
+              "season-block",
+              {
+                champion: season.championshipWon,
+                current: season.year === currentYear,
+              },
+            ]}
+          >
+            <h3>
+              <span class="season-year">{season.year}</span>
+              <span class="season-meta">
+                {[
+                  season.chassis.join(" / "),
+                  season.engines.join(" / "),
+                  season.tyres.join(" / "),
+                ]
+                  .filter((part) => part.length > 0)
+                  .join(" · ")}
+              </span>
+              <span class="season-pts">
+                {season.points ?? "—"} pts · P{season.position ?? "—"}
+              </span>
+            </h3>
+            <div class="table-scroll" tabindex="0">
+              <table aria-label={`${season.year} race results`}>
+                <thead>
+                  <tr>
+                    <th scope="col" class="driver-col">Driver</th>
+                    {season.rounds.map((round) => (
+                      <th scope="col" title={round.name}>{round.code}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {season.drivers.length === 0 ? (
+                    <tr>
+                      <td class="empty-cell" colspan={season.rounds.length + 1}>
+                        No race entries recorded.
+                      </td>
+                    </tr>
+                  ) : (
+                    season.drivers.map((driver) => (
+                      <tr>
+                        <th scope="row" class="driver-cell">
+                          {driver.flagCode ? (
+                            <span class="flag-emoji" aria-hidden="true">
+                              {alpha2Flag(driver.flagCode)}
+                            </span>
+                          ) : null}
+                          {driver.name}
+                        </th>
+                        {driver.results.map((cell) =>
+                          cell ? (
+                            <td class={resultClass(cell.text)}>
+                              {cell.text}
+                              {cell.pole ? <sup>P</sup> : null}
+                              {cell.fastest ? <sup>F</sup> : null}
+                            </td>
+                          ) : (
+                            <td class="result-none"></td>
+                          ),
+                        )}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ))}
         <p class="source-note">Historical data: f1db (CC BY 4.0)</p>
       </section>
     </main>
@@ -177,25 +232,98 @@ const flagSrc = store
   .stat-row strong {
     font-size: 1.5rem;
   }
-  .history-scroll {
-    margin-top: 0.75rem;
+  .legend {
+    margin: 0.5rem 0 0;
+    font-size: 0.72rem;
+    color: var(--muted);
   }
-  .history-table .drivers-cell {
-    white-space: normal;
-    min-width: 16rem;
+  .season-block {
+    margin-top: 1.75rem;
   }
-  .history-table tr.champion {
-    background: rgba(255, 199, 44, 0.08);
+  .season-block h3 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0 0 0.4rem;
   }
-  .history-table tr.champion .position-cell {
-    color: #ffc72c;
+  .season-year {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .season-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .season-pts {
+    margin-left: auto;
+    font-size: 0.85rem;
     font-weight: 600;
   }
-  .history-table tr.current {
-    box-shadow: inset 2px 0 0 var(--paper);
+  .season-block.champion h3 {
+    color: #ffc72c;
+  }
+  .season-block.current h3 {
+    color: var(--paper);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .driver-col {
+    min-width: 11rem;
+  }
+  .driver-cell {
+    min-width: 11rem;
+  }
+  .flag-emoji {
+    margin-right: 0.35rem;
+  }
+  table th[scope="col"]:not(.driver-col) {
+    padding-inline: 0.45rem;
+    font-size: 0.6rem;
+  }
+  table td {
+    padding-inline: 0.45rem;
+    text-align: center;
+  }
+  table td sup {
+    font-size: 0.55rem;
+  }
+  .result-win {
+    background: rgba(247, 201, 72, 0.32);
+    color: #ffe9a8;
+  }
+  .result-podium {
+    background: rgba(126, 212, 145, 0.25);
+    color: #c8f2d3;
+  }
+  .result-points {
+    background: rgba(167, 166, 243, 0.22);
+    color: #d9d8fb;
+  }
+  .result-finish {
+    color: var(--muted);
+  }
+  .result-ret {
+    background: rgba(224, 143, 213, 0.22);
+    color: #f0cdea;
+  }
+  .result-dsq {
+    background: rgba(220, 80, 80, 0.3);
+    color: #ffd7d7;
+  }
+  .result-dnq {
+    background: rgba(240, 150, 120, 0.22);
+    color: #f8d9cc;
+  }
+  .result-other {
+    color: var(--muted);
+  }
+  .empty-cell {
+    text-align: left !important;
+    color: var(--muted);
   }
   .source-note {
-    margin-top: 0.75rem;
+    margin-top: 1.5rem;
     font-size: 0.72rem;
     color: var(--muted);
   }

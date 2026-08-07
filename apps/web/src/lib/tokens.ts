@@ -27,6 +27,10 @@ export function teamColor(name: string): string {
 export function countryFlag(code: string): string {
   const alpha2 = ALPHA3_TO_ALPHA2[code];
   if (!alpha2) return String.fromCodePoint(0x1f3f3, 0xfe0f);
+  return alpha2Flag(alpha2);
+}
+
+export function alpha2Flag(alpha2: string): string {
   return String.fromCodePoint(
     ...[...alpha2.toUpperCase()].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65),
   );

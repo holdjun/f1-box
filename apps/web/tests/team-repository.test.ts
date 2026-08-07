@@ -42,48 +42,68 @@ const identityRow = {
 const db = fakeDb({
   "FROM constructor": [identityRow],
   "GROUP BY sec.year": [
-    { year: 2026, chassis: "SF-26", engines: "067/6" },
-    { year: 2025, chassis: "SF-25,SF-25B", engines: "066/12" },
-    { year: 1950, chassis: null, engines: null },
+    { year: 2026, chassis: "SF-26", engines: "067/6", tyres: "Pirelli" },
+    { year: 1979, chassis: "312T3,312T4", engines: "015", tyres: "Michelin" },
+    { year: 1950, chassis: null, engines: null, tyres: null },
+  ],
+  "grand_prix gp": [
+    { year: 2026, round: 1, code: "AUS", name: "Australian Grand Prix" },
+    { year: 2026, round: 2, code: "CHN", name: "Chinese Grand Prix" },
+    { year: 1979, round: 1, code: "ARG", name: "Argentine Grand Prix" },
+    { year: 1950, round: 1, code: "GBR", name: "British Grand Prix" },
   ],
   "test_driver = 0": [
-    { year: 2026, name: "Charles Leclerc" },
-    { year: 2026, name: "Lewis Hamilton" },
-    { year: 2025, name: "Charles Leclerc" },
-    { year: 1951, name: "Alberto Ascari" },
+    { year: 2026, id: "charles-leclerc", name: "Charles Leclerc", alpha2_code: "MC" },
+    { year: 2026, id: "lewis-hamilton", name: "Lewis Hamilton", alpha2_code: "GB" },
+    { year: 1979, id: "jody-scheckter", name: "Jody Scheckter", alpha2_code: "ZA" },
+    { year: 1951, id: "alberto-ascari", name: "Alberto Ascari", alpha2_code: "IT" },
+  ],
+  "race_result rr": [
+    { year: 2026, round: 1, driver_id: "charles-leclerc", position_text: "1", pole_position: 1 },
+    { year: 2026, round: 1, driver_id: "lewis-hamilton", position_text: "Ret", pole_position: 0 },
+    { year: 2026, round: 2, driver_id: "charles-leclerc", position_text: "4", pole_position: 0 },
+    { year: 1979, round: 1, driver_id: "jody-scheckter", position_text: "1", pole_position: 0 },
+  ],
+  "fastest_lap fl": [
+    { year: 2026, round: 1, driver_id: "charles-leclerc" },
   ],
   "season_constructor_standing": [
     { year: 2026, position_text: "2", points: 307, championship_won: 0 },
-    { year: 2025, position_text: "4", points: 398, championship_won: 0 },
-    { year: 2000, position_text: "1", points: 170, championship_won: 1 },
+    { year: 1979, position_text: "1", points: 113, championship_won: 1 },
     { year: 2000, position_text: "1", points: 180, championship_won: 1 },
   ],
 });
 
 describe("createTeamRepository with database", () => {
-  it("merges identity, seasons, drivers and standings", async () => {
+  it("merges identity and season meta", async () => {
     const team = await createTeamRepository(db).getTeam("ferrari");
-    expect(team).not.toBeNull();
     expect(team?.fullName).toBe("Scuderia Ferrari");
     expect(team?.alpha2Code).toBe("IT");
     expect(team?.totals.championships).toBe(16);
-    expect(team?.totals.points).toBe(11338);
-    expect(team?.seasons.map((s) => s.year)).toEqual([2026, 2025, 1950]);
+    expect(team?.seasons.map((s) => s.year)).toEqual([1950, 1979, 2026]);
   });
 
-  it("splits chassis and engine lists and groups drivers by year", async () => {
+  it("builds the per-round result matrix per driver", async () => {
     const team = await createTeamRepository(db).getTeam("ferrari");
     const byYear = Object.fromEntries(team!.seasons.map((s) => [s.year, s]));
-    expect(byYear[2025].chassis).toEqual(["SF-25", "SF-25B"]);
-    expect(byYear[2025].engines).toEqual(["066/12"]);
-    expect(byYear[2026].drivers).toEqual(["Charles Leclerc", "Lewis Hamilton"]);
+
+    const [leclerc, hamilton] = byYear[2026].drivers;
+    expect(leclerc).toMatchObject({ name: "Charles Leclerc", flagCode: "MC" });
+    expect(leclerc.results[0]).toEqual({ text: "1", pole: true, fastest: true });
+    expect(leclerc.results[1]).toEqual({ text: "4", pole: false, fastest: false });
+    expect(hamilton.results[0]).toEqual({ text: "Ret", pole: false, fastest: false });
+    expect(hamilton.results[1]).toBeNull();
+
+    expect(byYear[2026].rounds.map((r) => r.code)).toEqual(["AUS", "CHN"]);
+    expect(byYear[2026].chassis).toEqual(["SF-26"]);
+    expect(byYear[2026].tyres).toEqual(["P"]);
+    expect(byYear[1979].chassis).toEqual(["312T3", "312T4"]);
+    expect(byYear[1979].tyres).toEqual(["M"]);
     expect(byYear[1950].chassis).toEqual([]);
     expect(byYear[1950].drivers).toEqual([]);
-    expect(byYear[1950].points).toBeNull();
-    expect(byYear[1950].position).toBeNull();
   });
 
-  it("attaches standings and keeps the highest-points duplicate per year", async () => {
+  it("attaches standings and flags championship seasons", async () => {
     const team = await createTeamRepository(db).getTeam("ferrari");
     const byYear = Object.fromEntries(team!.seasons.map((s) => [s.year, s]));
     expect(byYear[2026]).toMatchObject({
@@ -91,22 +111,14 @@ describe("createTeamRepository with database", () => {
       position: "2",
       championshipWon: false,
     });
-    expect(byYear[2025].position).toBe("4");
+    expect(byYear[1979]).toMatchObject({
+      points: 113,
+      position: "1",
+      championshipWon: true,
+    });
+    expect(byYear[1950].points).toBeNull();
     // 2000 有积分榜但没有参赛行（fake 数据），不应出现
     expect(byYear[2000]).toBeUndefined();
-  });
-
-  it("flags championship seasons", async () => {
-    const championDb = fakeDb({
-      "FROM constructor": [identityRow],
-      "GROUP BY sec.year": [{ year: 2000, chassis: "F1-2000", engines: "049" }],
-      "test_driver = 0": [],
-      "season_constructor_standing": [
-        { year: 2000, position_text: "1", points: 180, championship_won: 1 },
-      ],
-    });
-    const team = await createTeamRepository(championDb).getTeam("ferrari");
-    expect(team?.seasons[0].championshipWon).toBe(true);
   });
 
   it("returns null for an unknown constructor", async () => {
@@ -128,7 +140,11 @@ describe("createTeamRepository without database (DEV fixture)", () => {
     expect(team?.fullName).toBe("Scuderia Ferrari");
     expect(team?.seasons).toHaveLength(77);
     expect(team?.seasons.filter((s) => s.championshipWon)).toHaveLength(16);
-    expect(team?.seasons[0].year).toBe(2026);
+    expect(team?.seasons[0].year).toBe(1950);
+    expect(team?.seasons.at(-1)?.year).toBe(2026);
+    const current = team?.seasons.at(-1);
+    expect(current?.rounds).toHaveLength(22);
+    expect(current?.drivers.map((d) => d.name)).toContain("Charles Leclerc");
   });
 
   it("returns null for other teams", async () => {
