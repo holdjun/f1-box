@@ -9,17 +9,9 @@ import {
 function fakeDb(responses: Record<string, unknown[]>): TeamDatabase {
   const find = (sql: string) => {
     const key = Object.keys(responses).find((marker) => sql.includes(marker));
-    if (!key) throw new Error(`Unexpected query: ${sql}`);
-    return { results: responses[key] };
+    return { results: key ? responses[key] : [] };
   };
   return {
-    prepare(sql: string) {
-      return {
-        bind() {
-          return { async all() { return find(sql); } };
-        },
-      };
-    },
     batch(statements) {
       return Promise.all(statements.map((statement) => Promise.resolve(find(statement.sql))));
     },
@@ -66,13 +58,16 @@ const db = fakeDb({
     { year: 2026, id: "charles-leclerc", name: "Charles Leclerc", alpha2_code: "MC" },
     { year: 2026, id: "lewis-hamilton", name: "Lewis Hamilton", alpha2_code: "GB" },
     { year: 1979, id: "jody-scheckter", name: "Jody Scheckter", alpha2_code: "ZA" },
-    { year: 1951, id: "alberto-ascari", name: "Alberto Ascari", alpha2_code: "IT" },
+    { year: 1950, id: "alberto-ascari", name: "Alberto Ascari", alpha2_code: "IT" },
   ],
   "race_result rr": [
     { year: 2026, round: 1, driver_id: "charles-leclerc", position_text: "1", pole_position: 1, fastest_lap: 1, reason_retired: null, position_number: 1 },
     { year: 2026, round: 1, driver_id: "lewis-hamilton", position_text: "DNF", pole_position: 0, fastest_lap: 0, reason_retired: "Engine", position_number: null },
     { year: 2026, round: 2, driver_id: "charles-leclerc", position_text: "4", pole_position: 0, fastest_lap: 0, reason_retired: "Collision", position_number: 4 },
     { year: 1979, round: 1, driver_id: "jody-scheckter", position_text: "1", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 1 },
+    // 共享赛车：SQL 按排名序，首条（最佳）生效
+    { year: 1950, round: 1, driver_id: "alberto-ascari", position_text: "1", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 1 },
+    { year: 1950, round: 1, driver_id: "alberto-ascari", position_text: "11", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 11 },
   ],
   "position_number IS NOT NULL": [
     { year: 2026, round: 1, driver_id: "lewis-hamilton", position_number: 3 },
@@ -86,6 +81,9 @@ const db = fakeDb({
     { year: 1979, position_text: "3", points: 100, championship_won: 0 },
     { year: 1979, position_text: "1", points: 13, championship_won: 1 },
     { year: 2000, position_text: "1", points: 180, championship_won: 1 },
+    // DSQ 行不覆盖数字名次
+    { year: 1950, position_text: "DSQ", points: 0, championship_won: 0 },
+    { year: 1950, position_text: "2", points: 10, championship_won: 0 },
   ],
 });
 
@@ -129,6 +127,10 @@ describe("createTeamRepository with database", () => {
     expect(byYear[1979].chassis).toEqual(["312T3", "312T4"]);
     expect(byYear[1979].tyres).toEqual(["M"]);
     expect(byYear[1950].chassis).toEqual([]);
+    // 共享车取最佳成绩；1950 积分榜 DSQ 不覆盖数字名次
+    const ascari = byYear[1950].drivers.find((d) => d.id === "alberto-ascari");
+    expect(ascari?.results[0]).toMatchObject({ text: "1" });
+    expect(byYear[1950]).toMatchObject({ points: 10, position: "2" });
   });
 
   it("computes the current season stats blocks", async () => {
@@ -150,7 +152,7 @@ describe("createTeamRepository with database", () => {
       position: "1",
       championshipWon: true,
     });
-    expect(byYear[1950].points).toBeNull();
+    expect(byYear[1950]).toMatchObject({ points: 10, position: "2" });
     expect(byYear[2000]).toBeUndefined();
   });
 

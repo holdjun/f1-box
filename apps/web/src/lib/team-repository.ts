@@ -78,11 +78,6 @@ export interface TeamRepository {
 }
 
 export interface TeamDatabase {
-  prepare(sql: string): {
-    bind(...values: readonly unknown[]): {
-      all(): Promise<{ results: unknown[] }>;
-    };
-  };
   batch(
     statements: { sql: string; values: readonly unknown[] }[],
   ): Promise<{ results: unknown[] }[]>;
@@ -155,7 +150,8 @@ SELECT ra.year, ra.round, rr.driver_id, rr.position_text, rr.pole_position,
   rr.fastest_lap, rr.reason_retired, rr.position_number
 FROM race ra
 JOIN race_result rr ON rr.race_id = ra.id
-WHERE rr.constructor_id = ?1`;
+WHERE rr.constructor_id = ?1
+ORDER BY rr.position_display_order`;
 
 const sprintRankSql = `
 SELECT ra.year, ra.round, srr.driver_id, srr.position_number
@@ -215,11 +211,8 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         return slug === "ferrari" ? (fixture as TeamPage) : null;
       }
 
-      const identity = await db.prepare(identitySql).bind(slug).all();
-      if (identity.results.length === 0) return null;
-      const base = parseIdentityRow(identity.results[0]);
-
       const [
+        identityRows,
         seasonRows,
         roundRows,
         driverRows,
@@ -230,6 +223,7 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         sprintStatRows,
         sprintPoleRows,
       ] = await db.batch([
+        { sql: identitySql, values: [slug] },
         { sql: seasonsSql, values: [slug] },
         { sql: roundsSql, values: [slug] },
         { sql: driversSql, values: [slug] },
@@ -240,6 +234,8 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         { sql: sprintStatsSql, values: [slug] },
         { sql: sprintPolesSql, values: [slug] },
       ]);
+      if (identityRows.results.length === 0) return null;
+      const base = parseIdentityRow(identityRows.results[0]);
 
       const seasons = mergeSeasons(
         seasonRows.results,
@@ -386,6 +382,8 @@ function mergeSeasons(
       byRound = new Map();
       results.set(`${year}:${driverId}`, byRound);
     }
+    // 共享赛车一名车手有多行；SQL 按排名序，首条即最佳成绩
+    if (byRound.has(round)) continue;
     byRound.set(round, {
       text: asString(record.position_text, "result position"),
       pole: Boolean(record.pole_position),
@@ -411,8 +409,8 @@ function mergeSeasons(
   for (const row of driverRows) {
     const record = asRecord(row, "driver row");
     const year = asNumber(record.year, "driver row year");
-    const season = seasons.get(year);
-    if (!season) continue;
+    // 车手行年份必来自 entrants/结果表，与 seasons 同源，无缺口
+    const season = seasons.get(year)!;
     const driverId = asString(record.id, "driver id");
     const byRound = results.get(`${year}:${driverId}`);
     season.drivers.push({
@@ -420,12 +418,11 @@ function mergeSeasons(
       name: asString(record.name, "driver name"),
       flagCode:
         record.alpha2_code === null ? null : asString(record.alpha2_code, "driver flag"),
-      results: (retainedRounds.get(year) ?? []).map(
+      results: retainedRounds.get(year)!.map(
         (round) => byRound?.get(round) ?? null,
       ),
     });
   }
-
   mergeStandings(seasons, standingRows);
 
   return [...seasons.values()].sort((a, b) => b.year - a.year);

@@ -48,7 +48,7 @@ function pickTeamColor(colors: unknown, teamId: string): string | null {
   const current = (entry as Record<string, unknown>).colors;
   if (!Array.isArray(current)) return null;
   const color = current[0];
-  return typeof color === "string" && /^#[0-9a-f]{3,8}$/i.test(color)
+  return typeof color === "string" && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(color)
     ? color
     : null;
 }

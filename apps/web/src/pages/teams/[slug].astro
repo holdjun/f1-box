@@ -9,7 +9,6 @@ import { getTeamBranding } from "../../lib/vendor.js";
 const slug = (Astro.params.slug ?? "").toLowerCase();
 // D1 batch 需要预编译语句，仓库层接口用 {sql, values} 以便测试替身
 const database: TeamDatabase = {
-  prepare: (sql) => env.F1_DB.prepare(sql),
   batch: (statements) =>
     env.F1_DB.batch(
       statements.map((statement) =>
@@ -40,6 +39,12 @@ const currentYear = team?.seasons[0]?.year;
 const flagSrc = store
   ? `/vendor/country-flags/${team?.alpha2Code.toLowerCase()}.svg`
   : null;
+
+// 名次非数字时（DSQ/EX）直接显示原文，不加 P 前缀
+function formatPosition(position: string | null): string {
+  if (position === null) return "—";
+  return /^\d+$/.test(position) ? `P${position}` : position;
+}
 
 function resultClass(text: string): string {
   if (text === "1") return "result-win";
@@ -180,7 +185,7 @@ function resultClass(text: string): string {
               ))}
               {season.points !== null ? (
                 <span class="season-pts">
-                  {season.points} pts · P{season.position ?? "—"}
+                  {season.points} pts · {formatPosition(season.position)}
                 </span>
               ) : null}
             </h3>
@@ -442,7 +447,7 @@ function resultClass(text: string): string {
     margin-top: 2rem;
     padding-left: 0.9rem;
     border-left: 2px solid var(--line);
-    /* 77 块全量渲染，视口外的块跳过布局与绘制，滚动时按需生成 */
+    /* 全部赛季块一次渲染，视口外的块跳过布局与绘制，滚动时按需生成 */
     content-visibility: auto;
     contain-intrinsic-size: auto 14rem;
   }
