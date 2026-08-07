@@ -130,7 +130,7 @@ WHERE sec.constructor_id = ?
 GROUP BY sec.year`;
 
 const roundsSql = `
-SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, ra.circuit_id
+SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, ra.circuit_id, ra.date
 FROM race ra
 JOIN grand_prix gp ON gp.id = ra.grand_prix_id
 WHERE ra.year IN (
@@ -288,11 +288,6 @@ function parseCurrentSeason(
   };
 }
 
-interface FastestSet {
-  add(year: number, round: number, driverId: string): void;
-  has(year: number, round: number, driverId: string): boolean;
-}
-
 function mergeSeasons(
   seasonRows: unknown[],
   roundRows: unknown[],
@@ -322,14 +317,22 @@ function mergeSeasons(
     });
   }
 
+  const rawRounds = new Map<
+    number,
+    { round: number; code: string; name: string; circuitId: string; date: string | null }[]
+  >();
   for (const row of roundRows) {
     const record = asRecord(row, "round row");
-    const season = seasons.get(asNumber(record.year, "round row year"));
-    season?.rounds.push({
+    const year = asNumber(record.year, "round row year");
+    const list = rawRounds.get(year) ?? [];
+    list.push({
+      round: asNumber(record.round, "round row round"),
       code: asString(record.code, "round code"),
       name: asString(record.name, "round name"),
       circuitId: asString(record.circuit_id, "round circuit"),
+      date: record.date == null ? null : asString(record.date, "round date"),
     });
+    rawRounds.set(year, list);
   }
 
   const sprintRanks = new Map<string, number>();
@@ -341,35 +344,63 @@ function mergeSeasons(
     );
   }
 
-  for (const row of driverRows) {
-    const record = asRecord(row, "driver row");
-    const season = seasons.get(asNumber(record.year, "driver row year"));
-    if (!season) continue;
-    season.drivers.push({
-      id: asString(record.id, "driver id"),
-      name: asString(record.name, "driver name"),
-      flagCode:
-        record.alpha2_code === null ? null : asString(record.alpha2_code, "driver flag"),
-      results: season.rounds.map(() => null),
-    });
-  }
-
+  const results = new Map<string, Map<number, RaceCell>>();
+  const racedRounds = new Set<string>();
   for (const row of resultRows) {
     const record = asRecord(row, "result row");
     const year = asNumber(record.year, "result row year");
     const round = asNumber(record.round, "result row round");
     const driverId = asString(record.driver_id, "result row driver");
-    const season = seasons.get(year);
-    const driver = season?.drivers.find((entry) => entry.id === driverId);
-    if (!season || !driver) continue;
-    driver.results[round - 1] = {
+    let byRound = results.get(`${year}:${driverId}`);
+    if (!byRound) {
+      byRound = new Map();
+      results.set(`${year}:${driverId}`, byRound);
+    }
+    byRound.set(round, {
       text: asString(record.position_text, "result position"),
       pole: Boolean(record.pole_position),
       fastest: Boolean(record.fastest_lap),
       classified:
         record.reason_retired !== null && record.position_number !== null,
       sprintRank: sprintRanks.get(`${year}:${round}:${driverId}`) ?? null,
-    };
+    });
+    racedRounds.add(`${year}:${round}`);
+  }
+
+  // 未举办的比赛（将来赛程）不进表格；无日期或已有结果的轮次保留
+  const today = new Date().toISOString().slice(0, 10);
+  const retainedRounds = new Map<number, number[]>();
+  for (const [year, season] of seasons) {
+    const retained = (rawRounds.get(year) ?? []).filter(
+      (r) =>
+        r.date === null ||
+        r.date <= today ||
+        racedRounds.has(`${year}:${r.round}`),
+    );
+    retainedRounds.set(year, retained.map((r) => r.round));
+    season.rounds = retained.map(({ code, name, circuitId }) => ({
+      code,
+      name,
+      circuitId,
+    }));
+  }
+
+  for (const row of driverRows) {
+    const record = asRecord(row, "driver row");
+    const year = asNumber(record.year, "driver row year");
+    const season = seasons.get(year);
+    if (!season) continue;
+    const driverId = asString(record.id, "driver id");
+    const byRound = results.get(`${year}:${driverId}`);
+    season.drivers.push({
+      id: driverId,
+      name: asString(record.name, "driver name"),
+      flagCode:
+        record.alpha2_code === null ? null : asString(record.alpha2_code, "driver flag"),
+      results: (retainedRounds.get(year) ?? []).map(
+        (round) => byRound?.get(round) ?? null,
+      ),
+    });
   }
 
   for (const row of standingRows) {
@@ -386,18 +417,6 @@ function mergeSeasons(
   }
 
   return [...seasons.values()].sort((a, b) => b.year - a.year);
-}
-
-function createFastestSet(): FastestSet {
-  const keys = new Set<string>();
-  return {
-    add(year, round, driverId) {
-      keys.add(`${year}:${round}:${driverId}`);
-    },
-    has(year, round, driverId) {
-      return keys.has(`${year}:${round}:${driverId}`);
-    },
-  };
 }
 
 function parseIdentityRow(row: unknown): Omit<TeamPage, "seasons" | "firstEntry" | "currentSeason"> {

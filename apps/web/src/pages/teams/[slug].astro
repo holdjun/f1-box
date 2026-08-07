@@ -18,6 +18,14 @@ const [team, branding] = await Promise.all([
 ]);
 if (!team) Astro.response.status = 404;
 
+// 上游数据最快 30 分钟更新一次，边缘短暂缓存可吸收重复请求
+if (team) {
+  Astro.response.headers.set(
+    "Cache-Control",
+    "public, s-maxage=300, stale-while-revalidate=600",
+  );
+}
+
 const currentYear = team?.seasons[0]?.year;
 const flagSrc = store
   ? `/vendor/country-flags/${team?.alpha2Code.toLowerCase()}.svg`

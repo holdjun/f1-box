@@ -52,6 +52,7 @@ const db = fakeDb({
     { year: 2026, round: 2, code: "CHN", name: "Chinese Grand Prix", circuit_id: "shanghai" },
     { year: 1979, round: 1, code: "ARG", name: "Argentine Grand Prix", circuit_id: "buenos-aires" },
     { year: 1950, round: 1, code: "GBR", name: "British Grand Prix", circuit_id: "silverstone" },
+    { year: 2026, round: 3, code: "JPN", name: "Japanese Grand Prix", circuit_id: "suzuka", date: "2099-01-01" },
   ],
   "MIN(year)": [{ first_entry: 1950 }],
   "position_text = 'Ret'": [
@@ -164,7 +165,7 @@ describe("createTeamRepository without database (DEV fixture)", () => {
     expect(team?.currentSeason?.grandPrix.points).toBe(268);
     expect(team?.currentSeason?.sprint.points).toBe(39);
     const current = team?.seasons[0];
-    expect(current?.rounds).toHaveLength(22);
+    expect(current?.rounds).toHaveLength(11);
     expect(current?.drivers.map((d) => d.name)).toContain("Charles Leclerc");
   });
 
