@@ -1,0 +1,37 @@
+name: data-sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 4 * * *"
+
+# 只刷新原始上游归档（vendor/f1db/）。策展层（team-colors/team-logos/
+# country-flags/tires/参考表）由本地 .data/vendor 策展后手动镜像上传。
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Download f1db release
+        run: |
+          curl -sSL -o f1db-json-splitted.zip https://github.com/f1db/f1db/releases/latest/download/f1db-json-splitted.zip
+          # tag 从重定向 URL 解析，避免未认证 API 限流
+          curl -sI -L https://github.com/f1db/f1db/releases/latest/download/f1db-json-splitted.zip \
+            | awk 'tolower($1)=="location:"{u=$2} END{split(u,a,"/download/"); split(a[2],b,"/"); print b[1]}' > f1db-tag.txt
+          cat f1db-tag.txt
+
+      - name: Publish to R2
+        run: |
+          npm install -g wrangler >/dev/null 2>&1
+          wrangler r2 object put --remote f1-box-data/vendor/f1db/f1db-json-splitted.zip --file f1db-json-splitted.zip
+          printf '{"source":"f1db","repo":"https://github.com/f1db/f1db","tag":"%s","fetchedAt":"%s","license":"CC-BY-4.0","artifact":"vendor/f1db/f1db-json-splitted.zip"}\n' \
+            "$(cat f1db-tag.txt)" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > f1db-release.json
+          wrangler r2 object put --remote f1-box-data/vendor/f1db/release.json --file f1db-release.json
+
+      - name: Verify
+        run: |
+          npm install -g wrangler >/dev/null 2>&1 || true
+          wrangler r2 object get --remote f1-box-data/vendor/f1db/release.json --file /dev/stdout
