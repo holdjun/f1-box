@@ -5,7 +5,8 @@ on:
   schedule:
     - cron: "23 4 * * *"
 
-# 只刷新原始上游归档（vendor/f1db/）。策展层（team-colors/team-logos/
+# 仅在上游 release tag 变化时刷新：R2 原始归档 + D1 整库重导（重导期间
+# /teams/* 短暂不可用，故收敛到每周一次）。策展层（team-colors/team-logos/
 # country-flags/tires/参考表）由本地 .data/vendor 策展后手动镜像上传。
 jobs:
   sync:
@@ -15,6 +16,8 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
+      - uses: actions/checkout@v4
+
       - name: Download f1db release
         run: |
           curl -sSL -o f1db-json-splitted.zip https://github.com/f1db/f1db/releases/latest/download/f1db-json-splitted.zip
@@ -23,20 +26,27 @@ jobs:
             | awk 'tolower($1)=="location:"{u=$2} END{split(u,a,"/download/"); split(a[2],b,"/"); print b[1]}' > f1db-tag.txt
           cat f1db-tag.txt
 
-      - name: Publish to R2
+      - name: Install wrangler
+        run: npm install -g wrangler >/dev/null 2>&1
+
+      - name: Detect new upstream release
+        id: release
         run: |
-          npm install -g wrangler >/dev/null 2>&1
+          previous=$(wrangler r2 object get --remote f1-box-data/vendor/f1db/release.json --file /dev/stdout 2>/dev/null \
+            | node -p 'JSON.parse(require("fs").readFileSync(0)).tag' || true)
+          echo "previous=${previous:-none} current=$(cat f1db-tag.txt)"
+          { [ "${previous:-none}" = "$(cat f1db-tag.txt)" ] && echo changed=false || echo changed=true; } >> "$GITHUB_OUTPUT"
+
+      - name: Publish to R2
+        if: steps.release.outputs.changed == 'true'
+        run: |
           wrangler r2 object put --remote f1-box-data/vendor/f1db/f1db-json-splitted.zip --file f1db-json-splitted.zip
           printf '{"source":"f1db","repo":"https://github.com/f1db/f1db","tag":"%s","fetchedAt":"%s","license":"CC-BY-4.0","artifact":"vendor/f1db/f1db-json-splitted.zip"}\n' \
             "$(cat f1db-tag.txt)" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > f1db-release.json
           wrangler r2 object put --remote f1-box-data/vendor/f1db/release.json --file f1db-release.json
 
-      - name: Verify
-        run: |
-          npm install -g wrangler >/dev/null 2>&1 || true
-          wrangler r2 object get --remote f1-box-data/vendor/f1db/release.json --file /dev/stdout
-
       - name: Refresh D1 (f1db full)
+        if: steps.release.outputs.changed == 'true'
         run: |
           ./scripts/f1db-d1-dump.sh f1db-d1
           ./scripts/f1db-d1-import.sh f1db-d1

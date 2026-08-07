@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # 从 f1db 官方 SQLite release 生成 D1 导入 SQL（按表拆分、父表优先）。
 # 用法: scripts/f1db-d1-dump.sh [输出目录]（默认 /tmp/f1db-d1）
-# 全量导入：表 + 视图原样保留（race_result/fastest_lap 等视图在 D1 可直接查询）。
+# 00-drop 反序清库后逐表重建（外键约束下无法逐表单独 drop），
+# 整库重导窗口存在，靠 data-sync 的 release tag 门禁收敛到每周一次；
+# race_data 追加 constructor 索引，否则按 constructor_id 的查询全表扫 18 万行。
 set -euo pipefail
 
 OUT="${1:-/tmp/f1db-d1}"
@@ -38,10 +40,18 @@ for name in "${TABLES[@]}"; do
   sqlite3 "$WORK/f1db.db" ".dump $name" \
     | grep -Ev '^(PRAGMA|BEGIN( TRANSACTION)?|COMMIT);$' \
     > "$OUT/$(printf '%02d' "$idx")-$name.sql"
+  # f1db 未给 race_data 建 constructor 索引，页面查询全靠它过滤
+  if [ "$name" = "race_data" ]; then
+    echo "CREATE INDEX IF NOT EXISTS idx_rd_constructor_type ON race_data (constructor_id, type);" \
+      >> "$OUT/$(printf '%02d' "$idx")-$name.sql"
+  fi
   idx=$((idx + 1))
 done
 
 {
+  for name in "${VIEWS[@]}"; do
+    echo "DROP VIEW IF EXISTS \"$name\";"
+  done
   for name in "${VIEWS[@]}"; do
     sqlite3 "$WORK/f1db.db" ".dump $name" \
       | grep -Ev '^(PRAGMA|BEGIN( TRANSACTION)?|COMMIT);$'
