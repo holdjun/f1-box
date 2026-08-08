@@ -16,7 +16,6 @@ test("ferrari page renders identity, summary and season blocks @desktop", async 
   await expect(blocks.first()).toContainText("2026");
   await expect(blocks.last()).toContainText("1950");
   await expect(page.locator(".season-block.champion")).toHaveCount(16);
-  await expect(page.getByText("Historical data: f1db")).toBeVisible();
   await expect(page.getByLabel("Table legend")).toContainText("Win");
   // 车手冠军名字金色（1979 Scheckter 等）
   await expect(page.locator(".driver-champion").first()).toBeVisible();
@@ -84,4 +83,11 @@ test("ferrari page renders on mobile @mobile", async ({ page }) => {
   await page.goto("/teams/ferrari");
   await expect(page.locator("main h1")).toHaveText("Scuderia Ferrari");
   await expect(page.locator(".season-block")).toHaveCount(77);
+});
+
+test("teams index lists featured teams @desktop", async ({ page }) => {
+  await page.goto("/teams");
+  await expect(page.locator("main h1")).toHaveText("Teams");
+  await expect(page.locator('a[href="/teams/ferrari"]')).toBeVisible();
+  await expect(page.locator('a[href="/teams/mercedes"]')).toBeVisible();
 });

@@ -1,0 +1,130 @@
+---
+import { env } from "cloudflare:workers";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getTeamBranding } from "../../lib/vendor.js";
+
+// 已验收的车队页；随验收逐步扩充
+const FEATURED = ["ferrari", "mclaren", "mercedes", "audi", "red-bull", "lotus"];
+const DEV_NAMES: Record<string, string> = {
+  ferrari: "Ferrari",
+  mclaren: "McLaren",
+  mercedes: "Mercedes",
+  audi: "Audi",
+  "red-bull": "Red Bull Racing",
+  lotus: "Lotus",
+};
+
+interface TeamCard {
+  id: string;
+  name: string;
+  color: string | null;
+  logoSrc: string | null;
+}
+
+let cards: TeamCard[];
+if (import.meta.env.DEV) {
+  cards = await Promise.all(
+    FEATURED.map(async (id) => ({
+      id,
+      name: DEV_NAMES[id],
+      ...(await getTeamBranding(undefined, id)),
+    })),
+  );
+} else {
+  const placeholders = FEATURED.map(() => "?").join(", ");
+  const rows = await env.F1_DB.prepare(
+    `SELECT id, name FROM constructor WHERE id IN (${placeholders})`,
+  )
+    .bind(...FEATURED)
+    .all();
+  const names = new Map(
+    rows.results.map((row) => {
+      const record = row as { id: string; name: string };
+      return [record.id, record.name];
+    }),
+  );
+  cards = await Promise.all(
+    FEATURED.map(async (id) => ({
+      id,
+      name: names.get(id) ?? id,
+      ...(await getTeamBranding(env.F1_DATA, id)),
+    })),
+  );
+}
+---
+
+<BaseLayout title="Teams" active="teams">
+  <main id="main-content" class="page-shell">
+    <h1>Teams</h1>
+    <div class="team-grid">
+      {cards.map((team) => (
+        <a
+          class="team-card"
+          href={`/teams/${team.id}`}
+          style={`--team-color: ${team.color ?? "#84909e"}`}
+        >
+          {team.logoSrc ? (
+            <img class="card-logo" src={team.logoSrc} alt="" />
+          ) : (
+            <span class="card-monogram" aria-hidden="true">
+              {team.name.slice(0, 2).toUpperCase()}
+            </span>
+          )}
+          <span class="card-name">{team.name}</span>
+        </a>
+      ))}
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin: 0 0 1.5rem;
+  }
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1rem;
+  }
+  .team-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background:
+      linear-gradient(
+        160deg,
+        color-mix(in srgb, var(--team-color) 22%, transparent),
+        transparent 60%
+      ),
+      var(--ink-soft);
+    color: var(--paper);
+    text-decoration: none;
+  }
+  .team-card:hover {
+    border-color: var(--team-color);
+  }
+  .card-logo {
+    height: 3rem;
+    width: auto;
+  }
+  .card-monogram {
+    display: grid;
+    place-items: center;
+    height: 3rem;
+    width: 3rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--team-color) 45%, transparent);
+    font-family: var(--display);
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+  .card-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+</style>

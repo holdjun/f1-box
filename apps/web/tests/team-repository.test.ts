@@ -100,7 +100,8 @@ describe("createTeamRepository with database", () => {
     expect(team?.fullName).toBe("Scuderia Ferrari");
     expect(team?.alpha2Code).toBe("IT");
     expect(team?.firstEntry).toBe(1950);
-    expect(team?.lineage.map((l) => l.id)).toEqual(["tyrrell", "mercedes"]);
+    // 1950 早于传承链起点 1970，链首补早期自身
+    expect(team?.lineage.map((l) => l.id)).toEqual(["ferrari", "tyrrell", "mercedes"]);
     expect(team?.totals.championships).toBe(16);
     expect(team?.seasons.map((s) => s.year)).toEqual([2026, 1979, 1950]);
   });

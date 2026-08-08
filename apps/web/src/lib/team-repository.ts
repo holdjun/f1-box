@@ -275,16 +275,20 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
       return {
         ...base,
         firstEntry: seasons.at(-1)?.year ?? null,
-        lineage: lineageRows.results.map((row) => {
-          const record = asRecord(row, "lineage row");
-          return {
-            id: asString(record.id, "lineage id"),
-            name: asString(record.name, "lineage name"),
-            yearFrom: asNumber(record.year_from, "lineage year from"),
-            yearTo:
-              record.year_to == null ? null : asNumber(record.year_to, "lineage year to"),
-          };
-        }),
+        lineage: withEarlyStint(
+          base,
+          seasons,
+          lineageRows.results.map((row) => {
+            const record = asRecord(row, "lineage row");
+            return {
+              id: asString(record.id, "lineage id"),
+              name: asString(record.name, "lineage name"),
+              yearFrom: asNumber(record.year_from, "lineage year from"),
+              yearTo:
+                record.year_to == null ? null : asNumber(record.year_to, "lineage year to"),
+            };
+          }),
+        ),
         currentSeason: buildCurrentSeason(
           seasons[0],
           gpStatRows.results,
@@ -295,6 +299,24 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
       };
     },
   };
+}
+
+// 传承链只覆盖近代入口（如 mercedes 从 1970 Tyrrell 起）；
+// 若车队在链起点之前就有参赛赛季（mercedes 1954-55），链首补"早期自身"徽章
+function withEarlyStint(
+  base: { id: string; name: string },
+  seasons: TeamSeason[],
+  lineage: LineageEntry[],
+): LineageEntry[] {
+  const first = lineage[0];
+  if (!first) return lineage;
+  const early = seasons.filter((season) => season.year < first.yearFrom);
+  if (early.length === 0) return lineage;
+  return [
+    // seasons 降序，末尾即最早
+    { id: base.id, name: base.name, yearFrom: early.at(-1)!.year, yearTo: early[0].year },
+    ...lineage,
+  ];
 }
 
 function buildCurrentSeason(
