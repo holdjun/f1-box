@@ -7,22 +7,95 @@ export interface TeamBranding {
   logoSrc: string | null;
 }
 
-// 展示元数据缺失或损坏时降级为 null，不抛错（页面主体不受影响）。
-export async function getTeamBranding(
+interface ColorPeriod {
+  from: number;
+  to: number | null;
+  colors: string[];
+}
+
+interface TeamColors {
+  colors: string[];
+  periods: ColorPeriod[];
+}
+
+export interface VendorIndexes {
+  colors: Record<string, TeamColors> | null;
+  logos: { file: string; yearFrom: number }[] | null;
+}
+
+// 一次拉取两份策展 JSON，供整页多队查询复用
+export async function getVendorIndexes(
   store: VendorStore | undefined,
-  teamId: string,
-): Promise<TeamBranding> {
-  if (!store) return { color: null, logoSrc: null };
+): Promise<VendorIndexes> {
+  if (!store) return { colors: null, logos: null };
 
   const [colors, logos] = await Promise.all([
     getVendorJson(store, "team-colors/team-colors.json"),
     getVendorJson(store, "team-logos/logos.json"),
   ]);
 
+  const colorsIndex =
+    typeof colors === "object" && colors !== null
+      ? ((colors as Record<string, unknown>).teams as Record<string, TeamColors> | undefined) ?? null
+      : null;
+  const logosRaw =
+    typeof logos === "object" && logos !== null
+      ? ((logos as Record<string, unknown>).logos as unknown[] | undefined)
+      : null;
+
   return {
-    color: pickTeamColor(colors, teamId),
-    logoSrc: pickTeamLogo(logos, teamId),
+    colors: colorsIndex,
+    logos: Array.isArray(logosRaw)
+      ? logosRaw.flatMap((entry) => {
+          if (typeof entry !== "object" || entry === null) return [];
+          const record = entry as Record<string, unknown>;
+          return typeof record.file === "string" && typeof record.yearFrom === "number"
+            ? [{ file: record.file, yearFrom: record.yearFrom }]
+            : [];
+        })
+      : null,
   };
+}
+
+export async function getTeamBranding(
+  store: VendorStore | undefined,
+  teamId: string,
+): Promise<TeamBranding> {
+  const indexes = await getVendorIndexes(store);
+  return {
+    color: latestColor(indexes, teamId),
+    logoSrc: logoSrcFor(indexes, teamId),
+  };
+}
+
+export function latestColor(indexes: VendorIndexes, teamId: string): string | null {
+  const team = indexes.colors?.[teamId];
+  if (!team) return null;
+  return validHex(team.colors[0]);
+}
+
+export function colorForYear(
+  indexes: VendorIndexes,
+  teamId: string,
+  year: number,
+): string | null {
+  const team = indexes.colors?.[teamId];
+  if (!team) return null;
+  const period = team.periods.find(
+    (p) => p.from <= year && (p.to === null || year <= p.to),
+  );
+  return validHex((period ?? team).colors[0]);
+}
+
+export function logoSrcFor(indexes: VendorIndexes, teamId: string): string | null {
+  if (!indexes.logos) return null;
+  const prefix = `team-logos/${teamId}@`;
+  let best: { file: string; yearFrom: number } | null = null;
+  for (const entry of indexes.logos) {
+    if (!entry.file.startsWith(prefix)) continue;
+    if (!best || entry.yearFrom >= best.yearFrom) best = entry;
+  }
+  return best ? `/vendor/${best.file}` : null;
 }
 
 async function getVendorJson(
@@ -39,39 +112,8 @@ async function getVendorJson(
   }
 }
 
-function pickTeamColor(colors: unknown, teamId: string): string | null {
-  if (typeof colors !== "object" || colors === null) return null;
-  const teams = (colors as Record<string, unknown>).teams;
-  if (typeof teams !== "object" || teams === null) return null;
-  const entry = (teams as Record<string, unknown>)[teamId];
-  if (typeof entry !== "object" || entry === null) return null;
-  const current = (entry as Record<string, unknown>).colors;
-  if (!Array.isArray(current)) return null;
-  const color = current[0];
+function validHex(color: string | undefined): string | null {
   return typeof color === "string" && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(color)
     ? color
     : null;
-}
-
-function pickTeamLogo(logos: unknown, teamId: string): string | null {
-  if (typeof logos !== "object" || logos === null) return null;
-  const entries = (logos as Record<string, unknown>).logos;
-  if (!Array.isArray(entries)) return null;
-
-  const prefix = `team-logos/${teamId}@`;
-  let best: { file: string; yearFrom: number } | null = null;
-  for (const entry of entries) {
-    if (typeof entry !== "object" || entry === null) continue;
-    const record = entry as Record<string, unknown>;
-    if (typeof record.file !== "string" || !record.file.startsWith(prefix)) {
-      continue;
-    }
-    const yearFrom =
-      typeof record.yearFrom === "number" ? record.yearFrom : Number.MIN_SAFE_INTEGER;
-    if (!best || yearFrom >= best.yearFrom) {
-      best = { file: record.file, yearFrom };
-    }
-  }
-
-  return best ? `/vendor/${best.file}` : null;
 }

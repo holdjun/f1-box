@@ -84,12 +84,44 @@ export interface TeamPage {
 
 export interface TeamRepository {
   getTeam(slug: string): Promise<TeamPage | null>;
+  getYearTeams(year: number): Promise<YearTeams | null>;
+  getConstructors(): Promise<ConstructorRef[]>;
+}
+
+export interface YearTeam {
+  id: string;
+  name: string;
+  position: number | null;
+  points: number;
+  drivers: string[];
+}
+
+export interface YearTeams {
+  years: number[];
+  teams: YearTeam[];
+}
+
+export interface ConstructorRef {
+  id: string;
+  name: string;
 }
 
 export interface TeamDatabase {
   batch(
     statements: { sql: string; values: readonly unknown[] }[],
   ): Promise<{ results: unknown[] }[]>;
+}
+
+// D1 batch 需要预编译语句，仓库层接口用 {sql, values} 以便测试替身
+export function createD1TeamDatabase(d1: D1Database): TeamDatabase {
+  return {
+    batch: (statements) =>
+      d1.batch(
+        statements.map((statement) =>
+          d1.prepare(statement.sql).bind(...statement.values),
+        ),
+      ),
+  };
 }
 
 const identitySql = `
@@ -221,6 +253,29 @@ JOIN constructor oc ON oc.id = cc.other_constructor_id
 WHERE cc.constructor_id = ?1
 ORDER BY cc.position_display_order`;
 
+const seasonYearsSql = `SELECT year FROM season ORDER BY year`;
+
+const yearTeamsSql = `
+SELECT sec.constructor_id AS id, c.name,
+  COALESCE(SUM(scs.points), 0) AS points,
+  MIN(scs.position_number) AS position
+FROM season_entrant_constructor sec
+JOIN constructor c ON c.id = sec.constructor_id
+LEFT JOIN season_constructor_standing scs
+  ON scs.year = sec.year AND scs.constructor_id = sec.constructor_id
+WHERE sec.year = ?1
+GROUP BY sec.constructor_id, c.name
+ORDER BY position IS NULL, position, points DESC`;
+
+const yearTeamDriversSql = `
+SELECT sed.constructor_id, d.name
+FROM season_entrant_driver sed
+JOIN driver d ON d.id = sed.driver_id
+WHERE sed.year = ?1 AND sed.test_driver = 0
+ORDER BY sed.constructor_id, d.name`;
+
+const constructorsSql = `SELECT id, name FROM constructor ORDER BY name`;
+
 export function createTeamRepository(db?: TeamDatabase): TeamRepository {
   return {
     async getTeam(slug) {
@@ -297,6 +352,65 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         ),
         seasons,
       };
+    },
+
+    async getYearTeams(year) {
+      if (!db) {
+        if (year !== 2026) return null;
+        const { default: fixture } = await import("./fixtures/year-teams-2026.json");
+        return fixture as YearTeams;
+      }
+
+      const [yearRows, teamRows, driverRows] = await db.batch([
+        { sql: seasonYearsSql, values: [] },
+        { sql: yearTeamsSql, values: [year] },
+        { sql: yearTeamDriversSql, values: [year] },
+      ]);
+      const years = yearRows.results.map((row) =>
+        asNumber(asRecord(row, "season year row").year, "season year"),
+      );
+      if (!years.includes(year)) return null;
+
+      const driversByTeam = new Map<string, string[]>();
+      for (const row of driverRows.results) {
+        const record = asRecord(row, "year team driver row");
+        const list = driversByTeam.get(asString(record.constructor_id, "year team id")) ?? [];
+        list.push(asString(record.name, "year team driver name"));
+        driversByTeam.set(asString(record.constructor_id, "year team id"), list);
+      }
+
+      return {
+        years,
+        teams: teamRows.results.map((row) => {
+          const record = asRecord(row, "year team row");
+          const id = asString(record.id, "year team id");
+          return {
+            id,
+            name: asString(record.name, "year team name"),
+            position:
+              record.position == null
+                ? null
+                : asNumber(record.position, "year team position"),
+            points: asNumber(record.points, "year team points"),
+            drivers: driversByTeam.get(id) ?? [],
+          };
+        }),
+      };
+    },
+
+    async getConstructors() {
+      if (!db) {
+        const { default: fixture } = await import("./fixtures/constructors.json");
+        return fixture as ConstructorRef[];
+      }
+      const rows = await db.batch([{ sql: constructorsSql, values: [] }]);
+      return rows[0].results.map((row) => {
+        const record = asRecord(row, "constructor row");
+        return {
+          id: asString(record.id, "constructor id"),
+          name: asString(record.name, "constructor name"),
+        };
+      });
     },
   };
 }

@@ -85,9 +85,16 @@ test("ferrari page renders on mobile @mobile", async ({ page }) => {
   await expect(page.locator(".season-block")).toHaveCount(77);
 });
 
-test("teams index lists featured teams @desktop", async ({ page }) => {
+test("teams index lists all constructors @desktop", async ({ page }) => {
   await page.goto("/teams");
   await expect(page.locator("main h1")).toHaveText("Teams");
+  await expect(page.locator(".team-card")).toHaveCount(187);
   await expect(page.locator('a[href="/teams/ferrari"]')).toBeVisible();
   await expect(page.locator('a[href="/teams/mercedes"]')).toBeVisible();
+});
+
+test("year teams grid links to global team pages @desktop", async ({ page }) => {
+  await page.goto("/2026/teams");
+  await expect(page.locator(".team-card")).toHaveCount(11);
+  await expect(page.locator('a[href="/teams/ferrari"]').first()).toBeVisible();
 });

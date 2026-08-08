@@ -2,23 +2,17 @@
 import { env } from "cloudflare:workers";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { createTeamRepository, type TeamDatabase } from "../../lib/team-repository.js";
+import {
+  createD1TeamDatabase,
+  createTeamRepository,
+} from "../../lib/team-repository.js";
 import { alpha2Flag } from "../../lib/tokens.js";
 import { getTeamBranding } from "../../lib/vendor.js";
 
 const slug = (Astro.params.slug ?? "").toLowerCase();
-// D1 batch 需要预编译语句，仓库层接口用 {sql, values} 以便测试替身
-const database: TeamDatabase = {
-  batch: (statements) =>
-    env.F1_DB.batch(
-      statements.map((statement) =>
-        env.F1_DB.prepare(statement.sql).bind(...statement.values),
-      ),
-    ),
-};
 const repository = import.meta.env.DEV
   ? createTeamRepository()
-  : createTeamRepository(database);
+  : createTeamRepository(createD1TeamDatabase(env.F1_DB));
 const store = import.meta.env.DEV ? undefined : env.F1_DATA;
 
 const [team, branding] = await Promise.all([

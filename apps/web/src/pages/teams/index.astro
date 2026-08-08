@@ -2,70 +2,34 @@
 import { env } from "cloudflare:workers";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getTeamBranding } from "../../lib/vendor.js";
+import {
+  createD1TeamDatabase,
+  createTeamRepository,
+} from "../../lib/team-repository.js";
+import { getVendorIndexes, logoSrcFor, latestColor } from "../../lib/vendor.js";
 
-// 已验收的车队页；随验收逐步扩充
-const FEATURED = ["ferrari", "mclaren", "mercedes", "audi", "red-bull", "lotus"];
-const DEV_NAMES: Record<string, string> = {
-  ferrari: "Ferrari",
-  mclaren: "McLaren",
-  mercedes: "Mercedes",
-  audi: "Audi",
-  "red-bull": "Red Bull Racing",
-  lotus: "Lotus",
-};
+const repository = import.meta.env.DEV
+  ? createTeamRepository()
+  : createTeamRepository(createD1TeamDatabase(env.F1_DB));
 
-interface TeamCard {
-  id: string;
-  name: string;
-  color: string | null;
-  logoSrc: string | null;
-}
-
-let cards: TeamCard[];
-if (import.meta.env.DEV) {
-  cards = await Promise.all(
-    FEATURED.map(async (id) => ({
-      id,
-      name: DEV_NAMES[id],
-      ...(await getTeamBranding(undefined, id)),
-    })),
-  );
-} else {
-  const placeholders = FEATURED.map(() => "?").join(", ");
-  const rows = await env.F1_DB.prepare(
-    `SELECT id, name FROM constructor WHERE id IN (${placeholders})`,
-  )
-    .bind(...FEATURED)
-    .all();
-  const names = new Map(
-    rows.results.map((row) => {
-      const record = row as { id: string; name: string };
-      return [record.id, record.name];
-    }),
-  );
-  cards = await Promise.all(
-    FEATURED.map(async (id) => ({
-      id,
-      name: names.get(id) ?? id,
-      ...(await getTeamBranding(env.F1_DATA, id)),
-    })),
-  );
-}
+const [constructors, indexes] = await Promise.all([
+  repository.getConstructors(),
+  getVendorIndexes(import.meta.env.DEV ? undefined : env.F1_DATA),
+]);
 ---
 
 <BaseLayout title="Teams" active="teams">
   <main id="main-content" class="page-shell">
     <h1>Teams</h1>
     <div class="team-grid">
-      {cards.map((team) => (
+      {constructors.map((team) => (
         <a
           class="team-card"
           href={`/teams/${team.id}`}
-          style={`--team-color: ${team.color ?? "#84909e"}`}
+          style={`--team-color: ${latestColor(indexes, team.id) ?? "#84909e"}`}
         >
-          {team.logoSrc ? (
-            <img class="card-logo" src={team.logoSrc} alt="" />
+          {logoSrcFor(indexes, team.id) ? (
+            <img class="card-logo" src={logoSrcFor(indexes, team.id)} alt="" />
           ) : (
             <span class="card-monogram" aria-hidden="true">
               {team.name.slice(0, 2).toUpperCase()}
