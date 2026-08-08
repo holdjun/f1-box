@@ -75,6 +75,7 @@ const db = fakeDb({
   "sprint_race_result srr": [
     { year: 2026, races: 1, points: 10, wins: 0, podiums: 1, top10s: 2 },
   ],
+  "MAX(year)": [{ year: 2026 }],
   "season_driver_standing": [
     { year: 1979, driver_id: "jody-scheckter" },
   ],
@@ -100,6 +101,7 @@ describe("createTeamRepository with database", () => {
     expect(team?.fullName).toBe("Scuderia Ferrari");
     expect(team?.alpha2Code).toBe("IT");
     expect(team?.firstEntry).toBe(1950);
+    expect(team?.activeSeason).toBe(2026);
     // 1950 早于传承链起点 1970，链首补早期自身
     expect(team?.lineage.map((l) => l.id)).toEqual(["ferrari", "tyrrell", "mercedes"]);
     expect(team?.totals.championships).toBe(16);
@@ -212,6 +214,7 @@ describe("createTeamRepository without database (DEV fixture)", () => {
     const team = await createTeamRepository().getTeam("ferrari");
     expect(team?.fullName).toBe("Scuderia Ferrari");
     expect(team?.firstEntry).toBe(1950);
+    expect(team?.activeSeason).toBe(2026);
     expect(team?.seasons).toHaveLength(77);
     expect(team?.seasons.filter((s) => s.championshipWon)).toHaveLength(16);
     expect(team?.seasons[0].year).toBe(2026);

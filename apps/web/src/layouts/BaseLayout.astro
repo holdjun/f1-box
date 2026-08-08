@@ -52,7 +52,7 @@ const {
     <SiteHeader active={active} year={year} availableYears={availableYears} rest={rest} />
     <slot />
     <SiteFooter
-      season={season}
+      season={year ?? season}
       sourceName={sourceName}
       fetchedAt={fetchedAt}
       freshness={freshness}

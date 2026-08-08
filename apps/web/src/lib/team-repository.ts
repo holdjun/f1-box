@@ -76,6 +76,7 @@ export interface TeamPage {
   countryName: string;
   alpha2Code: string;
   firstEntry: number | null;
+  activeSeason: number | null;
   lineage: LineageEntry[];
   totals: TeamTotals;
   currentSeason: CurrentSeason | null;
@@ -255,6 +256,8 @@ ORDER BY cc.position_display_order`;
 
 const seasonYearsSql = `SELECT year FROM season ORDER BY year`;
 
+const maxSeasonSql = `SELECT MAX(year) AS year FROM season`;
+
 const yearTeamsSql = `
 SELECT sec.constructor_id AS id, c.name,
   COALESCE(SUM(scs.points), 0) AS points,
@@ -300,6 +303,7 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         sprintPoleRows,
         championRows,
         lineageRows,
+        maxSeasonRows,
       ] = await db.batch([
         { sql: identitySql, values: [slug] },
         { sql: seasonsSql, values: [slug] },
@@ -313,6 +317,7 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         { sql: sprintPolesSql, values: [slug] },
         { sql: championsSql, values: [] },
         { sql: lineageSql, values: [slug] },
+        { sql: maxSeasonSql, values: [] },
       ]);
       if (identityRows.results.length === 0) return null;
       const base = parseIdentityRow(identityRows.results[0]);
@@ -330,6 +335,10 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
       return {
         ...base,
         firstEntry: seasons.at(-1)?.year ?? null,
+        activeSeason:
+          maxSeasonRows.results.length > 0
+            ? asNumber(asRecord(maxSeasonRows.results[0], "max season row").year, "max season")
+            : null,
         lineage: withEarlyStint(
           base,
           seasons,
@@ -634,7 +643,7 @@ function mergeStandings(
   }
 }
 
-function parseIdentityRow(row: unknown): Omit<TeamPage, "seasons" | "firstEntry" | "currentSeason" | "lineage"> {
+function parseIdentityRow(row: unknown): Omit<TeamPage, "seasons" | "firstEntry" | "currentSeason" | "lineage" | "activeSeason"> {
   const record = asRecord(row, "team identity row");
   return {
     id: asString(record.id, "team id"),

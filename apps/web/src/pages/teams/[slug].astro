@@ -29,7 +29,7 @@ if (team) {
   );
 }
 
-const currentYear = team?.seasons[0]?.year;
+const currentYear = team?.activeSeason ?? null;
 const flagSrc = store
   ? `/vendor/country-flags/${team?.alpha2Code.toLowerCase()}.svg`
   : null;
@@ -100,7 +100,7 @@ function resultClass(text: string): string {
       ) : null}
 
       <section class="info-panels">
-        {team.currentSeason ? (
+        {team.currentSeason && team.currentSeason.year === currentYear ? (
           <div class="info-panel" aria-label={`${team.currentSeason.year} season`}>
             <h2>{team.currentSeason.year} Season</h2>
             <div class="season-head">
@@ -164,11 +164,6 @@ function resultClass(text: string): string {
           <span class="key"><i class="result-win"></i>Win</span>
           <span class="key"><i class="result-podium"></i>Podium</span>
           <span class="key"><i class="result-points"></i>Points</span>
-          <span class="key"><i class="result-finish"></i>Classified</span>
-          <span class="key"><i class="result-ret"></i>Retired</span>
-          <span class="key"><i class="result-dnq"></i>DNQ</span>
-          <span class="key"><i class="result-dsq"></i>DSQ</span>
-          <span class="key"><i class="result-other"></i>DNS / NC</span>
           <span class="key"><sup class="sup-p">P</sup>pole position</span>
           <span class="key"><sup class="sup-f">F</sup>fastest lap</span>
           <span class="key"><sup class="sup-sprint">n</sup>sprint race position</span>
