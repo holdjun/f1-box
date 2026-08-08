@@ -1,0 +1,3 @@
+- [F1 数据源/参考仓库](f1-data-sources.md) — Fast-F1 / f1-dash / jolpica-f1 / f1db，数据回填与增强用
+- [Race 周末页增强（待开发）](race-weekend-enhancements.md) — 赛道图/赛道信息卡/前3名/session 选择器
+- [数据地基完成态](data-foundation-state.md) — R2 vendor 布局/覆盖数字/PR #5 #6/策展副本 .data/vendor，下一任务车队页
