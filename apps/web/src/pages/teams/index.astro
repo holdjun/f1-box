@@ -1,0 +1,94 @@
+---
+import { env } from "cloudflare:workers";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  createD1TeamDatabase,
+  createTeamRepository,
+} from "../../lib/team-repository.js";
+import { getVendorIndexes, logoSrcFor, latestColor } from "../../lib/vendor.js";
+
+const repository = import.meta.env.DEV
+  ? createTeamRepository()
+  : createTeamRepository(createD1TeamDatabase(env.F1_DB));
+
+const [constructors, indexes] = await Promise.all([
+  repository.getConstructors(),
+  getVendorIndexes(import.meta.env.DEV ? undefined : env.F1_DATA),
+]);
+---
+
+<BaseLayout title="Teams" active="teams">
+  <main id="main-content" class="page-shell">
+    <h1>Teams</h1>
+    <div class="team-grid">
+      {constructors.map((team) => (
+        <a
+          class="team-card"
+          href={`/teams/${team.id}`}
+          style={`--team-color: ${latestColor(indexes, team.id) ?? "#84909e"}`}
+        >
+          {logoSrcFor(indexes, team.id) ? (
+            <img class="card-logo" src={logoSrcFor(indexes, team.id)} alt="" />
+          ) : (
+            <span class="card-monogram" aria-hidden="true">
+              {team.name.slice(0, 2).toUpperCase()}
+            </span>
+          )}
+          <span class="card-name">{team.name}</span>
+        </a>
+      ))}
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin: 0 0 1.5rem;
+  }
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1rem;
+  }
+  .team-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background:
+      linear-gradient(
+        160deg,
+        color-mix(in srgb, var(--team-color) 22%, transparent),
+        transparent 60%
+      ),
+      var(--ink-soft);
+    color: var(--paper);
+    text-decoration: none;
+  }
+  .team-card:hover {
+    border-color: var(--team-color);
+  }
+  .card-logo {
+    height: 3rem;
+    width: auto;
+  }
+  .card-monogram {
+    display: grid;
+    place-items: center;
+    height: 3rem;
+    width: 3rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--team-color) 45%, transparent);
+    font-family: var(--display);
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+  .card-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+</style>

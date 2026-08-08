@@ -14,6 +14,13 @@
       "bucket_name": "f1-box-data"
     }
   ],
+  "d1_databases": [
+    {
+      "binding": "F1_DB",
+      "database_name": "f1db",
+      "database_id": "50683ee9-c236-4bc5-bc11-4e8151916f54"
+    }
+  ],
   "kv_namespaces": [
     {
       "binding": "SESSION",

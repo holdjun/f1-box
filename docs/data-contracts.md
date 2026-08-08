@@ -17,6 +17,16 @@
 
 manifest（latest.json）schema 不变；新产物走独立键，不经过 manifest。
 
+## D1 历史参考库（f1db）
+
+绑定 env.F1_DB（database f1db）。内容为 f1db 官方 SQLite release 全量（30 张表 + 18 个视图，含 race_result / fastest_lap 等比赛级结果视图），scripts/f1db-d1-dump.sh 按表拆分成导入 SQL（建表序天然父表优先、剥离显式事务语句），scripts/f1db-d1-import.sh 逐文件导入；data-sync action 每次上游 release 整库重导（约 25 分钟）。页面可直接 SQL 查询表与视图。
+
+读取：apps/web/src/lib/team-repository.ts 的 createTeamRepository(env.F1_DB)；DEV（astro dev）回退 fixtures/team-ferrari.json。行经边界解析后才进入类型世界，字段缺失即抛错。当前消费方：/teams/[slug]。
+
+## vendor 资产路由 /vendor/[...key]
+
+流式输出 R2 vendor/ 下的策展资产（车队 logo、国旗、颜色 JSON 等）。键段白名单 [A-Za-z0-9@._-]，DEV 返回 404（页面按降级规则回退 monogram/中性色）。响应 cache-control: public, max-age=86400。
+
 ## v1/seasons/{year}/directory.json
 
 ```ts

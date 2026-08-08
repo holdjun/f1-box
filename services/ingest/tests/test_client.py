@@ -112,7 +112,37 @@ def test_fetch_retries_only_bounded_transient_statuses(
     run(scenario())
 
     assert attempts == 3
-    assert delays == [0.05, 0.1]
+    assert delays == [5.0, 10.0]
+
+
+def test_fetch_honors_retry_after_header_on_429(tmp_path: Path) -> None:
+    attempts = 0
+    delays: list[float] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            return httpx.Response(
+                429, headers={"Retry-After": "7"}, request=request
+            )
+        return httpx.Response(200, json={"MRData": {}}, request=request)
+
+    async def fake_sleep(delay: float) -> None:
+        delays.append(delay)
+
+    async def scenario():  # type: ignore[no-untyped-def]
+        async with JolpicaClient(
+            raw_dir=tmp_path,
+            transport=httpx.MockTransport(handler),
+            sleep=fake_sleep,
+        ) as client:
+            return await client.fetch("/ergast/f1/2026.json")
+
+    run(scenario())
+
+    assert attempts == 2
+    assert delays == [7.0]
 
 
 def test_fetch_stops_after_bounded_timeout_retries(tmp_path: Path) -> None:
@@ -207,7 +237,7 @@ def test_fetch_rejects_unsafe_paths(tmp_path: Path, path: str) -> None:
         run(scenario())
 
 
-def test_client_limits_total_concurrency_to_six(tmp_path: Path) -> None:
+def test_client_limits_total_concurrency_to_two(tmp_path: Path) -> None:
     active = 0
     maximum = 0
 
@@ -237,4 +267,4 @@ def test_client_limits_total_concurrency_to_six(tmp_path: Path) -> None:
 
     run(scenario())
 
-    assert maximum == 6
+    assert maximum == 2

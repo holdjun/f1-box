@@ -1,29 +1,47 @@
 ---
-import SeasonError from "../../../components/SeasonError.astro";
-import BaseLayout from "../../../layouts/BaseLayout.astro";
-import { teamGrid } from "../../../lib/derive.js";
-import { resolveYearContext } from "../../../lib/year-context.js";
-import { teamColor } from "../../../lib/tokens.js";
+import { env } from "cloudflare:workers";
 
-const ctx = await resolveYearContext(Astro);
-if (ctx.status) Astro.response.status = ctx.status;
-const { year, index, season, rest } = ctx;
-const grid = season ? teamGrid(season) : [];
-const slug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import {
+  createD1TeamDatabase,
+  createTeamRepository,
+} from "../../../lib/team-repository.js";
+import { colorForYear, getVendorIndexes } from "../../../lib/vendor.js";
+
+const year = Number(Astro.params.year);
+const repository = import.meta.env.DEV
+  ? createTeamRepository()
+  : createTeamRepository(createD1TeamDatabase(env.F1_DB));
+
+const [data, indexes] = await Promise.all([
+  repository.getYearTeams(year),
+  getVendorIndexes(import.meta.env.DEV ? undefined : env.F1_DATA),
+]);
+if (!data) Astro.response.status = 404;
 ---
 
-{season ? (
-  <BaseLayout title={`${season.season} Teams`} active="teams" year={year} availableYears={index.availableYears} rest={rest}>
+{data ? (
+  <BaseLayout
+    title={`${year} Teams`}
+    active="teams"
+    year={year}
+    availableYears={data.years}
+    rest="/teams"
+  >
     <main id="main-content" class="page-shell">
-      <h1>{season.season} Teams</h1>
+      <h1>{year} Teams</h1>
       <div class="team-grid">
-        {grid.map((team) => (
+        {data.teams.map((team) => (
           <a
             class="team-card"
-            style={`--team-color: ${teamColor(team.name)}`}
-            href={`/${year}/teams/${slug(team.name)}`}
+            style={`--team-color: ${colorForYear(indexes, team.id, year) ?? "#84909e"}`}
+            href={`/teams/${team.id}`}
           >
-            <span class="team-card__pos">{String(team.position).padStart(2, "0")}</span>
+            <span class="team-card__pos">
+              {team.position === null
+                ? "—"
+                : String(team.position).padStart(2, "0")}
+            </span>
             <span class="team-card__name">{team.name}</span>
             <span class="team-card__drivers">{team.drivers.join(" · ")}</span>
             <span class="team-card__pts">{team.points} PTS</span>
@@ -33,18 +51,51 @@ const slug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
     </main>
   </BaseLayout>
 ) : (
-  <SeasonError year={year} index={index} rest={rest} status={ctx.status ?? 503} />
+  <BaseLayout title={`${year} Teams`}>
+    <main id="main-content" class="page-shell">
+      <h1>{year} Teams</h1>
+      <p>No constructor entries recorded for this season.</p>
+    </main>
+  </BaseLayout>
 )}
 
 <style>
-  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
-  .team-card {
-    display: flex; flex-direction: column; gap: 0.25rem; padding: 1.25rem; border-radius: 10px;
-    color: #fff; text-decoration: none;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--team-color) 70%, black), var(--team-color));
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
   }
-  .team-card__pos { font-size: 0.8rem; opacity: 0.8; }
-  .team-card__name { font-weight: 700; font-size: 1.1rem; }
-  .team-card__drivers { font-size: 0.85rem; opacity: 0.9; }
-  .team-card__pts { font-size: 0.8rem; margin-top: 0.5rem; }
+  .team-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1.25rem;
+    border-radius: 10px;
+    color: #fff;
+    text-decoration: none;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--team-color) 70%, black),
+      var(--team-color)
+    );
+  }
+  .team-card:hover {
+    outline: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  .team-card__pos {
+    font-size: 0.8rem;
+    opacity: 0.8;
+  }
+  .team-card__name {
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .team-card__drivers {
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+  .team-card__pts {
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+  }
 </style>

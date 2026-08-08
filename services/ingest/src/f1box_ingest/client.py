@@ -77,12 +77,12 @@ class JolpicaClient:
         self._clock = clock
         self._sleep = sleep
         self._max_attempts = max_attempts
-        self._semaphore = asyncio.Semaphore(6)
+        self._semaphore = asyncio.Semaphore(2)
         self._client = httpx.AsyncClient(
             base_url=base_url,
             transport=transport,
             timeout=httpx.Timeout(10.0),
-            limits=httpx.Limits(max_connections=6, max_keepalive_connections=6),
+            limits=httpx.Limits(max_connections=2, max_keepalive_connections=2),
             follow_redirects=False,
             headers={"User-Agent": "f1-box-ingest/0.1"},
         )
@@ -145,14 +145,23 @@ class JolpicaClient:
                 response.status_code in TRANSIENT_STATUS_CODES
                 and attempt + 1 < self._max_attempts
             ):
+                delay = self._retry_delay(response, attempt)
                 await response.aclose()
-                await self._sleep(0.05 * (2**attempt))
+                await self._sleep(delay)
                 continue
 
             response.raise_for_status()
             return response
 
         raise RuntimeError("retry loop exhausted")
+
+    @staticmethod
+    def _retry_delay(response: httpx.Response, attempt: int) -> float:
+        # 429 限流需要秒级等待；优先遵守上游 Retry-After
+        retry_after = response.headers.get("Retry-After")
+        if retry_after is not None and retry_after.isdigit():
+            return float(retry_after)
+        return 5.0 * (2**attempt)
 
     def _write_snapshot(
         self,

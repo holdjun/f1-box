@@ -10,7 +10,7 @@ interface Props {
 }
 
 const {
-  season = 2026,
+  season,
   sourceName,
   fetchedAt,
   freshness,
@@ -19,15 +19,13 @@ const {
 
 <footer class="site-footer">
   <div class="site-footer__inner page-shell">
-    <p>{season} season data</p>
+    {season !== undefined ? <p>{season} season data</p> : null}
     {sourceName && fetchedAt ? (
       <div class="site-footer__source">
         {freshness && <FreshnessBadge freshness={freshness} />}
         <p>Source: <span>{sourceName}</span></p>
         <p>Fetched {formatUtcDateTime(fetchedAt)}</p>
       </div>
-    ) : (
-      <p class="muted">Night Grid edition</p>
-    )}
+    ) : null}
   </div>
 </footer>

@@ -1,0 +1,622 @@
+---
+import { env } from "cloudflare:workers";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  createD1TeamDatabase,
+  createTeamRepository,
+} from "../../lib/team-repository.js";
+import { alpha2Flag } from "../../lib/tokens.js";
+import { getTeamBranding } from "../../lib/vendor.js";
+
+const slug = (Astro.params.slug ?? "").toLowerCase();
+const repository = import.meta.env.DEV
+  ? createTeamRepository()
+  : createTeamRepository(createD1TeamDatabase(env.F1_DB));
+const store = import.meta.env.DEV ? undefined : env.F1_DATA;
+
+const [team, branding] = await Promise.all([
+  repository.getTeam(slug),
+  getTeamBranding(store, slug),
+]);
+if (!team) Astro.response.status = 404;
+
+// 上游数据最快 30 分钟更新一次，边缘短暂缓存可吸收重复请求
+if (team) {
+  Astro.response.headers.set(
+    "Cache-Control",
+    "public, s-maxage=300, stale-while-revalidate=600",
+  );
+}
+
+const currentYear = team?.activeSeason ?? null;
+const flagSrc = store
+  ? `/vendor/country-flags/${team?.alpha2Code.toLowerCase()}.svg`
+  : null;
+
+// 名次非数字时（DSQ/EX）直接显示原文，不加 P 前缀
+function formatPosition(position: string | null): string {
+  if (position === null) return "—";
+  return /^\d+$/.test(position) ? `P${position}` : position;
+}
+
+function resultClass(text: string): string {
+  if (text === "1") return "result-win";
+  if (text === "2" || text === "3") return "result-podium";
+  if (/^\d+$/.test(text)) {
+    return Number(text) <= 10 ? "result-points" : "result-finish";
+  }
+  if (text === "DNF") return "result-ret";
+  if (text === "DSQ") return "result-dsq";
+  if (text === "DNQ" || text === "DNPQ") return "result-dnq";
+  return "result-other";
+}
+---
+
+{team ? (
+  <BaseLayout
+    title={team.name}
+    description={`${team.fullName} — career statistics and complete race-by-race history.`}
+    active="teams"
+  >
+    <main id="main-content" class="page-shell">
+      <header
+        class="team-hero"
+        style={`--team-color: ${branding.colors[0] ?? "#84909e"}; --team-color-2: ${branding.colors[1] ?? branding.colors[0] ?? "#84909e"}`}
+      >
+        {branding.logoSrc ? (
+          <img class="team-logo" src={branding.logoSrc} alt="" />
+        ) : (
+          <span class="team-monogram" aria-hidden="true"
+            >{team.name.slice(0, 2).toUpperCase()}</span
+          >
+        )}
+        <div>
+          <h1>{team.fullName}</h1>
+          <p class="team-country">
+            {flagSrc ? <img class="flag" src={flagSrc} alt="" /> : null}
+            {team.countryName}
+          </p>
+        </div>
+      </header>
+
+      {team.lineage.length > 0 ? (
+        <p class="lineage" aria-label="Team lineage">
+          <span class="lineage-label">Lineage</span>
+          {team.lineage.map((entry, index) => (
+            <span class="lineage-item">
+              {index > 0 ? <span class="lineage-arrow">→</span> : null}
+              <a class="lineage-chip" href={`/teams/${entry.id}`}>
+                {entry.name}
+                <span class="lineage-years">
+                  {entry.yearTo === null || entry.yearTo === entry.yearFrom
+                    ? entry.yearFrom
+                    : `${entry.yearFrom}–${entry.yearTo}`}
+                </span>
+              </a>
+            </span>
+          ))}
+        </p>
+      ) : null}
+
+      <section class="info-panels">
+        {team.currentSeason && team.currentSeason.year === currentYear ? (
+          <div class="info-panel" aria-label={`${team.currentSeason.year} season`}>
+            <h2>{team.currentSeason.year} Season</h2>
+            <div class="season-head">
+              <div>
+                <span>Season Position</span>
+                <strong>{team.currentSeason.position ?? "—"}</strong>
+              </div>
+              <div>
+                <span>Season Points</span>
+                <strong>{team.currentSeason.points ?? "—"}</strong>
+              </div>
+            </div>
+            <h3>Grand Prix</h3>
+            <dl>
+              <div><dt>Races</dt><dd>{team.currentSeason.grandPrix.races}</dd></div>
+              <div><dt>Points</dt><dd>{team.currentSeason.grandPrix.points}</dd></div>
+              <div><dt>Wins</dt><dd>{team.currentSeason.grandPrix.wins}</dd></div>
+              <div><dt>Podiums</dt><dd>{team.currentSeason.grandPrix.podiums}</dd></div>
+              <div><dt>Poles</dt><dd>{team.currentSeason.grandPrix.poles}</dd></div>
+              <div><dt>Top 10s</dt><dd>{team.currentSeason.grandPrix.top10s}</dd></div>
+              <div><dt>Fastest Laps</dt><dd>{team.currentSeason.grandPrix.fastestLaps}</dd></div>
+              <div><dt>DNFs</dt><dd>{team.currentSeason.grandPrix.dnfs}</dd></div>
+            </dl>
+            {team.currentSeason.sprint.races > 0 ? (
+              <>
+                <h3>Sprint</h3>
+                <dl>
+                  <div><dt>Races</dt><dd>{team.currentSeason.sprint.races}</dd></div>
+                  <div><dt>Points</dt><dd>{team.currentSeason.sprint.points}</dd></div>
+                  <div><dt>Wins</dt><dd>{team.currentSeason.sprint.wins}</dd></div>
+                  <div><dt>Podiums</dt><dd>{team.currentSeason.sprint.podiums}</dd></div>
+                  <div><dt>Poles</dt><dd>{team.currentSeason.sprint.poles}</dd></div>
+                  <div><dt>Top 10s</dt><dd>{team.currentSeason.sprint.top10s}</dd></div>
+                </dl>
+              </>
+            ) : null}
+          </div>
+        ) : null}
+        <div class="info-panel" aria-label="Team summary">
+          <h2>Team Summary</h2>
+          <dl>
+            <div><dt>Entries</dt><dd>{team.totals.entries}</dd></div>
+            <div><dt>Wins</dt><dd>{team.totals.wins}</dd></div>
+            <div><dt>Podiums</dt><dd>{team.totals.podiums}</dd></div>
+            <div><dt>Poles</dt><dd>{team.totals.poles}</dd></div>
+            <div><dt>Fastest laps</dt><dd>{team.totals.fastestLaps}</dd></div>
+            <div><dt>Points</dt><dd>{team.totals.points}</dd></div>
+            <div><dt>Championships</dt><dd>{team.totals.championships}</dd></div>
+            <div>
+              <dt>Best position</dt>
+              <dd>{team.totals.bestChampionshipPosition ?? "—"}</dd>
+            </div>
+            <div><dt>First Team Entry</dt><dd>{team.firstEntry}</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section aria-labelledby="history-title">
+        <h2 id="history-title">Season results</h2>
+        <p class="legend" aria-label="Table legend">
+          <span class="key"><i class="result-win"></i>Win</span>
+          <span class="key"><i class="result-podium"></i>Podium</span>
+          <span class="key"><i class="result-points"></i>Points</span>
+          <span class="key"><sup class="sup-p">P</sup>pole position</span>
+          <span class="key"><sup class="sup-f">F</sup>fastest lap</span>
+          <span class="key"><sup class="sup-sprint">n</sup>sprint race position</span>
+          <span class="key"><span class="dagger">†</span>retired but classified</span>
+          <span class="key driver-champion">driver champion</span>
+        </p>
+        {team.seasons.map((season) => (
+          <section
+            class:list={[
+              "season-block",
+              {
+                champion: season.championshipWon,
+                current: season.year === currentYear,
+              },
+            ]}
+          >
+            <h3>
+              <span class="season-year">{season.year}</span>
+              <span class="season-meta">
+                {[season.chassis.join(" / "), season.engines.join(" / ")]
+                  .filter((part) => part.length > 0)
+                  .join(" · ")}
+              </span>
+              {season.tyres.map((tyre) => (
+                <span class={`tyre-badge tyre-${tyre}`} title={`Tyres: ${tyre}`}>
+                  {tyre}
+                </span>
+              ))}
+              {season.points !== null ? (
+                <span class="season-pts">
+                  {season.points} pts · {formatPosition(season.position)}
+                </span>
+              ) : null}
+            </h3>
+            <div class="table-scroll" tabindex="0">
+              <table aria-label={`${season.year} race results`}>
+                <thead>
+                  <tr>
+                    <th scope="col" class="driver-col">Driver</th>
+                    {season.rounds.map((round) => (
+                      <th scope="col" title={round.name}>
+                        <a class="round-link" href={`/circuits/${round.circuitId}`}>
+                          {round.code}
+                        </a>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {season.drivers.length === 0 ? (
+                    <tr>
+                      <td class="empty-cell" colspan={season.rounds.length + 1}>
+                        No race entries recorded.
+                      </td>
+                    </tr>
+                  ) : (
+                    season.drivers.map((driver) => (
+                      <tr>
+                        <th scope="row" class="driver-cell">
+                          {driver.flagCode ? (
+                            <span class="flag-emoji" aria-hidden="true">
+                              {alpha2Flag(driver.flagCode)}
+                            </span>
+                          ) : null}
+                          <a
+                            class:list={[
+                              "driver-link",
+                              { "driver-champion": driver.champion },
+                            ]}
+                            href={`/drivers/${driver.id}`}
+                            title={driver.champion ? "Drivers' champion" : undefined}
+                          >
+                            {driver.name}
+                          </a>
+                        </th>
+                        {driver.results.map((cell) =>
+                          cell ? (
+                            <td class={resultClass(cell.text)}>
+                              {cell.text}
+                              {cell.classified ? <span class="dagger">†</span> : null}
+                              {cell.pole ? <sup class="sup-p">P</sup> : null}
+                              {cell.fastest ? <sup class="sup-f">F</sup> : null}
+                              {cell.sprintRank !== null ? (
+                                <sup class="sup-sprint">{cell.sprintRank}</sup>
+                              ) : null}
+                            </td>
+                          ) : (
+                            <td class="result-none"></td>
+                          ),
+                        )}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ))}
+      </section>
+    </main>
+  </BaseLayout>
+) : (
+  <BaseLayout title="Team not found">
+    <main id="main-content" class="page-shell">
+      <h1>Team not found</h1>
+      <p>No constructor with this identifier exists in the database.</p>
+    </main>
+  </BaseLayout>
+)}
+
+<style>
+  .team-hero {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem 2.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 14px;
+    color: #fff;
+    background:
+      radial-gradient(120% 170% at 88% -30%, rgba(255, 255, 255, 0.25), transparent 55%),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--team-color) 72%, black),
+        var(--team-color-2)
+      );
+    box-shadow: 0 20px 44px -24px color-mix(in srgb, var(--team-color) 65%, transparent);
+  }
+  .team-logo {
+    height: 4rem;
+    width: auto;
+    flex: none;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+  }
+  .team-monogram {
+    display: grid;
+    place-items: center;
+    height: 4rem;
+    width: 4rem;
+    flex: none;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    font-family: var(--display);
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .team-hero h1 {
+    margin: 0;
+    font-size: clamp(1.9rem, 4vw, 2.7rem);
+    letter-spacing: 0.01em;
+  }
+  .team-country {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.3rem 0 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .flag {
+    height: 0.95rem;
+    width: auto;
+  }
+  .info-panels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-top: 1.75rem;
+  }
+  .lineage {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 1rem 0 0;
+    font-size: 0.78rem;
+  }
+  .lineage-label {
+    margin-right: 0.3rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+  }
+  .lineage-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .lineage-arrow {
+    color: var(--muted);
+  }
+  .lineage-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.15rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted-light);
+    text-decoration: none;
+  }
+  .lineage-chip:hover {
+    border-color: var(--coral);
+    color: var(--coral);
+  }
+  .lineage-years {
+    color: var(--muted);
+    font-size: 0.68rem;
+  }
+  .info-panel {
+    flex: 1 1 18rem;
+    padding: 1.1rem 1.35rem 1.35rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--ink-soft);
+  }
+  .info-panel h2 {
+    margin: 0 0 0.9rem;
+    font-family: var(--display);
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .info-panel h2::before {
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-right: 0.5rem;
+    background: var(--coral);
+    content: "";
+  }
+  .info-panel h3 {
+    margin: 1rem 0 0.45rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .season-head {
+    display: flex;
+    gap: 2.5rem;
+  }
+  .season-head span {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+  .season-head strong {
+    font-family: var(--display);
+    font-size: 1.9rem;
+    line-height: 1.1;
+  }
+  .info-panel dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+    gap: 0.7rem 1rem;
+    margin: 0;
+  }
+  .info-panel dt {
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+  .info-panel dd {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .tyre-badge {
+    display: inline-grid;
+    place-items: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 4px;
+    background: #5a6470;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  .tyre-P { background: #ffd12e; color: #c00000; }
+  .tyre-B { background: #cc0000; }
+  .tyre-M { background: #1f6bb5; }
+  .tyre-G { background: #2a8fbd; }
+  .tyre-D { background: #2e8b57; }
+  .tyre-F { background: #b03a2e; }
+  .tyre-A { background: #95a5a6; }
+  .tyre-C { background: #e67e22; }
+  .tyre-E { background: #34495e; }
+  .sup-p,
+  .sup-f,
+  .sup-sprint {
+    font-size: 0.55rem;
+    font-weight: 700;
+  }
+  .sup-p { color: #ffc72c; }
+  .sup-f { color: #b06ef7; }
+  .sup-sprint { color: #ff8c42; }
+  .dagger {
+    font-size: 0.7rem;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.1rem;
+    margin: 0.6rem 0 0;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .key i {
+    width: 0.72rem;
+    height: 0.72rem;
+    border-radius: 4px;
+  }
+  .driver-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .driver-link:hover {
+    color: var(--coral);
+    text-decoration: underline;
+  }
+  .driver-champion {
+    color: #ffc72c;
+  }
+  .driver-champion:hover {
+    color: #ffc72c;
+  }
+  .round-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .round-link:hover {
+    color: var(--coral);
+  }
+  .season-block {
+    margin-top: 2rem;
+    padding-left: 0.9rem;
+    border-left: 2px solid var(--line);
+    /* 全部赛季块一次渲染，视口外的块跳过布局与绘制，滚动时按需生成 */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 14rem;
+  }
+  .season-block.champion {
+    border-left-color: #ffc72c;
+  }
+  .season-block.current {
+    border-left-color: var(--coral);
+  }
+  .season-block h3 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0 0 0.5rem;
+  }
+  .season-year {
+    font-family: var(--display);
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .season-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .season-pts {
+    margin-left: auto;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .season-block.champion h3 {
+    color: #ffc72c;
+  }
+  .driver-col {
+    min-width: 11rem;
+  }
+  .driver-cell {
+    min-width: 11rem;
+  }
+  .flag-emoji {
+    margin-right: 0.35rem;
+  }
+  /* 芯片式格子：独立圆角色块，空列也有弱底，网格读起来更整 */
+  .season-block table {
+    border-collapse: separate;
+    border-spacing: 3px 4px;
+  }
+  .season-block th,
+  .season-block td {
+    border-bottom: 0;
+    padding: 0.38rem 0.5rem;
+    border-radius: 5px;
+  }
+  .season-block tbody td {
+    background: rgba(137, 145, 154, 0.08);
+  }
+  .season-block tbody tr:hover td {
+    background: rgba(137, 145, 154, 0.14);
+  }
+  table th[scope="col"]:not(.driver-col) {
+    padding-inline: 0.45rem;
+    font-size: 0.6rem;
+  }
+  table td {
+    padding-inline: 0.45rem;
+    text-align: center;
+  }
+  table td sup {
+    font-size: 0.55rem;
+  }
+  .result-win {
+    background: rgba(247, 201, 72, 0.32) !important;
+    color: #ffe9a8;
+  }
+  .result-podium {
+    background: rgba(126, 212, 145, 0.25) !important;
+    color: #c8f2d3;
+  }
+  .result-points {
+    background: rgba(167, 166, 243, 0.22) !important;
+    color: #d9d8fb;
+  }
+  .result-finish {
+    color: var(--muted-light);
+  }
+  .key .result-finish,
+  .key .result-other {
+    background: rgba(137, 145, 154, 0.18);
+  }
+  .result-ret {
+    background: rgba(224, 143, 213, 0.22) !important;
+    color: #f0cdea;
+  }
+  .result-dsq {
+    background: rgba(220, 80, 80, 0.3) !important;
+    color: #ffd7d7;
+  }
+  .result-dnq {
+    background: rgba(240, 150, 120, 0.22) !important;
+    color: #f8d9cc;
+  }
+  .result-other {
+    color: var(--muted);
+  }
+  .empty-cell {
+    text-align: left !important;
+    color: var(--muted);
+  }
+</style>

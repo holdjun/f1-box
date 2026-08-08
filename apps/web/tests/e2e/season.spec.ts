@@ -72,10 +72,10 @@ test("@desktop drivers and teams directories link to detail pages", async ({
   await expect(page.getByRole("img", { name: /Finishing position by round/ })).toBeVisible();
 
   await page.goto("/2026/teams");
-  const teamLinks = page.locator('main a[href^="/2026/teams/"]');
+  const teamLinks = page.locator('main a[href^="/teams/"]');
   await expect(teamLinks.first()).toBeVisible();
   await teamLinks.first().click();
-  await expect(page.getByRole("img", { name: /Points scored by round/ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
 
 test("@desktop unknown driver under a valid year returns 404", async ({ page }) => {
