@@ -498,7 +498,7 @@ function mergeStandings(
   }
 }
 
-function parseIdentityRow(row: unknown): Omit<TeamPage, "seasons" | "firstEntry" | "currentSeason"> {
+function parseIdentityRow(row: unknown): Omit<TeamPage, "seasons" | "firstEntry" | "currentSeason" | "lineage"> {
   const record = asRecord(row, "team identity row");
   return {
     id: asString(record.id, "team id"),
