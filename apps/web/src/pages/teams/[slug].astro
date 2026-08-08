@@ -62,7 +62,7 @@ function resultClass(text: string): string {
     <main id="main-content" class="page-shell">
       <header
         class="team-hero"
-        style={`--team-color: ${branding.color ?? "#84909e"}`}
+        style={`--team-color: ${branding.colors[0] ?? "#84909e"}; --team-color-2: ${branding.colors[1] ?? branding.colors[0] ?? "#84909e"}`}
       >
         {branding.logoSrc ? (
           <img class="team-logo" src={branding.logoSrc} alt="" />
@@ -293,7 +293,7 @@ function resultClass(text: string): string {
       linear-gradient(
         135deg,
         color-mix(in srgb, var(--team-color) 72%, black),
-        var(--team-color)
+        var(--team-color-2)
       );
     box-shadow: 0 20px 44px -24px color-mix(in srgb, var(--team-color) 65%, transparent);
   }

@@ -3,7 +3,7 @@ export interface VendorStore {
 }
 
 export interface TeamBranding {
-  color: string | null;
+  colors: string[];
   logoSrc: string | null;
 }
 
@@ -63,15 +63,19 @@ export async function getTeamBranding(
 ): Promise<TeamBranding> {
   const indexes = await getVendorIndexes(store);
   return {
-    color: latestColor(indexes, teamId),
+    colors: latestColors(indexes, teamId),
     logoSrc: logoSrcFor(indexes, teamId),
   };
 }
 
-export function latestColor(indexes: VendorIndexes, teamId: string): string | null {
+export function latestColors(indexes: VendorIndexes, teamId: string): string[] {
   const team = indexes.colors?.[teamId];
-  if (!team) return null;
-  return validHex(team.colors[0]);
+  if (!team) return [];
+  return team.colors.filter((c): c is string => Boolean(validHex(c)));
+}
+
+export function latestColor(indexes: VendorIndexes, teamId: string): string | null {
+  return latestColors(indexes, teamId)[0] ?? null;
 }
 
 export function colorForYear(
