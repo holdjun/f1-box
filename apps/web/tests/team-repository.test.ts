@@ -35,7 +35,7 @@ const identityRow = {
 };
 
 const db = fakeDb({
-  "FROM constructor": [identityRow],
+  "co.id = c.country_id": [identityRow],
   "GROUP BY sec.year": [
     { year: 2026, chassis: "SF-26", engines: "067/6", power_units: "Ferrari", tyres: "Pirelli" },
     { year: 1979, chassis: "312T3,312T4", engines: "015", power_units: "Ferrari", tyres: "Michelin" },
@@ -78,6 +78,10 @@ const db = fakeDb({
   "season_driver_standing": [
     { year: 1979, driver_id: "jody-scheckter" },
   ],
+  "constructor_chronology": [
+    { id: "tyrrell", name: "Tyrrell", year_from: 1970, year_to: 1998 },
+    { id: "mercedes", name: "Mercedes", year_from: 2010, year_to: null },
+  ],
   "season_constructor_standing": [
     { year: 2026, position_text: "2", points: 307, championship_won: 0 },
     // 60 年代式多引擎变体：积分累加、名次取最好
@@ -96,6 +100,7 @@ describe("createTeamRepository with database", () => {
     expect(team?.fullName).toBe("Scuderia Ferrari");
     expect(team?.alpha2Code).toBe("IT");
     expect(team?.firstEntry).toBe(1950);
+    expect(team?.lineage.map((l) => l.id)).toEqual(["tyrrell", "mercedes"]);
     expect(team?.totals.championships).toBe(16);
     expect(team?.seasons.map((s) => s.year)).toEqual([2026, 1979, 1950]);
   });
@@ -165,7 +170,7 @@ describe("createTeamRepository with database", () => {
 
   it("falls back to zero stats when the latest season has no results yet", async () => {
     const preSeasonDb = fakeDb({
-      "FROM constructor": [identityRow],
+      "co.id = c.country_id": [identityRow],
       "GROUP BY sec.year": [
         { year: 2026, chassis: "SF-26", engines: "067/6", power_units: "Ferrari", tyres: "Pirelli" },
       ],
@@ -189,12 +194,12 @@ describe("createTeamRepository with database", () => {
   });
 
   it("returns null for an unknown constructor", async () => {
-    const emptyDb = fakeDb({ "FROM constructor": [] });
+    const emptyDb = fakeDb({ "co.id = c.country_id": [] });
     await expect(createTeamRepository(emptyDb).getTeam("nope")).resolves.toBeNull();
   });
 
   it("throws on a malformed identity row", async () => {
-    const badDb = fakeDb({ "FROM constructor": [{ id: "ferrari" }] });
+    const badDb = fakeDb({ "co.id = c.country_id": [{ id: "ferrari" }] });
     await expect(createTeamRepository(badDb).getTeam("ferrari")).rejects.toThrow(
       /team/i,
     );

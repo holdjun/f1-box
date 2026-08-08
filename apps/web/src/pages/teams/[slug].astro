@@ -86,6 +86,25 @@ function resultClass(text: string): string {
         </div>
       </header>
 
+      {team.lineage.length > 0 ? (
+        <p class="lineage" aria-label="Team lineage">
+          <span class="lineage-label">Lineage</span>
+          {team.lineage.map((entry, index) => (
+            <span class="lineage-item">
+              {index > 0 ? <span class="lineage-arrow">→</span> : null}
+              <a class="lineage-chip" href={`/teams/${entry.id}`}>
+                {entry.name}
+                <span class="lineage-years">
+                  {entry.yearTo === null || entry.yearTo === entry.yearFrom
+                    ? entry.yearFrom
+                    : `${entry.yearFrom}–${entry.yearTo}`}
+                </span>
+              </a>
+            </span>
+          ))}
+        </p>
+      ) : null}
+
       <section class="info-panels">
         {team.currentSeason ? (
           <div class="info-panel" aria-label={`${team.currentSeason.year} season`}>
@@ -327,6 +346,47 @@ function resultClass(text: string): string {
     flex-wrap: wrap;
     gap: 1.25rem;
     margin-top: 1.75rem;
+  }
+  .lineage {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 1rem 0 0;
+    font-size: 0.78rem;
+  }
+  .lineage-label {
+    margin-right: 0.3rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+  }
+  .lineage-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .lineage-arrow {
+    color: var(--muted);
+  }
+  .lineage-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.15rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted-light);
+    text-decoration: none;
+  }
+  .lineage-chip:hover {
+    border-color: var(--coral);
+    color: var(--coral);
+  }
+  .lineage-years {
+    color: var(--muted);
+    font-size: 0.68rem;
   }
   .info-panel {
     flex: 1 1 18rem;

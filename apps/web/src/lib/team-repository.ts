@@ -62,6 +62,13 @@ export interface CurrentSeason {
   sprint: StatsBlock;
 }
 
+export interface LineageEntry {
+  id: string;
+  name: string;
+  yearFrom: number;
+  yearTo: number | null;
+}
+
 export interface TeamPage {
   id: string;
   name: string;
@@ -69,6 +76,7 @@ export interface TeamPage {
   countryName: string;
   alpha2Code: string;
   firstEntry: number | null;
+  lineage: LineageEntry[];
   totals: TeamTotals;
   currentSeason: CurrentSeason | null;
   seasons: TeamSeason[];
@@ -206,6 +214,13 @@ SELECT year, driver_id
 FROM season_driver_standing
 WHERE championship_won = 1`;
 
+const lineageSql = `
+SELECT cc.other_constructor_id AS id, oc.name, cc.year_from, cc.year_to
+FROM constructor_chronology cc
+JOIN constructor oc ON oc.id = cc.other_constructor_id
+WHERE cc.constructor_id = ?1
+ORDER BY cc.position_display_order`;
+
 export function createTeamRepository(db?: TeamDatabase): TeamRepository {
   return {
     async getTeam(slug) {
@@ -229,6 +244,7 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         sprintStatRows,
         sprintPoleRows,
         championRows,
+        lineageRows,
       ] = await db.batch([
         { sql: identitySql, values: [slug] },
         { sql: seasonsSql, values: [slug] },
@@ -241,6 +257,7 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         { sql: sprintStatsSql, values: [slug] },
         { sql: sprintPolesSql, values: [slug] },
         { sql: championsSql, values: [] },
+        { sql: lineageSql, values: [slug] },
       ]);
       if (identityRows.results.length === 0) return null;
       const base = parseIdentityRow(identityRows.results[0]);
@@ -258,6 +275,16 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
       return {
         ...base,
         firstEntry: seasons.at(-1)?.year ?? null,
+        lineage: lineageRows.results.map((row) => {
+          const record = asRecord(row, "lineage row");
+          return {
+            id: asString(record.id, "lineage id"),
+            name: asString(record.name, "lineage name"),
+            yearFrom: asNumber(record.year_from, "lineage year from"),
+            yearTo:
+              record.year_to == null ? null : asNumber(record.year_to, "lineage year to"),
+          };
+        }),
         currentSeason: buildCurrentSeason(
           seasons[0],
           gpStatRows.results,
