@@ -75,6 +75,9 @@ const db = fakeDb({
   "sprint_race_result srr": [
     { year: 2026, races: 1, points: 10, wins: 0, podiums: 1, top10s: 2 },
   ],
+  "season_driver_standing": [
+    { year: 1979, driver_id: "jody-scheckter" },
+  ],
   "season_constructor_standing": [
     { year: 2026, position_text: "2", points: 307, championship_won: 0 },
     // 60 年代式多引擎变体：积分累加、名次取最好
@@ -131,6 +134,10 @@ describe("createTeamRepository with database", () => {
     const ascari = byYear[1950].drivers.find((d) => d.id === "alberto-ascari");
     expect(ascari?.results[0]).toMatchObject({ text: "1" });
     expect(byYear[1950]).toMatchObject({ points: 10, position: "2" });
+    // 车手冠军标记
+    const scheckter = byYear[1979].drivers.find((d) => d.id === "jody-scheckter");
+    expect(scheckter?.champion).toBe(true);
+    expect(leclerc.champion).toBe(false);
   });
 
   it("computes the current season stats blocks", async () => {

@@ -160,6 +160,7 @@ function resultClass(text: string): string {
           <span class="key"><sup class="sup-f">F</sup>fastest lap</span>
           <span class="key"><sup class="sup-sprint">n</sup>sprint race position</span>
           <span class="key"><span class="dagger">†</span>retired but classified</span>
+          <span class="key driver-champion">driver champion</span>
         </p>
         {team.seasons.map((season) => (
           <section
@@ -219,7 +220,14 @@ function resultClass(text: string): string {
                               {alpha2Flag(driver.flagCode)}
                             </span>
                           ) : null}
-                          <a class="driver-link" href={`/drivers/${driver.id}`}>
+                          <a
+                            class:list={[
+                              "driver-link",
+                              { "driver-champion": driver.champion },
+                            ]}
+                            href={`/drivers/${driver.id}`}
+                            title={driver.champion ? "Drivers' champion" : undefined}
+                          >
                             {driver.name}
                           </a>
                         </th>
@@ -435,6 +443,12 @@ function resultClass(text: string): string {
   .driver-link:hover {
     color: var(--coral);
     text-decoration: underline;
+  }
+  .driver-champion {
+    color: #ffc72c;
+  }
+  .driver-champion:hover {
+    color: #ffc72c;
   }
   .round-link {
     color: inherit;

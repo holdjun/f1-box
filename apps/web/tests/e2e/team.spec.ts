@@ -18,6 +18,8 @@ test("ferrari page renders identity, summary and season blocks @desktop", async 
   await expect(page.locator(".season-block.champion")).toHaveCount(16);
   await expect(page.getByText("Historical data: f1db")).toBeVisible();
   await expect(page.getByLabel("Table legend")).toContainText("Win");
+  // 车手冠军名字金色（1979 Scheckter 等）
+  await expect(page.locator(".driver-champion").first()).toBeVisible();
 });
 
 test("current season panel and markers @desktop", async ({ page }) => {

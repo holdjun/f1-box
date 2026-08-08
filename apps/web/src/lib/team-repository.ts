@@ -22,6 +22,7 @@ export interface TeamSeasonDriver {
   id: string;
   name: string;
   flagCode: string | null;
+  champion: boolean;
   results: (RaceCell | null)[];
 }
 
@@ -200,6 +201,11 @@ JOIN sprint_starting_grid_position ssg ON ssg.race_id = ra.id
 WHERE ssg.constructor_id = ?1 AND ssg.position_number = 1
 GROUP BY ra.year`;
 
+const championsSql = `
+SELECT year, driver_id
+FROM season_driver_standing
+WHERE championship_won = 1`;
+
 export function createTeamRepository(db?: TeamDatabase): TeamRepository {
   return {
     async getTeam(slug) {
@@ -222,6 +228,7 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         gpStatRows,
         sprintStatRows,
         sprintPoleRows,
+        championRows,
       ] = await db.batch([
         { sql: identitySql, values: [slug] },
         { sql: seasonsSql, values: [slug] },
@@ -233,6 +240,7 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         { sql: gpStatsSql, values: [slug] },
         { sql: sprintStatsSql, values: [slug] },
         { sql: sprintPolesSql, values: [slug] },
+        { sql: championsSql, values: [] },
       ]);
       if (identityRows.results.length === 0) return null;
       const base = parseIdentityRow(identityRows.results[0]);
@@ -244,6 +252,7 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         resultRows.results,
         sprintRankRows.results,
         standingRows.results,
+        championRows.results,
       );
 
       return {
@@ -323,6 +332,7 @@ function mergeSeasons(
   resultRows: unknown[],
   sprintRankRows: unknown[],
   standingRows: unknown[],
+  championRows: unknown[],
 ): TeamSeason[] {
   const seasons = new Map<number, TeamSeason>();
 
@@ -406,6 +416,15 @@ function mergeSeasons(
     }));
   }
 
+  // 全部赛季块一次渲染前，先标记车手冠军（名字金色）
+  const champions = new Set<string>();
+  for (const row of championRows) {
+    const record = asRecord(row, "champion row");
+    champions.add(
+      `${asNumber(record.year, "champion year")}:${asString(record.driver_id, "champion driver")}`,
+    );
+  }
+
   for (const row of driverRows) {
     const record = asRecord(row, "driver row");
     const year = asNumber(record.year, "driver row year");
@@ -418,6 +437,7 @@ function mergeSeasons(
       name: asString(record.name, "driver name"),
       flagCode:
         record.alpha2_code === null ? null : asString(record.alpha2_code, "driver flag"),
+      champion: champions.has(`${year}:${driverId}`),
       results: retainedRounds.get(year)!.map(
         (round) => byRound?.get(round) ?? null,
       ),

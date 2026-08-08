@@ -9,6 +9,8 @@ if [ -x apps/web/node_modules/.bin/wrangler ]; then
   WRANGLER=apps/web/node_modules/.bin/wrangler
 fi
 
+ls "$DIR"/*.sql > /dev/null 2>&1 || { echo "no .sql files in $DIR" >&2; exit 1; }
+
 for file in "$DIR"/*.sql; do
   echo "importing $(basename "$file")"
   if ! "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --file "$file" > /tmp/d1-import-step.log 2>&1; then
