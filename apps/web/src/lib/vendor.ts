@@ -5,6 +5,15 @@ export interface VendorStore {
 export interface TeamBranding {
   colors: string[];
   logoSrc: string | null;
+  logoVariant: LogoVariant | null;
+}
+
+export type LogoVariant = "color" | "white" | "mono";
+
+interface LogoAsset {
+  file: string;
+  yearFrom: number;
+  variant: LogoVariant;
 }
 
 interface ColorPeriod {
@@ -20,7 +29,21 @@ interface TeamColors {
 
 export interface VendorIndexes {
   colors: Record<string, TeamColors> | null;
-  logos: { file: string; yearFrom: number }[] | null;
+  logos: LogoAsset[] | null;
+}
+
+const VENDOR_CONTENT_TYPES: Record<string, string> = {
+  svg: "image/svg+xml",
+  webp: "image/webp",
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  json: "application/json",
+};
+
+export function vendorContentType(key: string): string {
+  const extension = key.split("/").at(-1)?.split(".").pop()?.toLowerCase() ?? "";
+  return VENDOR_CONTENT_TYPES[extension] ?? "application/octet-stream";
 }
 
 // 一次拉取两份策展 JSON，供整页多队查询复用
@@ -49,8 +72,11 @@ export async function getVendorIndexes(
       ? logosRaw.flatMap((entry) => {
           if (typeof entry !== "object" || entry === null) return [];
           const record = entry as Record<string, unknown>;
-          return typeof record.file === "string" && typeof record.yearFrom === "number"
-            ? [{ file: record.file, yearFrom: record.yearFrom }]
+          const variant = record.variant;
+          return typeof record.file === "string" &&
+            typeof record.yearFrom === "number" &&
+            (variant === "color" || variant === "white" || variant === "mono")
+            ? [{ file: record.file, yearFrom: record.yearFrom, variant }]
             : [];
         })
       : null,
@@ -62,9 +88,11 @@ export async function getTeamBranding(
   teamId: string,
 ): Promise<TeamBranding> {
   const indexes = await getVendorIndexes(store);
+  const logo = logoFor(indexes, teamId);
   return {
     colors: latestColors(indexes, teamId),
-    logoSrc: logoSrcFor(indexes, teamId),
+    logoSrc: logo ? `/vendor/${logo.file}` : null,
+    logoVariant: logo?.variant ?? null,
   };
 }
 
@@ -92,14 +120,26 @@ export function colorForYear(
 }
 
 export function logoSrcFor(indexes: VendorIndexes, teamId: string): string | null {
+  const logo = logoFor(indexes, teamId);
+  return logo ? `/vendor/${logo.file}` : null;
+}
+
+export function logoVariantFor(
+  indexes: VendorIndexes,
+  teamId: string,
+): LogoVariant | null {
+  return logoFor(indexes, teamId)?.variant ?? null;
+}
+
+function logoFor(indexes: VendorIndexes, teamId: string): LogoAsset | null {
   if (!indexes.logos) return null;
   const prefix = `team-logos/${teamId}@`;
-  let best: { file: string; yearFrom: number } | null = null;
+  let best: LogoAsset | null = null;
   for (const entry of indexes.logos) {
     if (!entry.file.startsWith(prefix)) continue;
     if (!best || entry.yearFrom >= best.yearFrom) best = entry;
   }
-  return best ? `/vendor/${best.file}` : null;
+  return best;
 }
 
 async function getVendorJson(

@@ -67,6 +67,7 @@ export interface LineageEntry {
   name: string;
   yearFrom: number;
   yearTo: number | null;
+  segment: "standalone" | "continuity";
 }
 
 export interface TeamPage {
@@ -85,21 +86,7 @@ export interface TeamPage {
 
 export interface TeamRepository {
   getTeam(slug: string): Promise<TeamPage | null>;
-  getYearTeams(year: number): Promise<YearTeams | null>;
   getConstructors(): Promise<ConstructorRef[]>;
-}
-
-export interface YearTeam {
-  id: string;
-  name: string;
-  position: number | null;
-  points: number;
-  drivers: string[];
-}
-
-export interface YearTeams {
-  years: number[];
-  teams: YearTeam[];
 }
 
 export interface ConstructorRef {
@@ -254,30 +241,26 @@ JOIN constructor oc ON oc.id = cc.other_constructor_id
 WHERE cc.constructor_id = ?1
 ORDER BY cc.position_display_order`;
 
-const seasonYearsSql = `SELECT year FROM season ORDER BY year`;
-
 const maxSeasonSql = `SELECT MAX(year) AS year FROM season`;
 
-const yearTeamsSql = `
-SELECT sec.constructor_id AS id, c.name,
-  COALESCE(SUM(scs.points), 0) AS points,
-  MIN(scs.position_number) AS position
-FROM season_entrant_constructor sec
-JOIN constructor c ON c.id = sec.constructor_id
-LEFT JOIN season_constructor_standing scs
-  ON scs.year = sec.year AND scs.constructor_id = sec.constructor_id
-WHERE sec.year = ?1
-GROUP BY sec.constructor_id, c.name
-ORDER BY position IS NULL, position, points DESC`;
-
-const yearTeamDriversSql = `
-SELECT sed.constructor_id, d.name
-FROM season_entrant_driver sed
-JOIN driver d ON d.id = sed.driver_id
-WHERE sed.year = ?1 AND sed.test_driver = 0
-ORDER BY sed.constructor_id, d.name`;
-
-const constructorsSql = `SELECT id, name FROM constructor ORDER BY name`;
+const constructorsSql = `
+WITH latest_season AS (
+  SELECT MAX(year) AS year FROM season
+), current_teams AS (
+  SELECT DISTINCT constructor_id
+  FROM season_entrant_constructor
+  WHERE year = (SELECT year FROM latest_season)
+)
+SELECT c.id, c.name
+FROM constructor c
+LEFT JOIN current_teams current_team ON current_team.constructor_id = c.id
+ORDER BY
+  CASE WHEN current_team.constructor_id IS NULL THEN 1 ELSE 0 END,
+  c.total_championship_wins DESC,
+  c.total_race_wins DESC,
+  c.total_race_entries DESC,
+  c.total_points DESC,
+  c.name`;
 
 export function createTeamRepository(db?: TeamDatabase): TeamRepository {
   return {
@@ -350,6 +333,7 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
               yearFrom: asNumber(record.year_from, "lineage year from"),
               yearTo:
                 record.year_to == null ? null : asNumber(record.year_to, "lineage year to"),
+              segment: "continuity" as const,
             };
           }),
         ),
@@ -360,50 +344,6 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
           sprintPoleRows.results,
         ),
         seasons,
-      };
-    },
-
-    async getYearTeams(year) {
-      if (!db) {
-        if (year !== 2026) return null;
-        const { default: fixture } = await import("./fixtures/year-teams-2026.json");
-        return fixture as YearTeams;
-      }
-
-      const [yearRows, teamRows, driverRows] = await db.batch([
-        { sql: seasonYearsSql, values: [] },
-        { sql: yearTeamsSql, values: [year] },
-        { sql: yearTeamDriversSql, values: [year] },
-      ]);
-      const years = yearRows.results.map((row) =>
-        asNumber(asRecord(row, "season year row").year, "season year"),
-      );
-      if (!years.includes(year)) return null;
-
-      const driversByTeam = new Map<string, string[]>();
-      for (const row of driverRows.results) {
-        const record = asRecord(row, "year team driver row");
-        const list = driversByTeam.get(asString(record.constructor_id, "year team id")) ?? [];
-        list.push(asString(record.name, "year team driver name"));
-        driversByTeam.set(asString(record.constructor_id, "year team id"), list);
-      }
-
-      return {
-        years,
-        teams: teamRows.results.map((row) => {
-          const record = asRecord(row, "year team row");
-          const id = asString(record.id, "year team id");
-          return {
-            id,
-            name: asString(record.name, "year team name"),
-            position:
-              record.position == null
-                ? null
-                : asNumber(record.position, "year team position"),
-            points: asNumber(record.points, "year team points"),
-            drivers: driversByTeam.get(id) ?? [],
-          };
-        }),
       };
     },
 
@@ -425,7 +365,7 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
 }
 
 // 传承链只覆盖近代入口（如 mercedes 从 1970 Tyrrell 起）；
-// 若车队在链起点之前就有参赛赛季（mercedes 1954-55），链首补"早期自身"徽章
+// 若车队在链起点之前有多个不连续的参赛段，按实际赛季拆成多个"早期自身"徽章
 function withEarlyStint(
   base: { id: string; name: string },
   seasons: TeamSeason[],
@@ -433,13 +373,29 @@ function withEarlyStint(
 ): LineageEntry[] {
   const first = lineage[0];
   if (!first) return lineage;
-  const early = seasons.filter((season) => season.year < first.yearFrom);
-  if (early.length === 0) return lineage;
-  return [
-    // seasons 降序，末尾即最早
-    { id: base.id, name: base.name, yearFrom: early.at(-1)!.year, yearTo: early[0].year },
-    ...lineage,
-  ];
+  const earlyYears = [...new Set(
+    seasons
+      .filter((season) => season.year < first.yearFrom)
+      .map((season) => season.year),
+  )].sort((a, b) => a - b);
+  if (earlyYears.length === 0) return lineage;
+
+  const earlyStints: LineageEntry[] = [];
+  for (const year of earlyYears) {
+    const previous = earlyStints.at(-1);
+    if (previous && previous.yearTo === year - 1) {
+      previous.yearTo = year;
+    } else {
+      earlyStints.push({
+        id: base.id,
+        name: base.name,
+        yearFrom: year,
+        yearTo: year,
+        segment: "standalone",
+      });
+    }
+  }
+  return [...earlyStints, ...lineage];
 }
 
 function buildCurrentSeason(

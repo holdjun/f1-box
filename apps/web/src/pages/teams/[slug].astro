@@ -30,6 +30,8 @@ if (team) {
 }
 
 const currentYear = team?.activeSeason ?? null;
+const standaloneLineage = team?.lineage.filter((entry) => entry.segment === "standalone") ?? [];
+const continuityLineage = team?.lineage.filter((entry) => entry.segment === "continuity") ?? [];
 const flagSrc = store
   ? `/vendor/country-flags/${team?.alpha2Code.toLowerCase()}.svg`
   : null;
@@ -64,13 +66,19 @@ function resultClass(text: string): string {
         class="team-hero"
         style={`--team-color: ${branding.colors[0] ?? "#84909e"}; --team-color-2: ${branding.colors[1] ?? branding.colors[0] ?? "#84909e"}`}
       >
-        {branding.logoSrc ? (
-          <img class="team-logo" src={branding.logoSrc} alt="" />
-        ) : (
-          <span class="team-monogram" aria-hidden="true"
-            >{team.name.slice(0, 2).toUpperCase()}</span
-          >
-        )}
+        <span class="team-logo-frame">
+          {branding.logoSrc ? (
+            <img
+              class:list={["team-logo", { "logo-on-light": branding.logoVariant !== "white" }]}
+              src={branding.logoSrc}
+              alt=""
+            />
+          ) : (
+            <span class="team-monogram" aria-hidden="true"
+              >{team.name.slice(0, 2).toUpperCase()}</span
+            >
+          )}
+        </span>
         <div>
           <h1>{team.fullName}</h1>
           <p class="team-country">
@@ -81,22 +89,48 @@ function resultClass(text: string): string {
       </header>
 
       {team.lineage.length > 0 ? (
-        <p class="lineage" aria-label="Team lineage">
-          <span class="lineage-label">Lineage</span>
-          {team.lineage.map((entry, index) => (
-            <span class="lineage-item">
-              {index > 0 ? <span class="lineage-arrow">→</span> : null}
-              <a class="lineage-chip" href={`/teams/${entry.id}`}>
-                {entry.name}
-                <span class="lineage-years">
-                  {entry.yearTo === null || entry.yearTo === entry.yearFrom
-                    ? entry.yearFrom
-                    : `${entry.yearFrom}–${entry.yearTo}`}
-                </span>
-              </a>
-            </span>
-          ))}
-        </p>
+        <div class="lineage" aria-label="Team lineage">
+          {standaloneLineage.length > 0 ? (
+            <div class="lineage-block">
+              <span class="lineage-label">Earlier entries</span>
+              <div class="lineage-list">
+                {standaloneLineage.map((entry, index) => (
+                  <span class="lineage-item">
+                    {index > 0 ? <span class="lineage-separator">·</span> : null}
+                    <a class="lineage-chip" href={`/teams/${entry.id}`}>
+                      {entry.name}
+                      <span class="lineage-years">
+                        {entry.yearTo === null || entry.yearTo === entry.yearFrom
+                          ? entry.yearFrom
+                          : `${entry.yearFrom}–${entry.yearTo}`}
+                      </span>
+                    </a>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {continuityLineage.length > 0 ? (
+            <div class="lineage-block">
+              <span class="lineage-label">Constructor continuity</span>
+              <div class="lineage-list">
+                {continuityLineage.map((entry, index) => (
+                  <span class="lineage-item">
+                    {index > 0 ? <span class="lineage-arrow">→</span> : null}
+                    <a class="lineage-chip" href={`/teams/${entry.id}`}>
+                      {entry.name}
+                      <span class="lineage-years">
+                        {entry.yearTo === null || entry.yearTo === entry.yearFrom
+                          ? entry.yearFrom
+                          : `${entry.yearFrom}–${entry.yearTo}`}
+                      </span>
+                    </a>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
       ) : null}
 
       <section class="info-panels">
@@ -292,11 +326,29 @@ function resultClass(text: string): string {
       );
     box-shadow: 0 20px 44px -24px color-mix(in srgb, var(--team-color) 65%, transparent);
   }
-  .team-logo {
+  .team-logo-frame {
+    display: grid;
+    place-items: center;
+    width: 6rem;
     height: 4rem;
-    width: auto;
+    flex: none;
+  }
+  .team-logo {
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
     flex: none;
     filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+  }
+  .logo-on-light {
+    box-sizing: border-box;
+    padding: 0.45rem 0.7rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.94);
+    filter: none;
   }
   .team-monogram {
     display: grid;
@@ -336,12 +388,22 @@ function resultClass(text: string): string {
     margin-top: 1.75rem;
   }
   .lineage {
+    display: grid;
+    gap: 0.65rem;
+    margin: 1rem 0 0;
+    font-size: 0.78rem;
+  }
+  .lineage-block {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.4rem;
-    margin: 1rem 0 0;
-    font-size: 0.78rem;
+  }
+  .lineage-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
   }
   .lineage-label {
     margin-right: 0.3rem;
@@ -356,6 +418,9 @@ function resultClass(text: string): string {
     gap: 0.4rem;
   }
   .lineage-arrow {
+    color: var(--muted);
+  }
+  .lineage-separator {
     color: var(--muted);
   }
   .lineage-chip {

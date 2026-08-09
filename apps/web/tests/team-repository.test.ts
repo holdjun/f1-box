@@ -108,6 +108,59 @@ describe("createTeamRepository with database", () => {
     expect(team?.seasons.map((s) => s.year)).toEqual([2026, 1979, 1950]);
   });
 
+  it("keeps non-consecutive early entries as separate stints", async () => {
+    const sparseDb = fakeDb({
+      "co.id = c.country_id": [identityRow],
+      "GROUP BY sec.year": [
+        { year: 1980, chassis: null, engines: null, power_units: null, tyres: null },
+        { year: 1978, chassis: null, engines: null, power_units: null, tyres: null },
+      ],
+      "grand_prix gp": [],
+      "position_text = 'DNF'": [],
+      "sprint_starting_grid_position": [],
+      "UNION": [],
+      "race_result rr": [],
+      "position_number IS NOT NULL": [],
+      "sprint_race_result srr": [],
+      "MAX(year)": [{ year: 1980 }],
+      "season_driver_standing": [],
+      "constructor_chronology": [
+        { id: "tyrrell", name: "Tyrrell", year_from: 1990, year_to: null },
+      ],
+      "season_constructor_standing": [],
+    });
+
+    const team = await createTeamRepository(sparseDb).getTeam("ferrari");
+    expect(team?.lineage).toEqual([
+      { id: "ferrari", name: "Ferrari", yearFrom: 1978, yearTo: 1978, segment: "standalone" },
+      { id: "ferrari", name: "Ferrari", yearFrom: 1980, yearTo: 1980, segment: "standalone" },
+      { id: "tyrrell", name: "Tyrrell", yearFrom: 1990, yearTo: null, segment: "continuity" },
+    ]);
+  });
+
+  it("orders the team catalog by current status and career prominence", async () => {
+    let sql = "";
+    const rankedDb: TeamDatabase = {
+      batch(statements) {
+        sql = statements[0].sql;
+        return Promise.resolve([
+          {
+            results: [
+              { id: "ferrari", name: "Ferrari" },
+              { id: "mclaren", name: "McLaren" },
+            ],
+          },
+        ]);
+      },
+    };
+
+    await createTeamRepository(rankedDb).getConstructors();
+    expect(sql).toContain("total_championship_wins DESC");
+    expect(sql).toContain("total_race_wins DESC");
+    expect(sql).toContain("total_race_entries DESC");
+    expect(sql).toContain("season_entrant_constructor");
+  });
+
   it("builds the per-round result matrix with markers", async () => {
     const team = await createTeamRepository(db).getTeam("ferrari");
     const byYear = Object.fromEntries(team!.seasons.map((s) => [s.year, s]));

@@ -1,12 +1,7 @@
 import { env } from "cloudflare:workers";
 import type { APIRoute } from "astro";
 
-const CONTENT_TYPES: Record<string, string> = {
-  svg: "image/svg+xml",
-  webp: "image/webp",
-  png: "image/png",
-  json: "application/json",
-};
+import { vendorContentType } from "../../lib/vendor.js";
 
 const KEY_SEGMENT = /^[A-Za-z0-9@._-]+$/;
 
@@ -30,10 +25,9 @@ export const GET: APIRoute = async ({ params }) => {
     return new Response(null, { status: 404 });
   }
 
-  const extension = segments[segments.length - 1].split(".").pop() ?? "";
   return new Response(object.body, {
     headers: {
-      "content-type": CONTENT_TYPES[extension] ?? "application/octet-stream",
+      "content-type": vendorContentType(segments[segments.length - 1]),
       "cache-control": "public, max-age=86400",
     },
   });

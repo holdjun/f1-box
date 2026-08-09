@@ -6,7 +6,12 @@ import {
   createD1TeamDatabase,
   createTeamRepository,
 } from "../../lib/team-repository.js";
-import { getVendorIndexes, logoSrcFor, latestColor } from "../../lib/vendor.js";
+import {
+  getVendorIndexes,
+  logoSrcFor,
+  logoVariantFor,
+  latestColor,
+} from "../../lib/vendor.js";
 
 const repository = import.meta.env.DEV
   ? createTeamRepository()
@@ -28,13 +33,22 @@ const [constructors, indexes] = await Promise.all([
           href={`/teams/${team.id}`}
           style={`--team-color: ${latestColor(indexes, team.id) ?? "#84909e"}`}
         >
-          {logoSrcFor(indexes, team.id) ? (
-            <img class="card-logo" src={logoSrcFor(indexes, team.id)} alt="" />
-          ) : (
-            <span class="card-monogram" aria-hidden="true">
-              {team.name.slice(0, 2).toUpperCase()}
-            </span>
-          )}
+          <span class="card-logo-frame">
+            {logoSrcFor(indexes, team.id) ? (
+              <img
+                class:list={[
+                  "card-logo",
+                  { "logo-on-light": logoVariantFor(indexes, team.id) !== "white" },
+                ]}
+                src={logoSrcFor(indexes, team.id)}
+                alt=""
+              />
+            ) : (
+              <span class="card-monogram" aria-hidden="true">
+                {team.name.slice(0, 2).toUpperCase()}
+              </span>
+            )}
+          </span>
           <span class="card-name">{team.name}</span>
         </a>
       ))}
@@ -72,9 +86,26 @@ const [constructors, indexes] = await Promise.all([
   .team-card:hover {
     border-color: var(--team-color);
   }
-  .card-logo {
+  .card-logo-frame {
+    display: grid;
+    place-items: center;
+    width: 8rem;
     height: 3rem;
-    width: auto;
+    flex: none;
+  }
+  .card-logo {
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .logo-on-light {
+    box-sizing: border-box;
+    padding: 0.3rem 0.55rem;
+    border-radius: 0.4rem;
+    background: rgba(255, 255, 255, 0.94);
   }
   .card-monogram {
     display: grid;

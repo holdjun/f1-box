@@ -16,6 +16,10 @@ test("@desktop racing page lists the full calendar", async ({ page }) => {
   const raceLinks = page.locator('main a[href^="/2026/racing/"]');
   await expect(raceLinks).toHaveCount(22);
   await expect(page.getByRole("navigation", { name: "Season" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Teams" })).toHaveAttribute(
+    "href",
+    "/teams",
+  );
 });
 
 test("@desktop race detail shows schedule and classifications", async ({

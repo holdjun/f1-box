@@ -93,8 +93,72 @@ test("teams index lists all constructors @desktop", async ({ page }) => {
   await expect(page.locator('a[href="/teams/mercedes"]')).toBeVisible();
 });
 
-test("year teams grid links to global team pages @desktop", async ({ page }) => {
+test("team logos use a stable contain frame @desktop", async ({ page }) => {
+  await page.goto("/teams");
+
+  const frame = page.locator(".card-logo-frame").first();
+  await expect(frame).toBeVisible();
+  await expect(frame).toHaveCSS("width", "128px");
+  await expect(frame).toHaveCSS("height", "48px");
+  const cardLogoFit = await frame.evaluate((element) => {
+    const scope = [...element.attributes].find((attribute) =>
+      attribute.name.startsWith("data-astro-cid-"),
+    );
+    const image = document.createElement("img");
+    image.className = "card-logo";
+    image.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/>";
+    if (scope) image.setAttribute(scope.name, "");
+    element.appendChild(image);
+    return getComputedStyle(image).objectFit;
+  });
+  expect(cardLogoFit).toBe("contain");
+  const cardLogoBounds = await frame.evaluate((element) => {
+    const image = element.querySelector("img.card-logo")!;
+    const frameBox = element.getBoundingClientRect();
+    const imageBox = image.getBoundingClientRect();
+    return { frameHeight: frameBox.height, imageHeight: imageBox.height };
+  });
+  expect(cardLogoBounds.imageHeight).toBeLessThanOrEqual(cardLogoBounds.frameHeight);
+  const cardLogoBoxSizing = await frame.evaluate((element) => {
+    const scope = [...element.attributes].find((attribute) =>
+      attribute.name.startsWith("data-astro-cid-"),
+    );
+    const image = document.createElement("img");
+    image.className = "card-logo logo-on-light";
+    if (scope) image.setAttribute(scope.name, "");
+    element.appendChild(image);
+    return getComputedStyle(image).boxSizing;
+  });
+  expect(cardLogoBoxSizing).toBe("border-box");
+
+  await page.goto("/teams/ferrari");
+  await expect(page.locator(".team-logo-frame")).toHaveCSS("width", "96px");
+  await expect(page.locator(".team-logo-frame")).toHaveCSS("height", "64px");
+  const teamLogoFit = await page.locator(".team-logo-frame").evaluate((element) => {
+    const scope = [...element.attributes].find((attribute) =>
+      attribute.name.startsWith("data-astro-cid-"),
+    );
+    const image = document.createElement("img");
+    image.className = "team-logo";
+    if (scope) image.setAttribute(scope.name, "");
+    element.appendChild(image);
+    return getComputedStyle(image).objectFit;
+  });
+  expect(teamLogoFit).toBe("contain");
+});
+
+test("year teams route redirects to the global team catalog @desktop", async ({ page }) => {
   await page.goto("/2026/teams");
-  await expect(page.locator(".team-card")).toHaveCount(11);
+  await page.waitForURL(/\/teams$/);
+  await expect(page.locator(".team-card")).toHaveCount(187);
+  await expect(page.locator(".team-card").first()).not.toContainText("PTS");
+  await expect(page.locator(".team-card").first()).not.toContainText("2026");
+  await expect(page.getByRole("navigation", { name: "Season" })).not.toBeVisible();
   await expect(page.locator('a[href="/teams/ferrari"]').first()).toBeVisible();
+});
+
+test("year team detail route redirects to the global team detail page @desktop", async ({ page }) => {
+  await page.goto("/2026/teams/ferrari");
+  await page.waitForURL(/\/teams\/ferrari$/);
+  await expect(page.locator("main h1")).toHaveText("Scuderia Ferrari");
 });
