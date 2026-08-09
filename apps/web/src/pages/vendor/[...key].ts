@@ -20,7 +20,10 @@ export const GET: APIRoute = async ({ params }) => {
     return new Response(null, { status: 404 });
   }
 
-  const object = await env.F1_DATA.get(`vendor/${segments.join("/")}`);
+  const key = `vendor/${segments.join("/")}`;
+  const previewOverrides = (env as typeof env & { F1_PREVIEW_OVERRIDES?: R2Bucket })
+    .F1_PREVIEW_OVERRIDES;
+  const object = (await previewOverrides?.get(key)) ?? (await env.F1_DATA.get(key));
   if (!object) {
     return new Response(null, { status: 404 });
   }

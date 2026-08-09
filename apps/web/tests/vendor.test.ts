@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { logoVariantFor, vendorContentType } from "../src/lib/vendor.js";
+import {
+  getVendorIndexes,
+  logoVariantFor,
+  vendorContentType,
+  type VendorStore,
+} from "../src/lib/vendor.js";
 
 describe("vendorContentType", () => {
   it("serves common logo formats with image MIME types", () => {
@@ -26,5 +31,35 @@ describe("vendorContentType", () => {
     expect(logoVariantFor(indexes, "ferrari")).toBe("white");
     expect(logoVariantFor(indexes, "arrows")).toBe("color");
     expect(logoVariantFor(indexes, "unknown")).toBeNull();
+  });
+
+  it("prefers preview logo overrides while retaining base vendor data", async () => {
+    const base: VendorStore = {
+      async get(key) {
+        if (key === "vendor/team-colors/team-colors.json") {
+          return { text: async () => JSON.stringify({ teams: { ferrari: { colors: ["#dc0000"] } } }) };
+        }
+        return {
+          text: async () => JSON.stringify({
+            logos: [{ file: "team-logos/ferrari@2026.webp", yearFrom: 2026, variant: "white" }],
+          }),
+        };
+      },
+    };
+    const preview: VendorStore = {
+      async get(key) {
+        if (key !== "vendor/team-logos/logos.json") return null;
+        return {
+          text: async () => JSON.stringify({
+            logos: [{ file: "team-logos/ferrari@2026.png", yearFrom: 2026, variant: "color" }],
+          }),
+        };
+      },
+    };
+
+    const indexes = await getVendorIndexes(base, preview);
+    expect(indexes.colors?.ferrari.colors).toEqual(["#dc0000"]);
+    expect(indexes.logos?.[0].file).toBe("team-logos/ferrari@2026.png");
+    expect(indexes.logos?.[0].variant).toBe("color");
   });
 });

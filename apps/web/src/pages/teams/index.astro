@@ -16,10 +16,14 @@ import {
 const repository = import.meta.env.DEV
   ? createTeamRepository()
   : createTeamRepository(createD1TeamDatabase(env.F1_DB));
+const store = import.meta.env.DEV ? undefined : env.F1_DATA;
+const previewOverrides = import.meta.env.DEV
+  ? undefined
+  : (env as typeof env & { F1_PREVIEW_OVERRIDES?: R2Bucket }).F1_PREVIEW_OVERRIDES;
 
 const [constructors, indexes] = await Promise.all([
   repository.getConstructors(),
-  getVendorIndexes(import.meta.env.DEV ? undefined : env.F1_DATA),
+  getVendorIndexes(store, previewOverrides),
 ]);
 ---
 

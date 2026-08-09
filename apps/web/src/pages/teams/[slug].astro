@@ -14,10 +14,13 @@ const repository = import.meta.env.DEV
   ? createTeamRepository()
   : createTeamRepository(createD1TeamDatabase(env.F1_DB));
 const store = import.meta.env.DEV ? undefined : env.F1_DATA;
+const previewOverrides = import.meta.env.DEV
+  ? undefined
+  : (env as typeof env & { F1_PREVIEW_OVERRIDES?: R2Bucket }).F1_PREVIEW_OVERRIDES;
 
 const [team, branding] = await Promise.all([
   repository.getTeam(slug),
-  getTeamBranding(store, slug),
+  getTeamBranding(store, slug, previewOverrides),
 ]);
 if (!team) Astro.response.status = 404;
 

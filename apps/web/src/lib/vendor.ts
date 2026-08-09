@@ -49,12 +49,13 @@ export function vendorContentType(key: string): string {
 // 一次拉取两份策展 JSON，供整页多队查询复用
 export async function getVendorIndexes(
   store: VendorStore | undefined,
+  overrideStore?: VendorStore,
 ): Promise<VendorIndexes> {
   if (!store) return { colors: null, logos: null };
 
   const [colors, logos] = await Promise.all([
-    getVendorJson(store, "team-colors/team-colors.json"),
-    getVendorJson(store, "team-logos/logos.json"),
+    getVendorJson(store, "team-colors/team-colors.json", overrideStore),
+    getVendorJson(store, "team-logos/logos.json", overrideStore),
   ]);
 
   const colorsIndex =
@@ -86,8 +87,9 @@ export async function getVendorIndexes(
 export async function getTeamBranding(
   store: VendorStore | undefined,
   teamId: string,
+  overrideStore?: VendorStore,
 ): Promise<TeamBranding> {
-  const indexes = await getVendorIndexes(store);
+  const indexes = await getVendorIndexes(store, overrideStore);
   const logo = logoFor(indexes, teamId);
   return {
     colors: latestColors(indexes, teamId),
@@ -145,9 +147,12 @@ function logoFor(indexes: VendorIndexes, teamId: string): LogoAsset | null {
 async function getVendorJson(
   store: VendorStore,
   key: string,
+  overrideStore?: VendorStore,
 ): Promise<unknown> {
   try {
-    const object = await store.get(`vendor/${key}`);
+    const object =
+      (overrideStore ? await overrideStore.get(`vendor/${key}`) : null) ??
+      (await store.get(`vendor/${key}`));
     if (!object) return null;
     return JSON.parse(await object.text());
   } catch (error) {

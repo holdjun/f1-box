@@ -12,6 +12,10 @@
     {
       "binding": "F1_DATA",
       "bucket_name": "f1-box-data"
+    },
+    {
+      "binding": "F1_PREVIEW_OVERRIDES",
+      "bucket_name": "f1-box-preview-overrides"
     }
   ],
   "d1_databases": [
