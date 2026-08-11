@@ -7,24 +7,17 @@ import {
   createTeamRepository,
 } from "../../lib/team-repository.js";
 import {
-  getVendorIndexes,
   logoSrcFor,
   logoVariantFor,
   latestColor,
+  vendorIndexes,
 } from "../../lib/vendor.js";
 
 const repository = import.meta.env.DEV
   ? createTeamRepository()
   : createTeamRepository(createD1TeamDatabase(env.F1_DB));
-const store = import.meta.env.DEV ? undefined : env.F1_DATA;
-const previewOverrides = import.meta.env.DEV
-  ? undefined
-  : (env as typeof env & { F1_PREVIEW_OVERRIDES?: R2Bucket }).F1_PREVIEW_OVERRIDES;
 
-const [constructors, indexes] = await Promise.all([
-  repository.getConstructors(),
-  getVendorIndexes(store, previewOverrides),
-]);
+const constructors = await repository.getConstructors();
 ---
 
 <BaseLayout title="Teams" active="teams">
@@ -35,16 +28,16 @@ const [constructors, indexes] = await Promise.all([
         <a
           class="team-card"
           href={`/teams/${team.id}`}
-          style={`--team-color: ${latestColor(indexes, team.id) ?? "#84909e"}`}
+          style={`--team-color: ${latestColor(vendorIndexes, team.id) ?? "#84909e"}`}
         >
           <span class="card-logo-frame">
-            {logoSrcFor(indexes, team.id) ? (
+            {logoSrcFor(vendorIndexes, team.id) ? (
               <img
                 class:list={[
                   "card-logo",
-                  { "logo-on-light": logoVariantFor(indexes, team.id) !== "white" },
+                  { "logo-on-light": logoVariantFor(vendorIndexes, team.id) !== "white" },
                 ]}
-                src={logoSrcFor(indexes, team.id)}
+                src={logoSrcFor(vendorIndexes, team.id)}
                 alt=""
               />
             ) : (

@@ -28,3 +28,9 @@ metadata:
 - /teams/{slug} 详情页：身份头（双色 hero、最新 logo、Lineage 传承链徽章可点击、早期自身 stint 自动补）+ Season 面板（GP/Sprint）+ Team Summary + wiki 式逐场矩阵（P/F/冲刺排名上标、†、车手冠军金字、轮胎徽章、夺冠/当前 accent、将来轮次空列）。
 - 预留未做：今年特写车手卡、视觉精修、车手链接（等 PR #5 全局车手页合并）。
 - e2e 经验：astro dev toolbar 会注入额外 h1，选择器要限定 main 作用域。
+
+2026-08-11 策展资产进仓库（PR #8 内完成）：
+
+- vendor 策展资产全部迁出 R2：logo 图片（65 张）与国旗（251 张）进 apps/web/public/vendor/，logos.json 与 team-colors.json 进 apps/web/src/data/ 构建期内联；vendor.ts 不再读 R2，DEV 与生产同源，本地 dev 也有真实 logo。
+- /vendor/[...key] 动态路由、F1_PREVIEW_OVERRIDES 绑定、f1-box-preview-overrides 覆盖桶、publish-team-logo-overrides.sh 一并删除。wrangler 部署时框架重定向到 dist/server/wrangler.json，静态资产实际从 dist/client 下发（assets.directory 写的 ./dist 不是真实来源）。
+- R2 f1-box-data 只留动态数据：v1/seasons payload（racing/results/drivers 消费，#38 退役后清理）与 vendor/f1db 归档。桶内 vendor/ 前缀（旧 logo/flag/color 副本、directory 方案遗物 constructors.json/drivers.json/manifest.json）待合并验收后清理。

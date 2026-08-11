@@ -1,0 +1,1141 @@
+{
+ "lookup": "colors(team, year) -> list: period containing year; year < oldest -> oldest colors; team absent -> null (monogram). colors[0]=primary, rest=secondary.",
+ "teams": {
+  "alfa-romeo": {
+   "name": "Alfa Romeo",
+   "periods": [
+    {
+     "from": 2019,
+     "to": 2020,
+     "colors": [
+      "#9b0000"
+     ]
+    },
+    {
+     "from": 2021,
+     "to": 2021,
+     "colors": [
+      "#900000"
+     ]
+    },
+    {
+     "from": 2022,
+     "to": 2022,
+     "colors": [
+      "#b12039"
+     ]
+    },
+    {
+     "from": 2023,
+     "to": null,
+     "colors": [
+      "#c92d4b"
+     ]
+    }
+   ],
+   "colors": [
+    "#c92d4b"
+   ]
+  },
+  "alphatauri": {
+   "name": "AlphaTauri",
+   "periods": [
+    {
+     "from": 2020,
+     "to": 2020,
+     "colors": [
+      "#ffffff"
+     ]
+    },
+    {
+     "from": 2021,
+     "to": 2021,
+     "colors": [
+      "#2b4562"
+     ]
+    },
+    {
+     "from": 2022,
+     "to": 2022,
+     "colors": [
+      "#4e7c9b"
+     ]
+    },
+    {
+     "from": 2023,
+     "to": null,
+     "colors": [
+      "#5e8faa"
+     ]
+    }
+   ],
+   "colors": [
+    "#5e8faa"
+   ]
+  },
+  "alpine": {
+   "name": "Alpine",
+   "periods": [
+    {
+     "from": 2021,
+     "to": 2021,
+     "colors": [
+      "#0090ff"
+     ]
+    },
+    {
+     "from": 2022,
+     "to": 2023,
+     "colors": [
+      "#2293d1"
+     ]
+    },
+    {
+     "from": 2024,
+     "to": null,
+     "colors": [
+      "#0093cc"
+     ]
+    }
+   ],
+   "colors": [
+    "#0093cc"
+   ]
+  },
+  "aston-martin": {
+   "name": "Aston Martin",
+   "periods": [
+    {
+     "from": 2021,
+     "to": 2021,
+     "colors": [
+      "#006f62"
+     ]
+    },
+    {
+     "from": 2022,
+     "to": 2022,
+     "colors": [
+      "#2d826d"
+     ]
+    },
+    {
+     "from": 2023,
+     "to": 2023,
+     "colors": [
+      "#358c75"
+     ]
+    },
+    {
+     "from": 2024,
+     "to": null,
+     "colors": [
+      "#229971"
+     ]
+    }
+   ],
+   "colors": [
+    "#229971"
+   ]
+  },
+  "audi": {
+   "name": "Audi",
+   "periods": [
+    {
+     "from": 2026,
+     "to": null,
+     "colors": [
+      "#ff2d00"
+     ]
+    }
+   ],
+   "colors": [
+    "#ff2d00"
+   ]
+  },
+  "cadillac": {
+   "name": "Cadillac",
+   "periods": [
+    {
+     "from": 2026,
+     "to": null,
+     "colors": [
+      "#444444"
+     ]
+    }
+   ],
+   "colors": [
+    "#444444"
+   ]
+  },
+  "ferrari": {
+   "name": "Ferrari",
+   "periods": [
+    {
+     "from": 2018,
+     "to": 2020,
+     "colors": [
+      "#dc0000"
+     ]
+    },
+    {
+     "from": 2021,
+     "to": 2021,
+     "colors": [
+      "#dc0004"
+     ]
+    },
+    {
+     "from": 2022,
+     "to": 2022,
+     "colors": [
+      "#ed1c24"
+     ]
+    },
+    {
+     "from": 2023,
+     "to": 2023,
+     "colors": [
+      "#f91536"
+     ]
+    },
+    {
+     "from": 2024,
+     "to": 2024,
+     "colors": [
+      "#e8002d"
+     ]
+    },
+    {
+     "from": 2025,
+     "to": null,
+     "colors": [
+      "#e80020"
+     ]
+    }
+   ],
+   "colors": [
+    "#e80020"
+   ]
+  },
+  "force-india": {
+   "name": "force-india",
+   "colors": [
+    "#a6192e"
+   ],
+   "periods": [
+    {
+     "from": 2008,
+     "to": null,
+     "colors": [
+      "#a6192e"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "haas": {
+   "name": "Haas",
+   "periods": [
+    {
+     "from": 2018,
+     "to": 2018,
+     "colors": [
+      "#828282"
+     ]
+    },
+    {
+     "from": 2019,
+     "to": 2019,
+     "colors": [
+      "#bd9e57"
+     ]
+    },
+    {
+     "from": 2020,
+     "to": 2020,
+     "colors": [
+      "#787878"
+     ]
+    },
+    {
+     "from": 2021,
+     "to": 2021,
+     "colors": [
+      "#ffffff"
+     ]
+    },
+    {
+     "from": 2022,
+     "to": null,
+     "colors": [
+      "#b6babd"
+     ]
+    }
+   ],
+   "colors": [
+    "#b6babd"
+   ]
+  },
+  "kick-sauber": {
+   "name": "Sauber",
+   "periods": [
+    {
+     "from": 2024,
+     "to": null,
+     "colors": [
+      "#52e252"
+     ]
+    }
+   ],
+   "colors": [
+    "#52e252"
+   ]
+  },
+  "mclaren": {
+   "name": "McLaren",
+   "periods": [
+    {
+     "from": 2018,
+     "to": 2018,
+     "colors": [
+      "#ff8000"
+     ]
+    },
+    {
+     "from": 2019,
+     "to": 2020,
+     "colors": [
+      "#ff8700"
+     ]
+    },
+    {
+     "from": 2021,
+     "to": 2021,
+     "colors": [
+      "#ff9800"
+     ]
+    },
+    {
+     "from": 2022,
+     "to": 2023,
+     "colors": [
+      "#f58020"
+     ]
+    },
+    {
+     "from": 2024,
+     "to": null,
+     "colors": [
+      "#ff8000"
+     ]
+    }
+   ],
+   "colors": [
+    "#ff8000"
+   ]
+  },
+  "mercedes": {
+   "name": "Mercedes",
+   "periods": [
+    {
+     "from": 2018,
+     "to": 2021,
+     "colors": [
+      "#00d2be"
+     ]
+    },
+    {
+     "from": 2022,
+     "to": 2023,
+     "colors": [
+      "#6cd3bf"
+     ]
+    },
+    {
+     "from": 2024,
+     "to": null,
+     "colors": [
+      "#27f4d2"
+     ]
+    }
+   ],
+   "colors": [
+    "#27f4d2"
+   ]
+  },
+  "racing-bulls": {
+   "name": "RB",
+   "periods": [
+    {
+     "from": 2025,
+     "to": null,
+     "colors": [
+      "#6692ff"
+     ]
+    }
+   ],
+   "colors": [
+    "#6692ff"
+   ]
+  },
+  "racing-point": {
+   "name": "Racing Point",
+   "periods": [
+    {
+     "from": 2018,
+     "to": null,
+     "colors": [
+      "#f596c8"
+     ]
+    }
+   ],
+   "colors": [
+    "#f596c8"
+   ]
+  },
+  "rb": {
+   "name": "RB",
+   "periods": [
+    {
+     "from": 2024,
+     "to": null,
+     "colors": [
+      "#6692ff"
+     ]
+    }
+   ],
+   "colors": [
+    "#6692ff"
+   ]
+  },
+  "red-bull": {
+   "name": "Red Bull",
+   "periods": [
+    {
+     "from": 2018,
+     "to": 2020,
+     "colors": [
+      "#1e41ff"
+     ]
+    },
+    {
+     "from": 2021,
+     "to": 2021,
+     "colors": [
+      "#0600ef"
+     ]
+    },
+    {
+     "from": 2022,
+     "to": 2022,
+     "colors": [
+      "#1e5bc6"
+     ]
+    },
+    {
+     "from": 2023,
+     "to": null,
+     "colors": [
+      "#3671c6"
+     ]
+    }
+   ],
+   "colors": [
+    "#3671c6"
+   ]
+  },
+  "renault": {
+   "name": "Renault",
+   "periods": [
+    {
+     "from": 2018,
+     "to": null,
+     "colors": [
+      "#fff500"
+     ]
+    }
+   ],
+   "colors": [
+    "#fff500"
+   ]
+  },
+  "sauber": {
+   "name": "Sauber",
+   "periods": [
+    {
+     "from": 2018,
+     "to": null,
+     "colors": [
+      "#9b0000"
+     ]
+    }
+   ],
+   "colors": [
+    "#9b0000"
+   ]
+  },
+  "toro-rosso": {
+   "name": "Toro Rosso",
+   "periods": [
+    {
+     "from": 2018,
+     "to": null,
+     "colors": [
+      "#469bff"
+     ]
+    }
+   ],
+   "colors": [
+    "#469bff"
+   ]
+  },
+  "williams": {
+   "name": "Williams",
+   "periods": [
+    {
+     "from": 2018,
+     "to": 2019,
+     "colors": [
+      "#ffffff"
+     ]
+    },
+    {
+     "from": 2020,
+     "to": 2020,
+     "colors": [
+      "#0082fa"
+     ]
+    },
+    {
+     "from": 2021,
+     "to": 2021,
+     "colors": [
+      "#005aff"
+     ]
+    },
+    {
+     "from": 2022,
+     "to": 2023,
+     "colors": [
+      "#37bedd"
+     ]
+    },
+    {
+     "from": 2024,
+     "to": null,
+     "colors": [
+      "#64c4ff"
+     ]
+    }
+   ],
+   "colors": [
+    "#64c4ff"
+   ]
+  },
+  "lotus": {
+   "name": "Lotus",
+   "colors": [
+    "#000000",
+    "#D6A41E"
+   ],
+   "periods": [
+    {
+     "from": 1958,
+     "to": 1971,
+     "colors": [
+      "#00653B",
+      "#FFD700"
+     ]
+    },
+    {
+     "from": 1972,
+     "to": 1994,
+     "colors": [
+      "#000000",
+      "#D6A41E"
+     ]
+    }
+   ]
+  },
+  "jordan": {
+   "name": "Jordan",
+   "colors": [
+    "#FFD700",
+    "#00653B"
+   ],
+   "periods": [
+    {
+     "from": 1991,
+     "to": 2005,
+     "colors": [
+      "#FFD700",
+      "#00653B"
+     ]
+    }
+   ]
+  },
+  "benetton": {
+   "name": "Benetton",
+   "colors": [
+    "#0057A0",
+    "#FFD700"
+   ],
+   "periods": [
+    {
+     "from": 1986,
+     "to": 2001,
+     "colors": [
+      "#0057A0",
+      "#FFD700"
+     ]
+    }
+   ]
+  },
+  "tyrrell": {
+   "name": "Tyrrell",
+   "colors": [
+    "#0033A0"
+   ],
+   "periods": [
+    {
+     "from": 1970,
+     "to": 1998,
+     "colors": [
+      "#0033A0"
+     ]
+    }
+   ]
+  },
+  "brabham": {
+   "name": "brabham",
+   "colors": [
+    "#006439"
+   ],
+   "periods": [
+    {
+     "from": 1962,
+     "to": null,
+     "colors": [
+      "#006439"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "cooper": {
+   "name": "Cooper",
+   "colors": [
+    "#00653B"
+   ],
+   "periods": [
+    {
+     "from": 1950,
+     "to": 1969,
+     "colors": [
+      "#00653B"
+     ]
+    }
+   ]
+  },
+  "maserati": {
+   "name": "Maserati",
+   "colors": [
+    "#B00020"
+   ],
+   "periods": [
+    {
+     "from": 1950,
+     "to": 1960,
+     "colors": [
+      "#B00020"
+     ]
+    }
+   ]
+  },
+  "vanwall": {
+   "name": "Vanwall",
+   "colors": [
+    "#00653B"
+   ],
+   "periods": [
+    {
+     "from": 1954,
+     "to": 1960,
+     "colors": [
+      "#00653B"
+     ]
+    }
+   ]
+  },
+  "brm": {
+   "name": "brm",
+   "colors": [
+    "#0f3b8c"
+   ],
+   "periods": [
+    {
+     "from": 1950,
+     "to": null,
+     "colors": [
+      "#0f3b8c"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "lola": {
+   "name": "lola",
+   "colors": [
+    "#ffd400"
+   ],
+   "periods": [
+    {
+     "from": 1962,
+     "to": null,
+     "colors": [
+      "#ffd400"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "march": {
+   "name": "March",
+   "colors": [
+    "#D40000",
+    "#FFFFFF"
+   ],
+   "periods": [
+    {
+     "from": 1970,
+     "to": 1992,
+     "colors": [
+      "#D40000",
+      "#FFFFFF"
+     ]
+    }
+   ]
+  },
+  "shadow": {
+   "name": "shadow",
+   "colors": [
+    "#565a5c"
+   ],
+   "periods": [
+    {
+     "from": 1973,
+     "to": null,
+     "colors": [
+      "#565a5c"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "wolf": {
+   "name": "Wolf",
+   "colors": [
+    "#000000",
+    "#D6A41E"
+   ],
+   "periods": [
+    {
+     "from": 1977,
+     "to": 1979,
+     "colors": [
+      "#000000",
+      "#D6A41E"
+     ]
+    }
+   ]
+  },
+  "fittipaldi": {
+   "name": "Fittipaldi",
+   "colors": [
+    "#FFD700",
+    "#003DA5"
+   ],
+   "periods": [
+    {
+     "from": 1975,
+     "to": 1982,
+     "colors": [
+      "#FFD700",
+      "#003DA5"
+     ]
+    }
+   ]
+  },
+  "ligier": {
+   "name": "Ligier",
+   "colors": [
+    "#0055A4",
+    "#FFFFFF"
+   ],
+   "periods": [
+    {
+     "from": 1976,
+     "to": 1996,
+     "colors": [
+      "#0055A4",
+      "#FFFFFF"
+     ]
+    }
+   ]
+  },
+  "minardi": {
+   "name": "Minardi",
+   "colors": [
+    "#003DA5",
+    "#FFD700"
+   ],
+   "periods": [
+    {
+     "from": 1985,
+     "to": 2005,
+     "colors": [
+      "#003DA5",
+      "#FFD700"
+     ]
+    }
+   ]
+  },
+  "prost": {
+   "name": "Prost",
+   "colors": [
+    "#0055A4"
+   ],
+   "periods": [
+    {
+     "from": 1997,
+     "to": 2001,
+     "colors": [
+      "#0055A4"
+     ]
+    }
+   ]
+  },
+  "stewart": {
+   "name": "Stewart",
+   "colors": [
+    "#FFFFFF",
+    "#003DA5"
+   ],
+   "periods": [
+    {
+     "from": 1997,
+     "to": 1999,
+     "colors": [
+      "#FFFFFF",
+      "#003DA5"
+     ]
+    }
+   ]
+  },
+  "jaguar": {
+   "name": "Jaguar",
+   "colors": [
+    "#00653B"
+   ],
+   "periods": [
+    {
+     "from": 2000,
+     "to": 2004,
+     "colors": [
+      "#00653B"
+     ]
+    }
+   ]
+  },
+  "arrows": {
+   "name": "Arrows",
+   "colors": [
+    "#FFFFFF",
+    "#FF6A13"
+   ],
+   "periods": [
+    {
+     "from": 1978,
+     "to": 2002,
+     "colors": [
+      "#FFFFFF",
+      "#FF6A13"
+     ]
+    }
+   ]
+  },
+  "footwork": {
+   "name": "footwork",
+   "colors": [
+    "#d40000"
+   ],
+   "periods": [
+    {
+     "from": 1991,
+     "to": null,
+     "colors": [
+      "#d40000"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "caterham": {
+   "name": "Caterham",
+   "colors": [
+    "#00653B",
+    "#FFD700"
+   ],
+   "periods": [
+    {
+     "from": 2012,
+     "to": 2014,
+     "colors": [
+      "#00653B",
+      "#FFD700"
+     ]
+    }
+   ]
+  },
+  "marussia": {
+   "name": "Marussia",
+   "colors": [
+    "#D40000",
+    "#003DA5"
+   ],
+   "periods": [
+    {
+     "from": 2012,
+     "to": 2015,
+     "colors": [
+      "#D40000",
+      "#003DA5"
+     ]
+    }
+   ]
+  },
+  "brawn": {
+   "name": "Brawn",
+   "colors": [
+    "#FFFFFF",
+    "#000000"
+   ],
+   "periods": [
+    {
+     "from": 2009,
+     "to": 2009,
+     "colors": [
+      "#FFFFFF",
+      "#000000"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "penske": {
+   "name": "Penske",
+   "colors": [
+    "#003DA5",
+    "#FFFFFF"
+   ],
+   "periods": [
+    {
+     "from": 1975,
+     "to": 1977,
+     "colors": [
+      "#003DA5",
+      "#FFFFFF"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "hesketh": {
+   "name": "Hesketh",
+   "colors": [
+    "#FFFFFF"
+   ],
+   "periods": [
+    {
+     "from": 1974,
+     "to": 1978,
+     "colors": [
+      "#FFFFFF"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "honda": {
+   "name": "Honda",
+   "colors": [
+    "#FFFFFF",
+    "#D40000"
+   ],
+   "periods": [
+    {
+     "from": 2006,
+     "to": 2008,
+     "colors": [
+      "#FFFFFF",
+      "#D40000"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "matra": {
+   "name": "Matra",
+   "colors": [
+    "#0055A4",
+    "#FFFFFF"
+   ],
+   "periods": [
+    {
+     "from": 1967,
+     "to": 1972,
+     "colors": [
+      "#0055A4",
+      "#FFFFFF"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "eagle": {
+   "name": "Eagle",
+   "colors": [
+    "#003DA5",
+    "#FFFFFF"
+   ],
+   "periods": [
+    {
+     "from": 1966,
+     "to": 1969,
+     "colors": [
+      "#003DA5",
+      "#FFFFFF"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "porsche": {
+   "name": "Porsche",
+   "colors": [
+    "#D40000"
+   ],
+   "periods": [
+    {
+     "from": 1957,
+     "to": 1964,
+     "colors": [
+      "#D40000"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "kuzma": {
+   "name": "Kuzma",
+   "colors": [
+    "#FF6A13"
+   ],
+   "periods": [
+    {
+     "from": 1951,
+     "to": 1960,
+     "colors": [
+      "#FF6A13"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "watson": {
+   "name": "Watson",
+   "colors": [
+    "#003DA5"
+   ],
+   "periods": [
+    {
+     "from": 1950,
+     "to": 1953,
+     "colors": [
+      "#003DA5"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "epperly": {
+   "name": "Epperly",
+   "colors": [
+    "#003DA5"
+   ],
+   "periods": [
+    {
+     "from": 1957,
+     "to": 1962,
+     "colors": [
+      "#003DA5"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "kurtis-kraft": {
+   "name": "Kurtis Kraft",
+   "colors": [
+    "#D40000"
+   ],
+   "periods": [
+    {
+     "from": 1950,
+     "to": 1960,
+     "colors": [
+      "#D40000"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "bmw-sauber": {
+   "name": "BMW Sauber",
+   "source": "curated",
+   "colors": [
+    "#FFFFFF",
+    "#003DA5"
+   ],
+   "periods": [
+    {
+     "from": 2006,
+     "to": 2009,
+     "colors": [
+      "#FFFFFF",
+      "#003DA5"
+     ]
+    }
+   ]
+  },
+  "lotus-f1": {
+   "name": "Lotus",
+   "source": "curated",
+   "colors": [
+    "#000000",
+    "#D6A41E"
+   ],
+   "periods": [
+    {
+     "from": 2012,
+     "to": 2015,
+     "colors": [
+      "#000000",
+      "#D6A41E"
+     ]
+    }
+   ]
+  }
+ }
+}

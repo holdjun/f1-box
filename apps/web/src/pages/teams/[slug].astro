@@ -7,22 +7,17 @@ import {
   createTeamRepository,
 } from "../../lib/team-repository.js";
 import { alpha2Flag } from "../../lib/tokens.js";
-import { getTeamBranding } from "../../lib/vendor.js";
+import { getTeamBranding, vendorIndexes } from "../../lib/vendor.js";
 
 const slug = (Astro.params.slug ?? "").toLowerCase();
 const repository = import.meta.env.DEV
   ? createTeamRepository()
   : createTeamRepository(createD1TeamDatabase(env.F1_DB));
-const store = import.meta.env.DEV ? undefined : env.F1_DATA;
-const previewOverrides = import.meta.env.DEV
-  ? undefined
-  : (env as typeof env & { F1_PREVIEW_OVERRIDES?: R2Bucket }).F1_PREVIEW_OVERRIDES;
 
-const [team, branding] = await Promise.all([
-  repository.getTeam(slug),
-  getTeamBranding(store, slug, previewOverrides),
-]);
+const team = await repository.getTeam(slug);
 if (!team) Astro.response.status = 404;
+
+const branding = getTeamBranding(vendorIndexes, slug);
 
 // 上游数据最快 30 分钟更新一次，边缘短暂缓存可吸收重复请求
 if (team) {
@@ -35,9 +30,7 @@ if (team) {
 const currentYear = team?.activeSeason ?? null;
 const standaloneLineage = team?.lineage.filter((entry) => entry.segment === "standalone") ?? [];
 const continuityLineage = team?.lineage.filter((entry) => entry.segment === "continuity") ?? [];
-const flagSrc = store
-  ? `/vendor/country-flags/${team?.alpha2Code.toLowerCase()}.svg`
-  : null;
+const flagSrc = team ? `/vendor/country-flags/${team.alpha2Code.toLowerCase()}.svg` : null;
 
 // 名次非数字时（DSQ/EX）直接显示原文，不加 P 前缀
 function formatPosition(position: string | null): string {

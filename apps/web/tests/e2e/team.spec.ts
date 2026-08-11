@@ -93,58 +93,43 @@ test("teams index lists all constructors @desktop", async ({ page }) => {
   await expect(page.locator('a[href="/teams/mercedes"]')).toBeVisible();
 });
 
-test("team logos use a stable contain frame @desktop", async ({ page }) => {
+test("team logos render inside a stable contain frame @desktop", async ({
+  page,
+}) => {
   await page.goto("/teams");
 
-  const frame = page.locator(".card-logo-frame").first();
-  await expect(frame).toBeVisible();
+  // 目录里的真实 logo（策展资产随仓库下发，DEV 也可见）
+  const frame = page.locator('a[href="/teams/ferrari"] .card-logo-frame');
   await expect(frame).toHaveCSS("width", "128px");
   await expect(frame).toHaveCSS("height", "48px");
-  const cardLogoFit = await frame.evaluate((element) => {
-    const scope = [...element.attributes].find((attribute) =>
-      attribute.name.startsWith("data-astro-cid-"),
-    );
-    const image = document.createElement("img");
-    image.className = "card-logo";
-    image.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/>";
-    if (scope) image.setAttribute(scope.name, "");
-    element.appendChild(image);
-    return getComputedStyle(image).objectFit;
-  });
-  expect(cardLogoFit).toBe("contain");
-  const cardLogoBounds = await frame.evaluate((element) => {
-    const image = element.querySelector("img.card-logo")!;
+  const cardLogo = frame.locator("img.card-logo");
+  await expect(cardLogo).toBeVisible();
+  await expect(cardLogo).toHaveCSS("object-fit", "contain");
+  const cardBounds = await frame.evaluate((element) => {
+    const image = element.querySelector("img")!;
     const frameBox = element.getBoundingClientRect();
     const imageBox = image.getBoundingClientRect();
-    return { frameHeight: frameBox.height, imageHeight: imageBox.height };
+    return {
+      frameWidth: frameBox.width,
+      frameHeight: frameBox.height,
+      imageWidth: imageBox.width,
+      imageHeight: imageBox.height,
+    };
   });
-  expect(cardLogoBounds.imageHeight).toBeLessThanOrEqual(cardLogoBounds.frameHeight);
-  const cardLogoBoxSizing = await frame.evaluate((element) => {
-    const scope = [...element.attributes].find((attribute) =>
-      attribute.name.startsWith("data-astro-cid-"),
-    );
-    const image = document.createElement("img");
-    image.className = "card-logo logo-on-light";
-    if (scope) image.setAttribute(scope.name, "");
-    element.appendChild(image);
-    return getComputedStyle(image).boxSizing;
-  });
-  expect(cardLogoBoxSizing).toBe("border-box");
+  expect(cardBounds.imageWidth).toBeLessThanOrEqual(cardBounds.frameWidth);
+  expect(cardBounds.imageHeight).toBeLessThanOrEqual(cardBounds.frameHeight);
+
+  // 无独立 logo 的车队回落为 monogram，不出现失效图片
+  await expect(page.locator('a[href="/teams/adams"] .card-monogram')).toBeVisible();
+  await expect(page.locator('a[href="/teams/adams"] img')).toHaveCount(0);
 
   await page.goto("/teams/ferrari");
-  await expect(page.locator(".team-logo-frame")).toHaveCSS("width", "96px");
-  await expect(page.locator(".team-logo-frame")).toHaveCSS("height", "64px");
-  const teamLogoFit = await page.locator(".team-logo-frame").evaluate((element) => {
-    const scope = [...element.attributes].find((attribute) =>
-      attribute.name.startsWith("data-astro-cid-"),
-    );
-    const image = document.createElement("img");
-    image.className = "team-logo";
-    if (scope) image.setAttribute(scope.name, "");
-    element.appendChild(image);
-    return getComputedStyle(image).objectFit;
-  });
-  expect(teamLogoFit).toBe("contain");
+  const teamFrame = page.locator(".team-logo-frame");
+  await expect(teamFrame).toHaveCSS("width", "96px");
+  await expect(teamFrame).toHaveCSS("height", "64px");
+  const teamLogo = teamFrame.locator("img.team-logo");
+  await expect(teamLogo).toBeVisible();
+  await expect(teamLogo).toHaveCSS("object-fit", "contain");
 });
 
 test("year teams route redirects to the global team catalog @desktop", async ({ page }) => {

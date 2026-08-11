@@ -16,7 +16,7 @@ Teams 目录目前有 187 个 constructor 身份，但 R2 策展层只有部分 
 - Teams 目录和详情页的 logo 框尺寸稳定，图片使用 contain 等比缩放。
 - 现有 187 个车队详情页仍能访问；继承链车队的顺序、年份没有回退、重叠或断裂记录。
 - 新增 logo 的文件、媒体类型和索引一致；坏图不会显示为失效图片。
-- 线上 R2 更新前，所有新增/替换资产在本地 Worker 和本地 D1 回归通过。
+- 新增/替换资产随 PR 提交，本地测试与预览部署回归通过后再合并。
 
 ## 范围外
 
@@ -24,9 +24,8 @@ Teams 目录目前有 187 个 constructor 身份，但 R2 策展层只有部分 
 
 ## Logo 管理方案
 
-- 每个身份只保留一条当前展示索引，记录 `yearFrom`、`variant`、`tier`、`layout`、来源、许可证和校验状态；不让页面从继承链自动借用其他身份的 logo。
-- `tier=featured` 先覆盖目录前部约 30–40 个高关注车队；`tier=standard` 再逐步补历史车队；没有高可信素材的身份继续使用 monogram。
+- 每个身份只保留一条当前展示索引，记录 `yearFrom`、`variant`、来源和许可证；不让页面从继承链自动借用其他身份的 logo。
+- 没有高可信素材的身份继续使用 monogram；不为没有可靠独立标识的历史参赛者伪造 logo。
 - 素材优先使用 SVG，其次使用去除多余留白的透明 PNG/WebP；JPEG 只作为明确标识的兜底，不通过拉伸或裁剪解决比例问题。
-- `layout` 只描述素材形状（wide、square、tall），不复制三套图片；目录卡、详情头部和未来紧凑列表使用不同的固定容器，统一 `object-fit: contain`，并允许按 layout 调整内边距。
-- 本地确认前只更新 `.data` 下的候选 R2 模拟存储。确认后先备份并上传 R2 logo 索引和素材，最后再通过 PR 发布代码；不修改 D1 chronology。
-- 不改变 D1 的 constructor chronology 原始关系；若只涉及展示语义，优先修正页面呈现和审计测试。
+- 目录卡、详情头部使用不同的固定容器，统一 `object-fit: contain`。
+- 资产与索引存放在仓库（`apps/web/public/vendor/team-logos/` + `apps/web/src/data/logos.json`），随 PR 审查、随代码部署；不走 R2 覆盖层，不修改 D1 chronology。
