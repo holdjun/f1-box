@@ -1,15 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { countryFlag, teamColor } from "../src/lib/tokens.js";
 
-describe("tokens", () => {
-  it("returns known team colors and a neutral fallback", () => {
-    expect(teamColor("Ferrari")).toBe("#f41919");
-    expect(teamColor("Not A Team")).toBe("#84909e");
-  });
+import { alpha2Flag } from "../src/lib/tokens.js";
 
-  it("maps country codes to flag emoji with a fallback", () => {
-    expect(countryFlag("GBR")).toBe("🇬🇧");
-    expect(countryFlag("BAH")).toBe("🇧🇭");
-    expect(countryFlag("XXX")).toBe("🏳️");
+describe("alpha2Flag", () => {
+  it("builds regional indicator emoji from alpha-2 codes", () => {
+    expect(alpha2Flag("GB")).toBe("🇬🇧");
+    expect(alpha2Flag("br")).toBe("🇧🇷");
   });
 });

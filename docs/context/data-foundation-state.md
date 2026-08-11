@@ -35,3 +35,4 @@ metadata:
 - /vendor/[...key] 动态路由、F1_PREVIEW_OVERRIDES 绑定、f1-box-preview-overrides 覆盖桶、publish-team-logo-overrides.sh 一并删除。wrangler 部署时框架重定向到 dist/server/wrangler.json，静态资产实际从 dist/client 下发（assets.directory 写的 ./dist 不是真实来源）。
 - R2 f1-box-data 只留动态数据：v1/seasons payload（racing/results/drivers 消费，#38 退役后清理）与 vendor/f1db 归档。桶内 vendor/ 前缀（旧 logo/flag/color 副本、directory 方案遗物 constructors.json/drivers.json/manifest.json）待合并验收后清理。
 - /{year}/teams 与 /{year}/teams/{team} 兼容跳转一并删除，直接 404（用户拍板不留兼容层；308 永久重定向本来也会被浏览器长期缓存，删掉更干净）。
+- 2026-08-11 全局车手目录 /drivers 切 f1db：driver-repository（单条 SQL：当前赛季优先+生涯成就排序，ROW_NUMBER 去重最后赛季多车队）+ fixtures/drivers.json（DEV 分流，同 teams 模式）。卡片用放大永久车号作标识、无号 monogram 回落、最新赛季车队与国籍旗 SVG；917 卡 content-visibility 控制渲染。/{year}/drivers 与 /{year}/drivers/{code} 删除直接 404；导航 Drivers 恒指 /drivers。死代码清理：derive.ts、TrendChart.astro、tokens.teamColor/countryFlag。/drivers/{id} 详情页待做（链接预留）。
