@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createTeamRepository,
+  seasonGap,
   type TeamDatabase,
 } from "../src/lib/team-repository.js";
 
@@ -281,5 +282,17 @@ describe("createTeamRepository without database (DEV fixture)", () => {
 
   it("returns null for other teams", async () => {
     await expect(createTeamRepository().getTeam("mercedes")).resolves.toBeNull();
+  });
+});
+
+describe("seasonGap", () => {
+  it("returns null for consecutive seasons", () => {
+    expect(seasonGap(2026, 2025)).toBeNull();
+    expect(seasonGap(1950, 1950)).toBeNull();
+  });
+
+  it("describes the missing span between distant seasons", () => {
+    expect(seasonGap(2019, 1985)).toEqual({ from: 1986, to: 2018, seasons: 33 });
+    expect(seasonGap(1979, 1951)).toEqual({ from: 1952, to: 1978, seasons: 27 });
   });
 });

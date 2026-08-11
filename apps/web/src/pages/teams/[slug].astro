@@ -5,6 +5,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import {
   createD1TeamDatabase,
   createTeamRepository,
+  seasonGap,
 } from "../../lib/team-repository.js";
 import { alpha2Flag } from "../../lib/tokens.js";
 import { getTeamBranding, vendorIndexes } from "../../lib/vendor.js";
@@ -200,16 +201,32 @@ function resultClass(text: string): string {
           <span class="key"><span class="dagger">†</span>retired but classified</span>
           <span class="key driver-champion">driver champion</span>
         </p>
-        {team.seasons.map((season) => (
-          <section
-            class:list={[
-              "season-block",
-              {
-                champion: season.championshipWon,
-                current: season.year === currentYear,
-              },
-            ]}
-          >
+        {team.seasons.map((season, index) => {
+          const prev = team.seasons[index - 1];
+          const gap = prev ? seasonGap(prev.year, season.year) : null;
+          return (
+            <>
+              {gap ? (
+                <div
+                  class="season-gap"
+                  role="separator"
+                  aria-label={`${gap.seasons} seasons without entries, ${gap.from} to ${gap.to}`}
+                >
+                  <span class="season-gap__label">
+                    {gap.from}–{gap.to} · {gap.seasons}{" "}
+                    {gap.seasons === 1 ? "season" : "seasons"} without entries
+                  </span>
+                </div>
+              ) : null}
+              <section
+                class:list={[
+                  "season-block",
+                  {
+                    champion: season.championshipWon,
+                    current: season.year === currentYear,
+                  },
+                ]}
+              >
             <h3>
               <span class="season-year">{season.year}</span>
               <span class="season-meta">
@@ -290,8 +307,17 @@ function resultClass(text: string): string {
                 </tbody>
               </table>
             </div>
-          </section>
-        ))}
+              </section>
+            </>
+          );
+        })}
+        <footer class="history-end">
+          <p class="history-end__summary">
+            {team.firstEntry}–{team.activeSeason} · {team.seasons.length}{" "}
+            {team.seasons.length === 1 ? "season" : "seasons"} of Grand Prix history
+          </p>
+          <a class="history-end__back" href="/teams">Back to all teams</a>
+        </footer>
       </section>
     </main>
   </BaseLayout>
@@ -574,6 +600,23 @@ function resultClass(text: string): string {
     content-visibility: auto;
     contain-intrinsic-size: auto 14rem;
   }
+  /* 相邻赛季不连续时，用一段虚线轨道标示断档区间 */
+  .season-gap {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 0.6rem 0 0.6rem 0.9rem;
+    border-left: 2px dashed color-mix(in srgb, var(--muted) 45%, transparent);
+  }
+  .season-gap + .season-block {
+    margin-top: 1rem;
+  }
+  .season-gap__label {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
   .season-block.champion {
     border-left-color: #ffc72c;
   }
@@ -679,5 +722,41 @@ function resultClass(text: string): string {
   .empty-cell {
     text-align: left !important;
     color: var(--muted);
+  }
+  /* 历史表收尾：一条渐隐分隔 + 生涯概览 + 返回目录，避免页面戛然而止 */
+  .history-end {
+    display: grid;
+    justify-items: center;
+    gap: 0.6rem;
+    margin-top: 3.5rem;
+    text-align: center;
+  }
+  .history-end::before {
+    content: "";
+    width: 9rem;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--line) 30%,
+      var(--line) 70%,
+      transparent
+    );
+  }
+  .history-end__summary {
+    margin: 0.4rem 0 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .history-end__back {
+    font-size: 0.85rem;
+    color: var(--muted-light);
+    text-decoration: none;
+  }
+  .history-end__back:hover {
+    color: var(--coral);
+    text-decoration: underline;
   }
 </style>

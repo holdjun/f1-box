@@ -19,6 +19,14 @@ test("ferrari page renders identity, summary and season blocks @desktop", async 
   await expect(page.getByLabel("Table legend")).toContainText("Win");
   // 车手冠军名字金色（1979 Scheckter 等）
   await expect(page.locator(".driver-champion").first()).toBeVisible();
+  // 历史表之后有收尾块，页面不戛然而止
+  await expect(page.locator(".history-end__summary")).toContainText(
+    "1950–2026 · 77 seasons",
+  );
+  await expect(page.locator(".history-end__back")).toHaveAttribute(
+    "href",
+    "/teams",
+  );
 });
 
 test("current season panel and markers @desktop", async ({ page }) => {
@@ -132,18 +140,9 @@ test("team logos render inside a stable contain frame @desktop", async ({
   await expect(teamLogo).toHaveCSS("object-fit", "contain");
 });
 
-test("year teams route redirects to the global team catalog @desktop", async ({ page }) => {
-  await page.goto("/2026/teams");
-  await page.waitForURL(/\/teams$/);
-  await expect(page.locator(".team-card")).toHaveCount(187);
-  await expect(page.locator(".team-card").first()).not.toContainText("PTS");
-  await expect(page.locator(".team-card").first()).not.toContainText("2026");
-  await expect(page.getByRole("navigation", { name: "Season" })).not.toBeVisible();
-  await expect(page.locator('a[href="/teams/ferrari"]').first()).toBeVisible();
-});
-
-test("year team detail route redirects to the global team detail page @desktop", async ({ page }) => {
-  await page.goto("/2026/teams/ferrari");
-  await page.waitForURL(/\/teams\/ferrari$/);
-  await expect(page.locator("main h1")).toHaveText("Scuderia Ferrari");
+test("year teams routes are retired @desktop", async ({ page }) => {
+  const index = await page.goto("/2026/teams");
+  expect(index?.status()).toBe(404);
+  const detail = await page.goto("/2026/teams/ferrari");
+  expect(detail?.status()).toBe(404);
 });

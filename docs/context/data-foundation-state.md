@@ -34,3 +34,4 @@ metadata:
 - vendor 策展资产全部迁出 R2：logo 图片（65 张）与国旗（251 张）进 apps/web/public/vendor/，logos.json 与 team-colors.json 进 apps/web/src/data/ 构建期内联；vendor.ts 不再读 R2，DEV 与生产同源，本地 dev 也有真实 logo。
 - /vendor/[...key] 动态路由、F1_PREVIEW_OVERRIDES 绑定、f1-box-preview-overrides 覆盖桶、publish-team-logo-overrides.sh 一并删除。wrangler 部署时框架重定向到 dist/server/wrangler.json，静态资产实际从 dist/client 下发（assets.directory 写的 ./dist 不是真实来源）。
 - R2 f1-box-data 只留动态数据：v1/seasons payload（racing/results/drivers 消费，#38 退役后清理）与 vendor/f1db 归档。桶内 vendor/ 前缀（旧 logo/flag/color 副本、directory 方案遗物 constructors.json/drivers.json/manifest.json）待合并验收后清理。
+- /{year}/teams 与 /{year}/teams/{team} 兼容跳转一并删除，直接 404（用户拍板不留兼容层；308 永久重定向本来也会被浏览器长期缓存，删掉更干净）。

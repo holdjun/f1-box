@@ -12,7 +12,7 @@
 - `/teams` 是唯一的全部车队目录，卡片只展示车队 logo 或 monogram，以及车队名称。
 - `/teams` 不显示 2025、2026 等年份、赛季名次、车手或积分，也不显示年份选择器。
 - 车队详情页继续保留按年份的历史成绩；年份只用于解释车队历史，不作为全部车队目录的筛选上下文。
-- 访问旧的 `/{year}/teams` 或 `/{year}/teams/{team}` 时跳转到 `/teams` 或 `/teams/{team}`，避免继续维护重复的年份车队页面。
+- 旧的 `/{year}/teams` 与 `/{year}/teams/{team}` 已删除，访问返回 404；年份车队目录不再维护，也不保留兼容跳转。
 - 继承链中的车队如果没有独立 logo，继续使用该车队自己的 monogram，不复用其他车队 logo。
 - `/vendor` 正确返回 SVG、PNG、WebP、JPEG 等已发布 logo 的媒体类型。
 
@@ -20,7 +20,7 @@
 
 - `/teams` 的车队卡片只包含车队身份信息，不包含年份、积分、名次和车手文字。
 - 主导航在带年份的页面中，Teams 链接指向 `/teams`；全局车队目录不出现 Season 年份选择器。
-- `/{year}/teams` 和 `/{year}/teams/{team}` 不再渲染旧的年份目录或赛季卡片。
+- `/{year}/teams` 和 `/{year}/teams/{team}` 返回 404，不再渲染旧的年份目录或赛季卡片。
 - 继承链车队的详情页可以正常访问；缺少独立 logo 时显示 monogram，不出现失效图片。
 - JPEG logo 的 `/vendor` 响应类型为 `image/jpeg`。
 - 相关单元测试、`pnpm check`、`pnpm test` 和构建通过。

@@ -364,6 +364,18 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
   };
 }
 
+export interface SeasonGap {
+  from: number;
+  to: number;
+  seasons: number;
+}
+
+// 相邻两个赛季年份不连续时，给出中间缺失的区间（seasons 按降序展示，newer 在上）
+export function seasonGap(newerYear: number, olderYear: number): SeasonGap | null {
+  if (newerYear - olderYear <= 1) return null;
+  return { from: olderYear + 1, to: newerYear - 1, seasons: newerYear - olderYear - 1 };
+}
+
 // 传承链只覆盖近代入口（如 mercedes 从 1970 Tyrrell 起）；
 // 若车队在链起点之前有多个不连续的参赛段，按实际赛季拆成多个"早期自身"徽章
 function withEarlyStint(
