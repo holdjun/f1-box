@@ -1,0 +1,544 @@
+{
+  "lookup": "logo(team): 每队仅存最新 logo；无 -> null (monogram)",
+  "logos": [
+    {
+      "file": "team-logos/alfa-romeo@2019.svg",
+      "yearFrom": 2019,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "trademarked, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/alphatauri@2020.svg",
+      "yearFrom": 2020,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/alpine@2026.webp",
+      "yearFrom": 2026,
+      "variant": "white",
+      "source": "formula1.com CDN",
+      "license": "trademarked, identification use"
+    },
+    {
+      "file": "team-logos/andrea-moda@1992.png",
+      "yearFrom": 1992,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/arrows@1978.png",
+      "yearFrom": 1978,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/aston-martin@2026.webp",
+      "yearFrom": 2026,
+      "variant": "white",
+      "source": "formula1.com CDN",
+      "license": "trademarked, identification use"
+    },
+    {
+      "file": "team-logos/ats@1977.png",
+      "yearFrom": 1977,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "public domain",
+      "verified": true
+    },
+    {
+      "file": "team-logos/audi@2026.webp",
+      "yearFrom": 2026,
+      "variant": "white",
+      "source": "formula1.com CDN",
+      "license": "trademarked, identification use"
+    },
+    {
+      "file": "team-logos/bar@1999.png",
+      "yearFrom": 1999,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/benetton@1986.svg",
+      "yearFrom": 1986,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/bmw-sauber@2006.svg",
+      "yearFrom": 2006,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "public domain",
+      "verified": true
+    },
+    {
+      "file": "team-logos/bmw@1969.svg",
+      "yearFrom": 1969,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "public domain",
+      "verified": true
+    },
+    {
+      "file": "team-logos/brabham@1962.png",
+      "yearFrom": 1962,
+      "variant": "color",
+      "source": "wikimedia-en (non-free, identification use)",
+      "license": "trademarked, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/brawn@2009.svg",
+      "yearFrom": 2009,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "trademarked, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/brm@1950.png",
+      "yearFrom": 1950,
+      "variant": "color",
+      "source": "wikimedia-en (non-free, identification use)",
+      "license": "trademarked, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/cadillac@2026.webp",
+      "yearFrom": 2026,
+      "variant": "white",
+      "source": "formula1.com CDN",
+      "license": "trademarked, identification use"
+    },
+    {
+      "file": "team-logos/caterham@2012.svg",
+      "yearFrom": 2012,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "trademarked, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/coloni@1987.png",
+      "yearFrom": 1987,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "public domain",
+      "verified": true
+    },
+    {
+      "file": "team-logos/cooper@1950.png",
+      "yearFrom": 1950,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "trademarked, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/ferrari@2026.webp",
+      "yearFrom": 2026,
+      "variant": "white",
+      "source": "formula1.com CDN",
+      "license": "trademarked, identification use"
+    },
+    {
+      "file": "team-logos/fondmetal@1991.png",
+      "yearFrom": 1991,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/footwork@1991.png",
+      "yearFrom": 1991,
+      "variant": "color",
+      "source": "wikimedia-en (non-free, identification use)",
+      "license": "trademarked, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/force-india@2008.svg",
+      "yearFrom": 2008,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "trademarked, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/forti@1995.png",
+      "yearFrom": 1995,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/haas@2026.webp",
+      "yearFrom": 2026,
+      "variant": "white",
+      "source": "formula1.com CDN",
+      "license": "trademarked, identification use"
+    },
+    {
+      "file": "team-logos/hesketh@1974.png",
+      "yearFrom": 1974,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "public domain",
+      "verified": true
+    },
+    {
+      "file": "team-logos/honda@2006.svg",
+      "yearFrom": 2006,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "public domain",
+      "verified": true
+    },
+    {
+      "file": "team-logos/hrt@2010.png",
+      "yearFrom": 2010,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/jaguar@2000.png",
+      "yearFrom": 2000,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "trademarked, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/jordan@1991.png",
+      "yearFrom": 1991,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/kick-sauber@2025.svg",
+      "yearFrom": 2025,
+      "variant": "color",
+      "source": "f1-dash",
+      "license": "trademarked, identification use"
+    },
+    {
+      "file": "team-logos/larrousse@1993.png",
+      "yearFrom": 1993,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/ligier@1976.svg",
+      "yearFrom": 1976,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "trademarked, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/lola@1962.png",
+      "yearFrom": 1962,
+      "variant": "color",
+      "source": "wikimedia-en (non-free, identification use)",
+      "license": "trademarked, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/lotus-f1@2012.jpg",
+      "yearFrom": 2012,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc by-sa 3.0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/lotus-racing@2010.png",
+      "yearFrom": 2010,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/lotus@2010.svg",
+      "yearFrom": 2010,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/manor@2014.png",
+      "yearFrom": 2014,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/march@1970.png",
+      "yearFrom": 1970,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/marussia@2010.png",
+      "yearFrom": 2010,
+      "variant": "color",
+      "source": "wikimedia (en-wiki, manor lineage)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/maserati@1950.svg",
+      "yearFrom": 1950,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "trademarked, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/mclaren@2026.webp",
+      "yearFrom": 2026,
+      "variant": "white",
+      "source": "formula1.com CDN",
+      "license": "trademarked, identification use"
+    },
+    {
+      "file": "team-logos/mercedes@2026.webp",
+      "yearFrom": 2026,
+      "variant": "white",
+      "source": "formula1.com CDN",
+      "license": "trademarked, identification use"
+    },
+    {
+      "file": "team-logos/midland@2006.png",
+      "yearFrom": 2006,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/minardi@1985.svg",
+      "yearFrom": 1985,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/osella@1980.svg",
+      "yearFrom": 1980,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/prost@1997.png",
+      "yearFrom": 1997,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/racing-bulls@2026.webp",
+      "yearFrom": 2026,
+      "variant": "white",
+      "source": "formula1.com CDN",
+      "license": "trademarked, identification use"
+    },
+    {
+      "file": "team-logos/racing-point@2019.svg",
+      "yearFrom": 2019,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/rb@2024.svg",
+      "yearFrom": 2024,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/red-bull@2026.webp",
+      "yearFrom": 2026,
+      "variant": "white",
+      "source": "formula1.com CDN",
+      "license": "trademarked, identification use"
+    },
+    {
+      "file": "team-logos/renault@2002.svg",
+      "yearFrom": 2002,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "trademarked, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/sauber@1993.svg",
+      "yearFrom": 1993,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "trademarked, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/shadow@1973.png",
+      "yearFrom": 1973,
+      "variant": "mono",
+      "source": "wikimedia-en (non-free, identification use)",
+      "license": "trademarked, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/spyker@2007.jpg",
+      "yearFrom": 2007,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "public domain",
+      "verified": true
+    },
+    {
+      "file": "team-logos/stewart@1997.png",
+      "yearFrom": 1997,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/super-aguri@2006.svg",
+      "yearFrom": 2006,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "public domain",
+      "verified": true
+    },
+    {
+      "file": "team-logos/theodore@1978.png",
+      "yearFrom": 1978,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc by-sa 4.0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/toleman@1981.svg",
+      "yearFrom": 1981,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc by-sa 3.0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/toro-rosso@2006.svg",
+      "yearFrom": 2006,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/tyrrell@1970.svg",
+      "yearFrom": 1970,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "trademarked, identification use",
+      "approximate": true,
+      "verified": true
+    },
+    {
+      "file": "team-logos/vanwall@1954.jpg",
+      "yearFrom": 1954,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": false,
+      "verified": true
+    },
+    {
+      "file": "team-logos/virgin@2010.png",
+      "yearFrom": 2010,
+      "variant": "color",
+      "source": "wikimedia-commons",
+      "license": "cc0",
+      "verified": true
+    },
+    {
+      "file": "team-logos/williams@2026.webp",
+      "yearFrom": 2026,
+      "variant": "white",
+      "source": "formula1.com CDN",
+      "license": "trademarked, identification use"
+    },
+    {
+      "file": "team-logos/wolf@1977.png",
+      "yearFrom": 1977,
+      "variant": "color",
+      "source": "wikimedia (commons/en-wiki)",
+      "license": "trademarked / fair-use, identification use",
+      "approximate": false,
+      "verified": true
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createTeamRepository,
+  seasonGap,
   type TeamDatabase,
 } from "../src/lib/team-repository.js";
 
@@ -106,6 +107,59 @@ describe("createTeamRepository with database", () => {
     expect(team?.lineage.map((l) => l.id)).toEqual(["ferrari", "tyrrell", "mercedes"]);
     expect(team?.totals.championships).toBe(16);
     expect(team?.seasons.map((s) => s.year)).toEqual([2026, 1979, 1950]);
+  });
+
+  it("keeps non-consecutive early entries as separate stints", async () => {
+    const sparseDb = fakeDb({
+      "co.id = c.country_id": [identityRow],
+      "GROUP BY sec.year": [
+        { year: 1980, chassis: null, engines: null, power_units: null, tyres: null },
+        { year: 1978, chassis: null, engines: null, power_units: null, tyres: null },
+      ],
+      "grand_prix gp": [],
+      "position_text = 'DNF'": [],
+      "sprint_starting_grid_position": [],
+      "UNION": [],
+      "race_result rr": [],
+      "position_number IS NOT NULL": [],
+      "sprint_race_result srr": [],
+      "MAX(year)": [{ year: 1980 }],
+      "season_driver_standing": [],
+      "constructor_chronology": [
+        { id: "tyrrell", name: "Tyrrell", year_from: 1990, year_to: null },
+      ],
+      "season_constructor_standing": [],
+    });
+
+    const team = await createTeamRepository(sparseDb).getTeam("ferrari");
+    expect(team?.lineage).toEqual([
+      { id: "ferrari", name: "Ferrari", yearFrom: 1978, yearTo: 1978, segment: "standalone" },
+      { id: "ferrari", name: "Ferrari", yearFrom: 1980, yearTo: 1980, segment: "standalone" },
+      { id: "tyrrell", name: "Tyrrell", yearFrom: 1990, yearTo: null, segment: "continuity" },
+    ]);
+  });
+
+  it("orders the team catalog by current status and career prominence", async () => {
+    let sql = "";
+    const rankedDb: TeamDatabase = {
+      batch(statements) {
+        sql = statements[0].sql;
+        return Promise.resolve([
+          {
+            results: [
+              { id: "ferrari", name: "Ferrari" },
+              { id: "mclaren", name: "McLaren" },
+            ],
+          },
+        ]);
+      },
+    };
+
+    await createTeamRepository(rankedDb).getConstructors();
+    expect(sql).toContain("total_championship_wins DESC");
+    expect(sql).toContain("total_race_wins DESC");
+    expect(sql).toContain("total_race_entries DESC");
+    expect(sql).toContain("season_entrant_constructor");
   });
 
   it("builds the per-round result matrix with markers", async () => {
@@ -228,5 +282,17 @@ describe("createTeamRepository without database (DEV fixture)", () => {
 
   it("returns null for other teams", async () => {
     await expect(createTeamRepository().getTeam("mercedes")).resolves.toBeNull();
+  });
+});
+
+describe("seasonGap", () => {
+  it("returns null for consecutive seasons", () => {
+    expect(seasonGap(2026, 2025)).toBeNull();
+    expect(seasonGap(1950, 1950)).toBeNull();
+  });
+
+  it("describes the missing span between distant seasons", () => {
+    expect(seasonGap(2019, 1985)).toEqual({ from: 1986, to: 2018, seasons: 33 });
+    expect(seasonGap(1979, 1951)).toEqual({ from: 1952, to: 1978, seasons: 27 });
   });
 });

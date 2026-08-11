@@ -5,21 +5,20 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import {
   createD1TeamDatabase,
   createTeamRepository,
+  seasonGap,
 } from "../../lib/team-repository.js";
 import { alpha2Flag } from "../../lib/tokens.js";
-import { getTeamBranding } from "../../lib/vendor.js";
+import { getTeamBranding, vendorIndexes } from "../../lib/vendor.js";
 
 const slug = (Astro.params.slug ?? "").toLowerCase();
 const repository = import.meta.env.DEV
   ? createTeamRepository()
   : createTeamRepository(createD1TeamDatabase(env.F1_DB));
-const store = import.meta.env.DEV ? undefined : env.F1_DATA;
 
-const [team, branding] = await Promise.all([
-  repository.getTeam(slug),
-  getTeamBranding(store, slug),
-]);
+const team = await repository.getTeam(slug);
 if (!team) Astro.response.status = 404;
+
+const branding = getTeamBranding(vendorIndexes, slug);
 
 // 上游数据最快 30 分钟更新一次，边缘短暂缓存可吸收重复请求
 if (team) {
@@ -30,9 +29,9 @@ if (team) {
 }
 
 const currentYear = team?.activeSeason ?? null;
-const flagSrc = store
-  ? `/vendor/country-flags/${team?.alpha2Code.toLowerCase()}.svg`
-  : null;
+const standaloneLineage = team?.lineage.filter((entry) => entry.segment === "standalone") ?? [];
+const continuityLineage = team?.lineage.filter((entry) => entry.segment === "continuity") ?? [];
+const flagSrc = team ? `/vendor/country-flags/${team.alpha2Code.toLowerCase()}.svg` : null;
 
 // 名次非数字时（DSQ/EX）直接显示原文，不加 P 前缀
 function formatPosition(position: string | null): string {
@@ -64,13 +63,19 @@ function resultClass(text: string): string {
         class="team-hero"
         style={`--team-color: ${branding.colors[0] ?? "#84909e"}; --team-color-2: ${branding.colors[1] ?? branding.colors[0] ?? "#84909e"}`}
       >
-        {branding.logoSrc ? (
-          <img class="team-logo" src={branding.logoSrc} alt="" />
-        ) : (
-          <span class="team-monogram" aria-hidden="true"
-            >{team.name.slice(0, 2).toUpperCase()}</span
-          >
-        )}
+        <span class="team-logo-frame">
+          {branding.logoSrc ? (
+            <img
+              class:list={["team-logo", { "logo-on-light": branding.logoVariant !== "white" }]}
+              src={branding.logoSrc}
+              alt=""
+            />
+          ) : (
+            <span class="team-monogram" aria-hidden="true"
+              >{team.name.slice(0, 2).toUpperCase()}</span
+            >
+          )}
+        </span>
         <div>
           <h1>{team.fullName}</h1>
           <p class="team-country">
@@ -81,22 +86,48 @@ function resultClass(text: string): string {
       </header>
 
       {team.lineage.length > 0 ? (
-        <p class="lineage" aria-label="Team lineage">
-          <span class="lineage-label">Lineage</span>
-          {team.lineage.map((entry, index) => (
-            <span class="lineage-item">
-              {index > 0 ? <span class="lineage-arrow">→</span> : null}
-              <a class="lineage-chip" href={`/teams/${entry.id}`}>
-                {entry.name}
-                <span class="lineage-years">
-                  {entry.yearTo === null || entry.yearTo === entry.yearFrom
-                    ? entry.yearFrom
-                    : `${entry.yearFrom}–${entry.yearTo}`}
-                </span>
-              </a>
-            </span>
-          ))}
-        </p>
+        <div class="lineage" aria-label="Team lineage">
+          {standaloneLineage.length > 0 ? (
+            <div class="lineage-block">
+              <span class="lineage-label">Earlier entries</span>
+              <div class="lineage-list">
+                {standaloneLineage.map((entry, index) => (
+                  <span class="lineage-item">
+                    {index > 0 ? <span class="lineage-separator">·</span> : null}
+                    <a class="lineage-chip" href={`/teams/${entry.id}`}>
+                      {entry.name}
+                      <span class="lineage-years">
+                        {entry.yearTo === null || entry.yearTo === entry.yearFrom
+                          ? entry.yearFrom
+                          : `${entry.yearFrom}–${entry.yearTo}`}
+                      </span>
+                    </a>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {continuityLineage.length > 0 ? (
+            <div class="lineage-block">
+              <span class="lineage-label">Constructor continuity</span>
+              <div class="lineage-list">
+                {continuityLineage.map((entry, index) => (
+                  <span class="lineage-item">
+                    {index > 0 ? <span class="lineage-arrow">→</span> : null}
+                    <a class="lineage-chip" href={`/teams/${entry.id}`}>
+                      {entry.name}
+                      <span class="lineage-years">
+                        {entry.yearTo === null || entry.yearTo === entry.yearFrom
+                          ? entry.yearFrom
+                          : `${entry.yearFrom}–${entry.yearTo}`}
+                      </span>
+                    </a>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
       ) : null}
 
       <section class="info-panels">
@@ -170,16 +201,32 @@ function resultClass(text: string): string {
           <span class="key"><span class="dagger">†</span>retired but classified</span>
           <span class="key driver-champion">driver champion</span>
         </p>
-        {team.seasons.map((season) => (
-          <section
-            class:list={[
-              "season-block",
-              {
-                champion: season.championshipWon,
-                current: season.year === currentYear,
-              },
-            ]}
-          >
+        {team.seasons.map((season, index) => {
+          const prev = team.seasons[index - 1];
+          const gap = prev ? seasonGap(prev.year, season.year) : null;
+          return (
+            <>
+              {gap ? (
+                <div
+                  class="season-gap"
+                  role="separator"
+                  aria-label={`${gap.seasons} seasons without entries, ${gap.from} to ${gap.to}`}
+                >
+                  <span class="season-gap__label">
+                    {gap.from}–{gap.to} · {gap.seasons}{" "}
+                    {gap.seasons === 1 ? "season" : "seasons"} without entries
+                  </span>
+                </div>
+              ) : null}
+              <section
+                class:list={[
+                  "season-block",
+                  {
+                    champion: season.championshipWon,
+                    current: season.year === currentYear,
+                  },
+                ]}
+              >
             <h3>
               <span class="season-year">{season.year}</span>
               <span class="season-meta">
@@ -260,8 +307,19 @@ function resultClass(text: string): string {
                 </tbody>
               </table>
             </div>
-          </section>
-        ))}
+              </section>
+            </>
+          );
+        })}
+        <footer class="history-end">
+          <p class="history-end__summary">
+            {team.firstEntry}–{team.seasons[0]?.year ?? team.activeSeason} ·{" "}
+            {team.seasons.length}{" "}
+            {team.seasons.length === 1 ? "season" : "seasons"} of Grand Prix
+            history
+          </p>
+          <a class="history-end__back" href="/teams">Back to all teams</a>
+        </footer>
       </section>
     </main>
   </BaseLayout>
@@ -292,11 +350,29 @@ function resultClass(text: string): string {
       );
     box-shadow: 0 20px 44px -24px color-mix(in srgb, var(--team-color) 65%, transparent);
   }
-  .team-logo {
+  .team-logo-frame {
+    display: grid;
+    place-items: center;
+    width: 6rem;
     height: 4rem;
-    width: auto;
+    flex: none;
+  }
+  .team-logo {
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
     flex: none;
     filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+  }
+  .logo-on-light {
+    box-sizing: border-box;
+    padding: 0.45rem 0.7rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.94);
+    filter: none;
   }
   .team-monogram {
     display: grid;
@@ -336,12 +412,22 @@ function resultClass(text: string): string {
     margin-top: 1.75rem;
   }
   .lineage {
+    display: grid;
+    gap: 0.65rem;
+    margin: 1rem 0 0;
+    font-size: 0.78rem;
+  }
+  .lineage-block {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.4rem;
-    margin: 1rem 0 0;
-    font-size: 0.78rem;
+  }
+  .lineage-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
   }
   .lineage-label {
     margin-right: 0.3rem;
@@ -356,6 +442,9 @@ function resultClass(text: string): string {
     gap: 0.4rem;
   }
   .lineage-arrow {
+    color: var(--muted);
+  }
+  .lineage-separator {
     color: var(--muted);
   }
   .lineage-chip {
@@ -513,6 +602,23 @@ function resultClass(text: string): string {
     content-visibility: auto;
     contain-intrinsic-size: auto 14rem;
   }
+  /* 相邻赛季不连续时，用一段虚线轨道标示断档区间 */
+  .season-gap {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 0.6rem 0 0.6rem 0.9rem;
+    border-left: 2px dashed color-mix(in srgb, var(--muted) 45%, transparent);
+  }
+  .season-gap + .season-block {
+    margin-top: 1rem;
+  }
+  .season-gap__label {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
   .season-block.champion {
     border-left-color: #ffc72c;
   }
@@ -618,5 +724,41 @@ function resultClass(text: string): string {
   .empty-cell {
     text-align: left !important;
     color: var(--muted);
+  }
+  /* 历史表收尾：一条渐隐分隔 + 生涯概览 + 返回目录，避免页面戛然而止 */
+  .history-end {
+    display: grid;
+    justify-items: center;
+    gap: 0.6rem;
+    margin-top: 3.5rem;
+    text-align: center;
+  }
+  .history-end::before {
+    content: "";
+    width: 9rem;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--line) 30%,
+      var(--line) 70%,
+      transparent
+    );
+  }
+  .history-end__summary {
+    margin: 0.4rem 0 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .history-end__back {
+    font-size: 0.85rem;
+    color: var(--muted-light);
+    text-decoration: none;
+  }
+  .history-end__back:hover {
+    color: var(--coral);
+    text-decoration: underline;
   }
 </style>

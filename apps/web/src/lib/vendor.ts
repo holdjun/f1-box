@@ -1,10 +1,18 @@
-export interface VendorStore {
-  get(key: string): Promise<{ text(): Promise<string> } | null>;
-}
+import rawLogos from "../data/logos.json";
+import rawTeamColors from "../data/team-colors.json";
 
 export interface TeamBranding {
   colors: string[];
   logoSrc: string | null;
+  logoVariant: LogoVariant | null;
+}
+
+export type LogoVariant = "color" | "white" | "mono";
+
+interface LogoAsset {
+  file: string;
+  yearFrom: number;
+  variant: LogoVariant;
 }
 
 interface ColorPeriod {
@@ -19,105 +27,57 @@ interface TeamColors {
 }
 
 export interface VendorIndexes {
-  colors: Record<string, TeamColors> | null;
-  logos: { file: string; yearFrom: number }[] | null;
+  colors: Record<string, TeamColors>;
+  logos: LogoAsset[];
 }
 
-// 一次拉取两份策展 JSON，供整页多队查询复用
-export async function getVendorIndexes(
-  store: VendorStore | undefined,
-): Promise<VendorIndexes> {
-  if (!store) return { colors: null, logos: null };
+// 策展资产与索引存放在仓库（src/data + public/vendor），构建期内联、随代码一起部署。
+// preview 与生产天然同源，无需运行时 R2 读取，也不再有桶级覆盖层。
+export const vendorIndexes: VendorIndexes = {
+  colors: rawTeamColors.teams as Record<string, TeamColors>,
+  logos: rawLogos.logos as LogoAsset[],
+};
 
-  const [colors, logos] = await Promise.all([
-    getVendorJson(store, "team-colors/team-colors.json"),
-    getVendorJson(store, "team-logos/logos.json"),
-  ]);
-
-  const colorsIndex =
-    typeof colors === "object" && colors !== null
-      ? ((colors as Record<string, unknown>).teams as Record<string, TeamColors> | undefined) ?? null
-      : null;
-  const logosRaw =
-    typeof logos === "object" && logos !== null
-      ? ((logos as Record<string, unknown>).logos as unknown[] | undefined)
-      : null;
-
-  return {
-    colors: colorsIndex,
-    logos: Array.isArray(logosRaw)
-      ? logosRaw.flatMap((entry) => {
-          if (typeof entry !== "object" || entry === null) return [];
-          const record = entry as Record<string, unknown>;
-          return typeof record.file === "string" && typeof record.yearFrom === "number"
-            ? [{ file: record.file, yearFrom: record.yearFrom }]
-            : [];
-        })
-      : null,
-  };
-}
-
-export async function getTeamBranding(
-  store: VendorStore | undefined,
-  teamId: string,
-): Promise<TeamBranding> {
-  const indexes = await getVendorIndexes(store);
+export function getTeamBranding(indexes: VendorIndexes, teamId: string): TeamBranding {
+  const logo = logoFor(indexes, teamId);
   return {
     colors: latestColors(indexes, teamId),
-    logoSrc: logoSrcFor(indexes, teamId),
+    logoSrc: logo ? logoUrl(logo.file) : null,
+    logoVariant: logo?.variant ?? null,
   };
 }
 
 export function latestColors(indexes: VendorIndexes, teamId: string): string[] {
-  const team = indexes.colors?.[teamId];
-  if (!team) return [];
-  return team.colors.filter((c): c is string => Boolean(validHex(c)));
+  return indexes.colors[teamId]?.colors ?? [];
 }
 
 export function latestColor(indexes: VendorIndexes, teamId: string): string | null {
   return latestColors(indexes, teamId)[0] ?? null;
 }
 
-export function colorForYear(
-  indexes: VendorIndexes,
-  teamId: string,
-  year: number,
-): string | null {
-  const team = indexes.colors?.[teamId];
-  if (!team) return null;
-  const period = team.periods.find(
-    (p) => p.from <= year && (p.to === null || year <= p.to),
-  );
-  return validHex((period ?? team).colors[0]);
+export function logoSrcFor(indexes: VendorIndexes, teamId: string): string | null {
+  const logo = logoFor(indexes, teamId);
+  return logo ? logoUrl(logo.file) : null;
 }
 
-export function logoSrcFor(indexes: VendorIndexes, teamId: string): string | null {
-  if (!indexes.logos) return null;
+export function logoVariantFor(
+  indexes: VendorIndexes,
+  teamId: string,
+): LogoVariant | null {
+  return logoFor(indexes, teamId)?.variant ?? null;
+}
+
+function logoFor(indexes: VendorIndexes, teamId: string): LogoAsset | null {
   const prefix = `team-logos/${teamId}@`;
-  let best: { file: string; yearFrom: number } | null = null;
+  let best: LogoAsset | null = null;
   for (const entry of indexes.logos) {
     if (!entry.file.startsWith(prefix)) continue;
     if (!best || entry.yearFrom >= best.yearFrom) best = entry;
   }
-  return best ? `/vendor/${best.file}` : null;
+  return best;
 }
 
-async function getVendorJson(
-  store: VendorStore,
-  key: string,
-): Promise<unknown> {
-  try {
-    const object = await store.get(`vendor/${key}`);
-    if (!object) return null;
-    return JSON.parse(await object.text());
-  } catch (error) {
-    console.error(`Failed to read vendor/${key}:`, error);
-    return null;
-  }
-}
-
-function validHex(color: string | undefined): string | null {
-  return typeof color === "string" && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(color)
-    ? color
-    : null;
+// 文件名里的 @ 需编码为 %40，否则 Cloudflare 静态资产层会先回一个 307 跳转
+function logoUrl(file: string): string {
+  return `/vendor/${file.split("/").map(encodeURIComponent).join("/")}`;
 }

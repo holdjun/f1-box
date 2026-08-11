@@ -19,6 +19,14 @@ test("ferrari page renders identity, summary and season blocks @desktop", async 
   await expect(page.getByLabel("Table legend")).toContainText("Win");
   // 车手冠军名字金色（1979 Scheckter 等）
   await expect(page.locator(".driver-champion").first()).toBeVisible();
+  // 历史表之后有收尾块，页面不戛然而止
+  await expect(page.locator(".history-end__summary")).toContainText(
+    "1950–2026 · 77 seasons",
+  );
+  await expect(page.locator(".history-end__back")).toHaveAttribute(
+    "href",
+    "/teams",
+  );
 });
 
 test("current season panel and markers @desktop", async ({ page }) => {
@@ -93,8 +101,48 @@ test("teams index lists all constructors @desktop", async ({ page }) => {
   await expect(page.locator('a[href="/teams/mercedes"]')).toBeVisible();
 });
 
-test("year teams grid links to global team pages @desktop", async ({ page }) => {
-  await page.goto("/2026/teams");
-  await expect(page.locator(".team-card")).toHaveCount(11);
-  await expect(page.locator('a[href="/teams/ferrari"]').first()).toBeVisible();
+test("team logos render inside a stable contain frame @desktop", async ({
+  page,
+}) => {
+  await page.goto("/teams");
+
+  // 目录里的真实 logo（策展资产随仓库下发，DEV 也可见）
+  const frame = page.locator('a[href="/teams/ferrari"] .card-logo-frame');
+  await expect(frame).toHaveCSS("width", "128px");
+  await expect(frame).toHaveCSS("height", "48px");
+  const cardLogo = frame.locator("img.card-logo");
+  await expect(cardLogo).toBeVisible();
+  await expect(cardLogo).toHaveCSS("object-fit", "contain");
+  const cardBounds = await frame.evaluate((element) => {
+    const image = element.querySelector("img")!;
+    const frameBox = element.getBoundingClientRect();
+    const imageBox = image.getBoundingClientRect();
+    return {
+      frameWidth: frameBox.width,
+      frameHeight: frameBox.height,
+      imageWidth: imageBox.width,
+      imageHeight: imageBox.height,
+    };
+  });
+  expect(cardBounds.imageWidth).toBeLessThanOrEqual(cardBounds.frameWidth);
+  expect(cardBounds.imageHeight).toBeLessThanOrEqual(cardBounds.frameHeight);
+
+  // 无独立 logo 的车队回落为 monogram，不出现失效图片
+  await expect(page.locator('a[href="/teams/adams"] .card-monogram')).toBeVisible();
+  await expect(page.locator('a[href="/teams/adams"] img')).toHaveCount(0);
+
+  await page.goto("/teams/ferrari");
+  const teamFrame = page.locator(".team-logo-frame");
+  await expect(teamFrame).toHaveCSS("width", "96px");
+  await expect(teamFrame).toHaveCSS("height", "64px");
+  const teamLogo = teamFrame.locator("img.team-logo");
+  await expect(teamLogo).toBeVisible();
+  await expect(teamLogo).toHaveCSS("object-fit", "contain");
+});
+
+test("year teams routes are retired @desktop", async ({ page }) => {
+  const index = await page.goto("/2026/teams");
+  expect(index?.status()).toBe(404);
+  const detail = await page.goto("/2026/teams/ferrari");
+  expect(detail?.status()).toBe(404);
 });

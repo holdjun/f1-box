@@ -23,8 +23,15 @@ metadata:
 
 - 架构转向：f1db 官方 SQLite 全量（30 表 + 18 视图，含 race_result/fastest_lap 比赛级视图）进了 Cloudflare D1（database f1db，id 50683ee9-c236-4bc5-bc11-4e8151916f54，APAC，约 42MB）。scripts/f1db-d1-dump.sh 按表拆分（建表序父表优先、剥事务语句）+ f1db-d1-import.sh 逐文件导入（约 25 分钟，data-sync timeout 45）。D1 坑：远端拒绝显式 BEGIN/COMMIT、外键默认开启、sqlite_master rowid 序即安全建表序。
 - 绑定 env.F1_DB（wrangler.jsonc + wrangler.preview.jsonc 同一库）；DEV 无 D1，走 fixture apps/web/src/lib/fixtures/team-ferrari.json（真实数据生成，77 季 16 冠）。
-- 2026-08-08 teams 体系切 f1db：/{year}/teams 网格改 D1 直出（1950–2026 全赛季， standings 累加+车手阵容），链接 /teams/{id}；旧 /{year}/teams/[team] 已删；/teams 索引列全 187 队；vendor 查询走 getVendorIndexes 单次拉取（按年取色、最新 logo、双色 hero）。DEV 用 year-teams-2026/constructors 两个小 fixture。用户决定：jolpica 不再用（directory 方案废弃，gen-directory 已删）；R2 v1/seasons 旧 payload 暂留——racing/results/drivers 页还在消费，迁移后删（#38）。logo 策展只留每队最新（38→44 身份：新增 brabham/brm/shadow/footwork/lola/force-india，march/fittipaldi 无可用 logo 留 monogram）；team-colors 补 6 队策展色；旧版本文件已从 R2 删除。wrangler dev --remote 连续请求会 403 限流（dev 专属），生产无此问题。两轮审查修复：COALESCE 全聚合（否则 172/187 队 500）、DNF 字面量、共享车按排名序 keep-first（ Fangio 1951 共享冠军曾显示 11）、多引擎变体积分累加、DSQ 名次不加 P 前缀、identity 并入单 batch、fixture 动态导入、race_data(constructor_id,type) 索引、data-sync release tag 门禁。D1 重导分钟级中断靠门禁收敛；blue-green 留待未来。旧 /{year}/teams/{team} name-slug 与新 f1db id 两套体系待 teams 改版统一。待办 #38：赛季页迁 D1 退役 jolpica（用户定先不做）。
+- 2026-08-08 teams 体系切 f1db：/teams 索引列全 187 队，卡片只显示 logo/monogram 与名称；/{year}/teams 和 /{year}/teams/{team} 仅作兼容跳转，不再维护年份车队目录；vendor 查询走 getVendorIndexes 单次拉取（最新 logo、双色 hero）。DEV 只保留 constructors/team-ferrari 两个 fixture。用户决定：jolpica 不再用（directory 方案废弃，gen-directory 已删）；R2 v1/seasons 旧 payload 暂留——racing/results/drivers 页还在消费，迁移后删（#38）。logo 策展只留每队最新（44 个身份，缺失时留 monogram）；team-colors 为 56 队策展色；旧版本文件已从 R2 删除。wrangler dev --remote 连续请求会 403 限流（dev 专属），生产无此问题。两轮审查修复：COALESCE 全聚合（否则 172/187 队 500）、DNF 字面量、共享车按排名序 keep-first（ Fangio 1951 共享冠军曾显示 11）、多引擎变体积分累加、DSQ 名次不加 P 前缀、identity 并入单 batch、fixture 动态导入、race_data(constructor_id,type) 索引、data-sync release tag 门禁。D1 重导分钟级中断靠门禁收敛；blue-green 留待未来。待办 #38：赛季页迁 D1 退役 jolpica（用户定先不做）。
 - 新增 /vendor/[...key] 路由：流式输出 R2 vendor/ 资产，键段白名单 [A-Za-z0-9@._-]，DEV 404。
 - /teams/{slug} 详情页：身份头（双色 hero、最新 logo、Lineage 传承链徽章可点击、早期自身 stint 自动补）+ Season 面板（GP/Sprint）+ Team Summary + wiki 式逐场矩阵（P/F/冲刺排名上标、†、车手冠军金字、轮胎徽章、夺冠/当前 accent、将来轮次空列）。
 - 预留未做：今年特写车手卡、视觉精修、车手链接（等 PR #5 全局车手页合并）。
 - e2e 经验：astro dev toolbar 会注入额外 h1，选择器要限定 main 作用域。
+
+2026-08-11 策展资产进仓库（PR #8 内完成）：
+
+- vendor 策展资产全部迁出 R2：logo 图片（65 张）与国旗（251 张）进 apps/web/public/vendor/，logos.json 与 team-colors.json 进 apps/web/src/data/ 构建期内联；vendor.ts 不再读 R2，DEV 与生产同源，本地 dev 也有真实 logo。
+- /vendor/[...key] 动态路由、F1_PREVIEW_OVERRIDES 绑定、f1-box-preview-overrides 覆盖桶、publish-team-logo-overrides.sh 一并删除。wrangler 部署时框架重定向到 dist/server/wrangler.json，静态资产实际从 dist/client 下发（assets.directory 写的 ./dist 不是真实来源）。
+- R2 f1-box-data 只留动态数据：v1/seasons payload（racing/results/drivers 消费，#38 退役后清理）与 vendor/f1db 归档。桶内 vendor/ 前缀（旧 logo/flag/color 副本、directory 方案遗物 constructors.json/drivers.json/manifest.json）待合并验收后清理。
+- /{year}/teams 与 /{year}/teams/{team} 兼容跳转一并删除，直接 404（用户拍板不留兼容层；308 永久重定向本来也会被浏览器长期缓存，删掉更干净）。

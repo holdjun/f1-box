@@ -16,6 +16,10 @@ test("@desktop racing page lists the full calendar", async ({ page }) => {
   const raceLinks = page.locator('main a[href^="/2026/racing/"]');
   await expect(raceLinks).toHaveCount(22);
   await expect(page.getByRole("navigation", { name: "Season" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Teams" })).toHaveAttribute(
+    "href",
+    "/teams",
+  );
 });
 
 test("@desktop race detail shows schedule and classifications", async ({
@@ -61,7 +65,7 @@ test("@desktop results index redirects to races", async ({ page }) => {
   await page.waitForURL(/\/2026\/results\/races$/);
 });
 
-test("@desktop drivers and teams directories link to detail pages", async ({
+test("@desktop drivers directory links to detail pages", async ({
   page,
 }) => {
   await page.goto("/2026/drivers");
@@ -70,12 +74,6 @@ test("@desktop drivers and teams directories link to detail pages", async ({
   await driverLinks.first().click();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByRole("img", { name: /Finishing position by round/ })).toBeVisible();
-
-  await page.goto("/2026/teams");
-  const teamLinks = page.locator('main a[href^="/teams/"]');
-  await expect(teamLinks.first()).toBeVisible();
-  await teamLinks.first().click();
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
 
 test("@desktop unknown driver under a valid year returns 404", async ({ page }) => {
