@@ -17,7 +17,7 @@ const logoDir = fileURLToPath(new URL("../public/vendor/team-logos", import.meta
 describe("curated vendor data", () => {
   it("serves the curated Ferrari branding from repo data", () => {
     const branding = getTeamBranding(vendorIndexes, "ferrari");
-    expect(branding.logoSrc).toBe("/vendor/team-logos/ferrari@2026.webp");
+    expect(branding.logoSrc).toBe("/vendor/team-logos/ferrari%402026.webp");
     expect(branding.logoVariant).toBe("white");
     expect(branding.colors[0]).toBe("#e80020");
   });
@@ -52,9 +52,9 @@ describe("logo and color selection", () => {
   };
 
   it("picks the newest logo for a team", () => {
-    expect(logoSrcFor(indexes, "ferrari")).toBe("/vendor/team-logos/ferrari@2026.webp");
+    expect(logoSrcFor(indexes, "ferrari")).toBe("/vendor/team-logos/ferrari%402026.webp");
     expect(logoVariantFor(indexes, "ferrari")).toBe("white");
-    expect(logoSrcFor(indexes, "arrows")).toBe("/vendor/team-logos/arrows@1978.png");
+    expect(logoSrcFor(indexes, "arrows")).toBe("/vendor/team-logos/arrows%401978.png");
     expect(logoSrcFor(indexes, "unknown")).toBeNull();
   });
 

@@ -42,7 +42,7 @@ export function getTeamBranding(indexes: VendorIndexes, teamId: string): TeamBra
   const logo = logoFor(indexes, teamId);
   return {
     colors: latestColors(indexes, teamId),
-    logoSrc: logo ? `/vendor/${logo.file}` : null,
+    logoSrc: logo ? logoUrl(logo.file) : null,
     logoVariant: logo?.variant ?? null,
   };
 }
@@ -57,7 +57,7 @@ export function latestColor(indexes: VendorIndexes, teamId: string): string | nu
 
 export function logoSrcFor(indexes: VendorIndexes, teamId: string): string | null {
   const logo = logoFor(indexes, teamId);
-  return logo ? `/vendor/${logo.file}` : null;
+  return logo ? logoUrl(logo.file) : null;
 }
 
 export function logoVariantFor(
@@ -75,4 +75,9 @@ function logoFor(indexes: VendorIndexes, teamId: string): LogoAsset | null {
     if (!best || entry.yearFrom >= best.yearFrom) best = entry;
   }
   return best;
+}
+
+// 文件名里的 @ 需编码为 %40，否则 Cloudflare 静态资产层会先回一个 307 跳转
+function logoUrl(file: string): string {
+  return `/vendor/${file.split("/").map(encodeURIComponent).join("/")}`;
 }
