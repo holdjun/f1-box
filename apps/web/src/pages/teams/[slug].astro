@@ -313,8 +313,10 @@ function resultClass(text: string): string {
         })}
         <footer class="history-end">
           <p class="history-end__summary">
-            {team.firstEntry}–{team.activeSeason} · {team.seasons.length}{" "}
-            {team.seasons.length === 1 ? "season" : "seasons"} of Grand Prix history
+            {team.firstEntry}–{team.seasons[0]?.year ?? team.activeSeason} ·{" "}
+            {team.seasons.length}{" "}
+            {team.seasons.length === 1 ? "season" : "seasons"} of Grand Prix
+            history
           </p>
           <a class="history-end__back" href="/teams">Back to all teams</a>
         </footer>
