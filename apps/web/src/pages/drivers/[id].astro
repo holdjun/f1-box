@@ -114,6 +114,25 @@ const matrixSeasons = (driver?.seasons ?? []).map((season) => ({
         </div>
       ) : null}
 
+      {driver.teamStints.length > 0 ? (
+        <div class="number-history" aria-label="Teams driven for">
+          <span class="number-label">Teams</span>
+          {driver.teamStints.map((stint, index) => (
+            <span class="number-item">
+              {index > 0 ? <span class="number-arrow">→</span> : null}
+              <a class="number-chip chip-link" href={`/teams/${stint.id}`}>
+                {stint.name}
+                <span class="number-years">
+                  {stint.yearFrom === stint.yearTo
+                    ? stint.yearFrom
+                    : `${stint.yearFrom}–${stint.yearTo}`}
+                </span>
+              </a>
+            </span>
+          ))}
+        </div>
+      ) : null}
+
       <section class="info-panels">
         {driver.currentSeason && driver.currentSeason.year === currentYear ? (
           <CurrentSeasonPanel season={driver.currentSeason} />
@@ -258,6 +277,13 @@ const matrixSeasons = (driver?.seasons ?? []).map((season) => ({
     border: 1px solid var(--line);
     border-radius: 999px;
     color: var(--muted-light);
+  }
+  a.number-chip {
+    text-decoration: none;
+  }
+  a.number-chip:hover {
+    border-color: var(--coral);
+    color: var(--coral);
   }
   .number-years {
     color: var(--muted);

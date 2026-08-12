@@ -35,6 +35,13 @@ export interface NumberStint {
   yearTo: number;
 }
 
+export interface TeamStint {
+  id: string;
+  name: string;
+  yearFrom: number;
+  yearTo: number;
+}
+
 export interface DriverSeasonTeam {
   id: string;
   name: string;
@@ -62,6 +69,7 @@ export interface DriverPage {
   permanentNumber: string | null;
   totals: DriverTotals;
   numberStints: NumberStint[];
+  teamStints: TeamStint[];
   currentSeason: CurrentSeason | null;
   seasons: DriverSeason[];
   activeSeason: number | null;
@@ -274,13 +282,13 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
           const { default: fixture } = await import(
             "./fixtures/driver-george-russell.json"
           );
-          return fixture as DriverPage;
+          return withTeamStints(fixture as DriverPage);
         }
         if (slug === "max-verstappen") {
           const { default: fixture } = await import(
             "./fixtures/driver-max-verstappen.json"
           );
-          return fixture as DriverPage;
+          return withTeamStints(fixture as DriverPage);
         }
         return null;
       }
@@ -325,6 +333,7 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
       return {
         ...identity,
         numberStints: mergeNumberStints(numberRows.results),
+        teamStints: mergeTeamStints(seasons),
         currentSeason: buildCurrentSeason(
           seasons[0],
           gpStatRows.results,
@@ -346,7 +355,7 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
 
 function parseIdentity(
   value: unknown,
-): Omit<DriverPage, "numberStints" | "currentSeason" | "seasons" | "activeSeason"> {
+): Omit<DriverPage, "numberStints" | "teamStints" | "currentSeason" | "seasons" | "activeSeason"> {
   const record = asRecord(value, "driver identity");
   return {
     id: asString(record.id, "driver id"),
@@ -397,6 +406,33 @@ export function mergeNumberStints(rows: unknown[]): NumberStint[] {
     }
   }
   return stints;
+}
+
+// 连续同队年合并为区间；换队或断档开新段（同 mergeNumberStints 模式）。
+// seasons 降序，先翻成升序；季中转会一年两队时各自成段
+export function mergeTeamStints(seasons: DriverSeason[]): TeamStint[] {
+  const stints: TeamStint[] = [];
+  for (const season of [...seasons].reverse()) {
+    for (const team of season.teams) {
+      const last = stints.at(-1);
+      if (last && last.id === team.id && last.yearTo === season.year - 1) {
+        last.yearTo = season.year;
+      } else {
+        stints.push({
+          id: team.id,
+          name: team.name,
+          yearFrom: season.year,
+          yearTo: season.year,
+        });
+      }
+    }
+  }
+  return stints;
+}
+
+// fixture 无 teamStints 字段，运行期从 seasons 补齐，保证 DEV 与 D1 同构
+function withTeamStints(page: DriverPage): DriverPage {
+  return { ...page, teamStints: mergeTeamStints(page.seasons) };
 }
 
 function mergeDriverSeasons(

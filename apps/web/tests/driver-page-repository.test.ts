@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createDriverRepository,
   mergeNumberStints,
+  mergeTeamStints,
   type DriverDatabase,
 } from "../src/lib/driver-repository.js";
 
@@ -63,6 +64,55 @@ describe("mergeNumberStints", () => {
     ).toEqual([
       { number: "17", yearFrom: 2005, yearTo: 2005 },
       { number: "18", yearFrom: 2005, yearTo: 2005 },
+    ]);
+  });
+});
+
+describe("mergeTeamStints", () => {
+  const season = (year: number, teams: [string, string][]) => ({
+    year,
+    rounds: [],
+    teams: teams.map(([id, name]) => ({ id, name, results: [] })),
+    points: null,
+    position: null,
+    championshipWon: false,
+  });
+
+  it("merges consecutive same-team years into a range", () => {
+    expect(
+      mergeTeamStints([
+        season(2013, [["mclaren", "McLaren"]]),
+        season(2012, [["mclaren", "McLaren"]]),
+        season(2011, [["mclaren", "McLaren"]]),
+      ]),
+    ).toEqual([{ id: "mclaren", name: "McLaren", yearFrom: 2011, yearTo: 2013 }]);
+  });
+
+  it("splits on a team change and on a return", () => {
+    expect(
+      mergeTeamStints([
+        season(2026, [["ferrari", "Ferrari"]]),
+        season(2025, [["ferrari", "Ferrari"]]),
+        season(2013, [["mclaren", "McLaren"]]),
+      ]),
+    ).toEqual([
+      { id: "mclaren", name: "McLaren", yearFrom: 2013, yearTo: 2013 },
+      { id: "ferrari", name: "Ferrari", yearFrom: 2025, yearTo: 2026 },
+    ]);
+  });
+
+  it("keeps both teams of a mid-season transfer", () => {
+    expect(
+      mergeTeamStints([
+        season(2018, [["renault", "Renault"]]),
+        season(2017, [
+          ["toro-rosso", "Toro Rosso"],
+          ["renault", "Renault"],
+        ]),
+      ]),
+    ).toEqual([
+      { id: "toro-rosso", name: "Toro Rosso", yearFrom: 2017, yearTo: 2017 },
+      { id: "renault", name: "Renault", yearFrom: 2017, yearTo: 2018 },
     ]);
   });
 });
@@ -193,6 +243,13 @@ describe("driver fixtures", () => {
     expect(driver?.dateOfBirth).toBe("1998-02-15");
     expect(driver?.numberStints).toEqual([
       { number: "63", yearFrom: 2019, yearTo: 2026 },
+    ]);
+    expect(driver?.teamStints).toEqual([
+      { id: "williams", name: "Williams", yearFrom: 2019, yearTo: 2020 },
+      // 2020 萨基尔代打一场 Mercedes，属真实参赛记录
+      { id: "mercedes", name: "Mercedes", yearFrom: 2020, yearTo: 2020 },
+      { id: "williams", name: "Williams", yearFrom: 2021, yearTo: 2021 },
+      { id: "mercedes", name: "Mercedes", yearFrom: 2022, yearTo: 2026 },
     ]);
     expect(driver?.currentSeason?.year).toBe(driver?.activeSeason);
   });

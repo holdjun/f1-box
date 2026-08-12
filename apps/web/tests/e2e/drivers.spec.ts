@@ -75,6 +75,10 @@ test("russell detail shows hero, bio and current season @desktop", async ({
   await expect(page.getByLabel("2026 season")).toBeVisible();
   await expect(page.getByLabel("Career stats")).toBeVisible();
   await expect(page.locator(".season-block.current")).toHaveCount(1);
+  // 待过车队链路：Williams → Mercedes，链向车队页
+  const teams = page.getByLabel("Teams driven for");
+  await expect(teams).toContainText("Williams");
+  await expect(teams.locator('a[href="/teams/mercedes"]')).toBeVisible();
 });
 
 test("verstappen detail shows number history and champion blocks @desktop", async ({
