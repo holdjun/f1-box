@@ -19,7 +19,7 @@ export interface MatrixSeason {
   year: number;
   metaText: string;
   metaHref: string | null;
-  tyres: string[];
+  tyres?: string[];
   rounds: MatrixRound[];
   rows: MatrixRow[];
   points: number | null;
@@ -78,7 +78,7 @@ const { seasons, rowLabel, showChampionKey = false } = Astro.props;
           ) : (
             <span class="season-meta">{season.metaText}</span>
           )}
-          {season.tyres.map((tyre) => (
+          {season.tyres?.map((tyre) => (
             <span class={`tyre-badge tyre-${tyre}`} title={`Tyres: ${tyre}`}>
               {tyre}
             </span>
@@ -336,10 +336,6 @@ const { seasons, rowLabel, showChampionKey = false } = Astro.props;
   }
   .result-finish {
     color: var(--muted-light);
-  }
-  .key .result-finish,
-  .key .result-other {
-    background: rgba(137, 145, 154, 0.18);
   }
   .result-ret {
     background: rgba(224, 143, 213, 0.22) !important;

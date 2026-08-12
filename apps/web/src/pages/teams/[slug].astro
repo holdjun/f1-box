@@ -254,12 +254,6 @@ const matrixSeasons = (team?.seasons ?? []).map((season) => ({
     height: 0.95rem;
     width: auto;
   }
-  .info-panels {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-    margin-top: 1.75rem;
-  }
   .lineage {
     display: grid;
     gap: 0.65rem;
@@ -313,49 +307,5 @@ const matrixSeasons = (team?.seasons ?? []).map((season) => ({
   .lineage-years {
     color: var(--muted);
     font-size: 0.68rem;
-  }
-  .info-panel {
-    flex: 1 1 18rem;
-    padding: 1.1rem 1.35rem 1.35rem;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: var(--ink-soft);
-  }
-  .info-panel h2 {
-    margin: 0 0 0.9rem;
-    font-family: var(--display);
-    font-size: 1.05rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .info-panel h2::before {
-    display: inline-block;
-    width: 0.55rem;
-    height: 0.55rem;
-    margin-right: 0.5rem;
-    background: var(--coral);
-    content: "";
-  }
-  .info-panel h3 {
-    margin: 1rem 0 0.45rem;
-    font-size: 0.68rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .info-panel dl {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
-    gap: 0.7rem 1rem;
-    margin: 0;
-  }
-  .info-panel dt {
-    font-size: 0.68rem;
-    color: var(--muted);
-  }
-  .info-panel dd {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
   }
 </style>

@@ -99,7 +99,9 @@ export function createD1DriverDatabase(d1: D1Database): DriverDatabase {
 }
 
 // 最后赛季多车队时取整行（constructor_id 与 team_name 同行，避免颜色错配）；
-// 当前赛季车手优先，其余按生涯成就排序，与车队目录同一哲学
+// 当前赛季车手优先，其余按生涯成就排序，与车队目录同一哲学。
+// 注：收官年两队平局时以 c.name 字母序兜底（season_entrant_driver 无轮次信息），
+// 是近似值；详情页 hero 末队以 race_result 真实轮次为准，两处口径略有差异
 const driversSql = `
 WITH latest_season AS (
   SELECT MAX(year) AS year FROM season
@@ -156,7 +158,7 @@ FROM race_data rd
 JOIN race ra ON ra.id = rd.race_id
 WHERE rd.driver_id = ?1 AND rd.type = 'RACE_RESULT'
 GROUP BY ra.year, rd.driver_number
-ORDER BY ra.year, rd.driver_number`;
+ORDER BY ra.year, CAST(rd.driver_number AS INTEGER)`;
 
 // 年份取正式阵容与实际结果的并集：当前季未出赛也有空矩阵块，将来轮次保留空列
 const roundsSql = `
@@ -282,13 +284,13 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
           const { default: fixture } = await import(
             "./fixtures/driver-george-russell.json"
           );
-          return withTeamStints(fixture as DriverPage);
+          return withTeamStints(fixture as Omit<DriverPage, "teamStints">);
         }
         if (slug === "max-verstappen") {
           const { default: fixture } = await import(
             "./fixtures/driver-max-verstappen.json"
           );
-          return withTeamStints(fixture as DriverPage);
+          return withTeamStints(fixture as Omit<DriverPage, "teamStints">);
         }
         return null;
       }
@@ -341,13 +343,11 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
           sprintPoleRows.results,
         ),
         seasons,
-        activeSeason:
-          maxSeasonRows.results.length > 0
-            ? asNumber(
-                asRecord(maxSeasonRows.results[0], "max season row").year,
-                "max season",
-              )
-            : null,
+        activeSeason: (() => {
+          // MAX() 恒返回一行；season 表为空时 year 为 NULL
+          const year = asRecord(maxSeasonRows.results[0], "max season row").year;
+          return year == null ? null : asNumber(year, "max season");
+        })(),
       };
     },
   };
@@ -430,8 +430,8 @@ export function mergeTeamStints(seasons: DriverSeason[]): TeamStint[] {
   return stints;
 }
 
-// fixture 无 teamStints 字段，运行期从 seasons 补齐，保证 DEV 与 D1 同构
-function withTeamStints(page: DriverPage): DriverPage {
+// fixture 不存 teamStints，运行期从 seasons 补齐，保证 DEV 与 D1 同构
+function withTeamStints(page: Omit<DriverPage, "teamStints">): DriverPage {
   return { ...page, teamStints: mergeTeamStints(page.seasons) };
 }
 
@@ -467,9 +467,7 @@ function mergeDriverSeasons(
     }
   }
   for (const [year, season] of seasons) {
-    season.rounds = (rawRounds.get(year) ?? []).map(
-      ({ round, ...display }) => display,
-    );
+    season.rounds = rawRounds.get(year)!.map(({ round, ...display }) => display);
   }
 
   const sprintRanks = new Map<string, number>();
@@ -503,16 +501,14 @@ function mergeDriverSeasons(
   for (const row of teamRows) {
     const record = asRecord(row, "driver team row");
     const year = asNumber(record.year, "driver team year");
-    const season = seasons.get(year);
-    if (!season) continue;
+    // team 年份必然在 roundsSql 并集里，season 必存在
+    const season = seasons.get(year)!;
     const constructorId = asString(record.id, "driver team id");
     const byRound = cells.get(`${year}:${constructorId}`);
     season.teams.push({
       id: constructorId,
       name: asString(record.name, "driver team name"),
-      results: (rawRounds.get(year) ?? []).map(
-        (r) => byRound?.get(r.round) ?? null,
-      ),
+      results: rawRounds.get(year)!.map((r) => byRound?.get(r.round) ?? null),
     });
   }
 
