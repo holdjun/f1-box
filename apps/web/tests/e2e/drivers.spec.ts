@@ -75,19 +75,20 @@ test("russell detail shows hero, bio and current season @desktop", async ({
   await expect(page.getByLabel("2026 season")).toBeVisible();
   await expect(page.getByLabel("Career stats")).toBeVisible();
   await expect(page.locator(".season-block.current")).toHaveCount(1);
-  // 待过车队链路：Williams → Mercedes，链向车队页
+  // 待过车队链路：Williams → Mercedes，链向车队页（russell 两段 Mercedes，取首个）
   const teams = page.getByLabel("Teams driven for");
   await expect(teams).toContainText("Williams");
-  await expect(teams.locator('a[href="/teams/mercedes"]')).toBeVisible();
+  await expect(teams.locator('a[href="/teams/mercedes"]').first()).toBeVisible();
 });
 
 test("verstappen detail shows number history and champion blocks @desktop", async ({
   page,
 }) => {
   await page.goto("/drivers/max-verstappen");
-  await expect(page.locator(".number-chip")).toHaveCount(3);
-  await expect(page.locator(".number-history")).toContainText("2015–2021");
-  await expect(page.locator(".number-history")).toContainText("2022–2025");
+  const numbers = page.getByLabel("Car number history");
+  await expect(numbers.locator(".number-chip")).toHaveCount(3);
+  await expect(numbers).toContainText("2015–2021");
+  await expect(numbers).toContainText("2022–2025");
   await expect(page.locator(".season-block.champion").first()).toBeVisible();
 });
 
