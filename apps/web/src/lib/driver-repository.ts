@@ -98,10 +98,9 @@ export function createD1DriverDatabase(d1: D1Database): DriverDatabase {
   };
 }
 
-// 最后赛季多车队时取整行（constructor_id 与 team_name 同行，避免颜色错配）；
+// 最后车队取自实际参赛的末站（与详情页 hero 同一口径）；相关子查询走
+// (driver_id, type) 索引逐人定位，避免全表开窗。
 // 当前赛季车手优先，其余按生涯成就排序，与车队目录同一哲学。
-// 注：收官年两队平局时以 c.name 字母序兜底（season_entrant_driver 无轮次信息），
-// 是近似值；详情页 hero 末队以 race_result 真实轮次为准，两处口径略有差异
 const driversSql = `
 WITH latest_season AS (
   SELECT MAX(year) AS year FROM season
@@ -112,17 +111,17 @@ current_drivers AS (
   WHERE year = (SELECT year FROM latest_season) AND test_driver = 0
 ),
 last_team AS (
-  SELECT driver_id, constructor_id, team_name
-  FROM (
-    SELECT sed.driver_id, sed.constructor_id, c.name AS team_name,
-      ROW_NUMBER() OVER (
-        PARTITION BY sed.driver_id ORDER BY sed.year DESC, c.name
-      ) AS rn
-    FROM season_entrant_driver sed
-    JOIN constructor c ON c.id = sed.constructor_id
-    WHERE sed.test_driver = 0
+  SELECT rd.driver_id, rd.constructor_id, c.name AS team_name
+  FROM driver d
+  JOIN race_data rd ON rd.rowid = (
+    SELECT rd2.rowid
+    FROM race_data rd2
+    JOIN race ra2 ON ra2.id = rd2.race_id
+    WHERE rd2.driver_id = d.id AND rd2.type = 'RACE_RESULT'
+    ORDER BY ra2.year DESC, ra2.round DESC
+    LIMIT 1
   )
-  WHERE rn = 1
+  JOIN constructor c ON c.id = rd.constructor_id
 )
 SELECT d.id, d.name, d.permanent_number, co.alpha2_code,
   lt.constructor_id AS team_id, lt.team_name,
@@ -151,14 +150,15 @@ FROM driver d
 JOIN country co ON co.id = d.nationality_country_id
 WHERE d.id = ?1`;
 
-// 号变更：按年分组比赛车号，repository 侧合并连续同年号区间
+// 号变更：仅取 1974 起——此前车号按站分配，无身份意义；1974 起 FIA 固定
+// 车队整季编号。年内按最早轮次排序，repository 侧合并连续同年号区间
 const numberStintsSql = `
 SELECT ra.year, rd.driver_number
 FROM race_data rd
 JOIN race ra ON ra.id = rd.race_id
-WHERE rd.driver_id = ?1 AND rd.type = 'RACE_RESULT'
+WHERE rd.driver_id = ?1 AND rd.type = 'RACE_RESULT' AND ra.year >= 1974
 GROUP BY ra.year, rd.driver_number
-ORDER BY ra.year, CAST(rd.driver_number AS INTEGER)`;
+ORDER BY ra.year, MIN(ra.round)`;
 
 // 年份取正式阵容与实际结果的并集：当前季未出赛也有空矩阵块，将来轮次保留空列
 const roundsSql = `

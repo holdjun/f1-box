@@ -10,7 +10,8 @@ function fakeDb(rows: unknown[]): DriverDatabase {
     batch(statements) {
       expect(statements).toHaveLength(1);
       const sql = statements[0].sql;
-      expect(sql).toContain("PARTITION BY sed.driver_id");
+      // 最后车队以实际参赛末站为准，与详情页 hero 同口径
+      expect(sql).toContain("ORDER BY ra2.year DESC, ra2.round DESC");
       expect(sql).toContain("test_driver = 0");
       expect(sql).toContain("total_championship_wins DESC");
       expect(sql).toContain("total_race_wins DESC");

@@ -234,6 +234,21 @@ describe("createDriverRepository with database", () => {
       createDriverRepository(db).getDriver("x"),
     ).rejects.toThrow(/driver/i);
   });
+
+  it("derives number stints only from the fixed-number era, in round order", async () => {
+    // 1974 前车号按站分配无身份意义；年内按最早轮次排序，换号续接才正确
+    let captured: string[] = [];
+    const db: DriverDatabase = {
+      batch(statements) {
+        captured = statements.map((s) => s.sql);
+        return Promise.resolve(statements.map(() => ({ results: [] })));
+      },
+    };
+    await createDriverRepository(db).getDriver("any");
+    const numbers = captured.find((sql) => sql.includes(NUMBERS));
+    expect(numbers).toContain("ra.year >= 1974");
+    expect(numbers).toContain("MIN(ra.round)");
+  });
 });
 
 describe("driver fixtures", () => {
