@@ -6,8 +6,10 @@ on:
     - cron: "23 4 * * *"
 
 # 仅在上游 release tag 变化时刷新：R2 原始归档 + D1 整库重导（重导期间
-# /teams/* 短暂不可用，故收敛到每周一次）。策展层（team-colors/team-logos/
-# country-flags/tires/参考表）由本地 .data/vendor 策展后手动镜像上传。
+# /teams/* 短暂不可用，故用 tag 门禁收敛）。release.json 是成功标记，
+# 最后一步才写入：D1 导入失败则不记录 tag，下次运行自动重试。
+# 策展层（team-colors/team-logos/country-flags/tires/参考表）由本地
+# .data/vendor 策展后手动镜像上传。
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -20,10 +22,12 @@ jobs:
 
       - name: Download f1db release
         run: |
-          curl -sSL -o f1db-json-splitted.zip https://github.com/f1db/f1db/releases/latest/download/f1db-json-splitted.zip
-          # tag 从重定向 URL 解析，避免未认证 API 限流
-          curl -sI -L https://github.com/f1db/f1db/releases/latest/download/f1db-json-splitted.zip \
+          curl -fsSL -o f1db-json-splitted.zip https://github.com/f1db/f1db/releases/latest/download/f1db-json-splitted.zip
+          # tag 取第一跳重定向（latest -> download/<tag>/...）：不能 -L 跟到底，
+          # 末跳落在 CDN 域名上没有 tag 信息；解析失败直接中止，门禁不容空 tag
+          curl -sI https://github.com/f1db/f1db/releases/latest/download/f1db-json-splitted.zip \
             | awk 'tolower($1)=="location:"{u=$2} END{split(u,a,"/download/"); split(a[2],b,"/"); print b[1]}' > f1db-tag.txt
+          grep -Eq '^v[0-9]' f1db-tag.txt || { echo "failed to parse upstream tag: '$(cat f1db-tag.txt)'" >&2; exit 1; }
           cat f1db-tag.txt
 
       - name: Install wrangler
@@ -32,21 +36,28 @@ jobs:
       - name: Detect new upstream release
         id: release
         run: |
-          previous=$(wrangler r2 object get --remote f1-box-data/vendor/f1db/release.json --file /dev/stdout 2>/dev/null \
-            | node -p 'JSON.parse(require("fs").readFileSync(0)).tag' || true)
-          echo "previous=${previous:-none} current=$(cat f1db-tag.txt)"
-          { [ "${previous:-none}" = "$(cat f1db-tag.txt)" ] && echo changed=false || echo changed=true; } >> "$GITHUB_OUTPUT"
+          # wrangler 的横幅也走 stdout，落盘后再解析
+          previous=none
+          if wrangler r2 object get --remote f1-box-data/vendor/f1db/release.json --file release-prev.json >/dev/null 2>&1; then
+            previous=$(node -p 'JSON.parse(require("fs").readFileSync("release-prev.json")).tag' || echo none)
+          fi
+          echo "previous=${previous} current=$(cat f1db-tag.txt)"
+          { [ "${previous}" = "$(cat f1db-tag.txt)" ] && echo changed=false || echo changed=true; } >> "$GITHUB_OUTPUT"
 
-      - name: Publish to R2
+      - name: Publish archive to R2
         if: steps.release.outputs.changed == 'true'
         run: |
           wrangler r2 object put --remote f1-box-data/vendor/f1db/f1db-json-splitted.zip --file f1db-json-splitted.zip
-          printf '{"source":"f1db","repo":"https://github.com/f1db/f1db","tag":"%s","fetchedAt":"%s","license":"CC-BY-4.0","artifact":"vendor/f1db/f1db-json-splitted.zip"}\n' \
-            "$(cat f1db-tag.txt)" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > f1db-release.json
-          wrangler r2 object put --remote f1-box-data/vendor/f1db/release.json --file f1db-release.json
 
       - name: Refresh D1 (f1db full)
         if: steps.release.outputs.changed == 'true'
         run: |
           ./scripts/f1db-d1-dump.sh f1db-d1
           ./scripts/f1db-d1-import.sh f1db-d1
+
+      - name: Record release.json
+        if: steps.release.outputs.changed == 'true'
+        run: |
+          printf '{"source":"f1db","repo":"https://github.com/f1db/f1db","tag":"%s","fetchedAt":"%s","license":"CC-BY-4.0","artifact":"vendor/f1db/f1db-json-splitted.zip"}\n' \
+            "$(cat f1db-tag.txt)" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > f1db-release.json
+          wrangler r2 object put --remote f1-box-data/vendor/f1db/release.json --file f1db-release.json
