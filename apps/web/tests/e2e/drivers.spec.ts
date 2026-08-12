@@ -58,3 +58,48 @@ test("drivers catalog renders on mobile @mobile", async ({ page }) => {
   );
   expect(hasPageOverflow).toBe(false);
 });
+
+test("russell detail shows hero, bio and current season @desktop", async ({
+  page,
+}) => {
+  await page.goto("/drivers/george-russell");
+  await expect(page.locator("main h1")).toHaveText("George William Russell");
+  await expect(page.locator(".driver-number")).toHaveText("63");
+  await expect(page.locator(".driver-country")).toContainText("United Kingdom");
+  await expect(page.locator(".flag")).toHaveAttribute(
+    "src",
+    "/vendor/country-flags/gb.svg",
+  );
+  await expect(page.locator(".driver-bio")).toContainText("15 February 1998");
+  await expect(page.locator(".driver-bio")).toContainText("King's Lynn");
+  await expect(page.getByLabel("2026 season")).toBeVisible();
+  await expect(page.getByLabel("Career stats")).toBeVisible();
+  await expect(page.locator(".season-block.current")).toHaveCount(1);
+});
+
+test("verstappen detail shows number history and champion blocks @desktop", async ({
+  page,
+}) => {
+  await page.goto("/drivers/max-verstappen");
+  await expect(page.locator(".number-chip")).toHaveCount(3);
+  await expect(page.locator(".number-history")).toContainText("2015–2021");
+  await expect(page.locator(".number-history")).toContainText("2022–2025");
+  await expect(page.locator(".season-block.champion").first()).toBeVisible();
+});
+
+test("unknown driver returns 404 @desktop", async ({ page }) => {
+  const response = await page.goto("/drivers/unknown-driver");
+  expect(response?.status()).toBe(404);
+  await expect(page.locator("main h1")).toHaveText("Driver not found");
+});
+
+test("russell detail renders on mobile @mobile", async ({ page }) => {
+  await page.goto("/drivers/george-russell");
+  await expect(page.locator("main h1")).toHaveText("George William Russell");
+  const hasPageOverflow = await page.evaluate(
+    () =>
+      document.documentElement.scrollWidth >
+      document.documentElement.clientWidth,
+  );
+  expect(hasPageOverflow).toBe(false);
+});

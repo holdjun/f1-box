@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import {
   formatLocalDateTime,
   formatUtcDateTime,
+  formatUtcLongDate,
 } from "../src/lib/time.js";
 
 describe("time formatting", () => {
@@ -26,5 +27,10 @@ describe("time formatting", () => {
     expect(() => formatUtcDateTime("not-a-time")).toThrow(
       "Invalid timestamp: not-a-time",
     );
+  });
+
+  test("formats a birth date with the long month name", () => {
+    expect(formatUtcLongDate("1998-02-15")).toBe("15 February 1998");
+    expect(formatUtcLongDate("1960-03-21")).toBe("21 March 1960");
   });
 });

@@ -1,0 +1,363 @@
+---
+import { seasonGap, type RaceCell } from "../lib/team-repository.js";
+import { formatPosition, resultClass } from "../lib/result-display.js";
+import { alpha2Flag } from "../lib/tokens.js";
+
+interface MatrixRound {
+  code: string;
+  name: string;
+  circuitId: string;
+}
+interface MatrixRow {
+  name: string;
+  href: string;
+  flagCode: string | null;
+  highlight: boolean;
+  results: (RaceCell | null)[];
+}
+export interface MatrixSeason {
+  year: number;
+  metaText: string;
+  metaHref: string | null;
+  tyres: string[];
+  rounds: MatrixRound[];
+  rows: MatrixRow[];
+  points: number | null;
+  position: string | null;
+  championshipWon: boolean;
+  current: boolean;
+}
+interface Props {
+  seasons: MatrixSeason[];
+  rowLabel: string;
+  showChampionKey?: boolean;
+}
+
+const { seasons, rowLabel, showChampionKey = false } = Astro.props;
+---
+
+<p class="legend" aria-label="Table legend">
+  <span class="key"><i class="result-win"></i>Win</span>
+  <span class="key"><i class="result-podium"></i>Podium</span>
+  <span class="key"><i class="result-points"></i>Points</span>
+  <span class="key"><sup class="sup-p">P</sup>pole position</span>
+  <span class="key"><sup class="sup-f">F</sup>fastest lap</span>
+  <span class="key"><sup class="sup-sprint">n</sup>sprint race position</span>
+  <span class="key"><span class="dagger">†</span>retired but classified</span>
+  {showChampionKey ? (
+    <span class="key driver-champion">driver champion</span>
+  ) : null}
+</p>
+{seasons.map((season, index) => {
+  const prev = seasons[index - 1];
+  const gap = prev ? seasonGap(prev.year, season.year) : null;
+  return (
+    <>
+      {gap ? (
+        <div
+          class="season-gap"
+          role="separator"
+          aria-label={`${gap.seasons} seasons without entries, ${gap.from} to ${gap.to}`}
+        >
+          <span class="season-gap__label">
+            {gap.from}–{gap.to} · {gap.seasons}{" "}
+            {gap.seasons === 1 ? "season" : "seasons"} without entries
+          </span>
+        </div>
+      ) : null}
+      <section
+        class:list={[
+          "season-block",
+          { champion: season.championshipWon, current: season.current },
+        ]}
+      >
+        <h3>
+          <span class="season-year">{season.year}</span>
+          {season.metaHref ? (
+            <a class="season-meta" href={season.metaHref}>{season.metaText}</a>
+          ) : (
+            <span class="season-meta">{season.metaText}</span>
+          )}
+          {season.tyres.map((tyre) => (
+            <span class={`tyre-badge tyre-${tyre}`} title={`Tyres: ${tyre}`}>
+              {tyre}
+            </span>
+          ))}
+          {season.points !== null ? (
+            <span class="season-pts">
+              {season.points} pts · {formatPosition(season.position)}
+            </span>
+          ) : null}
+        </h3>
+        <div class="table-scroll" tabindex="0">
+          <table aria-label={`${season.year} race results`}>
+            <thead>
+              <tr>
+                <th scope="col" class="driver-col">{rowLabel}</th>
+                {season.rounds.map((round) => (
+                  <th scope="col" title={round.name}>
+                    <a class="round-link" href={`/circuits/${round.circuitId}`}>
+                      {round.code}
+                    </a>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {season.rows.length === 0 ? (
+                <tr>
+                  <td class="empty-cell" colspan={season.rounds.length + 1}>
+                    No race entries recorded.
+                  </td>
+                </tr>
+              ) : (
+                season.rows.map((row) => (
+                  <tr>
+                    <th scope="row" class="driver-cell">
+                      {row.flagCode ? (
+                        <span class="flag-emoji" aria-hidden="true">
+                          {alpha2Flag(row.flagCode)}
+                        </span>
+                      ) : null}
+                      <a
+                        class:list={[
+                          "driver-link",
+                          { "driver-champion": row.highlight },
+                        ]}
+                        href={row.href}
+                        title={row.highlight ? "Drivers' champion" : undefined}
+                      >
+                        {row.name}
+                      </a>
+                    </th>
+                    {row.results.map((cell) =>
+                      cell ? (
+                        <td class={resultClass(cell.text)}>
+                          {cell.text}
+                          {cell.classified ? <span class="dagger">†</span> : null}
+                          {cell.pole ? <sup class="sup-p">P</sup> : null}
+                          {cell.fastest ? <sup class="sup-f">F</sup> : null}
+                          {cell.sprintRank !== null ? (
+                            <sup class="sup-sprint">{cell.sprintRank}</sup>
+                          ) : null}
+                        </td>
+                      ) : (
+                        <td class="result-none"></td>
+                      ),
+                    )}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </>
+  );
+})}
+
+<style>
+  .season-gap {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 0.6rem 0 0.6rem 0.9rem;
+    border-left: 2px dashed color-mix(in srgb, var(--muted) 45%, transparent);
+  }
+  .season-gap + .season-block {
+    margin-top: 1rem;
+  }
+  .season-gap__label {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .season-block {
+    margin-top: 2rem;
+    padding-left: 0.9rem;
+    border-left: 2px solid var(--line);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 14rem;
+  }
+  .season-block.champion {
+    border-left-color: #ffc72c;
+  }
+  .season-block.current {
+    border-left-color: var(--coral);
+  }
+  .season-block h3 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0 0 0.5rem;
+  }
+  .season-year {
+    font-family: var(--display);
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .season-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  a.season-meta:hover {
+    color: var(--coral);
+  }
+  .season-pts {
+    margin-left: auto;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .season-block.champion h3 {
+    color: #ffc72c;
+  }
+  .tyre-badge {
+    display: inline-grid;
+    place-items: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 4px;
+    background: #5a6470;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  .tyre-P { background: #ffd12e; color: #c00000; }
+  .tyre-B { background: #cc0000; }
+  .tyre-M { background: #1f6bb5; }
+  .tyre-G { background: #2a8fbd; }
+  .tyre-D { background: #2e8b57; }
+  .tyre-F { background: #b03a2e; }
+  .tyre-A { background: #95a5a6; }
+  .tyre-C { background: #e67e22; }
+  .tyre-E { background: #34495e; }
+  .sup-p,
+  .sup-f,
+  .sup-sprint {
+    font-size: 0.55rem;
+    font-weight: 700;
+  }
+  .sup-p { color: #ffc72c; }
+  .sup-f { color: #b06ef7; }
+  .sup-sprint { color: #ff8c42; }
+  .dagger {
+    font-size: 0.7rem;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.1rem;
+    margin: 0.6rem 0 0;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .key i {
+    width: 0.72rem;
+    height: 0.72rem;
+    border-radius: 4px;
+  }
+  .driver-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .driver-link:hover {
+    color: var(--coral);
+    text-decoration: underline;
+  }
+  .driver-champion {
+    color: #ffc72c;
+  }
+  .driver-champion:hover {
+    color: #ffc72c;
+  }
+  .round-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .round-link:hover {
+    color: var(--coral);
+  }
+  .driver-col {
+    min-width: 11rem;
+  }
+  .driver-cell {
+    min-width: 11rem;
+  }
+  .flag-emoji {
+    margin-right: 0.35rem;
+  }
+  .season-block table {
+    border-collapse: separate;
+    border-spacing: 3px 4px;
+  }
+  .season-block th,
+  .season-block td {
+    border-bottom: 0;
+    padding: 0.38rem 0.5rem;
+    border-radius: 5px;
+  }
+  .season-block tbody td {
+    background: rgba(137, 145, 154, 0.08);
+  }
+  .season-block tbody tr:hover td {
+    background: rgba(137, 145, 154, 0.14);
+  }
+  table th[scope="col"]:not(.driver-col) {
+    padding-inline: 0.45rem;
+    font-size: 0.6rem;
+  }
+  table td {
+    padding-inline: 0.45rem;
+    text-align: center;
+  }
+  table td sup {
+    font-size: 0.55rem;
+  }
+  .result-win {
+    background: rgba(247, 201, 72, 0.32) !important;
+    color: #ffe9a8;
+  }
+  .result-podium {
+    background: rgba(126, 212, 145, 0.25) !important;
+    color: #c8f2d3;
+  }
+  .result-points {
+    background: rgba(167, 166, 243, 0.22) !important;
+    color: #d9d8fb;
+  }
+  .result-finish {
+    color: var(--muted-light);
+  }
+  .key .result-finish,
+  .key .result-other {
+    background: rgba(137, 145, 154, 0.18);
+  }
+  .result-ret {
+    background: rgba(224, 143, 213, 0.22) !important;
+    color: #f0cdea;
+  }
+  .result-dsq {
+    background: rgba(220, 80, 80, 0.3) !important;
+    color: #ffd7d7;
+  }
+  .result-dnq {
+    background: rgba(240, 150, 120, 0.22) !important;
+    color: #f8d9cc;
+  }
+  .result-other {
+    color: var(--muted);
+  }
+  .empty-cell {
+    text-align: left !important;
+    color: var(--muted);
+  }
+</style>

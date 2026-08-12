@@ -1,0 +1,309 @@
+---
+import { env } from "cloudflare:workers";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import CurrentSeasonPanel from "../../components/CurrentSeasonPanel.astro";
+import HistoryEnd from "../../components/HistoryEnd.astro";
+import SeasonMatrix from "../../components/SeasonMatrix.astro";
+import {
+  createD1DriverDatabase,
+  createDriverRepository,
+} from "../../lib/driver-repository.js";
+import { formatUtcLongDate } from "../../lib/time.js";
+import { monogram } from "../../lib/tokens.js";
+import { latestColor, vendorIndexes } from "../../lib/vendor.js";
+
+const slug = (Astro.params.id ?? "").toLowerCase();
+const repository = import.meta.env.DEV
+  ? createDriverRepository()
+  : createDriverRepository(createD1DriverDatabase(env.F1_DB));
+
+const driver = await repository.getDriver(slug);
+if (!driver) Astro.response.status = 404;
+
+// 上游数据最快 30 分钟更新一次，边缘短暂缓存可吸收重复请求
+if (driver) {
+  Astro.response.headers.set(
+    "Cache-Control",
+    "public, s-maxage=300, stale-while-revalidate=600",
+  );
+}
+
+const currentYear = driver?.activeSeason ?? null;
+const flagSrc = driver
+  ? `/vendor/country-flags/${driver.alpha2Code.toLowerCase()}.svg`
+  : null;
+const latestTeam = driver?.seasons[0]?.teams.at(-1) ?? null;
+const teamColor =
+  (latestTeam && latestColor(vendorIndexes, latestTeam.id)) ?? "#84909e";
+
+const matrixSeasons = (driver?.seasons ?? []).map((season) => ({
+  year: season.year,
+  metaText: season.teams.map((team) => team.name).join(" / "),
+  metaHref:
+    season.teams.length === 1 ? `/teams/${season.teams[0].id}` : null,
+  tyres: [],
+  rounds: season.rounds,
+  rows: season.teams.map((team) => ({
+    name: team.name,
+    href: `/teams/${team.id}`,
+    flagCode: null,
+    highlight: false,
+    results: team.results,
+  })),
+  points: season.points,
+  position: season.position,
+  championshipWon: season.championshipWon,
+  current: season.year === currentYear,
+}));
+---
+
+{driver ? (
+  <BaseLayout
+    title={driver.name}
+    description={`${driver.fullName} — career statistics and complete race-by-race history.`}
+    active="drivers"
+  >
+    <main id="main-content" class="page-shell">
+      <header class="driver-hero" style={`--team-color: ${teamColor}`}>
+        <span class="driver-number-frame">
+          {driver.permanentNumber !== null ? (
+            <span class="driver-number">{driver.permanentNumber}</span>
+          ) : (
+            <span class="driver-monogram" aria-hidden="true">
+              {monogram(driver.name)}
+            </span>
+          )}
+        </span>
+        <div>
+          <h1>{driver.fullName}</h1>
+          <p class="driver-country">
+            {flagSrc ? <img class="flag" src={flagSrc} alt="" /> : null}
+            {driver.countryName}
+          </p>
+          <p class="driver-bio">
+            <span>Born {formatUtcLongDate(driver.dateOfBirth)}</span>
+            <span aria-hidden="true">·</span>
+            <span>{driver.placeOfBirth}</span>
+            {driver.dateOfDeath ? (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>Died {formatUtcLongDate(driver.dateOfDeath)}</span>
+              </>
+            ) : null}
+          </p>
+        </div>
+      </header>
+
+      {driver.numberStints.length > 1 ? (
+        <div class="number-history" aria-label="Car number history">
+          <span class="number-label">Car number</span>
+          {driver.numberStints.map((stint, index) => (
+            <span class="number-item">
+              {index > 0 ? <span class="number-arrow">→</span> : null}
+              <span class="number-chip">
+                #{stint.number}
+                <span class="number-years">
+                  {stint.yearFrom === stint.yearTo
+                    ? stint.yearFrom
+                    : `${stint.yearFrom}–${stint.yearTo}`}
+                </span>
+              </span>
+            </span>
+          ))}
+        </div>
+      ) : null}
+
+      <section class="info-panels">
+        {driver.currentSeason && driver.currentSeason.year === currentYear ? (
+          <CurrentSeasonPanel season={driver.currentSeason} />
+        ) : null}
+        <div class="info-panel" aria-label="Career stats">
+          <h2>Career Stats</h2>
+          <dl>
+            <div><dt>Entries</dt><dd>{driver.totals.entries}</dd></div>
+            <div><dt>Starts</dt><dd>{driver.totals.starts}</dd></div>
+            <div><dt>Wins</dt><dd>{driver.totals.wins}</dd></div>
+            <div><dt>Podiums</dt><dd>{driver.totals.podiums}</dd></div>
+            <div><dt>Poles</dt><dd>{driver.totals.poles}</dd></div>
+            <div><dt>Fastest laps</dt><dd>{driver.totals.fastestLaps}</dd></div>
+            <div><dt>Points</dt><dd>{driver.totals.points}</dd></div>
+            <div><dt>Sprint wins</dt><dd>{driver.totals.sprintWins}</dd></div>
+            <div><dt>Championships</dt><dd>{driver.totals.championships}</dd></div>
+            <div>
+              <dt>Best position</dt>
+              <dd>{driver.totals.bestChampionshipPosition ?? "—"}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section aria-labelledby="history-title">
+        <h2 id="history-title">Season results</h2>
+        <SeasonMatrix seasons={matrixSeasons} rowLabel="Constructor" />
+        <HistoryEnd
+          summary={`${driver.seasons.at(-1)?.year ?? driver.activeSeason}–${driver.seasons[0]?.year ?? driver.activeSeason} · ${driver.seasons.length} ${driver.seasons.length === 1 ? "season" : "seasons"} of Grand Prix history`}
+          backHref="/drivers"
+          backLabel="Back to all drivers"
+        />
+      </section>
+    </main>
+  </BaseLayout>
+) : (
+  <BaseLayout title="Driver not found">
+    <main id="main-content" class="page-shell">
+      <h1>Driver not found</h1>
+      <p>No driver with this identifier exists in the database.</p>
+    </main>
+  </BaseLayout>
+)}
+
+<style>
+  .driver-hero {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2rem 2.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 14px;
+    color: #fff;
+    background:
+      radial-gradient(120% 170% at 88% -30%, rgba(255, 255, 255, 0.25), transparent 55%),
+      linear-gradient(135deg, color-mix(in srgb, var(--team-color) 72%, black), var(--team-color));
+    box-shadow: 0 20px 44px -24px color-mix(in srgb, var(--team-color) 65%, transparent);
+  }
+  .driver-number-frame {
+    display: grid;
+    place-items: center;
+    width: 6rem;
+    height: 4rem;
+    flex: none;
+  }
+  .driver-number {
+    font-family: var(--display);
+    font-size: 3.2rem;
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: color-mix(in srgb, var(--team-color) 40%, white);
+  }
+  .driver-monogram {
+    display: grid;
+    place-items: center;
+    height: 4rem;
+    width: 4rem;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    font-family: var(--display);
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .driver-hero h1 {
+    margin: 0;
+    font-size: clamp(1.9rem, 4vw, 2.7rem);
+    letter-spacing: 0.01em;
+  }
+  .driver-country {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.3rem 0 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .flag {
+    height: 0.95rem;
+    width: auto;
+  }
+  .driver-bio {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.4rem 0 0;
+    font-size: 0.8rem;
+    opacity: 0.8;
+  }
+  .number-history {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 1rem 0 0;
+    font-size: 0.78rem;
+  }
+  .number-label {
+    margin-right: 0.3rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+  }
+  .number-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .number-arrow {
+    color: var(--muted);
+  }
+  .number-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.15rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted-light);
+  }
+  .number-years {
+    color: var(--muted);
+    font-size: 0.68rem;
+  }
+  .info-panels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-top: 1.75rem;
+  }
+  .info-panel {
+    flex: 1 1 18rem;
+    padding: 1.1rem 1.35rem 1.35rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--ink-soft);
+  }
+  .info-panel h2 {
+    margin: 0 0 0.9rem;
+    font-family: var(--display);
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .info-panel h2::before {
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-right: 0.5rem;
+    background: var(--coral);
+    content: "";
+  }
+  .info-panel dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+    gap: 0.7rem 1rem;
+    margin: 0;
+  }
+  .info-panel dt {
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+  .info-panel dd {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+</style>
