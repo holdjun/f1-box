@@ -1,0 +1,140 @@
+---
+import { env } from "cloudflare:workers";
+
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  createD1DriverDatabase,
+  createDriverRepository,
+} from "../../lib/driver-repository.js";
+import { latestColor, vendorIndexes } from "../../lib/vendor.js";
+import { monogram } from "../../lib/tokens.js";
+
+const repository = import.meta.env.DEV
+  ? createDriverRepository()
+  : createDriverRepository(createD1DriverDatabase(env.F1_DB));
+
+const drivers = await repository.getDrivers();
+
+// 目录查询是全库最重的聚合，边缘短暂缓存吸收重复请求
+Astro.response.headers.set(
+  "Cache-Control",
+  "public, s-maxage=300, stale-while-revalidate=600",
+);
+---
+
+<BaseLayout title="Drivers" active="drivers">
+  <main id="main-content" class="page-shell">
+    <h1>Drivers</h1>
+    <div class="driver-grid">
+      {drivers.map((driver) => (
+        <a
+          class="driver-card"
+          href={`/drivers/${driver.id}`}
+          style={`--team-color: ${(driver.teamId &&
+            latestColor(vendorIndexes, driver.teamId)) ?? "#84909e"}`}
+        >
+          <span class="card-logo-frame">
+            {driver.number !== null ? (
+              <span class="card-number">{driver.number}</span>
+            ) : (
+              <span class="card-monogram" aria-hidden="true">
+                {monogram(driver.name)}
+              </span>
+            )}
+          </span>
+          <span class="card-name">{driver.name}</span>
+          <span class="card-meta">
+            <span class="card-team">{driver.teamName ?? "—"}</span>
+            {driver.flagCode ? (
+              <img
+                class="card-flag"
+                src={`/vendor/country-flags/${driver.flagCode}.svg`}
+                alt=""
+              />
+            ) : null}
+          </span>
+        </a>
+      ))}
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin: 0 0 1.5rem;
+  }
+  .driver-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1rem;
+  }
+  .driver-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1.25rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background:
+      linear-gradient(
+        160deg,
+        color-mix(in srgb, var(--team-color) 22%, transparent),
+        transparent 60%
+      ),
+      var(--ink-soft);
+    color: var(--paper);
+    text-decoration: none;
+    /* 917 卡一次下发，视口外的卡跳过布局与绘制 */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 11rem;
+  }
+  .driver-card:hover {
+    border-color: var(--team-color);
+  }
+  .card-logo-frame {
+    display: grid;
+    place-items: center;
+    width: 8rem;
+    height: 3rem;
+    flex: none;
+  }
+  /* 无照片版权可用：放大永久车号作标识 */
+  .card-number {
+    font-family: var(--display);
+    font-size: 2.8rem;
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: color-mix(in srgb, var(--team-color) 55%, var(--paper));
+  }
+  .card-monogram {
+    display: grid;
+    place-items: center;
+    height: 3rem;
+    width: 3rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--team-color) 45%, transparent);
+    font-family: var(--display);
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+  .card-name {
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--muted-light);
+  }
+  .card-flag {
+    height: 0.8rem;
+    width: auto;
+    border-radius: 2px;
+  }
+</style>

@@ -18,6 +18,12 @@ const repository = import.meta.env.DEV
   : createTeamRepository(createD1TeamDatabase(env.F1_DB));
 
 const constructors = await repository.getConstructors();
+
+// 目录是全量聚合，边缘短暂缓存吸收重复请求
+Astro.response.headers.set(
+  "Cache-Control",
+  "public, s-maxage=300, stale-while-revalidate=600",
+);
 ---
 
 <BaseLayout title="Teams" active="teams">

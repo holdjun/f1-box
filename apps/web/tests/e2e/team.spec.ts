@@ -71,14 +71,16 @@ test("round headers link to future circuit pages @desktop", async ({
   expect(response?.status()).toBe(404);
 });
 
-test("drivers link to their future global pages @desktop", async ({ page }) => {
+test("drivers link to their global pages @desktop", async ({ page }) => {
   await page.goto("/teams/ferrari");
 
   const link = page.locator('a[href="/drivers/lewis-hamilton"]');
   await expect(link.first()).toBeVisible();
-  // 车手全局页尚未实现，先 404
-  const response = await page.goto("/drivers/lewis-hamilton");
-  expect(response?.status()).toBe(404);
+  // DEV 仅有 fixture 车手；hamilton 无 fixture 仍 404，russell 有 fixture 应 200
+  const missing = await page.goto("/drivers/lewis-hamilton");
+  expect(missing?.status()).toBe(404);
+  const present = await page.goto("/drivers/george-russell");
+  expect(present?.status()).toBe(200);
 });
 
 test("unknown team returns 404 @desktop", async ({ page }) => {

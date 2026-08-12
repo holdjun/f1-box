@@ -1,0 +1,63 @@
+---
+import type { CurrentSeason } from "../lib/team-repository.js";
+
+interface Props {
+  season: CurrentSeason;
+}
+const { season } = Astro.props;
+---
+
+<div class="info-panel" aria-label={`${season.year} season`}>
+  <h2>{season.year} Season</h2>
+  <div class="season-head">
+    <div>
+      <span>Season Position</span>
+      <strong>{season.position ?? "—"}</strong>
+    </div>
+    <div>
+      <span>Season Points</span>
+      <strong>{season.points ?? "—"}</strong>
+    </div>
+  </div>
+  <h3>Grand Prix</h3>
+  <dl>
+    <div><dt>Races</dt><dd>{season.grandPrix.races}</dd></div>
+    <div><dt>Points</dt><dd>{season.grandPrix.points}</dd></div>
+    <div><dt>Wins</dt><dd>{season.grandPrix.wins}</dd></div>
+    <div><dt>Podiums</dt><dd>{season.grandPrix.podiums}</dd></div>
+    <div><dt>Poles</dt><dd>{season.grandPrix.poles}</dd></div>
+    <div><dt>Top 10s</dt><dd>{season.grandPrix.top10s}</dd></div>
+    <div><dt>Fastest Laps</dt><dd>{season.grandPrix.fastestLaps}</dd></div>
+    <div><dt>DNFs</dt><dd>{season.grandPrix.dnfs}</dd></div>
+  </dl>
+  {season.sprint.races > 0 ? (
+    <>
+      <h3>Sprint</h3>
+      <dl>
+        <div><dt>Races</dt><dd>{season.sprint.races}</dd></div>
+        <div><dt>Points</dt><dd>{season.sprint.points}</dd></div>
+        <div><dt>Wins</dt><dd>{season.sprint.wins}</dd></div>
+        <div><dt>Podiums</dt><dd>{season.sprint.podiums}</dd></div>
+        <div><dt>Poles</dt><dd>{season.sprint.poles}</dd></div>
+        <div><dt>Top 10s</dt><dd>{season.sprint.top10s}</dd></div>
+      </dl>
+    </>
+  ) : null}
+</div>
+
+<style>
+  .season-head {
+    display: flex;
+    gap: 2.5rem;
+  }
+  .season-head span {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+  .season-head strong {
+    font-family: var(--display);
+    font-size: 1.9rem;
+    line-height: 1.1;
+  }
+</style>

@@ -1,0 +1,289 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  createDriverRepository,
+  mergeNumberStints,
+  mergeTeamStints,
+  type DriverDatabase,
+} from "../src/lib/driver-repository.js";
+
+// 键序即匹配优先级：与 driver-repository 的 11 条 SQL 特征子串对应
+function fakeDb(responses: Record<string, unknown[]>): DriverDatabase {
+  const find = (sql: string) => {
+    const key = Object.keys(responses).find((marker) => sql.includes(marker));
+    return { results: key ? responses[key] : [] };
+  };
+  return {
+    batch(statements) {
+      return Promise.resolve(statements.map((s) => find(s.sql)));
+    },
+  };
+}
+
+const IDENTITY = "co.id = d.nationality_country_id";
+const NUMBERS = "rd.type = 'RACE_RESULT'";
+const ROUNDS = "gp.abbreviation AS code";
+const TEAMS = "GROUP BY ra.year, rr.constructor_id";
+const RESULTS = "ORDER BY rr.position_display_order";
+const SPRINT_RANK = "srr.position_number IS NOT NULL";
+const STANDINGS = "season_driver_standing";
+const GP_STATS = "position_text = 'DNF'";
+const SPRINT_STATS = "SUM(srr.points)";
+const SPRINT_POLES = "sprint_starting_grid_position";
+const MAX_SEASON = "MAX(year) AS year FROM season";
+
+describe("mergeNumberStints", () => {
+  it("merges consecutive same-number years into a range", () => {
+    expect(
+      mergeNumberStints([
+        { year: 2015, driver_number: "33" },
+        { year: 2016, driver_number: "33" },
+        { year: 2017, driver_number: "33" },
+      ]),
+    ).toEqual([{ number: "33", yearFrom: 2015, yearTo: 2017 }]);
+  });
+
+  it("splits on a gap even with the same number", () => {
+    expect(
+      mergeNumberStints([
+        { year: 2015, driver_number: "33" },
+        { year: 2017, driver_number: "33" },
+      ]),
+    ).toEqual([
+      { number: "33", yearFrom: 2015, yearTo: 2015 },
+      { number: "33", yearFrom: 2017, yearTo: 2017 },
+    ]);
+  });
+
+  it("keeps same-year multi numbers as separate single-year stints", () => {
+    expect(
+      mergeNumberStints([
+        { year: 2005, driver_number: "17" },
+        { year: 2005, driver_number: "18" },
+      ]),
+    ).toEqual([
+      { number: "17", yearFrom: 2005, yearTo: 2005 },
+      { number: "18", yearFrom: 2005, yearTo: 2005 },
+    ]);
+  });
+});
+
+describe("mergeTeamStints", () => {
+  const season = (year: number, teams: [string, string][]) => ({
+    year,
+    rounds: [],
+    teams: teams.map(([id, name]) => ({ id, name, results: [] })),
+    points: null,
+    position: null,
+    championshipWon: false,
+  });
+
+  it("merges consecutive same-team years into a range", () => {
+    expect(
+      mergeTeamStints([
+        season(2013, [["mclaren", "McLaren"]]),
+        season(2012, [["mclaren", "McLaren"]]),
+        season(2011, [["mclaren", "McLaren"]]),
+      ]),
+    ).toEqual([{ id: "mclaren", name: "McLaren", yearFrom: 2011, yearTo: 2013 }]);
+  });
+
+  it("splits on a team change and on a return", () => {
+    expect(
+      mergeTeamStints([
+        season(2026, [["ferrari", "Ferrari"]]),
+        season(2025, [["ferrari", "Ferrari"]]),
+        season(2013, [["mclaren", "McLaren"]]),
+      ]),
+    ).toEqual([
+      { id: "mclaren", name: "McLaren", yearFrom: 2013, yearTo: 2013 },
+      { id: "ferrari", name: "Ferrari", yearFrom: 2025, yearTo: 2026 },
+    ]);
+  });
+
+  it("keeps both teams of a mid-season transfer", () => {
+    expect(
+      mergeTeamStints([
+        season(2018, [["renault", "Renault"]]),
+        season(2017, [
+          ["toro-rosso", "Toro Rosso"],
+          ["renault", "Renault"],
+        ]),
+      ]),
+    ).toEqual([
+      { id: "toro-rosso", name: "Toro Rosso", yearFrom: 2017, yearTo: 2017 },
+      { id: "renault", name: "Renault", yearFrom: 2017, yearTo: 2018 },
+    ]);
+  });
+});
+
+describe("createDriverRepository with database", () => {
+  const base = {
+    [IDENTITY]: [
+      {
+        id: "test-driver",
+        name: "Test Driver",
+        full_name: "Test A. Driver",
+        country_name: "United Kingdom",
+        alpha2_code: "GB",
+        date_of_birth: "1990-01-01",
+        date_of_death: null,
+        place_of_birth: "London",
+        permanent_number: "7",
+        entries: 100,
+        starts: 99,
+        wins: 5,
+        podiums: 20,
+        poles: 6,
+        fastest_laps: 7,
+        points: 500,
+        sprint_wins: 1,
+        championships: 1,
+        best_position: 1,
+      },
+    ],
+    [NUMBERS]: [{ year: 2017, driver_number: "7" }],
+    [ROUNDS]: [
+      { year: 2017, round: 1, code: "AUS", name: "Australia", circuit_id: "melbourne" },
+      { year: 2017, round: 2, code: "CHN", name: "China", circuit_id: "shanghai" },
+      { year: 2017, round: 3, code: "BHR", name: "Bahrain", circuit_id: "sakhir" },
+      { year: 2017, round: 4, code: "RUS", name: "Russia", circuit_id: "sochi" },
+    ],
+    [TEAMS]: [
+      { year: 2017, id: "toro-rosso", name: "Toro Rosso", first_round: 1 },
+      { year: 2017, id: "renault", name: "Renault", first_round: 3 },
+    ],
+    [RESULTS]: [
+      { year: 2017, round: 1, constructor_id: "toro-rosso", position_text: "9", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 9 },
+      { year: 2017, round: 2, constructor_id: "toro-rosso", position_text: "10", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 10 },
+      { year: 2017, round: 3, constructor_id: "renault", position_text: "7", pole_position: 1, fastest_lap: 0, reason_retired: null, position_number: 7 },
+      { year: 2017, round: 4, constructor_id: "renault", position_text: "DNF", pole_position: 0, fastest_lap: 1, reason_retired: "Engine", position_number: null },
+    ],
+    [SPRINT_RANK]: [],
+    [STANDINGS]: [
+      { year: 2017, position_text: "10", points: 54, championship_won: 0 },
+    ],
+    [GP_STATS]: [],
+    [SPRINT_STATS]: [],
+    [SPRINT_POLES]: [],
+    [MAX_SEASON]: [{ year: 2026 }],
+  };
+
+  it("maps identity, totals and bio fields", async () => {
+    const driver = await createDriverRepository(fakeDb(base)).getDriver("test-driver");
+    expect(driver).toMatchObject({
+      id: "test-driver",
+      fullName: "Test A. Driver",
+      countryName: "United Kingdom",
+      alpha2Code: "GB",
+      dateOfBirth: "1990-01-01",
+      dateOfDeath: null,
+      placeOfBirth: "London",
+      permanentNumber: "7",
+      activeSeason: 2026,
+    });
+    expect(driver?.totals).toMatchObject({
+      entries: 100,
+      wins: 5,
+      championships: 1,
+      bestChampionshipPosition: 1,
+    });
+  });
+
+  it("splits a mid-season transfer into two team rows with aligned cells", async () => {
+    const driver = await createDriverRepository(fakeDb(base)).getDriver("test-driver");
+    const season = driver?.seasons[0];
+    expect(season?.year).toBe(2017);
+    expect(season?.rounds).toHaveLength(4);
+    expect(season?.teams.map((t) => t.name)).toEqual(["Toro Rosso", "Renault"]);
+    expect(season?.teams[0].results.map((c) => c?.text ?? null)).toEqual([
+      "9",
+      "10",
+      null,
+      null,
+    ]);
+    expect(season?.teams[1].results.map((c) => c?.text ?? null)).toEqual([
+      null,
+      null,
+      "7",
+      "DNF",
+    ]);
+    // pole / fastest / classified（DNF 但有 position_number 才算）标记
+    expect(season?.teams[1].results[2]?.pole).toBe(true);
+    expect(season?.teams[1].results[3]?.fastest).toBe(true);
+    expect(season?.teams[1].results[3]?.classified).toBe(false);
+    // standings 落位
+    expect(season?.position).toBe("10");
+    expect(season?.points).toBe(54);
+  });
+
+  it("exposes retired gating data (latest season older than active season)", async () => {
+    const driver = await createDriverRepository(fakeDb(base)).getDriver("test-driver");
+    expect(driver?.currentSeason?.year).toBe(2017);
+    expect(driver?.activeSeason).toBe(2026);
+  });
+
+  it("returns null for an unknown driver", async () => {
+    const db = fakeDb({ ...base, [IDENTITY]: [] });
+    await expect(createDriverRepository(db).getDriver("nobody")).resolves.toBeNull();
+  });
+
+  it("rejects a malformed identity row", async () => {
+    const db = fakeDb({ ...base, [IDENTITY]: [{ id: "x", name: 42 }] });
+    await expect(
+      createDriverRepository(db).getDriver("x"),
+    ).rejects.toThrow(/driver/i);
+  });
+
+  it("derives number stints only from the fixed-number era, in round order", async () => {
+    // 1974 前车号按站分配无身份意义；年内按最早轮次排序，换号续接才正确
+    let captured: string[] = [];
+    const db: DriverDatabase = {
+      batch(statements) {
+        captured = statements.map((s) => s.sql);
+        return Promise.resolve(statements.map(() => ({ results: [] })));
+      },
+    };
+    await createDriverRepository(db).getDriver("any");
+    const numbers = captured.find((sql) => sql.includes(NUMBERS));
+    expect(numbers).toContain("ra.year >= 1974");
+    expect(numbers).toContain("MIN(ra.round)");
+  });
+});
+
+describe("driver fixtures", () => {
+  it("serves russell with a single number stint and a current season", async () => {
+    const driver = await createDriverRepository().getDriver("george-russell");
+    expect(driver?.permanentNumber).toBe("63");
+    expect(driver?.dateOfBirth).toBe("1998-02-15");
+    expect(driver?.numberStints).toEqual([
+      { number: "63", yearFrom: 2019, yearTo: 2026 },
+    ]);
+    expect(driver?.teamStints).toEqual([
+      { id: "williams", name: "Williams", yearFrom: 2019, yearTo: 2020 },
+      // 2020 萨基尔代打一场 Mercedes，属真实参赛记录
+      { id: "mercedes", name: "Mercedes", yearFrom: 2020, yearTo: 2020 },
+      { id: "williams", name: "Williams", yearFrom: 2021, yearTo: 2021 },
+      { id: "mercedes", name: "Mercedes", yearFrom: 2022, yearTo: 2026 },
+    ]);
+    expect(driver?.currentSeason?.year).toBe(driver?.activeSeason);
+  });
+
+  it("serves verstappen with three number stints and champion seasons", async () => {
+    const driver = await createDriverRepository().getDriver("max-verstappen");
+    expect(driver?.numberStints).toEqual([
+      { number: "33", yearFrom: 2015, yearTo: 2021 },
+      { number: "1", yearFrom: 2022, yearTo: 2025 },
+      { number: "3", yearFrom: 2026, yearTo: 2026 },
+    ]);
+    expect(
+      driver?.seasons.filter((s) => s.championshipWon).length,
+    ).toBeGreaterThanOrEqual(4);
+  });
+
+  it("returns null for slugs without a fixture", async () => {
+    await expect(
+      createDriverRepository().getDriver("lewis-hamilton"),
+    ).resolves.toBeNull();
+  });
+});

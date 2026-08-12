@@ -410,8 +410,23 @@ function withEarlyStint(
   return [...earlyStints, ...lineage];
 }
 
-function buildCurrentSeason(
-  latest: TeamSeason | undefined,
+// 结果格判定唯一来源：车队页与车手页共用（text/†/P/F/冲刺上标）
+export function buildRaceCell(
+  record: Record<string, unknown>,
+  sprintRank: number | null,
+): RaceCell {
+  return {
+    text: asString(record.position_text, "result position"),
+    pole: Boolean(record.pole_position),
+    fastest: Boolean(record.fastest_lap),
+    classified:
+      record.reason_retired !== null && record.position_number !== null,
+    sprintRank,
+  };
+}
+
+export function buildCurrentSeason(
+  latest: { year: number; position: string | null; points: number | null } | undefined,
   gpStatRows: unknown[],
   sprintStatRows: unknown[],
   sprintPoleRows: unknown[],
@@ -534,14 +549,10 @@ function mergeSeasons(
     }
     // 共享赛车一名车手有多行；SQL 按排名序，首条即最佳成绩
     if (byRound.has(round)) continue;
-    byRound.set(round, {
-      text: asString(record.position_text, "result position"),
-      pole: Boolean(record.pole_position),
-      fastest: Boolean(record.fastest_lap),
-      classified:
-        record.reason_retired !== null && record.position_number !== null,
-      sprintRank: sprintRanks.get(`${year}:${round}:${driverId}`) ?? null,
-    });
+    byRound.set(
+      round,
+      buildRaceCell(record, sprintRanks.get(`${year}:${round}:${driverId}`) ?? null),
+    );
   }
 
   // 赛季未结束时将来轮次保留为空列，与 wiki 一致

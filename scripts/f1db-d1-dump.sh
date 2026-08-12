@@ -40,9 +40,11 @@ for name in "${TABLES[@]}"; do
   sqlite3 "$WORK/f1db.db" ".dump $name" \
     | grep -Ev '^(PRAGMA|BEGIN( TRANSACTION)?|COMMIT);$' \
     > "$OUT/$(printf '%02d' "$idx")-$name.sql"
-  # f1db 未给 race_data 建 constructor 索引，页面查询全靠它过滤
+  # f1db 未给 race_data 建 constructor/driver 索引，车队页与车手页查询全靠它们过滤
   if [ "$name" = "race_data" ]; then
     echo "CREATE INDEX IF NOT EXISTS idx_rd_constructor_type ON race_data (constructor_id, type);" \
+      >> "$OUT/$(printf '%02d' "$idx")-$name.sql"
+    echo "CREATE INDEX IF NOT EXISTS idx_rd_driver_type ON race_data (driver_id, type);" \
       >> "$OUT/$(printf '%02d' "$idx")-$name.sql"
   fi
   idx=$((idx + 1))
