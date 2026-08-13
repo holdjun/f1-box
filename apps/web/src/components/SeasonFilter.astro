@@ -1,0 +1,108 @@
+---
+interface Props {
+  years: number[];
+  mode: "link" | "toggle";
+  baseHref?: string;
+  current?: number | null;
+  label?: string;
+  sticky?: boolean;
+}
+
+const {
+  years,
+  mode,
+  baseHref = "",
+  current = null,
+  label = "Filter by season",
+  sticky = false,
+} = Astro.props;
+---
+
+{mode === "link" ? (
+  <nav
+    class:list={["season-filter", { "season-filter--sticky": sticky }]}
+    aria-label={label}
+  >
+    <a
+      class:list={["season-filter__pill", { "is-active": current === null }]}
+      href={baseHref}
+      aria-current={current === null ? "page" : undefined}
+    >All</a>
+    {years.map((year) => (
+      <a
+        class:list={["season-filter__pill", { "is-active": current === year }]}
+        href={`${baseHref}?year=${year}`}
+        aria-current={current === year ? "page" : undefined}
+      >{year}</a>
+    ))}
+  </nav>
+) : (
+  <div
+    class:list={["season-filter", { "season-filter--sticky": sticky }]}
+    role="group"
+    aria-label={label}
+    data-season-filter
+  >
+    <button
+      type="button"
+      class="season-filter__pill is-active"
+      data-season-year="all"
+      aria-pressed="true"
+    >All</button>
+    {years.map((year) => (
+      <button
+        type="button"
+        class="season-filter__pill"
+        data-season-year={year}
+        aria-pressed="false"
+      >{year}</button>
+    ))}
+  </div>
+)}
+
+<style>
+  .season-filter {
+    display: flex;
+    gap: 0.35rem;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 0.35rem 0.25rem 0.55rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--coral) var(--line);
+    -webkit-overflow-scrolling: touch;
+  }
+  .season-filter--sticky {
+    position: sticky;
+    z-index: 5;
+    top: 0;
+    background: var(--ink);
+  }
+  .season-filter__pill {
+    flex: 0 0 auto;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted-light);
+    font: inherit;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      color 160ms ease,
+      border-color 160ms ease,
+      background-color 160ms ease;
+  }
+  .season-filter__pill:hover {
+    color: var(--paper);
+    border-color: var(--muted);
+  }
+  .season-filter__pill.is-active {
+    border-color: var(--coral);
+    background: var(--coral);
+    color: var(--ink);
+    font-weight: 700;
+  }
+</style>

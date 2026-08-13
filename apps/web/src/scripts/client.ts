@@ -69,10 +69,55 @@ function enhanceRails(root: ParentNode = document): void {
   });
 }
 
+// 详情页赛季筛选：空集 = 全部显示；选中集合则只显示对应 data-season-block
+function enhanceSeasonFilters(root: ParentNode = document): void {
+  root.querySelectorAll<HTMLElement>("[data-season-filter]").forEach((bar) => {
+    if (bar.dataset.enhanced === "true") return;
+    bar.dataset.enhanced = "true";
+
+    const buttons = [
+      ...bar.querySelectorAll<HTMLButtonElement>("[data-season-year]"),
+    ];
+    const selected = new Set<number>();
+
+    const sync = () => {
+      const showingAll = selected.size === 0;
+      for (const button of buttons) {
+        const year = button.dataset.seasonYear;
+        const active = year === "all" ? showingAll : selected.has(Number(year));
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      }
+      document
+        .querySelectorAll<HTMLElement>("[data-season-block]")
+        .forEach((block) => {
+          block.hidden = showingAll
+            ? false
+            : !selected.has(Number(block.dataset.seasonBlock));
+        });
+    };
+
+    for (const button of buttons) {
+      button.addEventListener("click", () => {
+        const value = button.dataset.seasonYear;
+        if (value === "all") {
+          selected.clear();
+        } else {
+          const year = Number(value);
+          if (selected.has(year)) selected.delete(year);
+          else selected.add(year);
+        }
+        sync();
+      });
+    }
+  });
+}
+
 function enhancePage(): void {
   enhanceLocalTimes();
   enhanceCountdowns();
   enhanceRails();
+  enhanceSeasonFilters();
 }
 
 enhancePage();

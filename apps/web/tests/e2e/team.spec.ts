@@ -103,6 +103,25 @@ test("teams index lists all constructors @desktop", async ({ page }) => {
   await expect(page.locator('a[href="/teams/mercedes"]')).toBeVisible();
 });
 
+test("teams index filters to a season @desktop", async ({ page }) => {
+  await page.goto("/teams?year=1997");
+  await expect(page.locator(".team-card")).toHaveCount(12);
+  await expect(page.locator('a[href="/teams/ferrari"]')).toBeVisible();
+  await expect(
+    page.locator('.season-filter__pill[aria-current="page"]'),
+  ).toHaveText("1997");
+});
+
+test("ferrari detail filters season blocks @desktop", async ({ page }) => {
+  await page.goto("/teams/ferrari");
+  const filter = page.getByRole("group", { name: "Filter by season" });
+  await filter.getByRole("button", { name: "1997" }).click();
+  await expect(page.locator(".season-block:visible")).toHaveCount(1);
+  await expect(page.locator(".season-block:visible .season-year")).toHaveText("1997");
+  await filter.getByRole("button", { name: "All" }).click();
+  await expect(page.locator(".season-block:visible")).toHaveCount(77);
+});
+
 test("team logos render inside a stable contain frame @desktop", async ({
   page,
 }) => {

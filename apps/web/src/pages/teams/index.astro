@@ -2,6 +2,7 @@
 import { env } from "cloudflare:workers";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import SeasonFilter from "../../components/SeasonFilter.astro";
 import {
   createD1TeamDatabase,
   createTeamRepository,
@@ -17,7 +18,16 @@ const repository = import.meta.env.DEV
   ? createTeamRepository()
   : createTeamRepository(createD1TeamDatabase(env.F1_DB));
 
-const constructors = await repository.getConstructors();
+const years = await repository.getSeasonYears();
+const yearParam = Astro.url.searchParams.get("year");
+const year =
+  yearParam !== null && years.includes(Number(yearParam))
+    ? Number(yearParam)
+    : null;
+const constructors =
+  year === null
+    ? await repository.getConstructors()
+    : await repository.getConstructorsByYear(year);
 
 // 目录是全量聚合，边缘短暂缓存吸收重复请求
 Astro.response.headers.set(
@@ -29,6 +39,14 @@ Astro.response.headers.set(
 <BaseLayout title="Teams" active="teams">
   <main id="main-content" class="page-shell">
     <h1>Teams</h1>
+    <SeasonFilter
+      years={years}
+      mode="link"
+      baseHref="/teams"
+      current={year}
+      label="Filter by season"
+      sticky
+    />
     <div class="team-grid">
       {constructors.map((team) => (
         <a

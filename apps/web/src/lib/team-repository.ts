@@ -87,6 +87,8 @@ export interface TeamPage {
 export interface TeamRepository {
   getTeam(slug: string): Promise<TeamPage | null>;
   getConstructors(): Promise<ConstructorRef[]>;
+  getConstructorsByYear(year: number): Promise<ConstructorRef[]>;
+  getSeasonYears(): Promise<number[]>;
 }
 
 export interface ConstructorRef {
@@ -262,6 +264,16 @@ ORDER BY
   c.total_points DESC,
   c.name`;
 
+// 年份目录：名单是枚举，名字字母序即可
+const constructorsByYearSql = `
+SELECT DISTINCT c.id, c.name
+FROM season_entrant_constructor sec
+JOIN constructor c ON c.id = sec.constructor_id
+WHERE sec.year = ?1
+ORDER BY c.name`;
+
+const seasonYearsSql = `SELECT year FROM season ORDER BY year DESC`;
+
 export function createTeamRepository(db?: TeamDatabase): TeamRepository {
   return {
     async getTeam(slug) {
@@ -353,14 +365,43 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         return fixture as ConstructorRef[];
       }
       const rows = await db.batch([{ sql: constructorsSql, values: [] }]);
-      return rows[0].results.map((row) => {
-        const record = asRecord(row, "constructor row");
-        return {
-          id: asString(record.id, "constructor id"),
-          name: asString(record.name, "constructor name"),
-        };
-      });
+      return rows[0].results.map(mapConstructorRef);
     },
+
+    async getConstructorsByYear(year) {
+      if (!db) {
+        const { default: fixture } = await import("./fixtures/constructors.json");
+        return (fixture as (ConstructorRef & { years: number[] })[]).flatMap(
+          ({ years, ...ref }) => (years.includes(year) ? [ref] : []),
+        );
+      }
+      const rows = await db.batch([{ sql: constructorsByYearSql, values: [year] }]);
+      return rows[0].results.map(mapConstructorRef);
+    },
+
+    async getSeasonYears() {
+      if (!db) {
+        // DEV 从 fixture 参赛年份推导；生产读 season 表
+        const { default: fixture } = await import("./fixtures/constructors.json");
+        const years = new Set<number>();
+        for (const team of fixture as (ConstructorRef & { years: number[] })[]) {
+          for (const year of team.years) years.add(year);
+        }
+        return [...years].sort((a, b) => b - a);
+      }
+      const rows = await db.batch([{ sql: seasonYearsSql, values: [] }]);
+      return rows[0].results.map((row) =>
+        asNumber(asRecord(row, "season year").year, "season year"),
+      );
+    },
+  };
+}
+
+function mapConstructorRef(row: unknown): ConstructorRef {
+  const record = asRecord(row, "constructor row");
+  return {
+    id: asString(record.id, "constructor id"),
+    name: asString(record.name, "constructor name"),
   };
 }
 

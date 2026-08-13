@@ -2,6 +2,7 @@
 import { env } from "cloudflare:workers";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import SeasonFilter from "../../components/SeasonFilter.astro";
 import {
   createD1DriverDatabase,
   createDriverRepository,
@@ -13,7 +14,16 @@ const repository = import.meta.env.DEV
   ? createDriverRepository()
   : createDriverRepository(createD1DriverDatabase(env.F1_DB));
 
-const drivers = await repository.getDrivers();
+const years = await repository.getSeasonYears();
+const yearParam = Astro.url.searchParams.get("year");
+const year =
+  yearParam !== null && years.includes(Number(yearParam))
+    ? Number(yearParam)
+    : null;
+const drivers =
+  year === null
+    ? await repository.getDrivers()
+    : await repository.getDriversByYear(year);
 
 // 目录查询是全库最重的聚合，边缘短暂缓存吸收重复请求
 Astro.response.headers.set(
@@ -25,6 +35,14 @@ Astro.response.headers.set(
 <BaseLayout title="Drivers" active="drivers">
   <main id="main-content" class="page-shell">
     <h1>Drivers</h1>
+    <SeasonFilter
+      years={years}
+      mode="link"
+      baseHref="/drivers"
+      current={year}
+      label="Filter by season"
+      sticky
+    />
     <div class="driver-grid">
       {drivers.map((driver) => (
         <a

@@ -77,6 +77,8 @@ export interface DriverPage {
 
 export interface DriverRepository {
   getDrivers(): Promise<DriverSummary[]>;
+  getDriversByYear(year: number): Promise<DriverSummary[]>;
+  getSeasonYears(): Promise<number[]>;
   getDriver(slug: string): Promise<DriverPage | null>;
 }
 
@@ -136,6 +138,37 @@ ORDER BY
   d.total_race_wins DESC,
   d.total_race_entries DESC,
   d.name`;
+
+// 年份目录：卡片显示该年车队，季中转会取该年最后参赛车队；名单是枚举，
+// 名字字母序即可。isCurrent 在年份视图无意义，恒 false。
+const driversByYearSql = `
+WITH year_drivers AS (
+  SELECT DISTINCT driver_id
+  FROM season_entrant_driver
+  WHERE year = ?1 AND test_driver = 0
+),
+last_team AS (
+  SELECT rd.driver_id, rd.constructor_id, c.name AS team_name
+  FROM driver d
+  JOIN race_data rd ON rd.rowid = (
+    SELECT rd2.rowid
+    FROM race_data rd2
+    JOIN race ra2 ON ra2.id = rd2.race_id
+    WHERE rd2.driver_id = d.id AND rd2.type = 'RACE_RESULT' AND ra2.year = ?1
+    ORDER BY ra2.round DESC
+    LIMIT 1
+  )
+  JOIN constructor c ON c.id = rd.constructor_id
+)
+SELECT d.id, d.name, d.permanent_number, co.alpha2_code,
+  lt.constructor_id AS team_id, lt.team_name
+FROM year_drivers yd
+JOIN driver d ON d.id = yd.driver_id
+LEFT JOIN country co ON co.id = d.nationality_country_id
+LEFT JOIN last_team lt ON lt.driver_id = d.id
+ORDER BY d.name`;
+
+const seasonYearsSql = `SELECT year FROM season ORDER BY year DESC`;
 
 const identitySql = `
 SELECT d.id, d.name, d.full_name, co.name AS country_name, co.alpha2_code,
@@ -250,31 +283,37 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
       }
 
       const [rows] = await db.batch([{ sql: driversSql, values: [] }]);
-      return rows.results.map((row) => {
-        const record = asRecord(row, "driver row");
-        return {
-          id: asString(record.id, "driver id"),
-          name: asString(record.name, "driver name"),
-          number:
-            record.permanent_number == null
-              ? null
-              : asString(record.permanent_number, "driver number"),
-          // 国旗 SVG 以 alpha2 小写命名
-          flagCode:
-            record.alpha2_code == null
-              ? null
-              : asString(record.alpha2_code, "driver flag code").toLowerCase(),
-          teamId:
-            record.team_id == null
-              ? null
-              : asString(record.team_id, "driver team id"),
-          teamName:
-            record.team_name == null
-              ? null
-              : asString(record.team_name, "driver team name"),
-          isCurrent: record.is_current === 1,
-        };
-      });
+      return rows.results.map(mapDriverRow);
+    },
+
+    async getDriversByYear(year) {
+      if (!db) {
+        // fixture 仅 DEV 用，动态导入避免打进生产 bundle
+        const { default: fixture } = await import("./fixtures/drivers.json");
+        return (fixture as (DriverSummary & { years: number[] })[]).flatMap(
+          ({ years, ...summary }) => (years.includes(year) ? [summary] : []),
+        );
+      }
+
+      const [rows] = await db.batch([{ sql: driversByYearSql, values: [year] }]);
+      return rows.results.map(mapDriverRow);
+    },
+
+    async getSeasonYears() {
+      if (!db) {
+        // DEV 从 fixture 参赛年份推导；生产读 season 表
+        const { default: fixture } = await import("./fixtures/drivers.json");
+        const years = new Set<number>();
+        for (const driver of fixture as (DriverSummary & { years: number[] })[]) {
+          for (const year of driver.years) years.add(year);
+        }
+        return [...years].sort((a, b) => b - a);
+      }
+
+      const [rows] = await db.batch([{ sql: seasonYearsSql, values: [] }]);
+      return rows.results.map((row) =>
+        asNumber(asRecord(row, "season year").year, "season year"),
+      );
     },
 
     async getDriver(slug) {
@@ -350,6 +389,33 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
         })(),
       };
     },
+  };
+}
+
+// 目录行映射：按年查询的行没有 is_current，isCurrent 自然为 false
+function mapDriverRow(row: unknown): DriverSummary {
+  const record = asRecord(row, "driver row");
+  return {
+    id: asString(record.id, "driver id"),
+    name: asString(record.name, "driver name"),
+    number:
+      record.permanent_number == null
+        ? null
+        : asString(record.permanent_number, "driver number"),
+    // 国旗 SVG 以 alpha2 小写命名
+    flagCode:
+      record.alpha2_code == null
+        ? null
+        : asString(record.alpha2_code, "driver flag code").toLowerCase(),
+    teamId:
+      record.team_id == null
+        ? null
+        : asString(record.team_id, "driver team id"),
+    teamName:
+      record.team_name == null
+        ? null
+        : asString(record.team_name, "driver team name"),
+    isCurrent: record.is_current === 1,
   };
 }
 

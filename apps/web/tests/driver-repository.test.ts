@@ -120,3 +120,86 @@ describe("drivers fixture", () => {
     expect(prost).toBeLessThan(drivers.findIndex((d) => d.id === "ayrton-senna"));
   });
 });
+
+describe("getDriversByYear", () => {
+  it("filters to the given year and excludes test drivers", async () => {
+    let sql = "";
+    let values: readonly unknown[] = [];
+    const db: DriverDatabase = {
+      batch(statements) {
+        sql = statements[0].sql;
+        values = statements[0].values;
+        return Promise.resolve([{ results: [] }]);
+      },
+    };
+
+    await createDriverRepository(db).getDriversByYear(1997);
+    expect(sql).toContain("test_driver = 0");
+    expect(sql).toContain("ra2.year = ?1");
+    expect(values).toEqual([1997]);
+  });
+
+  it("maps rows with the year's team, flag lowercased", async () => {
+    const db: DriverDatabase = {
+      batch() {
+        return Promise.resolve([
+          {
+            results: [
+              {
+                id: "michael-schumacher",
+                name: "Michael Schumacher",
+                permanent_number: null,
+                alpha2_code: "DE",
+                team_id: "ferrari",
+                team_name: "Ferrari",
+              },
+              {
+                id: "no-team",
+                name: "No Team",
+                permanent_number: null,
+                alpha2_code: null,
+                team_id: null,
+                team_name: null,
+              },
+            ],
+          },
+        ]);
+      },
+    };
+
+    const drivers = await createDriverRepository(db).getDriversByYear(1997);
+    expect(drivers).toEqual([
+      {
+        id: "michael-schumacher",
+        name: "Michael Schumacher",
+        number: null,
+        flagCode: "de",
+        teamId: "ferrari",
+        teamName: "Ferrari",
+        isCurrent: false,
+      },
+      {
+        id: "no-team",
+        name: "No Team",
+        number: null,
+        flagCode: null,
+        teamId: null,
+        teamName: null,
+        isCurrent: false,
+      },
+    ]);
+  });
+});
+
+describe("getSeasonYears", () => {
+  it("returns years in descending order", async () => {
+    const db: DriverDatabase = {
+      batch() {
+        return Promise.resolve([{ results: [{ year: 2026 }, { year: 1950 }] }]);
+      },
+    };
+
+    const years = await createDriverRepository(db).getSeasonYears();
+    expect(years).toEqual([2026, 1950]);
+  });
+});

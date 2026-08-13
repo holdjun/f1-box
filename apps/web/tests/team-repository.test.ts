@@ -296,3 +296,48 @@ describe("seasonGap", () => {
     expect(seasonGap(1979, 1951)).toEqual({ from: 1952, to: 1978, seasons: 27 });
   });
 });
+
+describe("getConstructorsByYear", () => {
+  it("filters to the given year and dedupes", async () => {
+    let sql = "";
+    let values: readonly unknown[] = [];
+    const db: TeamDatabase = {
+      batch(statements) {
+        sql = statements[0].sql;
+        values = statements[0].values;
+        return Promise.resolve([{ results: [] }]);
+      },
+    };
+
+    await createTeamRepository(db).getConstructorsByYear(1997);
+    expect(sql).toContain("DISTINCT");
+    expect(sql).toContain("sec.year = ?1");
+    expect(values).toEqual([1997]);
+  });
+
+  it("maps rows", async () => {
+    const db: TeamDatabase = {
+      batch() {
+        return Promise.resolve([
+          { results: [{ id: "ferrari", name: "Ferrari" }] },
+        ]);
+      },
+    };
+
+    const teams = await createTeamRepository(db).getConstructorsByYear(1997);
+    expect(teams).toEqual([{ id: "ferrari", name: "Ferrari" }]);
+  });
+});
+
+describe("getSeasonYears", () => {
+  it("returns years in descending order", async () => {
+    const db: TeamDatabase = {
+      batch() {
+        return Promise.resolve([{ results: [{ year: 2026 }, { year: 1950 }] }]);
+      },
+    };
+
+    const years = await createTeamRepository(db).getSeasonYears();
+    expect(years).toEqual([2026, 1950]);
+  });
+});

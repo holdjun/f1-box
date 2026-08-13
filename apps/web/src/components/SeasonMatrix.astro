@@ -1,4 +1,5 @@
 ---
+import SeasonFilter from "./SeasonFilter.astro";
 import { seasonGap, type RaceCell } from "../lib/team-repository.js";
 import { formatPosition, resultClass } from "../lib/result-display.js";
 import { alpha2Flag } from "../lib/tokens.js";
@@ -34,8 +35,10 @@ interface Props {
 }
 
 const { seasons, rowLabel, showChampionKey = false } = Astro.props;
+const filterYears = seasons.map((season) => season.year);
 ---
 
+<SeasonFilter years={filterYears} mode="toggle" label="Filter by season" sticky />
 <p class="legend" aria-label="Table legend">
   <span class="key"><i class="result-win"></i>Win</span>
   <span class="key"><i class="result-podium"></i>Podium</span>
@@ -56,6 +59,7 @@ const { seasons, rowLabel, showChampionKey = false } = Astro.props;
       {gap ? (
         <div
           class="season-gap"
+          data-season-block={season.year}
           role="separator"
           aria-label={`${gap.seasons} seasons without entries, ${gap.from} to ${gap.to}`}
         >
@@ -70,6 +74,7 @@ const { seasons, rowLabel, showChampionKey = false } = Astro.props;
           "season-block",
           { champion: season.championshipWon, current: season.current },
         ]}
+        data-season-block={season.year}
       >
         <h3>
           <span class="season-year">{season.year}</span>

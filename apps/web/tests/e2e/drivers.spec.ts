@@ -6,7 +6,9 @@ test("drivers catalog renders the full fixture field @desktop", async ({
   await page.goto("/drivers");
   await expect(page.locator("main h1")).toHaveText("Drivers");
   await expect(page.locator(".driver-card")).toHaveCount(32);
-  await expect(page.getByRole("navigation", { name: "Season" })).not.toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Filter by season" }),
+  ).toBeVisible();
 });
 
 test("russell card shows permanent number, team and flag @desktop", async ({
@@ -107,4 +109,28 @@ test("russell detail renders on mobile @mobile", async ({ page }) => {
       document.documentElement.clientWidth,
   );
   expect(hasPageOverflow).toBe(false);
+});
+
+test("drivers catalog filters to a season @desktop", async ({ page }) => {
+  await page.goto("/drivers?year=1997");
+  await expect(page.locator(".driver-card")).toHaveCount(2);
+  await expect(page.locator('a[href="/drivers/michael-schumacher"]')).toBeVisible();
+  await expect(page.locator('a[href="/drivers/mika-hakkinen"]')).toBeVisible();
+  await expect(
+    page.locator('.season-filter__pill[aria-current="page"]'),
+  ).toHaveText("1997");
+});
+
+test("drivers detail filters season blocks @desktop", async ({ page }) => {
+  await page.goto("/drivers/george-russell");
+  const filter = page.getByRole("group", { name: "Filter by season" });
+  await filter.getByRole("button", { name: "2021" }).click();
+  await expect(page.locator(".season-block:visible")).toHaveCount(1);
+  await expect(page.locator(".season-block:visible .season-year")).toHaveText("2021");
+  // 多选：追加 2020
+  await filter.getByRole("button", { name: "2020" }).click();
+  await expect(page.locator(".season-block:visible")).toHaveCount(2);
+  // All 一键回到全量
+  await filter.getByRole("button", { name: "All" }).click();
+  await expect(page.locator(".season-block:visible")).toHaveCount(8);
 });

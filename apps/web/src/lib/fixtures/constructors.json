@@ -1,1 +1,2203 @@
-[{"id":"afm","name":"AFM"},{"id":"ags","name":"AGS"},{"id":"ats-wheels","name":"ATS"},{"id":"ats","name":"ATS"},{"id":"adams","name":"Adams"},{"id":"alfa-romeo","name":"Alfa Romeo"},{"id":"alfa-special","name":"Alfa Special"},{"id":"alphatauri","name":"AlphaTauri"},{"id":"alpine","name":"Alpine"},{"id":"alta","name":"Alta"},{"id":"amon","name":"Amon"},{"id":"andrea-moda","name":"Andrea Moda"},{"id":"apollon","name":"Apollon"},{"id":"arrows","name":"Arrows"},{"id":"arzani-volpini","name":"Arzani-Volpini"},{"id":"aston-butterworth","name":"Aston Butterworth"},{"id":"aston-martin","name":"Aston Martin"},{"id":"audi","name":"Audi"},{"id":"bar","name":"BAR"},{"id":"bmw","name":"BMW"},{"id":"bmw-sauber","name":"BMW Sauber"},{"id":"brm","name":"BRM"},{"id":"brp","name":"BRP"},{"id":"balsa","name":"Balsa"},{"id":"behra-porsche","name":"Behra-Porsche"},{"id":"bellasi","name":"Bellasi"},{"id":"benetton","name":"Benetton"},{"id":"boro","name":"Boro"},{"id":"brabham","name":"Brabham"},{"id":"brawn","name":"Brawn"},{"id":"bromme","name":"Bromme"},{"id":"bugatti","name":"Bugatti"},{"id":"cadillac","name":"Cadillac"},{"id":"caterham","name":"Caterham"},{"id":"christensen","name":"Christensen"},{"id":"cisitalia","name":"Cisitalia"},{"id":"coloni","name":"Coloni"},{"id":"connaught","name":"Connaught"},{"id":"connew","name":"Connew"},{"id":"cooper","name":"Cooper"},{"id":"dallara","name":"Dallara"},{"id":"de-tomaso","name":"De Tomaso"},{"id":"deidt","name":"Deidt"},{"id":"del-roy","name":"Del Roy"},{"id":"derrington-francis","name":"Derrington-Francis"},{"id":"dunn","name":"Dunn"},{"id":"emw","name":"EMW"},{"id":"enb","name":"ENB"},{"id":"era","name":"ERA"},{"id":"eagle","name":"Eagle"},{"id":"eifelland","name":"Eifelland"},{"id":"elder","name":"Elder"},{"id":"emeryson","name":"Emeryson"},{"id":"ensign","name":"Ensign"},{"id":"epperly","name":"Epperly"},{"id":"eurobrun","name":"EuroBrun"},{"id":"ewing","name":"Ewing"},{"id":"first","name":"FIRST"},{"id":"ferguson","name":"Ferguson"},{"id":"ferrari","name":"Ferrari"},{"id":"fittipaldi","name":"Fittipaldi"},{"id":"fondmetal","name":"Fondmetal"},{"id":"footwork","name":"Footwork"},{"id":"force-india","name":"Force India"},{"id":"forti","name":"Forti"},{"id":"frank-williams-racing-cars","name":"Frank Williams Racing Cars"},{"id":"frazer-nash","name":"Frazer-Nash"},{"id":"fry","name":"Fry"},{"id":"gilby","name":"Gilby"},{"id":"gordini","name":"Gordini"},{"id":"greifzu","name":"Greifzu"},{"id":"hrt","name":"HRT"},{"id":"hwm","name":"HWM"},{"id":"haas","name":"Haas"},{"id":"hall","name":"Hall"},{"id":"heck","name":"Heck"},{"id":"hesketh","name":"Hesketh"},{"id":"hill","name":"Hill"},{"id":"honda","name":"Honda"},{"id":"iso-marlboro","name":"Iso-Marlboro"},{"id":"jbw","name":"JBW"},{"id":"jaguar","name":"Jaguar"},{"id":"jordan","name":"Jordan"},{"id":"kauhsen","name":"Kauhsen"},{"id":"kick-sauber","name":"Kick Sauber"},{"id":"klenk","name":"Klenk"},{"id":"kojima","name":"Kojima"},{"id":"krakau","name":"Krakau"},{"id":"kurtis-kraft","name":"Kurtis Kraft"},{"id":"kuzma","name":"Kuzma"},{"id":"lds","name":"LDS"},{"id":"lec","name":"LEC"},{"id":"lancia","name":"Lancia"},{"id":"langley","name":"Langley"},{"id":"larrousse","name":"Larrousse"},{"id":"lesovsky","name":"Lesovsky"},{"id":"leyton-house","name":"Leyton House"},{"id":"life","name":"Life"},{"id":"ligier","name":"Ligier"},{"id":"lola","name":"Lola"},{"id":"lotus-f1","name":"Lotus"},{"id":"lotus","name":"Lotus"},{"id":"lotus-racing","name":"Lotus Racing"},{"id":"lyncar","name":"Lyncar"},{"id":"maki","name":"Maki"},{"id":"manor","name":"Manor"},{"id":"march","name":"March"},{"id":"marchese","name":"Marchese"},{"id":"martini","name":"Martini"},{"id":"marussia","name":"Marussia"},{"id":"maserati","name":"Maserati"},{"id":"matra","name":"Matra"},{"id":"mcguire","name":"McGuire"},{"id":"mclaren","name":"McLaren"},{"id":"mercedes","name":"Mercedes"},{"id":"merzario","name":"Merzario"},{"id":"meskowski","name":"Meskowski"},{"id":"midland","name":"Midland"},{"id":"minardi","name":"Minardi"},{"id":"modena","name":"Modena"},{"id":"moore","name":"Moore"},{"id":"nacke","name":"Nacke"},{"id":"nichels","name":"Nichels"},{"id":"osca","name":"O.S.C.A."},{"id":"olson","name":"Olson"},{"id":"onyx","name":"Onyx"},{"id":"osella","name":"Osella"},{"id":"pacific","name":"Pacific"},{"id":"pankratz","name":"Pankratz"},{"id":"parnelli","name":"Parnelli"},{"id":"pawl","name":"Pawl"},{"id":"penske","name":"Penske"},{"id":"phillips","name":"Phillips"},{"id":"politoys","name":"Politoys"},{"id":"porsche","name":"Porsche"},{"id":"prost","name":"Prost"},{"id":"protos","name":"Protos"},{"id":"ram","name":"RAM"},{"id":"rb","name":"RB"},{"id":"racing-bulls","name":"Racing Bulls"},{"id":"racing-point","name":"Racing Point"},{"id":"rae","name":"Rae"},{"id":"rebaque","name":"Rebaque"},{"id":"red-bull","name":"Red Bull"},{"id":"reif","name":"Reif"},{"id":"renault","name":"Renault"},{"id":"rial","name":"Rial"},{"id":"sauber","name":"Sauber"},{"id":"scarab","name":"Scarab"},{"id":"schroeder","name":"Schroeder"},{"id":"scirocco","name":"Scirocco"},{"id":"shadow","name":"Shadow"},{"id":"shannon","name":"Shannon"},{"id":"sherman","name":"Sherman"},{"id":"simca-gordini","name":"Simca-Gordini"},{"id":"simtek","name":"Simtek"},{"id":"snowberger","name":"Snowberger"},{"id":"spirit","name":"Spirit"},{"id":"spyker","name":"Spyker"},{"id":"stebro","name":"Stebro"},{"id":"stevens","name":"Stevens"},{"id":"stewart","name":"Stewart"},{"id":"super-aguri","name":"Super Aguri"},{"id":"surtees","name":"Surtees"},{"id":"sutton","name":"Sutton"},{"id":"talbot-lago","name":"Talbot-Lago"},{"id":"tec-mec","name":"Tec-Mec"},{"id":"tecno","name":"Tecno"},{"id":"theodore","name":"Theodore"},{"id":"token","name":"Token"},{"id":"toleman","name":"Toleman"},{"id":"toro-rosso","name":"Toro Rosso"},{"id":"toyota","name":"Toyota"},{"id":"trevis","name":"Trevis"},{"id":"trojan","name":"Trojan"},{"id":"turner","name":"Turner"},{"id":"tyrrell","name":"Tyrrell"},{"id":"vanwall","name":"Vanwall"},{"id":"venturi","name":"Venturi"},{"id":"veritas","name":"Veritas"},{"id":"virgin","name":"Virgin"},{"id":"watson","name":"Watson"},{"id":"wetteroth","name":"Wetteroth"},{"id":"williams","name":"Williams"},{"id":"wolf","name":"Wolf"},{"id":"wolf-williams","name":"Wolf-Williams"},{"id":"zakspeed","name":"Zakspeed"}]
+[
+ {
+  "id": "afm",
+  "name": "AFM",
+  "years": [
+   1952,
+   1953
+  ]
+ },
+ {
+  "id": "ags",
+  "name": "AGS",
+  "years": [
+   1986,
+   1987,
+   1988,
+   1989,
+   1990,
+   1991
+  ]
+ },
+ {
+  "id": "ats-wheels",
+  "name": "ATS",
+  "years": [
+   1978,
+   1979,
+   1980,
+   1981,
+   1982,
+   1983,
+   1984
+  ]
+ },
+ {
+  "id": "ats",
+  "name": "ATS",
+  "years": [
+   1963
+  ]
+ },
+ {
+  "id": "adams",
+  "name": "Adams",
+  "years": [
+   1950
+  ]
+ },
+ {
+  "id": "alfa-romeo",
+  "name": "Alfa Romeo",
+  "years": [
+   1950,
+   1951,
+   1979,
+   1980,
+   1981,
+   1982,
+   1983,
+   1984,
+   1985,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023
+  ]
+ },
+ {
+  "id": "alfa-special",
+  "name": "Alfa Special",
+  "years": [
+   1963,
+   1965
+  ]
+ },
+ {
+  "id": "alphatauri",
+  "name": "AlphaTauri",
+  "years": [
+   2020,
+   2021,
+   2022,
+   2023
+  ]
+ },
+ {
+  "id": "alpine",
+  "name": "Alpine",
+  "years": [
+   2021,
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ]
+ },
+ {
+  "id": "alta",
+  "name": "Alta",
+  "years": [
+   1950,
+   1951,
+   1952
+  ]
+ },
+ {
+  "id": "amon",
+  "name": "Amon",
+  "years": [
+   1974
+  ]
+ },
+ {
+  "id": "andrea-moda",
+  "name": "Andrea Moda",
+  "years": [
+   1992
+  ]
+ },
+ {
+  "id": "apollon",
+  "name": "Apollon",
+  "years": [
+   1977
+  ]
+ },
+ {
+  "id": "arrows",
+  "name": "Arrows",
+  "years": [
+   1978,
+   1979,
+   1980,
+   1981,
+   1982,
+   1983,
+   1984,
+   1985,
+   1986,
+   1987,
+   1988,
+   1989,
+   1990,
+   1997,
+   1998,
+   1999,
+   2000,
+   2001,
+   2002
+  ]
+ },
+ {
+  "id": "arzani-volpini",
+  "name": "Arzani-Volpini",
+  "years": [
+   1955
+  ]
+ },
+ {
+  "id": "aston-butterworth",
+  "name": "Aston Butterworth",
+  "years": [
+   1952
+  ]
+ },
+ {
+  "id": "aston-martin",
+  "name": "Aston Martin",
+  "years": [
+   1959,
+   1960,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ]
+ },
+ {
+  "id": "audi",
+  "name": "Audi",
+  "years": [
+   2026
+  ]
+ },
+ {
+  "id": "bar",
+  "name": "BAR",
+  "years": [
+   1999,
+   2000,
+   2001,
+   2002,
+   2003,
+   2004,
+   2005
+  ]
+ },
+ {
+  "id": "bmw",
+  "name": "BMW",
+  "years": [
+   1969
+  ]
+ },
+ {
+  "id": "bmw-sauber",
+  "name": "BMW Sauber",
+  "years": [
+   2006,
+   2007,
+   2008,
+   2009
+  ]
+ },
+ {
+  "id": "brm",
+  "name": "BRM",
+  "years": [
+   1951,
+   1956,
+   1957,
+   1958,
+   1959,
+   1960,
+   1961,
+   1962,
+   1963,
+   1964,
+   1965,
+   1966,
+   1967,
+   1968,
+   1969,
+   1970,
+   1971,
+   1972,
+   1973,
+   1974,
+   1975,
+   1976,
+   1977
+  ]
+ },
+ {
+  "id": "brp",
+  "name": "BRP",
+  "years": [
+   1963,
+   1964
+  ]
+ },
+ {
+  "id": "balsa",
+  "name": "Balsa",
+  "years": [
+   1952
+  ]
+ },
+ {
+  "id": "behra-porsche",
+  "name": "Behra-Porsche",
+  "years": [
+   1959,
+   1960
+  ]
+ },
+ {
+  "id": "bellasi",
+  "name": "Bellasi",
+  "years": [
+   1970,
+   1971
+  ]
+ },
+ {
+  "id": "benetton",
+  "name": "Benetton",
+  "years": [
+   1986,
+   1987,
+   1988,
+   1989,
+   1990,
+   1991,
+   1992,
+   1993,
+   1994,
+   1995,
+   1996,
+   1997,
+   1998,
+   1999,
+   2000,
+   2001
+  ]
+ },
+ {
+  "id": "boro",
+  "name": "Boro",
+  "years": [
+   1976,
+   1977
+  ]
+ },
+ {
+  "id": "brabham",
+  "name": "Brabham",
+  "years": [
+   1962,
+   1963,
+   1964,
+   1965,
+   1966,
+   1967,
+   1968,
+   1969,
+   1970,
+   1971,
+   1972,
+   1973,
+   1974,
+   1975,
+   1976,
+   1977,
+   1978,
+   1979,
+   1980,
+   1981,
+   1982,
+   1983,
+   1984,
+   1985,
+   1986,
+   1987,
+   1989,
+   1990,
+   1991,
+   1992
+  ]
+ },
+ {
+  "id": "brawn",
+  "name": "Brawn",
+  "years": [
+   2009
+  ]
+ },
+ {
+  "id": "bromme",
+  "name": "Bromme",
+  "years": [
+   1951,
+   1952,
+   1953,
+   1954
+  ]
+ },
+ {
+  "id": "bugatti",
+  "name": "Bugatti",
+  "years": [
+   1956
+  ]
+ },
+ {
+  "id": "cadillac",
+  "name": "Cadillac",
+  "years": [
+   2026
+  ]
+ },
+ {
+  "id": "caterham",
+  "name": "Caterham",
+  "years": [
+   2012,
+   2013,
+   2014
+  ]
+ },
+ {
+  "id": "christensen",
+  "name": "Christensen",
+  "years": [
+   1959,
+   1960
+  ]
+ },
+ {
+  "id": "cisitalia",
+  "name": "Cisitalia",
+  "years": [
+   1952
+  ]
+ },
+ {
+  "id": "coloni",
+  "name": "Coloni",
+  "years": [
+   1987,
+   1988,
+   1989,
+   1990,
+   1991
+  ]
+ },
+ {
+  "id": "connaught",
+  "name": "Connaught",
+  "years": [
+   1952,
+   1953,
+   1954,
+   1955,
+   1956,
+   1957,
+   1958,
+   1959
+  ]
+ },
+ {
+  "id": "connew",
+  "name": "Connew",
+  "years": [
+   1972
+  ]
+ },
+ {
+  "id": "cooper",
+  "name": "Cooper",
+  "years": [
+   1950,
+   1952,
+   1953,
+   1954,
+   1955,
+   1956,
+   1957,
+   1958,
+   1959,
+   1960,
+   1961,
+   1962,
+   1963,
+   1964,
+   1965,
+   1966,
+   1967,
+   1968,
+   1969
+  ]
+ },
+ {
+  "id": "dallara",
+  "name": "Dallara",
+  "years": [
+   1988,
+   1989,
+   1990,
+   1991,
+   1992
+  ]
+ },
+ {
+  "id": "de-tomaso",
+  "name": "De Tomaso",
+  "years": [
+   1961,
+   1962,
+   1963,
+   1970
+  ]
+ },
+ {
+  "id": "deidt",
+  "name": "Deidt",
+  "years": [
+   1950,
+   1951,
+   1952
+  ]
+ },
+ {
+  "id": "del-roy",
+  "name": "Del Roy",
+  "years": [
+   1953
+  ]
+ },
+ {
+  "id": "derrington-francis",
+  "name": "Derrington-Francis",
+  "years": [
+   1964
+  ]
+ },
+ {
+  "id": "dunn",
+  "name": "Dunn",
+  "years": [
+   1957,
+   1958,
+   1959
+  ]
+ },
+ {
+  "id": "emw",
+  "name": "EMW",
+  "years": [
+   1953
+  ]
+ },
+ {
+  "id": "enb",
+  "name": "ENB",
+  "years": [
+   1962
+  ]
+ },
+ {
+  "id": "era",
+  "name": "ERA",
+  "years": [
+   1950,
+   1951,
+   1952
+  ]
+ },
+ {
+  "id": "eagle",
+  "name": "Eagle",
+  "years": [
+   1966,
+   1967,
+   1968,
+   1969
+  ]
+ },
+ {
+  "id": "eifelland",
+  "name": "Eifelland",
+  "years": [
+   1972
+  ]
+ },
+ {
+  "id": "elder",
+  "name": "Elder",
+  "years": [
+   1959
+  ]
+ },
+ {
+  "id": "emeryson",
+  "name": "Emeryson",
+  "years": [
+   1956,
+   1961,
+   1962
+  ]
+ },
+ {
+  "id": "ensign",
+  "name": "Ensign",
+  "years": [
+   1973,
+   1974,
+   1975,
+   1976,
+   1977,
+   1978,
+   1979,
+   1980,
+   1981,
+   1982
+  ]
+ },
+ {
+  "id": "epperly",
+  "name": "Epperly",
+  "years": [
+   1955,
+   1957,
+   1958,
+   1959,
+   1960
+  ]
+ },
+ {
+  "id": "eurobrun",
+  "name": "EuroBrun",
+  "years": [
+   1988,
+   1989,
+   1990
+  ]
+ },
+ {
+  "id": "ewing",
+  "name": "Ewing",
+  "years": [
+   1950,
+   1960
+  ]
+ },
+ {
+  "id": "first",
+  "name": "FIRST",
+  "years": [
+   1989
+  ]
+ },
+ {
+  "id": "ferguson",
+  "name": "Ferguson",
+  "years": [
+   1961
+  ]
+ },
+ {
+  "id": "ferrari",
+  "name": "Ferrari",
+  "years": [
+   1950,
+   1951,
+   1952,
+   1953,
+   1954,
+   1955,
+   1956,
+   1957,
+   1958,
+   1959,
+   1960,
+   1961,
+   1962,
+   1963,
+   1964,
+   1965,
+   1966,
+   1967,
+   1968,
+   1969,
+   1970,
+   1971,
+   1972,
+   1973,
+   1974,
+   1975,
+   1976,
+   1977,
+   1978,
+   1979,
+   1980,
+   1981,
+   1982,
+   1983,
+   1984,
+   1985,
+   1986,
+   1987,
+   1988,
+   1989,
+   1990,
+   1991,
+   1992,
+   1993,
+   1994,
+   1995,
+   1996,
+   1997,
+   1998,
+   1999,
+   2000,
+   2001,
+   2002,
+   2003,
+   2004,
+   2005,
+   2006,
+   2007,
+   2008,
+   2009,
+   2010,
+   2011,
+   2012,
+   2013,
+   2014,
+   2015,
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ]
+ },
+ {
+  "id": "fittipaldi",
+  "name": "Fittipaldi",
+  "years": [
+   1975,
+   1976,
+   1977,
+   1978,
+   1979,
+   1980,
+   1981,
+   1982
+  ]
+ },
+ {
+  "id": "fondmetal",
+  "name": "Fondmetal",
+  "years": [
+   1991,
+   1992
+  ]
+ },
+ {
+  "id": "footwork",
+  "name": "Footwork",
+  "years": [
+   1991,
+   1992,
+   1993,
+   1994,
+   1995,
+   1996
+  ]
+ },
+ {
+  "id": "force-india",
+  "name": "Force India",
+  "years": [
+   2008,
+   2009,
+   2010,
+   2011,
+   2012,
+   2013,
+   2014,
+   2015,
+   2016,
+   2017,
+   2018
+  ]
+ },
+ {
+  "id": "forti",
+  "name": "Forti",
+  "years": [
+   1995,
+   1996
+  ]
+ },
+ {
+  "id": "frank-williams-racing-cars",
+  "name": "Frank Williams Racing Cars",
+  "years": [
+   1975
+  ]
+ },
+ {
+  "id": "frazer-nash",
+  "name": "Frazer-Nash",
+  "years": [
+   1952
+  ]
+ },
+ {
+  "id": "fry",
+  "name": "Fry",
+  "years": [
+   1959
+  ]
+ },
+ {
+  "id": "gilby",
+  "name": "Gilby",
+  "years": [
+   1961,
+   1962,
+   1963
+  ]
+ },
+ {
+  "id": "gordini",
+  "name": "Gordini",
+  "years": [
+   1952,
+   1953,
+   1954,
+   1955,
+   1956
+  ]
+ },
+ {
+  "id": "greifzu",
+  "name": "Greifzu",
+  "years": [
+   1953
+  ]
+ },
+ {
+  "id": "hrt",
+  "name": "HRT",
+  "years": [
+   2010,
+   2011,
+   2012
+  ]
+ },
+ {
+  "id": "hwm",
+  "name": "HWM",
+  "years": [
+   1951,
+   1952,
+   1953,
+   1954,
+   1955
+  ]
+ },
+ {
+  "id": "haas",
+  "name": "Haas",
+  "years": [
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ]
+ },
+ {
+  "id": "hall",
+  "name": "Hall",
+  "years": [
+   1951
+  ]
+ },
+ {
+  "id": "heck",
+  "name": "Heck",
+  "years": [
+   1952,
+   1953
+  ]
+ },
+ {
+  "id": "hesketh",
+  "name": "Hesketh",
+  "years": [
+   1974,
+   1975,
+   1976,
+   1977,
+   1978
+  ]
+ },
+ {
+  "id": "hill",
+  "name": "Hill",
+  "years": [
+   1975
+  ]
+ },
+ {
+  "id": "honda",
+  "name": "Honda",
+  "years": [
+   1964,
+   1965,
+   1966,
+   1967,
+   1968,
+   2006,
+   2007,
+   2008
+  ]
+ },
+ {
+  "id": "iso-marlboro",
+  "name": "Iso-Marlboro",
+  "years": [
+   1973,
+   1974
+  ]
+ },
+ {
+  "id": "jbw",
+  "name": "JBW",
+  "years": [
+   1959,
+   1960,
+   1961
+  ]
+ },
+ {
+  "id": "jaguar",
+  "name": "Jaguar",
+  "years": [
+   2000,
+   2001,
+   2002,
+   2003,
+   2004
+  ]
+ },
+ {
+  "id": "jordan",
+  "name": "Jordan",
+  "years": [
+   1991,
+   1992,
+   1993,
+   1994,
+   1995,
+   1996,
+   1997,
+   1998,
+   1999,
+   2000,
+   2001,
+   2002,
+   2003,
+   2004,
+   2005
+  ]
+ },
+ {
+  "id": "kauhsen",
+  "name": "Kauhsen",
+  "years": [
+   1979
+  ]
+ },
+ {
+  "id": "kick-sauber",
+  "name": "Kick Sauber",
+  "years": [
+   2024,
+   2025
+  ]
+ },
+ {
+  "id": "klenk",
+  "name": "Klenk",
+  "years": [
+   1954
+  ]
+ },
+ {
+  "id": "kojima",
+  "name": "Kojima",
+  "years": [
+   1976,
+   1977
+  ]
+ },
+ {
+  "id": "krakau",
+  "name": "Krakau",
+  "years": [
+   1952
+  ]
+ },
+ {
+  "id": "kurtis-kraft",
+  "name": "Kurtis Kraft",
+  "years": [
+   1950,
+   1951,
+   1952,
+   1953,
+   1954,
+   1955,
+   1956,
+   1957,
+   1958,
+   1959,
+   1960
+  ]
+ },
+ {
+  "id": "kuzma",
+  "name": "Kuzma",
+  "years": [
+   1951,
+   1952,
+   1953,
+   1954,
+   1955,
+   1956,
+   1957,
+   1958,
+   1959,
+   1960
+  ]
+ },
+ {
+  "id": "lds",
+  "name": "LDS",
+  "years": [
+   1962,
+   1963,
+   1965,
+   1967,
+   1968
+  ]
+ },
+ {
+  "id": "lec",
+  "name": "LEC",
+  "years": [
+   1977
+  ]
+ },
+ {
+  "id": "lancia",
+  "name": "Lancia",
+  "years": [
+   1954,
+   1955
+  ]
+ },
+ {
+  "id": "langley",
+  "name": "Langley",
+  "years": [
+   1950
+  ]
+ },
+ {
+  "id": "larrousse",
+  "name": "Larrousse",
+  "years": [
+   1993,
+   1994,
+   1995
+  ]
+ },
+ {
+  "id": "lesovsky",
+  "name": "Lesovsky",
+  "years": [
+   1950,
+   1951,
+   1952,
+   1953,
+   1956,
+   1957,
+   1958,
+   1959,
+   1960
+  ]
+ },
+ {
+  "id": "leyton-house",
+  "name": "Leyton House",
+  "years": [
+   1990,
+   1991
+  ]
+ },
+ {
+  "id": "life",
+  "name": "Life",
+  "years": [
+   1990
+  ]
+ },
+ {
+  "id": "ligier",
+  "name": "Ligier",
+  "years": [
+   1976,
+   1977,
+   1978,
+   1979,
+   1980,
+   1981,
+   1982,
+   1983,
+   1984,
+   1985,
+   1986,
+   1987,
+   1988,
+   1989,
+   1990,
+   1991,
+   1992,
+   1993,
+   1994,
+   1995,
+   1996
+  ]
+ },
+ {
+  "id": "lola",
+  "name": "Lola",
+  "years": [
+   1962,
+   1963,
+   1967,
+   1968,
+   1974,
+   1975,
+   1985,
+   1986,
+   1987,
+   1988,
+   1989,
+   1990,
+   1991,
+   1993,
+   1997
+  ]
+ },
+ {
+  "id": "lotus-f1",
+  "name": "Lotus",
+  "years": [
+   2012,
+   2013,
+   2014,
+   2015
+  ]
+ },
+ {
+  "id": "lotus",
+  "name": "Lotus",
+  "years": [
+   1958,
+   1959,
+   1960,
+   1961,
+   1962,
+   1963,
+   1964,
+   1965,
+   1966,
+   1967,
+   1968,
+   1969,
+   1970,
+   1971,
+   1972,
+   1973,
+   1974,
+   1975,
+   1976,
+   1977,
+   1978,
+   1979,
+   1980,
+   1981,
+   1982,
+   1983,
+   1984,
+   1985,
+   1986,
+   1987,
+   1988,
+   1989,
+   1990,
+   1991,
+   1992,
+   1993,
+   1994
+  ]
+ },
+ {
+  "id": "lotus-racing",
+  "name": "Lotus Racing",
+  "years": [
+   2010,
+   2011
+  ]
+ },
+ {
+  "id": "lyncar",
+  "name": "Lyncar",
+  "years": [
+   1974,
+   1975
+  ]
+ },
+ {
+  "id": "maki",
+  "name": "Maki",
+  "years": [
+   1974,
+   1975,
+   1976
+  ]
+ },
+ {
+  "id": "manor",
+  "name": "Manor",
+  "years": [
+   2016
+  ]
+ },
+ {
+  "id": "march",
+  "name": "March",
+  "years": [
+   1970,
+   1971,
+   1972,
+   1973,
+   1974,
+   1975,
+   1976,
+   1977,
+   1978,
+   1981,
+   1982,
+   1987,
+   1988,
+   1989,
+   1992,
+   1993
+  ]
+ },
+ {
+  "id": "marchese",
+  "name": "Marchese",
+  "years": [
+   1950,
+   1951
+  ]
+ },
+ {
+  "id": "martini",
+  "name": "Martini",
+  "years": [
+   1978
+  ]
+ },
+ {
+  "id": "marussia",
+  "name": "Marussia",
+  "years": [
+   2012,
+   2013,
+   2014,
+   2015
+  ]
+ },
+ {
+  "id": "maserati",
+  "name": "Maserati",
+  "years": [
+   1950,
+   1951,
+   1952,
+   1953,
+   1954,
+   1955,
+   1956,
+   1957,
+   1958,
+   1959,
+   1960
+  ]
+ },
+ {
+  "id": "matra",
+  "name": "Matra",
+  "years": [
+   1966,
+   1967,
+   1968,
+   1969,
+   1970,
+   1971,
+   1972
+  ]
+ },
+ {
+  "id": "mcguire",
+  "name": "McGuire",
+  "years": [
+   1977
+  ]
+ },
+ {
+  "id": "mclaren",
+  "name": "McLaren",
+  "years": [
+   1966,
+   1967,
+   1968,
+   1969,
+   1970,
+   1971,
+   1972,
+   1973,
+   1974,
+   1975,
+   1976,
+   1977,
+   1978,
+   1979,
+   1980,
+   1981,
+   1982,
+   1983,
+   1984,
+   1985,
+   1986,
+   1987,
+   1988,
+   1989,
+   1990,
+   1991,
+   1992,
+   1993,
+   1994,
+   1995,
+   1996,
+   1997,
+   1998,
+   1999,
+   2000,
+   2001,
+   2002,
+   2003,
+   2004,
+   2005,
+   2006,
+   2007,
+   2008,
+   2009,
+   2010,
+   2011,
+   2012,
+   2013,
+   2014,
+   2015,
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ]
+ },
+ {
+  "id": "mercedes",
+  "name": "Mercedes",
+  "years": [
+   1954,
+   1955,
+   2010,
+   2011,
+   2012,
+   2013,
+   2014,
+   2015,
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ]
+ },
+ {
+  "id": "merzario",
+  "name": "Merzario",
+  "years": [
+   1978,
+   1979
+  ]
+ },
+ {
+  "id": "meskowski",
+  "name": "Meskowski",
+  "years": [
+   1960
+  ]
+ },
+ {
+  "id": "midland",
+  "name": "Midland",
+  "years": [
+   2006
+  ]
+ },
+ {
+  "id": "minardi",
+  "name": "Minardi",
+  "years": [
+   1985,
+   1986,
+   1987,
+   1988,
+   1989,
+   1990,
+   1991,
+   1992,
+   1993,
+   1994,
+   1995,
+   1996,
+   1997,
+   1998,
+   1999,
+   2000,
+   2001,
+   2002,
+   2003,
+   2004,
+   2005
+  ]
+ },
+ {
+  "id": "modena",
+  "name": "Modena",
+  "years": [
+   1991
+  ]
+ },
+ {
+  "id": "moore",
+  "name": "Moore",
+  "years": [
+   1950,
+   1951,
+   1959
+  ]
+ },
+ {
+  "id": "nacke",
+  "name": "Nacke",
+  "years": [
+   1952
+  ]
+ },
+ {
+  "id": "nichels",
+  "name": "Nichels",
+  "years": [
+   1950,
+   1954
+  ]
+ },
+ {
+  "id": "osca",
+  "name": "O.S.C.A.",
+  "years": [
+   1951,
+   1952,
+   1953,
+   1958
+  ]
+ },
+ {
+  "id": "olson",
+  "name": "Olson",
+  "years": [
+   1950
+  ]
+ },
+ {
+  "id": "onyx",
+  "name": "Onyx",
+  "years": [
+   1989,
+   1990
+  ]
+ },
+ {
+  "id": "osella",
+  "name": "Osella",
+  "years": [
+   1980,
+   1981,
+   1982,
+   1983,
+   1984,
+   1985,
+   1986,
+   1987,
+   1988,
+   1989,
+   1990
+  ]
+ },
+ {
+  "id": "pacific",
+  "name": "Pacific",
+  "years": [
+   1994,
+   1995
+  ]
+ },
+ {
+  "id": "pankratz",
+  "name": "Pankratz",
+  "years": [
+   1954,
+   1955
+  ]
+ },
+ {
+  "id": "parnelli",
+  "name": "Parnelli",
+  "years": [
+   1974,
+   1975,
+   1976
+  ]
+ },
+ {
+  "id": "pawl",
+  "name": "Pawl",
+  "years": [
+   1951,
+   1954,
+   1955
+  ]
+ },
+ {
+  "id": "penske",
+  "name": "Penske",
+  "years": [
+   1974,
+   1975,
+   1976,
+   1977
+  ]
+ },
+ {
+  "id": "phillips",
+  "name": "Phillips",
+  "years": [
+   1954,
+   1955,
+   1956,
+   1957,
+   1958,
+   1959,
+   1960
+  ]
+ },
+ {
+  "id": "politoys",
+  "name": "Politoys",
+  "years": [
+   1972
+  ]
+ },
+ {
+  "id": "porsche",
+  "name": "Porsche",
+  "years": [
+   1957,
+   1958,
+   1959,
+   1960,
+   1961,
+   1962,
+   1963,
+   1964
+  ]
+ },
+ {
+  "id": "prost",
+  "name": "Prost",
+  "years": [
+   1997,
+   1998,
+   1999,
+   2000,
+   2001
+  ]
+ },
+ {
+  "id": "protos",
+  "name": "Protos",
+  "years": [
+   1967
+  ]
+ },
+ {
+  "id": "ram",
+  "name": "RAM",
+  "years": [
+   1983,
+   1984,
+   1985
+  ]
+ },
+ {
+  "id": "rb",
+  "name": "RB",
+  "years": [
+   2024
+  ]
+ },
+ {
+  "id": "racing-bulls",
+  "name": "Racing Bulls",
+  "years": [
+   2025,
+   2026
+  ]
+ },
+ {
+  "id": "racing-point",
+  "name": "Racing Point",
+  "years": [
+   2019,
+   2020
+  ]
+ },
+ {
+  "id": "rae",
+  "name": "Rae",
+  "years": [
+   1950
+  ]
+ },
+ {
+  "id": "rebaque",
+  "name": "Rebaque",
+  "years": [
+   1979
+  ]
+ },
+ {
+  "id": "red-bull",
+  "name": "Red Bull",
+  "years": [
+   2005,
+   2006,
+   2007,
+   2008,
+   2009,
+   2010,
+   2011,
+   2012,
+   2013,
+   2014,
+   2015,
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ]
+ },
+ {
+  "id": "reif",
+  "name": "Reif",
+  "years": [
+   1952
+  ]
+ },
+ {
+  "id": "renault",
+  "name": "Renault",
+  "years": [
+   1977,
+   1978,
+   1979,
+   1980,
+   1981,
+   1982,
+   1983,
+   1984,
+   1985,
+   2002,
+   2003,
+   2004,
+   2005,
+   2006,
+   2007,
+   2008,
+   2009,
+   2010,
+   2011,
+   2016,
+   2017,
+   2018,
+   2019,
+   2020
+  ]
+ },
+ {
+  "id": "rial",
+  "name": "Rial",
+  "years": [
+   1988,
+   1989
+  ]
+ },
+ {
+  "id": "sauber",
+  "name": "Sauber",
+  "years": [
+   1993,
+   1994,
+   1995,
+   1996,
+   1997,
+   1998,
+   1999,
+   2000,
+   2001,
+   2002,
+   2003,
+   2004,
+   2005,
+   2010,
+   2011,
+   2012,
+   2013,
+   2014,
+   2015,
+   2016,
+   2017,
+   2018
+  ]
+ },
+ {
+  "id": "scarab",
+  "name": "Scarab",
+  "years": [
+   1960
+  ]
+ },
+ {
+  "id": "schroeder",
+  "name": "Schroeder",
+  "years": [
+   1951,
+   1953,
+   1954,
+   1955
+  ]
+ },
+ {
+  "id": "scirocco",
+  "name": "Scirocco",
+  "years": [
+   1963,
+   1964
+  ]
+ },
+ {
+  "id": "shadow",
+  "name": "Shadow",
+  "years": [
+   1973,
+   1974,
+   1975,
+   1976,
+   1977,
+   1978,
+   1979,
+   1980
+  ]
+ },
+ {
+  "id": "shannon",
+  "name": "Shannon",
+  "years": [
+   1966
+  ]
+ },
+ {
+  "id": "sherman",
+  "name": "Sherman",
+  "years": [
+   1951,
+   1952
+  ]
+ },
+ {
+  "id": "simca-gordini",
+  "name": "Simca-Gordini",
+  "years": [
+   1950,
+   1951,
+   1952,
+   1953
+  ]
+ },
+ {
+  "id": "simtek",
+  "name": "Simtek",
+  "years": [
+   1994,
+   1995
+  ]
+ },
+ {
+  "id": "snowberger",
+  "name": "Snowberger",
+  "years": [
+   1950
+  ]
+ },
+ {
+  "id": "spirit",
+  "name": "Spirit",
+  "years": [
+   1983,
+   1984,
+   1985
+  ]
+ },
+ {
+  "id": "spyker",
+  "name": "Spyker",
+  "years": [
+   2007
+  ]
+ },
+ {
+  "id": "stebro",
+  "name": "Stebro",
+  "years": [
+   1963
+  ]
+ },
+ {
+  "id": "stevens",
+  "name": "Stevens",
+  "years": [
+   1950,
+   1952,
+   1953,
+   1954,
+   1955,
+   1956
+  ]
+ },
+ {
+  "id": "stewart",
+  "name": "Stewart",
+  "years": [
+   1997,
+   1998,
+   1999
+  ]
+ },
+ {
+  "id": "super-aguri",
+  "name": "Super Aguri",
+  "years": [
+   2006,
+   2007,
+   2008
+  ]
+ },
+ {
+  "id": "surtees",
+  "name": "Surtees",
+  "years": [
+   1970,
+   1971,
+   1972,
+   1973,
+   1974,
+   1975,
+   1976,
+   1977,
+   1978
+  ]
+ },
+ {
+  "id": "sutton",
+  "name": "Sutton",
+  "years": [
+   1959
+  ]
+ },
+ {
+  "id": "talbot-lago",
+  "name": "Talbot-Lago",
+  "years": [
+   1950,
+   1951
+  ]
+ },
+ {
+  "id": "tec-mec",
+  "name": "Tec-Mec",
+  "years": [
+   1959
+  ]
+ },
+ {
+  "id": "tecno",
+  "name": "Tecno",
+  "years": [
+   1969,
+   1972,
+   1973
+  ]
+ },
+ {
+  "id": "theodore",
+  "name": "Theodore",
+  "years": [
+   1978,
+   1981,
+   1982,
+   1983
+  ]
+ },
+ {
+  "id": "token",
+  "name": "Token",
+  "years": [
+   1974
+  ]
+ },
+ {
+  "id": "toleman",
+  "name": "Toleman",
+  "years": [
+   1981,
+   1982,
+   1983,
+   1984,
+   1985
+  ]
+ },
+ {
+  "id": "toro-rosso",
+  "name": "Toro Rosso",
+  "years": [
+   2006,
+   2007,
+   2008,
+   2009,
+   2010,
+   2011,
+   2012,
+   2013,
+   2014,
+   2015,
+   2016,
+   2017,
+   2018,
+   2019
+  ]
+ },
+ {
+  "id": "toyota",
+  "name": "Toyota",
+  "years": [
+   2002,
+   2003,
+   2004,
+   2005,
+   2006,
+   2007,
+   2008,
+   2009
+  ]
+ },
+ {
+  "id": "trevis",
+  "name": "Trevis",
+  "years": [
+   1951,
+   1952,
+   1955,
+   1960
+  ]
+ },
+ {
+  "id": "trojan",
+  "name": "Trojan",
+  "years": [
+   1974
+  ]
+ },
+ {
+  "id": "turner",
+  "name": "Turner",
+  "years": [
+   1953
+  ]
+ },
+ {
+  "id": "tyrrell",
+  "name": "Tyrrell",
+  "years": [
+   1970,
+   1971,
+   1972,
+   1973,
+   1974,
+   1975,
+   1976,
+   1977,
+   1978,
+   1979,
+   1980,
+   1981,
+   1982,
+   1983,
+   1984,
+   1985,
+   1986,
+   1987,
+   1988,
+   1989,
+   1990,
+   1991,
+   1992,
+   1993,
+   1994,
+   1995,
+   1996,
+   1997,
+   1998
+  ]
+ },
+ {
+  "id": "vanwall",
+  "name": "Vanwall",
+  "years": [
+   1954,
+   1955,
+   1956,
+   1957,
+   1958,
+   1959,
+   1960
+  ]
+ },
+ {
+  "id": "venturi",
+  "name": "Venturi",
+  "years": [
+   1992
+  ]
+ },
+ {
+  "id": "veritas",
+  "name": "Veritas",
+  "years": [
+   1951,
+   1952,
+   1953
+  ]
+ },
+ {
+  "id": "virgin",
+  "name": "Virgin",
+  "years": [
+   2010,
+   2011
+  ]
+ },
+ {
+  "id": "watson",
+  "name": "Watson",
+  "years": [
+   1950,
+   1951,
+   1952,
+   1953,
+   1956,
+   1957,
+   1958,
+   1959,
+   1960
+  ]
+ },
+ {
+  "id": "wetteroth",
+  "name": "Wetteroth",
+  "years": [
+   1950
+  ]
+ },
+ {
+  "id": "williams",
+  "name": "Williams",
+  "years": [
+   1978,
+   1979,
+   1980,
+   1981,
+   1982,
+   1983,
+   1984,
+   1985,
+   1986,
+   1987,
+   1988,
+   1989,
+   1990,
+   1991,
+   1992,
+   1993,
+   1994,
+   1995,
+   1996,
+   1997,
+   1998,
+   1999,
+   2000,
+   2001,
+   2002,
+   2003,
+   2004,
+   2005,
+   2006,
+   2007,
+   2008,
+   2009,
+   2010,
+   2011,
+   2012,
+   2013,
+   2014,
+   2015,
+   2016,
+   2017,
+   2018,
+   2019,
+   2020,
+   2021,
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ]
+ },
+ {
+  "id": "wolf",
+  "name": "Wolf",
+  "years": [
+   1977,
+   1978,
+   1979
+  ]
+ },
+ {
+  "id": "wolf-williams",
+  "name": "Wolf-Williams",
+  "years": [
+   1976
+  ]
+ },
+ {
+  "id": "zakspeed",
+  "name": "Zakspeed",
+  "years": [
+   1985,
+   1986,
+   1987,
+   1988,
+   1989
+  ]
+ }
+]
