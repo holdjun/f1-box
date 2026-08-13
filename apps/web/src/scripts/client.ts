@@ -1,3 +1,5 @@
+import { summarizeYears } from "../lib/season-summary.js";
+
 const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
   day: "2-digit",
   month: "short",
@@ -67,26 +69,6 @@ function enhanceRails(root: ParentNode = document): void {
       }
     });
   });
-}
-
-// 把选中年份压缩为区间摘要：1990–2000, 2007
-function summarizeYears(selected: Set<number>): string {
-  if (selected.size === 0) return "All seasons";
-  const years = [...selected].sort((a, b) => a - b);
-  const ranges: string[] = [];
-  let start = years[0];
-  let prev = years[0];
-  for (let i = 1; i < years.length; i++) {
-    if (years[i] === prev + 1) {
-      prev = years[i];
-    } else {
-      ranges.push(start === prev ? `${start}` : `${start}–${prev}`);
-      start = years[i];
-      prev = years[i];
-    }
-  }
-  ranges.push(start === prev ? `${start}` : `${start}–${prev}`);
-  return ranges.join(", ");
 }
 
 // 详情页赛季筛选：触发器展开面板，点选年份/年代控制 data-season-block 显隐
@@ -169,7 +151,14 @@ function enhanceSeasonFilters(root: ParentNode = document): void {
     const count = panel.querySelector<HTMLElement>(
       "[data-season-filter-count]",
     );
-    const selected = new Set<number>();
+    const selected = new Set<number>(
+      (bar.dataset.initialSelected ?? "")
+        .split(",")
+        .flatMap((part) => {
+          const year = Number(part);
+          return Number.isInteger(year) && year > 0 ? [year] : [];
+        }),
+    );
 
     const decadeOf = (year: number) => Math.floor(year / 10) * 10;
     const yearButtonsInDecade = (decadeStart: number) =>
@@ -207,6 +196,20 @@ function enhanceSeasonFilters(root: ParentNode = document): void {
             ? false
             : !selected.has(Number(block.dataset.seasonBlock));
         });
+      // 同步 URL：?year=1997,2007 让筛选状态可分享、刷新保持
+      try {
+        const url = new URL(window.location.href);
+        if (selected.size === 0) url.searchParams.delete("year");
+        else {
+          url.searchParams.set(
+            "year",
+            [...selected].sort((a, b) => a - b).join(","),
+          );
+        }
+        window.history.replaceState(null, "", url);
+      } catch {
+        // window.location.href 恒为合法 URL，仅异常环境（jsdom 等）会走到这里
+      }
     };
 
     for (const button of yearButtons) {

@@ -32,13 +32,28 @@ interface Props {
   seasons: MatrixSeason[];
   rowLabel: string;
   showChampionKey?: boolean;
+  initialSelected?: number[] | null;
 }
 
-const { seasons, rowLabel, showChampionKey = false } = Astro.props;
+const {
+  seasons,
+  rowLabel,
+  showChampionKey = false,
+  initialSelected = null,
+} = Astro.props;
 const filterYears = seasons.map((season) => season.year);
+// 有初始筛选时，未选中的赛季块不渲染显式（hidden 由客户端同步）
+const isBlockHidden = (year: number) =>
+  initialSelected !== null && !initialSelected.includes(year);
 ---
 
-<SeasonFilter years={filterYears} mode="toggle" label="Filter by season" sticky />
+<SeasonFilter
+  years={filterYears}
+  mode="toggle"
+  label="Filter by season"
+  sticky
+  initialSelected={initialSelected}
+/>
 <p class="legend" aria-label="Table legend">
   <span class="key"><i class="result-win"></i>Win</span>
   <span class="key"><i class="result-podium"></i>Podium</span>
@@ -61,6 +76,7 @@ const filterYears = seasons.map((season) => season.year);
           class="season-gap"
           data-season-block={season.year}
           role="separator"
+          hidden={isBlockHidden(season.year)}
           aria-label={`${gap.seasons} seasons without entries, ${gap.from} to ${gap.to}`}
         >
           <span class="season-gap__label">
@@ -75,6 +91,7 @@ const filterYears = seasons.map((season) => season.year);
           { champion: season.championshipWon, current: season.current },
         ]}
         data-season-block={season.year}
+        hidden={isBlockHidden(season.year)}
       >
         <h3>
           <span class="season-year">{season.year}</span>

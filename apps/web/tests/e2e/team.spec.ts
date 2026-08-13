@@ -121,6 +121,14 @@ test("ferrari detail filters season blocks @desktop", async ({ page }) => {
   await expect(page.locator(".season-block:visible")).toHaveCount(77);
 });
 
+test("ferrari detail filters multiple seasons via URL @desktop", async ({
+  page,
+}) => {
+  await page.goto("/teams/ferrari?year=1997,2007");
+  await expect(page.locator(".season-block:visible")).toHaveCount(2);
+  await expect(page.locator(".season-filter__summary")).toHaveText("1997, 2007");
+});
+
 test("team logos render inside a stable contain frame @desktop", async ({
   page,
 }) => {

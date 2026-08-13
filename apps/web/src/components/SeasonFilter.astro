@@ -1,4 +1,6 @@
 ---
+import { summarizeYears } from "../lib/season-summary.js";
+
 interface Props {
   years: number[];
   mode: "link" | "toggle";
@@ -6,6 +8,7 @@ interface Props {
   current?: number | null;
   label?: string;
   sticky?: boolean;
+  initialSelected?: number[] | null;
 }
 
 const {
@@ -15,6 +18,7 @@ const {
   current = null,
   label = "Season",
   sticky = false,
+  initialSelected = null,
 } = Astro.props;
 
 interface DecadeGroup {
@@ -40,13 +44,25 @@ function groupDecades(years: number[]): DecadeGroup[] {
 }
 
 const decades = groupDecades(years);
-const summary = current === null ? "All seasons" : String(current);
+const isSelected = (year: number) =>
+  mode === "link" ? current === year : initialSelected?.includes(year) ?? false;
+const summary =
+  mode === "link"
+    ? current === null
+      ? "All seasons"
+      : String(current)
+    : summarizeYears(initialSelected ?? []);
+const count =
+  initialSelected && initialSelected.length > 0
+    ? `${initialSelected.length} selected`
+    : "All seasons";
 ---
 
 <div
   class:list={["season-filter", { "season-filter--sticky": sticky }]}
   data-season-filter
   data-mode={mode}
+  data-initial-selected={initialSelected?.join(",") ?? ""}
 >
   <button
     type="button"
@@ -82,7 +98,7 @@ const summary = current === null ? "All seasons" : String(current);
       )}
       {mode === "toggle" ? (
         <span class="season-filter__count" data-season-filter-count
-          >All seasons</span
+          >{count}</span
         >
       ) : null}
     </div>
@@ -113,9 +129,12 @@ const summary = current === null ? "All seasons" : String(current);
               ) : (
                 <button
                   type="button"
-                  class="season-filter__year"
+                  class:list={[
+                    "season-filter__year",
+                    { "is-active": isSelected(year) },
+                  ]}
                   data-season-year={year}
-                  aria-pressed="false"
+                  aria-pressed={isSelected(year)}
                 >{year}</button>
               ),
             )}
@@ -133,11 +152,7 @@ const summary = current === null ? "All seasons" : String(current);
   .season-filter--sticky {
     position: sticky;
     z-index: 5;
-    top: 0;
-    padding-block: 0.35rem;
-    background: color-mix(in srgb, var(--ink) 82%, transparent);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    top: 0.5rem;
   }
   .season-filter__trigger {
     display: inline-flex;
@@ -153,6 +168,7 @@ const summary = current === null ? "All seasons" : String(current);
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
+    box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.6);
     transition: border-color 160ms ease, color 160ms ease;
   }
   .season-filter__trigger:hover {
@@ -238,6 +254,8 @@ const summary = current === null ? "All seasons" : String(current);
     font-weight: 700;
     letter-spacing: 0.06em;
     text-align: left;
+  }
+  button.season-filter__decade {
     cursor: pointer;
   }
   button.season-filter__decade:hover {

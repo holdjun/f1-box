@@ -9,6 +9,7 @@ import {
   createD1TeamDatabase,
   createTeamRepository,
 } from "../../lib/team-repository.js";
+import { parseYearParam } from "../../lib/routing.js";
 import { getTeamBranding, vendorIndexes } from "../../lib/vendor.js";
 
 const slug = (Astro.params.slug ?? "").toLowerCase();
@@ -54,6 +55,15 @@ const matrixSeasons = (team?.seasons ?? []).map((season) => ({
   championshipWon: season.championshipWon,
   current: season.year === currentYear,
 }));
+
+// ?year=1997,2007 只显示这些赛季（筛选状态可分享/后退）
+const initialSelected = (() => {
+  const param = parseYearParam(Astro.url.searchParams.get("year"));
+  if (param === null) return null;
+  const seasonYears = new Set((team?.seasons ?? []).map((s) => s.year));
+  const valid = param.filter((year) => seasonYears.has(year));
+  return valid.length > 0 ? valid : null;
+})();
 ---
 
 {team ? (
@@ -163,6 +173,7 @@ const matrixSeasons = (team?.seasons ?? []).map((season) => ({
           seasons={matrixSeasons}
           rowLabel="Driver"
           showChampionKey
+          initialSelected={initialSelected}
         />
         <HistoryEnd
           summary={`${team.firstEntry}–${team.seasons[0]?.year ?? team.activeSeason} · ${team.seasons.length} ${team.seasons.length === 1 ? "season" : "seasons"} of Grand Prix history`}

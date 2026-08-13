@@ -146,3 +146,10 @@ test("drivers detail selects a decade then adds a year @desktop", async ({
   await panel.getByRole("button", { name: "2019", exact: true }).click();
   await expect(page.locator(".season-block:visible")).toHaveCount(8);
 });
+
+test("drivers detail filters via URL @desktop", async ({ page }) => {
+  await page.goto("/drivers/george-russell?year=2021");
+  await expect(page.locator(".season-block:visible")).toHaveCount(1);
+  await expect(page.locator(".season-block:visible .season-year")).toHaveText("2021");
+  await expect(page.locator(".season-filter__summary")).toHaveText("2021");
+});
