@@ -148,6 +148,7 @@ const count =
 <style>
   .season-filter {
     position: relative;
+    margin-block: 1rem 1.25rem;
   }
   .season-filter--sticky {
     position: sticky;
@@ -258,7 +259,8 @@ const count =
   button.season-filter__decade {
     cursor: pointer;
   }
-  button.season-filter__decade:hover {
+  button.season-filter__decade:hover,
+  button.season-filter__decade.is-active {
     color: var(--coral);
   }
   .season-filter__years {

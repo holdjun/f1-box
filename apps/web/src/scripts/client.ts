@@ -161,11 +161,16 @@ function enhanceSeasonFilters(root: ParentNode = document): void {
     );
 
     const decadeOf = (year: number) => Math.floor(year / 10) * 10;
-    const yearButtonsInDecade = (decadeStart: number) =>
-      yearButtons.filter((button) => {
-        const year = Number(button.dataset.seasonYear);
-        return decadeOf(year) === decadeStart;
-      });
+    const decadeYears = (decadeStart: number) =>
+      yearButtons
+        .filter((button) => decadeOf(Number(button.dataset.seasonYear)) === decadeStart)
+        .map((button) => Number(button.dataset.seasonYear));
+    const decadeStartOf = (button: HTMLButtonElement) =>
+      Number((button.dataset.seasonDecade ?? "").slice(0, 4));
+    const isDecadeFullySelected = (button: HTMLButtonElement) => {
+      const years = decadeYears(decadeStartOf(button));
+      return years.length > 0 && years.every((year) => selected.has(year));
+    };
 
     const sync = () => {
       const showingAll = selected.size === 0;
@@ -175,15 +180,7 @@ function enhanceSeasonFilters(root: ParentNode = document): void {
         button.setAttribute("aria-pressed", String(active));
       }
       for (const decadeButton of decadeButtons) {
-        const label = decadeButton.dataset.seasonDecade ?? "";
-        const decadeStart = Number(label.slice(0, 4));
-        const inDecade = yearButtonsInDecade(decadeStart);
-        const allActive =
-          inDecade.length > 0 &&
-          inDecade.every((button) =>
-            selected.has(Number(button.dataset.seasonYear)),
-          );
-        decadeButton.classList.toggle("is-active", allActive);
+        decadeButton.classList.toggle("is-active", isDecadeFullySelected(decadeButton));
       }
       if (summary) summary.textContent = summarizeYears(selected);
       if (count) {
@@ -223,16 +220,9 @@ function enhanceSeasonFilters(root: ParentNode = document): void {
 
     for (const decadeButton of decadeButtons) {
       decadeButton.addEventListener("click", () => {
-        const label = decadeButton.dataset.seasonDecade ?? "";
-        const decadeStart = Number(label.slice(0, 4));
-        const inDecade = yearButtonsInDecade(decadeStart);
-        const allActive =
-          inDecade.length > 0 &&
-          inDecade.every((button) =>
-            selected.has(Number(button.dataset.seasonYear)),
-          );
-        for (const button of inDecade) {
-          const year = Number(button.dataset.seasonYear);
+        const years = decadeYears(decadeStartOf(decadeButton));
+        const allActive = isDecadeFullySelected(decadeButton);
+        for (const year of years) {
           if (allActive) selected.delete(year);
           else selected.add(year);
         }
