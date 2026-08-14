@@ -5,6 +5,7 @@ import {
   mergeNumberStints,
   mergeTeamStints,
   type DriverDatabase,
+  type DriverSeason,
 } from "../src/lib/driver-repository.js";
 
 // 键序即匹配优先级：与 driver-repository 的 11 条 SQL 特征子串对应
@@ -71,10 +72,20 @@ describe("mergeNumberStints", () => {
 });
 
 describe("mergeTeamStints", () => {
-  const season = (year: number, teams: [string, string][]) => ({
+  // teams 元组第三个元素可选：最后参赛轮次（缺省 1）
+  const season = (
+    year: number,
+    teams: [string, string, number?][],
+  ): DriverSeason => ({
     year,
     rounds: [],
-    teams: teams.map(([id, name]) => ({ id, name, results: [], teammates: [] })),
+    teams: teams.map(([id, name, lastRound = 1]) => ({
+      id,
+      name,
+      lastRound,
+      results: [],
+      teammates: [],
+    })),
     points: null,
     position: null,
     championshipWon: false,
@@ -106,10 +117,11 @@ describe("mergeTeamStints", () => {
   it("keeps both teams of a mid-season transfer", () => {
     expect(
       mergeTeamStints([
-        season(2018, [["renault", "Renault"]]),
+        season(2018, [["renault", "Renault", 21]]),
+        // 矩阵序：换队后的 Renault 在上（lastRound 21 > 4）；stint 应还原时间序
         season(2017, [
-          ["toro-rosso", "Toro Rosso"],
-          ["renault", "Renault"],
+          ["renault", "Renault", 21],
+          ["toro-rosso", "Toro Rosso", 4],
         ]),
       ]),
     ).toEqual([
@@ -304,10 +316,10 @@ describe("driver fixtures", () => {
       { number: "63", yearFrom: 2019, yearTo: 2026 },
     ]);
     expect(driver?.teamStints).toEqual([
-      { id: "williams", name: "Williams", yearFrom: 2019, yearTo: 2020 },
-      // 2020 萨基尔代打一场 Mercedes，属真实参赛记录
+      { id: "williams", name: "Williams", yearFrom: 2019, yearTo: 2019 },
+      // 2020 萨基尔代打一场 Mercedes，属真实参赛记录；时间序在 Williams 收尾站之前
       { id: "mercedes", name: "Mercedes", yearFrom: 2020, yearTo: 2020 },
-      { id: "williams", name: "Williams", yearFrom: 2021, yearTo: 2021 },
+      { id: "williams", name: "Williams", yearFrom: 2020, yearTo: 2021 },
       { id: "mercedes", name: "Mercedes", yearFrom: 2022, yearTo: 2026 },
     ]);
     expect(driver?.currentSeason?.year).toBe(driver?.activeSeason);
@@ -323,6 +335,11 @@ describe("driver fixtures", () => {
     expect(
       driver?.seasons.filter((s) => s.championshipWon).length,
     ).toBeGreaterThanOrEqual(4);
+    // 2016 季中转队：chips 按时间序，先效力的 Toro Rosso 在前
+    expect(driver?.teamStints).toEqual([
+      { id: "toro-rosso", name: "Toro Rosso", yearFrom: 2015, yearTo: 2016 },
+      { id: "red-bull", name: "Red Bull", yearFrom: 2016, yearTo: 2026 },
+    ]);
   });
 
   it("returns null for slugs without a fixture", async () => {

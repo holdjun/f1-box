@@ -96,10 +96,10 @@ test("russell detail shows hero, bio and current season @desktop", async ({
   await expect(teams).toContainText("Williams");
   await expect(teams.locator(".team-chip").filter({ hasText: "Mercedes" }).first()).toBeVisible();
   await expect(teams.locator("a")).toHaveCount(0);
-  // chip 用该 stint 结束年份的队色：2019–2020 Williams（#0082fa）与 2021（#005aff）不同
+  // chip 用该 stint 结束年份的队色：2019 Williams（#ffffff）与 2020–2021（#005aff）不同
   const williamsChips = teams.locator(".team-chip").filter({ hasText: "Williams" });
   await expect(williamsChips).toHaveCount(2);
-  await expect(williamsChips.nth(0)).toHaveCSS("color", "rgb(0, 130, 250)");
+  await expect(williamsChips.nth(0)).toHaveCSS("color", "rgb(255, 255, 255)");
   await expect(williamsChips.nth(1)).toHaveCSS("color", "rgb(0, 90, 255)");
   // 生涯矩阵：首行车手自己（白色），队友行灰色且可链接
   const current = page.locator(".season-block.current");
@@ -137,6 +137,12 @@ test("verstappen detail shows number history and champion blocks @desktop", asyn
   await expect(blocks2016).toHaveCount(2);
   await expect(blocks2016.nth(0)).toContainText("Red Bull");
   await expect(blocks2016.nth(1)).toContainText("Toro Rosso");
+  // chips 与矩阵相反按时间序：先效力的 Toro Rosso 在前
+  const teamChips = page.getByLabel("Teams driven for").locator(".team-chip");
+  await expect(teamChips.nth(0)).toContainText("Toro Rosso");
+  await expect(teamChips.nth(0)).toContainText("2015–2016");
+  await expect(teamChips.nth(1)).toContainText("Red Bull");
+  await expect(teamChips.nth(1)).toContainText("2016–2026");
 });
 
 test("year view shows that year's race number over the permanent one @desktop", async ({

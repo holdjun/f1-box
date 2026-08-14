@@ -51,6 +51,8 @@ export interface TeamStint {
 export interface DriverSeasonTeam {
   id: string;
   name: string;
+  // 该队最后参赛轮次：矩阵块按此降序（换队后在上），stint 时间线按此升序
+  lastRound: number;
   results: (RaceCell | null)[];
   teammates: DriverSeasonTeammate[];
 }
@@ -538,11 +540,12 @@ export function mergeNumberStints(rows: unknown[]): NumberStint[] {
 }
 
 // 连续同队年合并为区间；换队或断档开新段（同 mergeNumberStints 模式）。
-// seasons 降序，先翻成升序；季中转会一年两队时各自成段
+// seasons 降序，先翻成升序；同年多队按最后参赛轮次升序还原时间线
+// （矩阵里换队后的队在上，chips 里先效力的队在前）
 export function mergeTeamStints(seasons: DriverSeason[]): TeamStint[] {
   const stints: TeamStint[] = [];
   for (const season of [...seasons].reverse()) {
-    for (const team of season.teams) {
+    for (const team of [...season.teams].sort((a, b) => a.lastRound - b.lastRound)) {
       const last = stints.at(-1);
       if (last && last.id === team.id && last.yearTo === season.year - 1) {
         last.yearTo = season.year;
@@ -703,6 +706,7 @@ function mergeDriverSeasons(
     season.teams.push({
       id: constructorId,
       name: asString(record.name, "driver team name"),
+      lastRound: asNumber(record.last_round, "driver team last round"),
       results: rawRounds.get(year)!.map((r) => byRound?.get(r.round) ?? null),
       teammates,
     });
