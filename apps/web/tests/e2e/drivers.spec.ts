@@ -77,10 +77,15 @@ test("russell detail shows hero, bio and current season @desktop", async ({
   await expect(page.getByLabel("2026 season")).toBeVisible();
   await expect(page.getByLabel("Career stats")).toBeVisible();
   await expect(page.locator(".season-block.current")).toHaveCount(1);
-  // 待过车队链路：Williams → Mercedes，链向车队页（russell 两段 Mercedes，取首个）
+  // 待过车队链路：Williams → Mercedes；chip 纯展示不可点击（与车号一致）
   const teams = page.getByLabel("Teams driven for");
   await expect(teams).toContainText("Williams");
-  await expect(teams.locator('a[href="/teams/mercedes"]').first()).toBeVisible();
+  await expect(teams.locator(".team-chip").filter({ hasText: "Mercedes" }).first()).toBeVisible();
+  await expect(teams.locator("a")).toHaveCount(0);
+  // 生涯矩阵：第一行是车手自己（加粗），队友行跟进且可链接
+  const current = page.locator(".season-block.current");
+  await expect(current.locator(".driver-cell .driver-link.emphasis")).toHaveText("George Russell");
+  await expect(current.locator(".driver-cell a[href='/drivers/kimi-antonelli']")).toBeVisible();
 });
 
 test("verstappen detail shows number history and champion blocks @desktop", async ({

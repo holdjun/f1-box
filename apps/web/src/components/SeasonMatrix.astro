@@ -11,15 +11,17 @@ interface MatrixRound {
 }
 interface MatrixRow {
   name: string;
-  href: string;
+  href: string | null;
   flagCode: string | null;
   highlight: boolean;
+  emphasis?: boolean;
   results: (RaceCell | null)[];
 }
 export interface MatrixSeason {
   year: number;
   metaText: string;
   metaHref: string | null;
+  metaColor?: string | null;
   tyres?: string[];
   rounds: MatrixRound[];
   rows: MatrixRow[];
@@ -96,7 +98,11 @@ const isBlockHidden = (year: number) =>
         <h3>
           <span class="season-year">{season.year}</span>
           {season.metaHref ? (
-            <a class="season-meta" href={season.metaHref}>{season.metaText}</a>
+            <a
+              class="season-meta"
+              href={season.metaHref}
+              style={season.metaColor ? `--meta-color: ${season.metaColor}` : undefined}
+            >{season.metaText}</a>
           ) : (
             <span class="season-meta">{season.metaText}</span>
           )}
@@ -141,16 +147,22 @@ const isBlockHidden = (year: number) =>
                           {alpha2Flag(row.flagCode)}
                         </span>
                       ) : null}
-                      <a
-                        class:list={[
-                          "driver-link",
-                          { "driver-champion": row.highlight },
-                        ]}
-                        href={row.href}
-                        title={row.highlight ? "Drivers' champion" : undefined}
-                      >
-                        {row.name}
-                      </a>
+                      {row.href ? (
+                        <a
+                          class:list={[
+                            "driver-link",
+                            { "driver-champion": row.highlight, emphasis: row.emphasis },
+                          ]}
+                          href={row.href}
+                          title={row.highlight ? "Drivers' champion" : undefined}
+                        >
+                          {row.name}
+                        </a>
+                      ) : (
+                        <span class:list={["driver-link", { emphasis: row.emphasis }]}>
+                          {row.name}
+                        </span>
+                      )}
                     </th>
                     {row.results.map((cell) =>
                       cell ? (
@@ -227,7 +239,10 @@ const isBlockHidden = (year: number) =>
     text-decoration: none;
   }
   a.season-meta:hover {
-    color: var(--coral);
+    color: var(--meta-color, var(--coral));
+  }
+  .driver-link.emphasis {
+    font-weight: 700;
   }
   .season-pts {
     margin-left: auto;

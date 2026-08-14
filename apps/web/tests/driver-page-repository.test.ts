@@ -24,7 +24,9 @@ const IDENTITY = "co.id = d.nationality_country_id";
 const NUMBERS = "rd.type = 'RACE_RESULT'";
 const ROUNDS = "gp.abbreviation AS code";
 const TEAMS = "GROUP BY ra.year, rr.constructor_id";
+const TEAMMATE_RESULTS = "rr.driver_id <> ?1";
 const RESULTS = "ORDER BY rr.position_display_order";
+const TEAMMATE_SPRINT = "srr.driver_id <> ?1";
 const SPRINT_RANK = "srr.position_number IS NOT NULL";
 const STANDINGS = "season_driver_standing";
 const GP_STATS = "position_text = 'DNF'";
@@ -73,6 +75,7 @@ describe("mergeTeamStints", () => {
     year,
     rounds: [],
     teams: teams.map(([id, name]) => ({ id, name, results: [] })),
+    teammates: [],
     points: null,
     position: null,
     championshipWon: false,
@@ -153,12 +156,19 @@ describe("createDriverRepository with database", () => {
       { year: 2017, id: "toro-rosso", name: "Toro Rosso", first_round: 1 },
       { year: 2017, id: "renault", name: "Renault", first_round: 3 },
     ],
+    [TEAMMATE_RESULTS]: [
+      { year: 2017, round: 1, driver_id: "teammate-a", name: "Teammate A", alpha2_code: "FR", position_text: "5", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 5 },
+      { year: 2017, round: 2, driver_id: "teammate-a", name: "Teammate A", alpha2_code: "FR", position_text: "6", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 6 },
+      { year: 2017, round: 3, driver_id: "teammate-b", name: "Teammate B", alpha2_code: "DE", position_text: "8", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 8 },
+      { year: 2017, round: 4, driver_id: "teammate-b", name: "Teammate B", alpha2_code: "DE", position_text: "11", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 11 },
+    ],
     [RESULTS]: [
       { year: 2017, round: 1, constructor_id: "toro-rosso", position_text: "9", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 9 },
       { year: 2017, round: 2, constructor_id: "toro-rosso", position_text: "10", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 10 },
       { year: 2017, round: 3, constructor_id: "renault", position_text: "7", pole_position: 1, fastest_lap: 0, reason_retired: null, position_number: 7 },
       { year: 2017, round: 4, constructor_id: "renault", position_text: "DNF", pole_position: 0, fastest_lap: 1, reason_retired: "Engine", position_number: null },
     ],
+    [TEAMMATE_SPRINT]: [],
     [SPRINT_RANK]: [],
     [STANDINGS]: [
       { year: 2017, position_text: "10", points: 54, championship_won: 0 },
@@ -215,6 +225,26 @@ describe("createDriverRepository with database", () => {
     // standings 落位
     expect(season?.position).toBe("10");
     expect(season?.points).toBe(54);
+  });
+
+  it("lists teammates with aligned result matrices", async () => {
+    const driver = await createDriverRepository(fakeDb(base)).getDriver("test-driver");
+    const season = driver?.seasons[0];
+    expect(season?.teammates.map((t) => t.name)).toEqual(["Teammate A", "Teammate B"]);
+    expect(season?.teammates[0]).toMatchObject({ id: "teammate-a", flagCode: "fr" });
+    // 队友只在自己参赛的站有结果，矩阵与 rounds 对齐
+    expect(season?.teammates[0].results.map((c) => c?.text ?? null)).toEqual([
+      "5",
+      "6",
+      null,
+      null,
+    ]);
+    expect(season?.teammates[1].results.map((c) => c?.text ?? null)).toEqual([
+      null,
+      null,
+      "8",
+      "11",
+    ]);
   });
 
   it("exposes retired gating data (latest season older than active season)", async () => {

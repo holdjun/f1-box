@@ -48,10 +48,18 @@ export interface DriverSeasonTeam {
   results: (RaceCell | null)[];
 }
 
+export interface DriverSeasonTeammate {
+  id: string;
+  name: string;
+  flagCode: string | null;
+  results: (RaceCell | null)[];
+}
+
 export interface DriverSeason {
   year: number;
   rounds: SeasonRound[];
   teams: DriverSeasonTeam[];
+  teammates: DriverSeasonTeammate[];
   points: number | null;
   position: string | null;
   championshipWon: boolean;
@@ -231,6 +239,34 @@ FROM race ra
 JOIN sprint_race_result srr ON srr.race_id = ra.id
 WHERE srr.driver_id = ?1 AND srr.position_number IS NOT NULL`;
 
+// 队友：该车手效力车队里的其他车手（替补亦含），结果按站取最佳
+const teammateResultsSql = `
+SELECT ra.year, ra.round, rr.driver_id, d.name, cn.alpha2_code,
+  rr.position_text, rr.pole_position, rr.fastest_lap, rr.reason_retired,
+  rr.position_number
+FROM race ra
+JOIN race_result rr ON rr.race_id = ra.id
+JOIN driver d ON d.id = rr.driver_id
+LEFT JOIN country cn ON cn.id = d.nationality_country_id
+WHERE rr.driver_id <> ?1
+  AND EXISTS (
+    SELECT 1 FROM season_entrant_driver sed
+    WHERE sed.driver_id = ?1 AND sed.test_driver = 0
+      AND sed.constructor_id = rr.constructor_id AND sed.year = ra.year
+  )
+ORDER BY rr.position_display_order`;
+
+const teammateSprintRankSql = `
+SELECT ra.year, ra.round, srr.driver_id, srr.position_number
+FROM race ra
+JOIN sprint_race_result srr ON srr.race_id = ra.id
+WHERE srr.driver_id <> ?1 AND srr.position_number IS NOT NULL
+  AND EXISTS (
+    SELECT 1 FROM season_entrant_driver sed
+    WHERE sed.driver_id = ?1 AND sed.test_driver = 0
+      AND sed.constructor_id = srr.constructor_id AND sed.year = ra.year
+  )`;
+
 // 逐年单行，无需变体合并
 const standingsSql = `
 SELECT year, position_text, points, championship_won
@@ -346,6 +382,8 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
         sprintStatRows,
         sprintPoleRows,
         maxSeasonRows,
+        teammateResultRows,
+        teammateSprintRankRows,
       ] = await db.batch([
         { sql: identitySql, values: [slug] },
         { sql: numberStintsSql, values: [slug] },
@@ -358,6 +396,8 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
         { sql: sprintStatsSql, values: [slug] },
         { sql: sprintPolesSql, values: [slug] },
         { sql: maxSeasonSql, values: [] },
+        { sql: teammateResultsSql, values: [slug] },
+        { sql: teammateSprintRankSql, values: [slug] },
       ]);
 
       if (identityRows.results.length === 0) return null;
@@ -369,6 +409,8 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
         resultRows.results,
         sprintRankRows.results,
         standingRows.results,
+        teammateResultRows.results,
+        teammateSprintRankRows.results,
       );
 
       return {
@@ -498,7 +540,11 @@ export function mergeTeamStints(seasons: DriverSeason[]): TeamStint[] {
 
 // fixture 不存 teamStints，运行期从 seasons 补齐，保证 DEV 与 D1 同构
 function withTeamStints(page: Omit<DriverPage, "teamStints">): DriverPage {
-  return { ...page, teamStints: mergeTeamStints(page.seasons) };
+  const seasons = page.seasons.map((season) => ({
+    ...season,
+    teammates: season.teammates ?? [],
+  }));
+  return { ...page, seasons, teamStints: mergeTeamStints(page.seasons) };
 }
 
 function mergeDriverSeasons(
@@ -507,6 +553,8 @@ function mergeDriverSeasons(
   resultRows: unknown[],
   sprintRankRows: unknown[],
   standingRows: unknown[],
+  teammateResultRows: unknown[],
+  teammateSprintRankRows: unknown[],
 ): DriverSeason[] {
   const seasons = new Map<number, DriverSeason>();
   const rawRounds = new Map<number, { round: number; code: string; name: string; circuitId: string }[]>();
@@ -526,6 +574,7 @@ function mergeDriverSeasons(
         year,
         rounds: [],
         teams: [],
+        teammates: [],
         points: null,
         position: null,
         championshipWon: false,
@@ -585,6 +634,62 @@ function mergeDriverSeasons(
     season.points = asNumber(record.points, "driver standing points");
     season.position = asString(record.position_text, "driver standing position");
     season.championshipWon = season.championshipWon || record.championship_won === 1;
+  }
+
+  // 队友结果与冲刺排名：按 (year, driver) 分组，矩阵对齐 rounds
+  const teammateSprintRanks = new Map<string, number>();
+  for (const row of teammateSprintRankRows) {
+    const record = asRecord(row, "teammate sprint rank row");
+    teammateSprintRanks.set(
+      `${asNumber(record.year, "teammate sprint year")}:${asNumber(record.round, "teammate sprint round")}:${asString(record.driver_id, "teammate sprint driver")}`,
+      asNumber(record.position_number, "teammate sprint rank"),
+    );
+  }
+
+  const teammateCells = new Map<
+    string,
+    { id: string; name: string; flagCode: string | null; byRound: Map<number, RaceCell> }
+  >();
+  for (const row of teammateResultRows) {
+    const record = asRecord(row, "teammate result row");
+    const year = asNumber(record.year, "teammate result year");
+    const round = asNumber(record.round, "teammate result round");
+    const driverId = asString(record.driver_id, "teammate result driver");
+    const key = `${year}:${driverId}`;
+    let entry = teammateCells.get(key);
+    if (!entry) {
+      entry = {
+        id: driverId,
+        name: asString(record.name, "teammate name"),
+        flagCode:
+          record.alpha2_code == null
+            ? null
+            : asString(record.alpha2_code, "teammate flag").toLowerCase(),
+        byRound: new Map(),
+      };
+      teammateCells.set(key, entry);
+    }
+    // 共享赛车多行，SQL 按排名序，首条即最佳成绩
+    if (entry.byRound.has(round)) continue;
+    entry.byRound.set(
+      round,
+      buildRaceCell(
+        record,
+        teammateSprintRanks.get(`${year}:${round}:${driverId}`) ?? null,
+      ),
+    );
+  }
+
+  for (const [year, season] of seasons) {
+    season.teammates = [...teammateCells.entries()]
+      .filter(([key]) => key.startsWith(`${year}:`))
+      .map(([, entry]) => ({
+        id: entry.id,
+        name: entry.name,
+        flagCode: entry.flagCode,
+        results: rawRounds.get(year)!.map((r) => entry.byRound.get(r.round) ?? null),
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   return [...seasons.values()].sort((a, b) => b.year - a.year);

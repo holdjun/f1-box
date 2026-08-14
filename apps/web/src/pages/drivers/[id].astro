@@ -38,24 +38,47 @@ const latestTeam = driver?.seasons[0]?.teams.at(-1) ?? null;
 const teamColor =
   (latestTeam && latestColor(vendorIndexes, latestTeam.id)) ?? "#84909e";
 
-const matrixSeasons = (driver?.seasons ?? []).map((season) => ({
-  year: season.year,
-  metaText: season.teams.map((team) => team.name).join(" / "),
-  metaHref:
-    season.teams.length === 1 ? `/teams/${season.teams[0].id}` : null,
-  rounds: season.rounds,
-  rows: season.teams.map((team) => ({
-    name: team.name,
-    href: `/teams/${team.id}`,
-    flagCode: null,
-    highlight: false,
-    results: team.results,
-  })),
-  points: season.points,
-  position: season.position,
-  championshipWon: season.championshipWon,
-  current: season.year === currentYear,
-}));
+const matrixSeasons = (driver?.seasons ?? []).map((season) => {
+  // 车手自己的行：多年多队时按站合并（每站取其实际效力车队的成绩）
+  const driverResults = season.rounds.map(
+    (_, index) =>
+      season.teams
+        .map((team) => team.results[index])
+        .find((cell) => cell !== null) ?? null,
+  );
+  const singleTeam = season.teams.length === 1 ? season.teams[0] : null;
+  return {
+    year: season.year,
+    metaText: season.teams.map((team) => team.name).join(" / "),
+    metaHref: singleTeam ? `/teams/${singleTeam.id}` : null,
+    metaColor: singleTeam
+      ? (latestColor(vendorIndexes, singleTeam.id) ?? null)
+      : null,
+    rounds: season.rounds,
+    rows: [
+      {
+        name: driver?.name ?? "",
+        href: null,
+        flagCode: driver?.alpha2Code.toLowerCase() ?? null,
+        highlight: false,
+        emphasis: true,
+        results: driverResults,
+      },
+      ...season.teammates.map((teammate) => ({
+        name: teammate.name,
+        href: `/drivers/${teammate.id}`,
+        flagCode: teammate.flagCode,
+        highlight: false,
+        emphasis: false,
+        results: teammate.results,
+      })),
+    ],
+    points: season.points,
+    position: season.position,
+    championshipWon: season.championshipWon,
+    current: season.year === currentYear,
+  };
+});
 
 // ?year=1997,2007 只显示这些赛季（筛选状态可分享/后退）
 const initialSelected = (() => {
@@ -129,14 +152,14 @@ const initialSelected = (() => {
           {driver.teamStints.map((stint, index) => (
             <span class="number-item">
               {index > 0 ? <span class="number-arrow">→</span> : null}
-              <a class="team-chip" href={`/teams/${stint.id}`}>
+              <span class="team-chip">
                 {stint.name}
                 <span class="number-years">
                   {stint.yearFrom === stint.yearTo
                     ? stint.yearFrom
                     : `${stint.yearFrom}–${stint.yearTo}`}
                 </span>
-              </a>
+              </span>
             </span>
           ))}
         </div>
@@ -291,13 +314,6 @@ const initialSelected = (() => {
     border: 1px solid var(--line);
     border-radius: 999px;
     color: var(--muted-light);
-  }
-  .team-chip {
-    text-decoration: none;
-  }
-  .team-chip:hover {
-    border-color: var(--coral);
-    color: var(--coral);
   }
   .number-years {
     color: var(--muted);
