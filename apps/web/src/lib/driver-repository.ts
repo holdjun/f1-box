@@ -16,6 +16,12 @@ export interface DriverSummary {
   isCurrent: boolean;
 }
 
+// DEV 目录 fixture 附带积分与逐年号码数据；生产由 SQL 提供
+interface DriverCatalogFixture extends DriverSummary {
+  points: number;
+  seasons: Record<string, { points: number; number?: string } | undefined>;
+}
+
 export interface DriverTotals {
   entries: number;
   starts: number;
@@ -109,8 +115,8 @@ export function createD1DriverDatabase(d1: D1Database): DriverDatabase {
 }
 
 // 最后车队取自实际参赛的末站（与详情页 hero 同一口径）；相关子查询走
-// (driver_id, type) 索引逐人定位，避免全表开窗。
-// 当前赛季车手优先，其余按生涯成就排序，与车队目录同一哲学。
+// (driver_id, type) 索引逐人定位，避免全表开窗。号码在 1974 年前按站分配
+// 无身份意义，与车号时间线同口径只取 1974 起。目录按生涯总积分降序。
 const driversSql = `
 WITH latest_season AS (
   SELECT MAX(year) AS year FROM season
@@ -120,8 +126,9 @@ current_drivers AS (
   FROM season_entrant_driver
   WHERE year = (SELECT year FROM latest_season) AND test_driver = 0
 ),
-last_team AS (
-  SELECT rd.driver_id, rd.constructor_id, c.name AS team_name
+last_race AS (
+  SELECT rd.driver_id, rd.constructor_id, c.name AS team_name,
+    CASE WHEN ra.year >= 1974 THEN rd.driver_number END AS last_number
   FROM driver d
   JOIN race_data rd ON rd.rowid = (
     SELECT rd2.rowid
@@ -131,32 +138,29 @@ last_team AS (
     ORDER BY ra2.year DESC, ra2.round DESC
     LIMIT 1
   )
+  JOIN race ra ON ra.id = rd.race_id
   JOIN constructor c ON c.id = rd.constructor_id
 )
 SELECT d.id, d.name, d.permanent_number, co.alpha2_code,
-  lt.constructor_id AS team_id, lt.team_name,
+  lr.constructor_id AS team_id, lr.team_name, lr.last_number,
   CASE WHEN cd.driver_id IS NULL THEN 0 ELSE 1 END AS is_current
 FROM driver d
 LEFT JOIN country co ON co.id = d.nationality_country_id
-LEFT JOIN last_team lt ON lt.driver_id = d.id
+LEFT JOIN last_race lr ON lr.driver_id = d.id
 LEFT JOIN current_drivers cd ON cd.driver_id = d.id
-ORDER BY
-  CASE WHEN cd.driver_id IS NULL THEN 1 ELSE 0 END,
-  d.total_championship_wins DESC,
-  d.total_race_wins DESC,
-  d.total_race_entries DESC,
-  d.name`;
+ORDER BY d.total_points DESC, d.name`;
 
-// 年份目录：卡片显示该年车队，季中转会取该年最后参赛车队；名单是枚举，
-// 名字字母序即可。isCurrent 在年份视图无意义，恒 false。
+// 年份目录：卡片显示该年车队与号码（季中转会取该年最后参赛车队），按该年
+// 积分榜降序；无积分榜的（如替补）垫底按名字排。
 const driversByYearSql = `
 WITH year_drivers AS (
   SELECT DISTINCT driver_id
   FROM season_entrant_driver
   WHERE year = ?1 AND test_driver = 0
 ),
-last_team AS (
-  SELECT rd.driver_id, rd.constructor_id, c.name AS team_name
+last_race AS (
+  SELECT rd.driver_id, rd.constructor_id, c.name AS team_name,
+    CASE WHEN ?1 >= 1974 THEN rd.driver_number END AS last_number
   FROM driver d
   JOIN race_data rd ON rd.rowid = (
     SELECT rd2.rowid
@@ -169,12 +173,14 @@ last_team AS (
   JOIN constructor c ON c.id = rd.constructor_id
 )
 SELECT d.id, d.name, d.permanent_number, co.alpha2_code,
-  lt.constructor_id AS team_id, lt.team_name
+  lr.constructor_id AS team_id, lr.team_name, lr.last_number,
+  COALESCE(sds.points, 0) AS points
 FROM year_drivers yd
 JOIN driver d ON d.id = yd.driver_id
 LEFT JOIN country co ON co.id = d.nationality_country_id
-LEFT JOIN last_team lt ON lt.driver_id = d.id
-ORDER BY d.name`;
+LEFT JOIN last_race lr ON lr.driver_id = d.id
+LEFT JOIN season_driver_standing sds ON sds.driver_id = d.id AND sds.year = ?1
+ORDER BY points DESC, d.name`;
 
 const seasonYearsSql = `SELECT year FROM season ORDER BY year DESC`;
 
@@ -316,7 +322,9 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
       if (!db) {
         // fixture 仅 DEV 用，动态导入避免打进生产 bundle
         const { default: fixture } = await import("./fixtures/drivers.json");
-        return fixture as DriverSummary[];
+        return (fixture as DriverCatalogFixture[]).map(
+          ({ points, seasons, ...summary }) => summary,
+        );
       }
 
       const [rows] = await db.batch([{ sql: driversSql, values: [] }]);
@@ -325,11 +333,22 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
 
     async getDriversByYear(year) {
       if (!db) {
-        // fixture 仅 DEV 用，动态导入避免打进生产 bundle
         const { default: fixture } = await import("./fixtures/drivers.json");
-        return (fixture as (DriverSummary & { years: number[] })[]).flatMap(
-          ({ years, ...summary }) => (years.includes(year) ? [summary] : []),
-        );
+        const rows: (DriverSummary & { points: number })[] = [];
+        for (const { seasons, ...summary } of fixture as DriverCatalogFixture[]) {
+          const entry = seasons[String(year)];
+          if (entry) {
+            rows.push({
+              ...summary,
+              // 年份视图优先该年号码，无该年号码（1974 前按站分配）才回落
+              number: entry.number ?? summary.number,
+              points: entry.points,
+            });
+          }
+        }
+        return rows
+          .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name))
+          .map(({ points, ...row }) => row);
       }
 
       const [rows] = await db.batch([{ sql: driversByYearSql, values: [year] }]);
@@ -341,8 +360,8 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
         // DEV 从 fixture 参赛年份推导；生产读 season 表
         const { default: fixture } = await import("./fixtures/drivers.json");
         const years = new Set<number>();
-        for (const driver of fixture as (DriverSummary & { years: number[] })[]) {
-          for (const year of driver.years) years.add(year);
+        for (const driver of fixture as DriverCatalogFixture[]) {
+          for (const key of Object.keys(driver.seasons)) years.add(Number(key));
         }
         return [...years].sort((a, b) => b - a);
       }
@@ -441,10 +460,7 @@ function mapDriverRow(row: unknown): DriverSummary {
   return {
     id: asString(record.id, "driver id"),
     name: asString(record.name, "driver name"),
-    number:
-      record.permanent_number == null
-        ? null
-        : asString(record.permanent_number, "driver number"),
+    number: permanentOrLastNumber(record),
     // 国旗 SVG 以 alpha2 小写命名
     flagCode:
       record.alpha2_code == null
@@ -460,6 +476,17 @@ function mapDriverRow(row: unknown): DriverSummary {
         : asString(record.team_name, "driver team name"),
     isCurrent: record.is_current === 1,
   };
+}
+
+// 无永久车号的车手回落最后一次参赛号码（1974 前号码按站分配，视为无）
+function permanentOrLastNumber(record: Record<string, unknown>): string | null {
+  if (record.permanent_number != null) {
+    return asString(record.permanent_number, "driver number");
+  }
+  if (record.last_number != null) {
+    return asString(record.last_number, "driver last number");
+  }
+  return null;
 }
 
 function parseIdentity(

@@ -24,13 +24,27 @@ test("russell card shows permanent number, team and flag @desktop", async ({
   );
 });
 
-test("numberless legends fall back to a monogram @desktop", async ({
+test("pre-1974 legends fall back to a monogram @desktop", async ({
+  page,
+}) => {
+  await page.goto("/drivers");
+  const card = page.locator('a[href="/drivers/juan-manuel-fangio"]');
+  await expect(card.locator(".card-monogram")).toHaveText("JF");
+  await expect(card.locator(".card-number")).toHaveCount(0);
+});
+
+test("drivers without a permanent number show their last race number @desktop", async ({
   page,
 }) => {
   await page.goto("/drivers");
   const card = page.locator('a[href="/drivers/ayrton-senna"]');
-  await expect(card.locator(".card-monogram")).toHaveText("AS");
-  await expect(card.locator(".card-number")).toHaveCount(0);
+  // senna 1994 最后用 2 号
+  await expect(card.locator(".card-number")).toHaveText("2");
+});
+
+test("drivers catalog orders by career points @desktop", async ({ page }) => {
+  await page.goto("/drivers");
+  await expect(page.locator(".card-name").first()).toHaveText("Lewis Hamilton");
 });
 
 test("year drivers routes are retired @desktop", async ({ page }) => {
@@ -136,6 +150,13 @@ test("drivers catalog filters to a season @desktop", async ({ page }) => {
   await expect(page.locator('a[href="/drivers/michael-schumacher"]')).toBeVisible();
   await expect(page.locator('a[href="/drivers/mika-hakkinen"]')).toBeVisible();
   await expect(page.locator(".season-filter__summary")).toHaveText("1997");
+  // 按该年积分排序：schumacher 78 分在 hakkinen 前，且显示该年号码
+  await expect(page.locator(".card-name").first()).toHaveText(
+    "Michael Schumacher",
+  );
+  await expect(
+    page.locator('a[href="/drivers/mika-hakkinen"] .card-number'),
+  ).toHaveText("9");
 });
 
 test("drivers detail filters season blocks @desktop", async ({ page }) => {

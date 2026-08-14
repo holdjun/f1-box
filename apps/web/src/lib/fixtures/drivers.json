@@ -1,668 +1,1621 @@
 [
- {
-  "id": "lewis-hamilton",
-  "name": "Lewis Hamilton",
-  "number": "44",
-  "flagCode": "gb",
-  "teamId": "ferrari",
-  "teamName": "Ferrari",
-  "isCurrent": true,
-  "years": [
-   2007,
-   2008,
-   2009,
-   2010,
-   2011,
-   2012,
-   2013,
-   2014,
-   2015,
-   2016,
-   2017,
-   2018,
-   2019,
-   2020,
-   2021,
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "max-verstappen",
-  "name": "Max Verstappen",
-  "number": "3",
-  "flagCode": "nl",
-  "teamId": "red-bull",
-  "teamName": "Red Bull",
-  "isCurrent": true,
-  "years": [
-   2015,
-   2016,
-   2017,
-   2018,
-   2019,
-   2020,
-   2021,
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "fernando-alonso",
-  "name": "Fernando Alonso",
-  "number": "14",
-  "flagCode": "es",
-  "teamId": "aston-martin",
-  "teamName": "Aston Martin",
-  "isCurrent": true,
-  "years": [
-   2001,
-   2003,
-   2004,
-   2005,
-   2006,
-   2007,
-   2008,
-   2009,
-   2010,
-   2011,
-   2012,
-   2013,
-   2014,
-   2015,
-   2016,
-   2017,
-   2018,
-   2021,
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "lando-norris",
-  "name": "Lando Norris",
-  "number": "4",
-  "flagCode": "gb",
-  "teamId": "mclaren",
-  "teamName": "McLaren",
-  "isCurrent": true,
-  "years": [
-   2019,
-   2020,
-   2021,
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "valtteri-bottas",
-  "name": "Valtteri Bottas",
-  "number": "77",
-  "flagCode": "fi",
-  "teamId": "cadillac",
-  "teamName": "Cadillac",
-  "isCurrent": true,
-  "years": [
-   2013,
-   2014,
-   2015,
-   2016,
-   2017,
-   2018,
-   2019,
-   2020,
-   2021,
-   2022,
-   2023,
-   2024,
-   2026
-  ]
- },
- {
-  "id": "charles-leclerc",
-  "name": "Charles Leclerc",
-  "number": "16",
-  "flagCode": "mc",
-  "teamId": "ferrari",
-  "teamName": "Ferrari",
-  "isCurrent": true,
-  "years": [
-   2018,
-   2019,
-   2020,
-   2021,
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "oscar-piastri",
-  "name": "Oscar Piastri",
-  "number": "81",
-  "flagCode": "au",
-  "teamId": "mclaren",
-  "teamName": "McLaren",
-  "isCurrent": true,
-  "years": [
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "george-russell",
-  "name": "George Russell",
-  "number": "63",
-  "flagCode": "gb",
-  "teamId": "mercedes",
-  "teamName": "Mercedes",
-  "isCurrent": true,
-  "years": [
-   2019,
-   2020,
-   2021,
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "sergio-perez",
-  "name": "Sergio P\u00e9rez",
-  "number": "11",
-  "flagCode": "mx",
-  "teamId": "cadillac",
-  "teamName": "Cadillac",
-  "isCurrent": true,
-  "years": [
-   2011,
-   2012,
-   2013,
-   2014,
-   2015,
-   2016,
-   2017,
-   2018,
-   2019,
-   2020,
-   2021,
-   2022,
-   2023,
-   2024,
-   2026
-  ]
- },
- {
-  "id": "kimi-antonelli",
-  "name": "Kimi Antonelli",
-  "number": "12",
-  "flagCode": "it",
-  "teamId": "mercedes",
-  "teamName": "Mercedes",
-  "isCurrent": true,
-  "years": [
-   2025,
-   2026
-  ]
- },
- {
-  "id": "carlos-sainz-jr",
-  "name": "Carlos Sainz Jr.",
-  "number": "55",
-  "flagCode": "es",
-  "teamId": "williams",
-  "teamName": "Williams",
-  "isCurrent": true,
-  "years": [
-   2015,
-   2016,
-   2017,
-   2018,
-   2019,
-   2020,
-   2021,
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "esteban-ocon",
-  "name": "Esteban Ocon",
-  "number": "31",
-  "flagCode": "fr",
-  "teamId": "haas",
-  "teamName": "Haas",
-  "isCurrent": true,
-  "years": [
-   2016,
-   2017,
-   2018,
-   2020,
-   2021,
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "pierre-gasly",
-  "name": "Pierre Gasly",
-  "number": "10",
-  "flagCode": "fr",
-  "teamId": "alpine",
-  "teamName": "Alpine",
-  "isCurrent": true,
-  "years": [
-   2017,
-   2018,
-   2019,
-   2020,
-   2021,
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "nico-hulkenberg",
-  "name": "Nico H\u00fclkenberg",
-  "number": "27",
-  "flagCode": "de",
-  "teamId": "audi",
-  "teamName": "Audi",
-  "isCurrent": true,
-  "years": [
-   2010,
-   2012,
-   2013,
-   2014,
-   2015,
-   2016,
-   2017,
-   2018,
-   2019,
-   2020,
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "lance-stroll",
-  "name": "Lance Stroll",
-  "number": "18",
-  "flagCode": "ca",
-  "teamId": "aston-martin",
-  "teamName": "Aston Martin",
-  "isCurrent": true,
-  "years": [
-   2017,
-   2018,
-   2019,
-   2020,
-   2021,
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "alexander-albon",
-  "name": "Alexander Albon",
-  "number": "23",
-  "flagCode": "th",
-  "teamId": "williams",
-  "teamName": "Williams",
-  "isCurrent": true,
-  "years": [
-   2019,
-   2020,
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "liam-lawson",
-  "name": "Liam Lawson",
-  "number": "30",
-  "flagCode": "nz",
-  "teamId": "racing-bulls",
-  "teamName": "Racing Bulls",
-  "isCurrent": true,
-  "years": [
-   2023,
-   2024,
-   2025,
-   2026
-  ]
- },
- {
-  "id": "franco-colapinto",
-  "name": "Franco Colapinto",
-  "number": "43",
-  "flagCode": "ar",
-  "teamId": "alpine",
-  "teamName": "Alpine",
-  "isCurrent": true,
-  "years": [
-   2025,
-   2026
-  ]
- },
- {
-  "id": "oliver-bearman",
-  "name": "Oliver Bearman",
-  "number": "87",
-  "flagCode": "gb",
-  "teamId": "haas",
-  "teamName": "Haas",
-  "isCurrent": true,
-  "years": [
-   2025,
-   2026
-  ]
- },
- {
-  "id": "gabriel-bortoleto",
-  "name": "Gabriel Bortoleto",
-  "number": "5",
-  "flagCode": "br",
-  "teamId": "audi",
-  "teamName": "Audi",
-  "isCurrent": true,
-  "years": [
-   2025,
-   2026
-  ]
- },
- {
-  "id": "isack-hadjar",
-  "name": "Isack Hadjar",
-  "number": "6",
-  "flagCode": "fr",
-  "teamId": "red-bull",
-  "teamName": "Red Bull",
-  "isCurrent": true,
-  "years": [
-   2025,
-   2026
-  ]
- },
- {
-  "id": "arvid-lindblad",
-  "name": "Arvid Lindblad",
-  "number": "41",
-  "flagCode": "gb",
-  "teamId": "racing-bulls",
-  "teamName": "Racing Bulls",
-  "isCurrent": true,
-  "years": [
-   2026
-  ]
- },
- {
-  "id": "michael-schumacher",
-  "name": "Michael Schumacher",
-  "number": null,
-  "flagCode": "de",
-  "teamId": "mercedes",
-  "teamName": "Mercedes",
-  "isCurrent": false,
-  "years": [
-   1991,
-   1992,
-   1993,
-   1994,
-   1995,
-   1996,
-   1997,
-   1998,
-   1999,
-   2000,
-   2001,
-   2002,
-   2003,
-   2004,
-   2005,
-   2006,
-   2010,
-   2011,
-   2012
-  ]
- },
- {
-  "id": "juan-manuel-fangio",
-  "name": "Juan Manuel Fangio",
-  "number": null,
-  "flagCode": "ar",
-  "teamId": "maserati",
-  "teamName": "Maserati",
-  "isCurrent": false,
-  "years": [
-   1950,
-   1951,
-   1953,
-   1954,
-   1955,
-   1956,
-   1957,
-   1958
-  ]
- },
- {
-  "id": "sebastian-vettel",
-  "name": "Sebastian Vettel",
-  "number": null,
-  "flagCode": "de",
-  "teamId": "aston-martin",
-  "teamName": "Aston Martin",
-  "isCurrent": false,
-  "years": [
-   2007,
-   2008,
-   2009,
-   2010,
-   2011,
-   2012,
-   2013,
-   2014,
-   2015,
-   2016,
-   2017,
-   2018,
-   2019,
-   2020,
-   2021,
-   2022
-  ]
- },
- {
-  "id": "alain-prost",
-  "name": "Alain Prost",
-  "number": null,
-  "flagCode": "fr",
-  "teamId": "williams",
-  "teamName": "Williams",
-  "isCurrent": false,
-  "years": [
-   1980,
-   1981,
-   1982,
-   1983,
-   1984,
-   1985,
-   1986,
-   1987,
-   1988,
-   1989,
-   1990,
-   1991,
-   1993
-  ]
- },
- {
-  "id": "ayrton-senna",
-  "name": "Ayrton Senna",
-  "number": null,
-  "flagCode": "br",
-  "teamId": "williams",
-  "teamName": "Williams",
-  "isCurrent": false,
-  "years": [
-   1984,
-   1985,
-   1986,
-   1987,
-   1988,
-   1989,
-   1990,
-   1991,
-   1992,
-   1993,
-   1994
-  ]
- },
- {
-  "id": "jackie-stewart",
-  "name": "Jackie Stewart",
-  "number": null,
-  "flagCode": "gb",
-  "teamId": "tyrrell",
-  "teamName": "Tyrrell",
-  "isCurrent": false,
-  "years": [
-   1965,
-   1966,
-   1967,
-   1968,
-   1969,
-   1970,
-   1971,
-   1972,
-   1973
-  ]
- },
- {
-  "id": "niki-lauda",
-  "name": "Niki Lauda",
-  "number": null,
-  "flagCode": "at",
-  "teamId": "mclaren",
-  "teamName": "McLaren",
-  "isCurrent": false,
-  "years": [
-   1971,
-   1972,
-   1973,
-   1974,
-   1975,
-   1976,
-   1977,
-   1978,
-   1979,
-   1982,
-   1983,
-   1984,
-   1985
-  ]
- },
- {
-  "id": "nelson-piquet",
-  "name": "Nelson Piquet",
-  "number": null,
-  "flagCode": "br",
-  "teamId": "benetton",
-  "teamName": "Benetton",
-  "isCurrent": false,
-  "years": [
-   1978,
-   1979,
-   1980,
-   1981,
-   1982,
-   1983,
-   1984,
-   1985,
-   1986,
-   1987,
-   1988,
-   1989,
-   1990,
-   1991
-  ]
- },
- {
-  "id": "jim-clark",
-  "name": "Jim Clark",
-  "number": null,
-  "flagCode": "gb",
-  "teamId": "lotus",
-  "teamName": "Lotus",
-  "isCurrent": false,
-  "years": [
-   1960,
-   1961,
-   1962,
-   1963,
-   1964,
-   1965,
-   1966,
-   1967,
-   1968
-  ]
- },
- {
-  "id": "mika-hakkinen",
-  "name": "Mika H\u00e4kkinen",
-  "number": null,
-  "flagCode": "fi",
-  "teamId": "mclaren",
-  "teamName": "McLaren",
-  "isCurrent": false,
-  "years": [
-   1991,
-   1992,
-   1993,
-   1994,
-   1995,
-   1996,
-   1997,
-   1998,
-   1999,
-   2000,
-   2001
-  ]
- }
+  {
+    "id": "lewis-hamilton",
+    "name": "Lewis Hamilton",
+    "number": "44",
+    "flagCode": "gb",
+    "teamId": "ferrari",
+    "teamName": "Ferrari",
+    "isCurrent": true,
+    "points": 5187.5,
+    "seasons": {
+      "2007": {
+        "points": 109,
+        "number": "2"
+      },
+      "2008": {
+        "points": 98,
+        "number": "22"
+      },
+      "2009": {
+        "points": 49,
+        "number": "1"
+      },
+      "2010": {
+        "points": 240,
+        "number": "2"
+      },
+      "2011": {
+        "points": 227,
+        "number": "3"
+      },
+      "2012": {
+        "points": 190,
+        "number": "4"
+      },
+      "2013": {
+        "points": 189,
+        "number": "10"
+      },
+      "2014": {
+        "points": 384,
+        "number": "44"
+      },
+      "2015": {
+        "points": 381,
+        "number": "44"
+      },
+      "2016": {
+        "points": 380,
+        "number": "44"
+      },
+      "2017": {
+        "points": 363,
+        "number": "44"
+      },
+      "2018": {
+        "points": 408,
+        "number": "44"
+      },
+      "2019": {
+        "points": 413,
+        "number": "44"
+      },
+      "2020": {
+        "points": 347,
+        "number": "44"
+      },
+      "2021": {
+        "points": 387.5,
+        "number": "44"
+      },
+      "2022": {
+        "points": 240,
+        "number": "44"
+      },
+      "2023": {
+        "points": 234,
+        "number": "44"
+      },
+      "2024": {
+        "points": 223,
+        "number": "44"
+      },
+      "2025": {
+        "points": 156,
+        "number": "44"
+      },
+      "2026": {
+        "points": 169,
+        "number": "44"
+      }
+    }
+  },
+  {
+    "id": "max-verstappen",
+    "name": "Max Verstappen",
+    "number": "3",
+    "flagCode": "nl",
+    "teamId": "red-bull",
+    "teamName": "Red Bull",
+    "isCurrent": true,
+    "points": 3553.5,
+    "seasons": {
+      "2015": {
+        "points": 49,
+        "number": "33"
+      },
+      "2016": {
+        "points": 204,
+        "number": "33"
+      },
+      "2017": {
+        "points": 168,
+        "number": "33"
+      },
+      "2018": {
+        "points": 249,
+        "number": "33"
+      },
+      "2019": {
+        "points": 278,
+        "number": "33"
+      },
+      "2020": {
+        "points": 214,
+        "number": "33"
+      },
+      "2021": {
+        "points": 395.5,
+        "number": "33"
+      },
+      "2022": {
+        "points": 454,
+        "number": "1"
+      },
+      "2023": {
+        "points": 575,
+        "number": "1"
+      },
+      "2024": {
+        "points": 437,
+        "number": "1"
+      },
+      "2025": {
+        "points": 421,
+        "number": "1"
+      },
+      "2026": {
+        "points": 109,
+        "number": "3"
+      }
+    }
+  },
+  {
+    "id": "sebastian-vettel",
+    "name": "Sebastian Vettel",
+    "number": "5",
+    "flagCode": "de",
+    "teamId": "aston-martin",
+    "teamName": "Aston Martin",
+    "isCurrent": false,
+    "points": 3098,
+    "seasons": {
+      "2007": {
+        "points": 6,
+        "number": "19"
+      },
+      "2008": {
+        "points": 35,
+        "number": "15"
+      },
+      "2009": {
+        "points": 84,
+        "number": "15"
+      },
+      "2010": {
+        "points": 256,
+        "number": "5"
+      },
+      "2011": {
+        "points": 392,
+        "number": "1"
+      },
+      "2012": {
+        "points": 281,
+        "number": "1"
+      },
+      "2013": {
+        "points": 397,
+        "number": "1"
+      },
+      "2014": {
+        "points": 167,
+        "number": "1"
+      },
+      "2015": {
+        "points": 278,
+        "number": "5"
+      },
+      "2016": {
+        "points": 212,
+        "number": "5"
+      },
+      "2017": {
+        "points": 317,
+        "number": "5"
+      },
+      "2018": {
+        "points": 320,
+        "number": "5"
+      },
+      "2019": {
+        "points": 240,
+        "number": "5"
+      },
+      "2020": {
+        "points": 33,
+        "number": "5"
+      },
+      "2021": {
+        "points": 43,
+        "number": "5"
+      },
+      "2022": {
+        "points": 37,
+        "number": "5"
+      }
+    }
+  },
+  {
+    "id": "fernando-alonso",
+    "name": "Fernando Alonso",
+    "number": "14",
+    "flagCode": "es",
+    "teamId": "aston-martin",
+    "teamName": "Aston Martin",
+    "isCurrent": true,
+    "points": 2394,
+    "seasons": {
+      "2001": {
+        "points": 0,
+        "number": "21"
+      },
+      "2003": {
+        "points": 55,
+        "number": "8"
+      },
+      "2004": {
+        "points": 59,
+        "number": "8"
+      },
+      "2005": {
+        "points": 133,
+        "number": "5"
+      },
+      "2006": {
+        "points": 134,
+        "number": "1"
+      },
+      "2007": {
+        "points": 109,
+        "number": "1"
+      },
+      "2008": {
+        "points": 61,
+        "number": "5"
+      },
+      "2009": {
+        "points": 26,
+        "number": "7"
+      },
+      "2010": {
+        "points": 252,
+        "number": "8"
+      },
+      "2011": {
+        "points": 257,
+        "number": "5"
+      },
+      "2012": {
+        "points": 278,
+        "number": "5"
+      },
+      "2013": {
+        "points": 242,
+        "number": "3"
+      },
+      "2014": {
+        "points": 161,
+        "number": "14"
+      },
+      "2015": {
+        "points": 11,
+        "number": "14"
+      },
+      "2016": {
+        "points": 54,
+        "number": "14"
+      },
+      "2017": {
+        "points": 17,
+        "number": "14"
+      },
+      "2018": {
+        "points": 50,
+        "number": "14"
+      },
+      "2021": {
+        "points": 81,
+        "number": "14"
+      },
+      "2022": {
+        "points": 81,
+        "number": "14"
+      },
+      "2023": {
+        "points": 206,
+        "number": "14"
+      },
+      "2024": {
+        "points": 70,
+        "number": "14"
+      },
+      "2025": {
+        "points": 56,
+        "number": "14"
+      },
+      "2026": {
+        "points": 1,
+        "number": "14"
+      }
+    }
+  },
+  {
+    "id": "charles-leclerc",
+    "name": "Charles Leclerc",
+    "number": "16",
+    "flagCode": "mc",
+    "teamId": "ferrari",
+    "teamName": "Ferrari",
+    "isCurrent": true,
+    "points": 1810,
+    "seasons": {
+      "2018": {
+        "points": 39,
+        "number": "16"
+      },
+      "2019": {
+        "points": 264,
+        "number": "16"
+      },
+      "2020": {
+        "points": 98,
+        "number": "16"
+      },
+      "2021": {
+        "points": 159,
+        "number": "16"
+      },
+      "2022": {
+        "points": 308,
+        "number": "16"
+      },
+      "2023": {
+        "points": 206,
+        "number": "16"
+      },
+      "2024": {
+        "points": 356,
+        "number": "16"
+      },
+      "2025": {
+        "points": 242,
+        "number": "16"
+      },
+      "2026": {
+        "points": 138,
+        "number": "16"
+      }
+    }
+  },
+  {
+    "id": "valtteri-bottas",
+    "name": "Valtteri Bottas",
+    "number": "77",
+    "flagCode": "fi",
+    "teamId": "cadillac",
+    "teamName": "Cadillac",
+    "isCurrent": true,
+    "points": 1797,
+    "seasons": {
+      "2013": {
+        "points": 4,
+        "number": "17"
+      },
+      "2014": {
+        "points": 186,
+        "number": "77"
+      },
+      "2015": {
+        "points": 136,
+        "number": "77"
+      },
+      "2016": {
+        "points": 85,
+        "number": "77"
+      },
+      "2017": {
+        "points": 305,
+        "number": "77"
+      },
+      "2018": {
+        "points": 247,
+        "number": "77"
+      },
+      "2019": {
+        "points": 326,
+        "number": "77"
+      },
+      "2020": {
+        "points": 223,
+        "number": "77"
+      },
+      "2021": {
+        "points": 226,
+        "number": "77"
+      },
+      "2022": {
+        "points": 49,
+        "number": "77"
+      },
+      "2023": {
+        "points": 10,
+        "number": "77"
+      },
+      "2024": {
+        "points": 0,
+        "number": "77"
+      },
+      "2026": {
+        "points": 0,
+        "number": "77"
+      }
+    }
+  },
+  {
+    "id": "sergio-perez",
+    "name": "Sergio Pérez",
+    "number": "11",
+    "flagCode": "mx",
+    "teamId": "cadillac",
+    "teamName": "Cadillac",
+    "isCurrent": true,
+    "points": 1638,
+    "seasons": {
+      "2011": {
+        "points": 14,
+        "number": "17"
+      },
+      "2012": {
+        "points": 66,
+        "number": "15"
+      },
+      "2013": {
+        "points": 49,
+        "number": "6"
+      },
+      "2014": {
+        "points": 59,
+        "number": "11"
+      },
+      "2015": {
+        "points": 78,
+        "number": "11"
+      },
+      "2016": {
+        "points": 101,
+        "number": "11"
+      },
+      "2017": {
+        "points": 100,
+        "number": "11"
+      },
+      "2018": {
+        "points": 62,
+        "number": "11"
+      },
+      "2019": {
+        "points": 52,
+        "number": "11"
+      },
+      "2020": {
+        "points": 125,
+        "number": "11"
+      },
+      "2021": {
+        "points": 190,
+        "number": "11"
+      },
+      "2022": {
+        "points": 305,
+        "number": "11"
+      },
+      "2023": {
+        "points": 285,
+        "number": "11"
+      },
+      "2024": {
+        "points": 152,
+        "number": "11"
+      },
+      "2026": {
+        "points": 0,
+        "number": "11"
+      }
+    }
+  },
+  {
+    "id": "michael-schumacher",
+    "name": "Michael Schumacher",
+    "number": "7",
+    "flagCode": "de",
+    "teamId": "mercedes",
+    "teamName": "Mercedes",
+    "isCurrent": false,
+    "points": 1566,
+    "seasons": {
+      "1991": {
+        "points": 4,
+        "number": "19"
+      },
+      "1992": {
+        "points": 53,
+        "number": "19"
+      },
+      "1993": {
+        "points": 52,
+        "number": "5"
+      },
+      "1994": {
+        "points": 92,
+        "number": "5"
+      },
+      "1995": {
+        "points": 102,
+        "number": "1"
+      },
+      "1996": {
+        "points": 59,
+        "number": "1"
+      },
+      "1997": {
+        "points": 78,
+        "number": "5"
+      },
+      "1998": {
+        "points": 86,
+        "number": "3"
+      },
+      "1999": {
+        "points": 44,
+        "number": "3"
+      },
+      "2000": {
+        "points": 108,
+        "number": "3"
+      },
+      "2001": {
+        "points": 123,
+        "number": "1"
+      },
+      "2002": {
+        "points": 144,
+        "number": "1"
+      },
+      "2003": {
+        "points": 93,
+        "number": "1"
+      },
+      "2004": {
+        "points": 148,
+        "number": "1"
+      },
+      "2005": {
+        "points": 62,
+        "number": "1"
+      },
+      "2006": {
+        "points": 121,
+        "number": "5"
+      },
+      "2010": {
+        "points": 72,
+        "number": "3"
+      },
+      "2011": {
+        "points": 76,
+        "number": "7"
+      },
+      "2012": {
+        "points": 49,
+        "number": "7"
+      }
+    }
+  },
+  {
+    "id": "lando-norris",
+    "name": "Lando Norris",
+    "number": "4",
+    "flagCode": "gb",
+    "teamId": "mclaren",
+    "teamName": "McLaren",
+    "isCurrent": true,
+    "points": 1558,
+    "seasons": {
+      "2019": {
+        "points": 49,
+        "number": "4"
+      },
+      "2020": {
+        "points": 97,
+        "number": "4"
+      },
+      "2021": {
+        "points": 160,
+        "number": "4"
+      },
+      "2022": {
+        "points": 122,
+        "number": "4"
+      },
+      "2023": {
+        "points": 205,
+        "number": "4"
+      },
+      "2024": {
+        "points": 374,
+        "number": "4"
+      },
+      "2025": {
+        "points": 423,
+        "number": "4"
+      },
+      "2026": {
+        "points": 128,
+        "number": "1"
+      }
+    }
+  },
+  {
+    "id": "carlos-sainz-jr",
+    "name": "Carlos Sainz Jr.",
+    "number": "55",
+    "flagCode": "es",
+    "teamId": "williams",
+    "teamName": "Williams",
+    "isCurrent": true,
+    "points": 1342.5,
+    "seasons": {
+      "2015": {
+        "points": 18,
+        "number": "55"
+      },
+      "2016": {
+        "points": 46,
+        "number": "55"
+      },
+      "2017": {
+        "points": 54,
+        "number": "55"
+      },
+      "2018": {
+        "points": 53,
+        "number": "55"
+      },
+      "2019": {
+        "points": 96,
+        "number": "55"
+      },
+      "2020": {
+        "points": 105,
+        "number": "55"
+      },
+      "2021": {
+        "points": 164.5,
+        "number": "55"
+      },
+      "2022": {
+        "points": 246,
+        "number": "55"
+      },
+      "2023": {
+        "points": 200,
+        "number": "55"
+      },
+      "2024": {
+        "points": 290,
+        "number": "55"
+      },
+      "2025": {
+        "points": 64,
+        "number": "55"
+      },
+      "2026": {
+        "points": 6,
+        "number": "55"
+      }
+    }
+  },
+  {
+    "id": "george-russell",
+    "name": "George Russell",
+    "number": "63",
+    "flagCode": "gb",
+    "teamId": "mercedes",
+    "teamName": "Mercedes",
+    "isCurrent": true,
+    "points": 1193,
+    "seasons": {
+      "2019": {
+        "points": 0,
+        "number": "63"
+      },
+      "2020": {
+        "points": 3,
+        "number": "63"
+      },
+      "2021": {
+        "points": 16,
+        "number": "63"
+      },
+      "2022": {
+        "points": 275,
+        "number": "63"
+      },
+      "2023": {
+        "points": 175,
+        "number": "63"
+      },
+      "2024": {
+        "points": 245,
+        "number": "63"
+      },
+      "2025": {
+        "points": 319,
+        "number": "63"
+      },
+      "2026": {
+        "points": 160,
+        "number": "63"
+      }
+    }
+  },
+  {
+    "id": "oscar-piastri",
+    "name": "Oscar Piastri",
+    "number": "81",
+    "flagCode": "au",
+    "teamId": "mclaren",
+    "teamName": "McLaren",
+    "isCurrent": true,
+    "points": 891,
+    "seasons": {
+      "2023": {
+        "points": 97,
+        "number": "81"
+      },
+      "2024": {
+        "points": 292,
+        "number": "81"
+      },
+      "2025": {
+        "points": 410,
+        "number": "81"
+      },
+      "2026": {
+        "points": 92,
+        "number": "81"
+      }
+    }
+  },
+  {
+    "id": "alain-prost",
+    "name": "Alain Prost",
+    "number": "2",
+    "flagCode": "fr",
+    "teamId": "williams",
+    "teamName": "Williams",
+    "isCurrent": false,
+    "points": 798.5,
+    "seasons": {
+      "1980": {
+        "points": 5,
+        "number": "8"
+      },
+      "1981": {
+        "points": 43,
+        "number": "15"
+      },
+      "1982": {
+        "points": 34,
+        "number": "15"
+      },
+      "1983": {
+        "points": 57,
+        "number": "15"
+      },
+      "1984": {
+        "points": 71.5,
+        "number": "7"
+      },
+      "1985": {
+        "points": 73,
+        "number": "2"
+      },
+      "1986": {
+        "points": 72,
+        "number": "1"
+      },
+      "1987": {
+        "points": 46,
+        "number": "1"
+      },
+      "1988": {
+        "points": 87,
+        "number": "11"
+      },
+      "1989": {
+        "points": 76,
+        "number": "2"
+      },
+      "1990": {
+        "points": 71,
+        "number": "1"
+      },
+      "1991": {
+        "points": 34,
+        "number": "27"
+      },
+      "1993": {
+        "points": 99,
+        "number": "2"
+      }
+    }
+  },
+  {
+    "id": "nico-hulkenberg",
+    "name": "Nico Hülkenberg",
+    "number": "27",
+    "flagCode": "de",
+    "teamId": "audi",
+    "teamName": "Audi",
+    "isCurrent": true,
+    "points": 624,
+    "seasons": {
+      "2010": {
+        "points": 22,
+        "number": "10"
+      },
+      "2012": {
+        "points": 63,
+        "number": "12"
+      },
+      "2013": {
+        "points": 51,
+        "number": "11"
+      },
+      "2014": {
+        "points": 96,
+        "number": "27"
+      },
+      "2015": {
+        "points": 58,
+        "number": "27"
+      },
+      "2016": {
+        "points": 72,
+        "number": "27"
+      },
+      "2017": {
+        "points": 43,
+        "number": "27"
+      },
+      "2018": {
+        "points": 69,
+        "number": "27"
+      },
+      "2019": {
+        "points": 37,
+        "number": "27"
+      },
+      "2020": {
+        "points": 10,
+        "number": "27"
+      },
+      "2022": {
+        "points": 0,
+        "number": "27"
+      },
+      "2023": {
+        "points": 9,
+        "number": "27"
+      },
+      "2024": {
+        "points": 41,
+        "number": "27"
+      },
+      "2025": {
+        "points": 51,
+        "number": "27"
+      },
+      "2026": {
+        "points": 2,
+        "number": "27"
+      }
+    }
+  },
+  {
+    "id": "ayrton-senna",
+    "name": "Ayrton Senna",
+    "number": "2",
+    "flagCode": "br",
+    "teamId": "williams",
+    "teamName": "Williams",
+    "isCurrent": false,
+    "points": 614,
+    "seasons": {
+      "1984": {
+        "points": 13,
+        "number": "19"
+      },
+      "1985": {
+        "points": 38,
+        "number": "12"
+      },
+      "1986": {
+        "points": 55,
+        "number": "12"
+      },
+      "1987": {
+        "points": 57,
+        "number": "12"
+      },
+      "1988": {
+        "points": 90,
+        "number": "12"
+      },
+      "1989": {
+        "points": 60,
+        "number": "1"
+      },
+      "1990": {
+        "points": 78,
+        "number": "27"
+      },
+      "1991": {
+        "points": 96,
+        "number": "1"
+      },
+      "1992": {
+        "points": 50,
+        "number": "1"
+      },
+      "1993": {
+        "points": 73,
+        "number": "8"
+      },
+      "1994": {
+        "points": 0,
+        "number": "2"
+      }
+    }
+  },
+  {
+    "id": "pierre-gasly",
+    "name": "Pierre Gasly",
+    "number": "10",
+    "flagCode": "fr",
+    "teamId": "alpine",
+    "teamName": "Alpine",
+    "isCurrent": true,
+    "points": 500,
+    "seasons": {
+      "2017": {
+        "points": 0,
+        "number": "10"
+      },
+      "2018": {
+        "points": 29,
+        "number": "10"
+      },
+      "2019": {
+        "points": 95,
+        "number": "10"
+      },
+      "2020": {
+        "points": 75,
+        "number": "10"
+      },
+      "2021": {
+        "points": 110,
+        "number": "10"
+      },
+      "2022": {
+        "points": 23,
+        "number": "10"
+      },
+      "2023": {
+        "points": 62,
+        "number": "10"
+      },
+      "2024": {
+        "points": 42,
+        "number": "10"
+      },
+      "2025": {
+        "points": 22,
+        "number": "10"
+      },
+      "2026": {
+        "points": 42,
+        "number": "10"
+      }
+    }
+  },
+  {
+    "id": "esteban-ocon",
+    "name": "Esteban Ocon",
+    "number": "31",
+    "flagCode": "fr",
+    "teamId": "haas",
+    "teamName": "Haas",
+    "isCurrent": true,
+    "points": 486,
+    "seasons": {
+      "2016": {
+        "points": 0,
+        "number": "31"
+      },
+      "2017": {
+        "points": 87,
+        "number": "31"
+      },
+      "2018": {
+        "points": 49,
+        "number": "31"
+      },
+      "2020": {
+        "points": 62,
+        "number": "31"
+      },
+      "2021": {
+        "points": 74,
+        "number": "31"
+      },
+      "2022": {
+        "points": 92,
+        "number": "31"
+      },
+      "2023": {
+        "points": 58,
+        "number": "31"
+      },
+      "2024": {
+        "points": 23,
+        "number": "31"
+      },
+      "2025": {
+        "points": 38,
+        "number": "31"
+      },
+      "2026": {
+        "points": 3,
+        "number": "31"
+      }
+    }
+  },
+  {
+    "id": "nelson-piquet",
+    "name": "Nelson Piquet",
+    "number": "20",
+    "flagCode": "br",
+    "teamId": "benetton",
+    "teamName": "Benetton",
+    "isCurrent": false,
+    "points": 485.5,
+    "seasons": {
+      "1978": {
+        "points": 0,
+        "number": "66"
+      },
+      "1979": {
+        "points": 3,
+        "number": "6"
+      },
+      "1980": {
+        "points": 54,
+        "number": "5"
+      },
+      "1981": {
+        "points": 50,
+        "number": "5"
+      },
+      "1982": {
+        "points": 20,
+        "number": "1"
+      },
+      "1983": {
+        "points": 59,
+        "number": "5"
+      },
+      "1984": {
+        "points": 29,
+        "number": "1"
+      },
+      "1985": {
+        "points": 21,
+        "number": "7"
+      },
+      "1986": {
+        "points": 69,
+        "number": "6"
+      },
+      "1987": {
+        "points": 73,
+        "number": "6"
+      },
+      "1988": {
+        "points": 22,
+        "number": "1"
+      },
+      "1989": {
+        "points": 12,
+        "number": "11"
+      },
+      "1990": {
+        "points": 43,
+        "number": "20"
+      },
+      "1991": {
+        "points": 26.5,
+        "number": "20"
+      }
+    }
+  },
+  {
+    "id": "niki-lauda",
+    "name": "Niki Lauda",
+    "number": "1",
+    "flagCode": "at",
+    "teamId": "mclaren",
+    "teamName": "McLaren",
+    "isCurrent": false,
+    "points": 420.5,
+    "seasons": {
+      "1971": {
+        "points": 0
+      },
+      "1972": {
+        "points": 0
+      },
+      "1973": {
+        "points": 2
+      },
+      "1974": {
+        "points": 38,
+        "number": "12"
+      },
+      "1975": {
+        "points": 64.5,
+        "number": "12"
+      },
+      "1976": {
+        "points": 68,
+        "number": "1"
+      },
+      "1977": {
+        "points": 72,
+        "number": "11"
+      },
+      "1978": {
+        "points": 44,
+        "number": "1"
+      },
+      "1979": {
+        "points": 4,
+        "number": "5"
+      },
+      "1982": {
+        "points": 30,
+        "number": "8"
+      },
+      "1983": {
+        "points": 12,
+        "number": "8"
+      },
+      "1984": {
+        "points": 72,
+        "number": "8"
+      },
+      "1985": {
+        "points": 14,
+        "number": "1"
+      }
+    }
+  },
+  {
+    "id": "mika-hakkinen",
+    "name": "Mika Häkkinen",
+    "number": "3",
+    "flagCode": "fi",
+    "teamId": "mclaren",
+    "teamName": "McLaren",
+    "isCurrent": false,
+    "points": 420,
+    "seasons": {
+      "1991": {
+        "points": 2,
+        "number": "11"
+      },
+      "1992": {
+        "points": 11,
+        "number": "11"
+      },
+      "1993": {
+        "points": 4,
+        "number": "7"
+      },
+      "1994": {
+        "points": 26,
+        "number": "7"
+      },
+      "1995": {
+        "points": 17,
+        "number": "8"
+      },
+      "1996": {
+        "points": 31,
+        "number": "7"
+      },
+      "1997": {
+        "points": 27,
+        "number": "9"
+      },
+      "1998": {
+        "points": 100,
+        "number": "8"
+      },
+      "1999": {
+        "points": 76,
+        "number": "1"
+      },
+      "2000": {
+        "points": 89,
+        "number": "1"
+      },
+      "2001": {
+        "points": 37,
+        "number": "3"
+      }
+    }
+  },
+  {
+    "id": "kimi-antonelli",
+    "name": "Kimi Antonelli",
+    "number": "12",
+    "flagCode": "it",
+    "teamId": "mercedes",
+    "teamName": "Mercedes",
+    "isCurrent": true,
+    "points": 369,
+    "seasons": {
+      "2025": {
+        "points": 150,
+        "number": "12"
+      },
+      "2026": {
+        "points": 219,
+        "number": "12"
+      }
+    }
+  },
+  {
+    "id": "jackie-stewart",
+    "name": "Jackie Stewart",
+    "number": null,
+    "flagCode": "gb",
+    "teamId": "tyrrell",
+    "teamName": "Tyrrell",
+    "isCurrent": false,
+    "points": 360,
+    "seasons": {
+      "1965": {
+        "points": 33
+      },
+      "1966": {
+        "points": 14
+      },
+      "1967": {
+        "points": 10
+      },
+      "1968": {
+        "points": 36
+      },
+      "1969": {
+        "points": 63
+      },
+      "1970": {
+        "points": 25
+      },
+      "1971": {
+        "points": 62
+      },
+      "1972": {
+        "points": 45
+      },
+      "1973": {
+        "points": 71
+      }
+    }
+  },
+  {
+    "id": "lance-stroll",
+    "name": "Lance Stroll",
+    "number": "18",
+    "flagCode": "ca",
+    "teamId": "aston-martin",
+    "teamName": "Aston Martin",
+    "isCurrent": true,
+    "points": 325,
+    "seasons": {
+      "2017": {
+        "points": 40,
+        "number": "18"
+      },
+      "2018": {
+        "points": 6,
+        "number": "18"
+      },
+      "2019": {
+        "points": 21,
+        "number": "18"
+      },
+      "2020": {
+        "points": 75,
+        "number": "18"
+      },
+      "2021": {
+        "points": 34,
+        "number": "18"
+      },
+      "2022": {
+        "points": 18,
+        "number": "18"
+      },
+      "2023": {
+        "points": 74,
+        "number": "18"
+      },
+      "2024": {
+        "points": 24,
+        "number": "18"
+      },
+      "2025": {
+        "points": 33,
+        "number": "18"
+      },
+      "2026": {
+        "points": 0,
+        "number": "18"
+      }
+    }
+  },
+  {
+    "id": "alexander-albon",
+    "name": "Alexander Albon",
+    "number": "23",
+    "flagCode": "th",
+    "teamId": "williams",
+    "teamName": "Williams",
+    "isCurrent": true,
+    "points": 318,
+    "seasons": {
+      "2019": {
+        "points": 92,
+        "number": "23"
+      },
+      "2020": {
+        "points": 105,
+        "number": "23"
+      },
+      "2022": {
+        "points": 4,
+        "number": "23"
+      },
+      "2023": {
+        "points": 27,
+        "number": "23"
+      },
+      "2024": {
+        "points": 12,
+        "number": "23"
+      },
+      "2025": {
+        "points": 73,
+        "number": "23"
+      },
+      "2026": {
+        "points": 5,
+        "number": "23"
+      }
+    }
+  },
+  {
+    "id": "juan-manuel-fangio",
+    "name": "Juan Manuel Fangio",
+    "number": null,
+    "flagCode": "ar",
+    "teamId": "maserati",
+    "teamName": "Maserati",
+    "isCurrent": false,
+    "points": 277.64,
+    "seasons": {
+      "1950": {
+        "points": 27
+      },
+      "1951": {
+        "points": 31
+      },
+      "1953": {
+        "points": 28
+      },
+      "1954": {
+        "points": 42
+      },
+      "1955": {
+        "points": 40
+      },
+      "1956": {
+        "points": 30
+      },
+      "1957": {
+        "points": 40
+      },
+      "1958": {
+        "points": 7
+      }
+    }
+  },
+  {
+    "id": "jim-clark",
+    "name": "Jim Clark",
+    "number": null,
+    "flagCode": "gb",
+    "teamId": "lotus",
+    "teamName": "Lotus",
+    "isCurrent": false,
+    "points": 274,
+    "seasons": {
+      "1960": {
+        "points": 8
+      },
+      "1961": {
+        "points": 11
+      },
+      "1962": {
+        "points": 30
+      },
+      "1963": {
+        "points": 54
+      },
+      "1964": {
+        "points": 32
+      },
+      "1965": {
+        "points": 54
+      },
+      "1966": {
+        "points": 16
+      },
+      "1967": {
+        "points": 41
+      },
+      "1968": {
+        "points": 9
+      }
+    }
+  },
+  {
+    "id": "isack-hadjar",
+    "name": "Isack Hadjar",
+    "number": "6",
+    "flagCode": "fr",
+    "teamId": "red-bull",
+    "teamName": "Red Bull",
+    "isCurrent": true,
+    "points": 119,
+    "seasons": {
+      "2025": {
+        "points": 51,
+        "number": "6"
+      },
+      "2026": {
+        "points": 68,
+        "number": "6"
+      }
+    }
+  },
+  {
+    "id": "liam-lawson",
+    "name": "Liam Lawson",
+    "number": "30",
+    "flagCode": "nz",
+    "teamId": "racing-bulls",
+    "teamName": "Racing Bulls",
+    "isCurrent": true,
+    "points": 87,
+    "seasons": {
+      "2023": {
+        "points": 2,
+        "number": "40"
+      },
+      "2024": {
+        "points": 4,
+        "number": "30"
+      },
+      "2025": {
+        "points": 38,
+        "number": "30"
+      },
+      "2026": {
+        "points": 43,
+        "number": "30"
+      }
+    }
+  },
+  {
+    "id": "oliver-bearman",
+    "name": "Oliver Bearman",
+    "number": "87",
+    "flagCode": "gb",
+    "teamId": "haas",
+    "teamName": "Haas",
+    "isCurrent": true,
+    "points": 66,
+    "seasons": {
+      "2024": {
+        "points": 7,
+        "number": "50"
+      },
+      "2025": {
+        "points": 41,
+        "number": "87"
+      },
+      "2026": {
+        "points": 18,
+        "number": "87"
+      }
+    }
+  },
+  {
+    "id": "gabriel-bortoleto",
+    "name": "Gabriel Bortoleto",
+    "number": "5",
+    "flagCode": "br",
+    "teamId": "audi",
+    "teamName": "Audi",
+    "isCurrent": true,
+    "points": 29,
+    "seasons": {
+      "2025": {
+        "points": 19,
+        "number": "5"
+      },
+      "2026": {
+        "points": 10,
+        "number": "5"
+      }
+    }
+  },
+  {
+    "id": "franco-colapinto",
+    "name": "Franco Colapinto",
+    "number": "43",
+    "flagCode": "ar",
+    "teamId": "alpine",
+    "teamName": "Alpine",
+    "isCurrent": true,
+    "points": 24,
+    "seasons": {
+      "2024": {
+        "points": 5,
+        "number": "43"
+      },
+      "2025": {
+        "points": 0,
+        "number": "43"
+      },
+      "2026": {
+        "points": 19,
+        "number": "43"
+      }
+    }
+  },
+  {
+    "id": "arvid-lindblad",
+    "name": "Arvid Lindblad",
+    "number": "41",
+    "flagCode": "gb",
+    "teamId": "racing-bulls",
+    "teamName": "Racing Bulls",
+    "isCurrent": true,
+    "points": 23,
+    "seasons": {
+      "2026": {
+        "points": 23,
+        "number": "41"
+      }
+    }
+  }
 ]

@@ -13,9 +13,7 @@ function fakeDb(rows: unknown[]): DriverDatabase {
       // 最后车队以实际参赛末站为准，与详情页 hero 同口径
       expect(sql).toContain("ORDER BY ra2.year DESC, ra2.round DESC");
       expect(sql).toContain("test_driver = 0");
-      expect(sql).toContain("total_championship_wins DESC");
-      expect(sql).toContain("total_race_wins DESC");
-      expect(sql).toContain("total_race_entries DESC");
+      expect(sql).toContain("total_points DESC");
       return Promise.resolve([{ results: rows }]);
     },
   };
@@ -37,6 +35,7 @@ describe("createDriverRepository with database", () => {
         id: "ayrton-senna",
         name: "Ayrton Senna",
         permanent_number: null,
+        last_number: "2",
         alpha2_code: "BR",
         team_id: "senna",
         team_name: "Senna",
@@ -67,7 +66,7 @@ describe("createDriverRepository with database", () => {
       {
         id: "ayrton-senna",
         name: "Ayrton Senna",
-        number: null,
+        number: "2",
         flagCode: "br",
         teamId: "senna",
         teamName: "Senna",
@@ -94,7 +93,7 @@ describe("createDriverRepository with database", () => {
 });
 
 describe("drivers fixture", () => {
-  it("serves the curated catalog in DEV order", async () => {
+  it("serves the curated catalog sorted by career points", async () => {
     const drivers = await createDriverRepository().getDrivers();
     expect(drivers.length).toBeGreaterThanOrEqual(30);
 
@@ -106,18 +105,15 @@ describe("drivers fixture", () => {
       isCurrent: true,
     });
 
+    // 无永久车号回落最后参赛号码（senna 1994 用 2 号）
     const senna = drivers.find((d) => d.id === "ayrton-senna");
-    expect(senna).toMatchObject({ number: null, isCurrent: false });
+    expect(senna).toMatchObject({ number: "2", isCurrent: false });
 
-    // 当前车手全部排在历史车手之前
-    const firstHistorical = drivers.findIndex((d) => !d.isCurrent);
-    expect(
-      drivers.slice(firstHistorical).every((d) => !d.isCurrent),
-    ).toBe(true);
-
-    // 历史段内按生涯成就：prost（4 冠）在 senna（3 冠）前
-    const prost = drivers.findIndex((d) => d.id === "alain-prost");
-    expect(prost).toBeLessThan(drivers.findIndex((d) => d.id === "ayrton-senna"));
+    // 按生涯总积分降序：hamilton（5187.5）在 verstappen（3553.5）前
+    const hamilton = drivers.findIndex((d) => d.id === "lewis-hamilton");
+    expect(hamilton).toBeLessThan(
+      drivers.findIndex((d) => d.id === "max-verstappen"),
+    );
   });
 });
 
@@ -136,6 +132,7 @@ describe("getDriversByYear", () => {
     await createDriverRepository(db).getDriversByYear(1997);
     expect(sql).toContain("test_driver = 0");
     expect(sql).toContain("ra2.year = ?1");
+    expect(sql).toContain("ORDER BY points DESC");
     expect(values).toEqual([1997]);
   });
 
@@ -149,6 +146,7 @@ describe("getDriversByYear", () => {
                 id: "michael-schumacher",
                 name: "Michael Schumacher",
                 permanent_number: null,
+                last_number: "5",
                 alpha2_code: "DE",
                 team_id: "ferrari",
                 team_name: "Ferrari",
@@ -172,7 +170,7 @@ describe("getDriversByYear", () => {
       {
         id: "michael-schumacher",
         name: "Michael Schumacher",
-        number: null,
+        number: "5",
         flagCode: "de",
         teamId: "ferrari",
         teamName: "Ferrari",
@@ -188,6 +186,16 @@ describe("getDriversByYear", () => {
         isCurrent: false,
       },
     ]);
+  });
+
+  it("orders the DEV year view by that year's points", async () => {
+    const drivers = await createDriverRepository().getDriversByYear(1997);
+    // schumacher 78 分在 hakkinen 27 分前；hakkinen 该年用 9 号
+    expect(drivers.map((d) => d.name)).toEqual([
+      "Michael Schumacher",
+      "Mika Häkkinen",
+    ]);
+    expect(drivers[1]).toMatchObject({ number: "9" });
   });
 });
 

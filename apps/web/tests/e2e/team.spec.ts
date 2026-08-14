@@ -101,6 +101,8 @@ test("teams index lists all constructors @desktop", async ({ page }) => {
   await expect(page.locator(".team-card")).toHaveCount(187);
   await expect(page.locator('a[href="/teams/ferrari"]')).toBeVisible();
   await expect(page.locator('a[href="/teams/mercedes"]')).toBeVisible();
+  // 按总积分排序：ferrari 11338 分第一
+  await expect(page.locator(".card-name").first()).toHaveText("Ferrari");
 });
 
 test("teams index filters to a season @desktop", async ({ page }) => {
@@ -108,6 +110,8 @@ test("teams index filters to a season @desktop", async ({ page }) => {
   await expect(page.locator(".team-card")).toHaveCount(12);
   await expect(page.locator('a[href="/teams/ferrari"]')).toBeVisible();
   await expect(page.locator(".season-filter__summary")).toHaveText("1997");
+  // 按该年积分排序：1997 WCC Williams 123 分第一
+  await expect(page.locator(".card-name").first()).toHaveText("Williams");
 });
 
 test("ferrari detail filters season blocks @desktop", async ({ page }) => {

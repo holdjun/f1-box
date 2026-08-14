@@ -139,7 +139,7 @@ describe("createTeamRepository with database", () => {
     ]);
   });
 
-  it("orders the team catalog by current status and career prominence", async () => {
+  it("orders the team catalog by total points", async () => {
     let sql = "";
     const rankedDb: TeamDatabase = {
       batch(statements) {
@@ -156,10 +156,7 @@ describe("createTeamRepository with database", () => {
     };
 
     await createTeamRepository(rankedDb).getConstructors();
-    expect(sql).toContain("total_championship_wins DESC");
-    expect(sql).toContain("total_race_wins DESC");
-    expect(sql).toContain("total_race_entries DESC");
-    expect(sql).toContain("season_entrant_constructor");
+    expect(sql).toContain("ORDER BY c.total_points DESC, c.name");
   });
 
   it("builds the per-round result matrix with markers", async () => {
@@ -298,7 +295,7 @@ describe("seasonGap", () => {
 });
 
 describe("getConstructorsByYear", () => {
-  it("filters to the given year and dedupes", async () => {
+  it("filters to the given year and merges multi-line standings", async () => {
     let sql = "";
     let values: readonly unknown[] = [];
     const db: TeamDatabase = {
@@ -310,8 +307,9 @@ describe("getConstructorsByYear", () => {
     };
 
     await createTeamRepository(db).getConstructorsByYear(1997);
-    expect(sql).toContain("DISTINCT");
+    expect(sql).toContain("GROUP BY c.id, c.name");
     expect(sql).toContain("sec.year = ?1");
+    expect(sql).toContain("ORDER BY points DESC");
     expect(values).toEqual([1997]);
   });
 
@@ -327,6 +325,12 @@ describe("getConstructorsByYear", () => {
     const teams = await createTeamRepository(db).getConstructorsByYear(1997);
     expect(teams).toEqual([{ id: "ferrari", name: "Ferrari" }]);
   });
+
+  it("orders the DEV year view by that year's points", async () => {
+    const teams = await createTeamRepository().getConstructorsByYear(1997);
+    // 1997 WCC：Williams 123 分压过 Ferrari 102
+    expect(teams[0]).toEqual({ id: "williams", name: "Williams" });
+  });
 });
 
 describe("getSeasonYears", () => {
@@ -339,5 +343,10 @@ describe("getSeasonYears", () => {
 
     const years = await createTeamRepository(db).getSeasonYears();
     expect(years).toEqual([2026, 1950]);
+  });
+
+  it("orders the DEV catalog by total points", async () => {
+    const teams = await createTeamRepository().getConstructors();
+    expect(teams[0]).toEqual({ id: "ferrari", name: "Ferrari" });
   });
 });
