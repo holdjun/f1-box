@@ -12,7 +12,7 @@ import {
 import { formatUtcLongDate } from "../../lib/time.js";
 import { monogram } from "../../lib/tokens.js";
 import { parseYearParam } from "../../lib/routing.js";
-import { latestColor, vendorIndexes } from "../../lib/vendor.js";
+import { colorForYear, latestColor, vendorIndexes } from "../../lib/vendor.js";
 
 const slug = (Astro.params.id ?? "").toLowerCase();
 const repository = import.meta.env.DEV
@@ -47,7 +47,7 @@ const matrixSeasons = (driver?.seasons ?? []).flatMap((season) =>
       {
         name: team.name,
         href: `/teams/${team.id}`,
-        color: latestColor(vendorIndexes, team.id),
+        color: colorForYear(vendorIndexes, team.id, season.year),
       },
     ],
     split: index > 0,
@@ -149,7 +149,10 @@ const initialSelected = (() => {
           {driver.teamStints.map((stint, index) => (
             <span class="number-item">
               {index > 0 ? <span class="number-arrow">→</span> : null}
-              <span class="team-chip">
+              <span
+                class="team-chip"
+                style={`--stint-color: ${colorForYear(vendorIndexes, stint.id, stint.yearTo) ?? "#84909e"}`}
+              >
                 {stint.name}
                 <span class="number-years">
                   {stint.yearFrom === stint.yearTo
@@ -311,6 +314,11 @@ const initialSelected = (() => {
     border: 1px solid var(--line);
     border-radius: 999px;
     color: var(--muted-light);
+  }
+  .team-chip {
+    /* 车队名用该 stint 结束年份的队色，时间交叉时取新年份的配色 */
+    border-color: color-mix(in srgb, var(--stint-color) 45%, transparent);
+    color: var(--stint-color);
   }
   .number-years {
     color: var(--muted);

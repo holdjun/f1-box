@@ -96,6 +96,11 @@ test("russell detail shows hero, bio and current season @desktop", async ({
   await expect(teams).toContainText("Williams");
   await expect(teams.locator(".team-chip").filter({ hasText: "Mercedes" }).first()).toBeVisible();
   await expect(teams.locator("a")).toHaveCount(0);
+  // chip 用该 stint 结束年份的队色：2019–2020 Williams（#0082fa）与 2021（#005aff）不同
+  const williamsChips = teams.locator(".team-chip").filter({ hasText: "Williams" });
+  await expect(williamsChips).toHaveCount(2);
+  await expect(williamsChips.nth(0)).toHaveCSS("color", "rgb(0, 130, 250)");
+  await expect(williamsChips.nth(1)).toHaveCSS("color", "rgb(0, 90, 255)");
   // 生涯矩阵：首行车手自己（白色），队友行灰色且可链接
   const current = page.locator(".season-block.current");
   await expect(

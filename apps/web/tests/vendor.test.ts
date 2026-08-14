@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import {
+  colorForYear,
   getTeamBranding,
   latestColor,
   logoSrcFor,
@@ -61,6 +62,19 @@ describe("logo and color selection", () => {
   it("returns the latest curated colors", () => {
     expect(latestColor(indexes, "ferrari")).toBe("#dc0000");
     expect(latestColor(indexes, "unknown")).toBeNull();
+  });
+
+  it("picks the color period containing the year", () => {
+    expect(colorForYear(indexes, "ferrari", 2019)).toBe("#aaaaaa");
+    expect(colorForYear(indexes, "ferrari", 2022)).toBe("#dc0000");
+    // 早于最早 period 回落最老配色；车队缺失回落 null
+    expect(colorForYear(indexes, "ferrari", 2000)).toBe("#aaaaaa");
+    expect(colorForYear(indexes, "unknown", 2020)).toBeNull();
+  });
+
+  it("tracks real period colors by year", () => {
+    expect(colorForYear(vendorIndexes, "williams", 2020)).toBe("#0082fa");
+    expect(colorForYear(vendorIndexes, "williams", 2021)).toBe("#005aff");
   });
 });
 
