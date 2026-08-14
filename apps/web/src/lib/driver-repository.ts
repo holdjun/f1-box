@@ -116,7 +116,8 @@ export function createD1DriverDatabase(d1: D1Database): DriverDatabase {
 
 // 最后车队取自实际参赛的末站（与详情页 hero 同一口径）；相关子查询走
 // (driver_id, type) 索引逐人定位，避免全表开窗。号码在 1974 年前按站分配
-// 无身份意义，与车号时间线同口径只取 1974 起。目录按生涯总积分降序。
+// 无身份意义，与车号时间线同口径只取 1974 起。全量视图号码=永久车号，
+// 无则回落最后参赛号码。目录按生涯总积分降序。
 const driversSql = `
 WITH latest_season AS (
   SELECT MAX(year) AS year FROM season
@@ -141,8 +142,8 @@ last_race AS (
   JOIN race ra ON ra.id = rd.race_id
   JOIN constructor c ON c.id = rd.constructor_id
 )
-SELECT d.id, d.name, d.permanent_number, co.alpha2_code,
-  lr.constructor_id AS team_id, lr.team_name, lr.last_number,
+SELECT d.id, d.name, COALESCE(d.permanent_number, lr.last_number) AS number,
+  co.alpha2_code, lr.constructor_id AS team_id, lr.team_name,
   CASE WHEN cd.driver_id IS NULL THEN 0 ELSE 1 END AS is_current
 FROM driver d
 LEFT JOIN country co ON co.id = d.nationality_country_id
@@ -151,7 +152,8 @@ LEFT JOIN current_drivers cd ON cd.driver_id = d.id
 ORDER BY d.total_points DESC, d.name`;
 
 // 年份目录：卡片显示该年车队与号码（季中转会取该年最后参赛车队），按该年
-// 积分榜降序；无积分榜的（如替补）垫底按名字排。
+// 积分榜降序；无积分榜的（如替补）垫底按名字排。号码优先该年实际号码
+// （如卫冕冠军 1 号），1974 前才回落永久车号。
 const driversByYearSql = `
 WITH year_drivers AS (
   SELECT DISTINCT driver_id
@@ -172,8 +174,8 @@ last_race AS (
   )
   JOIN constructor c ON c.id = rd.constructor_id
 )
-SELECT d.id, d.name, d.permanent_number, co.alpha2_code,
-  lr.constructor_id AS team_id, lr.team_name, lr.last_number,
+SELECT d.id, d.name, COALESCE(lr.last_number, d.permanent_number) AS number,
+  co.alpha2_code, lr.constructor_id AS team_id, lr.team_name,
   COALESCE(sds.points, 0) AS points
 FROM year_drivers yd
 JOIN driver d ON d.id = yd.driver_id
@@ -222,14 +224,16 @@ WHERE ra.year IN (
 ORDER BY ra.year, ra.round`;
 
 // 行=该年该车手的 constructor 条目；first_round 定行序（季中转会多行）
+// 行=该年该车手的 constructor 条目；车队块按该队最后参赛轮次降序，换队后
+// 的车队在上，临时替补（如只跑一场）也遵循同一口径
 const teamsSql = `
-SELECT ra.year, rr.constructor_id AS id, c.name, MIN(ra.round) AS first_round
+SELECT ra.year, rr.constructor_id AS id, c.name, MAX(ra.round) AS last_round
 FROM race ra
 JOIN race_result rr ON rr.race_id = ra.id
 JOIN constructor c ON c.id = rr.constructor_id
 WHERE rr.driver_id = ?1
 GROUP BY ra.year, rr.constructor_id, c.name
-ORDER BY ra.year DESC, first_round`;
+ORDER BY ra.year DESC, last_round DESC`;
 
 const resultsSql = `
 SELECT ra.year, ra.round, rr.constructor_id, rr.position_text, rr.pole_position,
@@ -460,7 +464,7 @@ function mapDriverRow(row: unknown): DriverSummary {
   return {
     id: asString(record.id, "driver id"),
     name: asString(record.name, "driver name"),
-    number: permanentOrLastNumber(record),
+    number: record.number == null ? null : asString(record.number, "driver number"),
     // 国旗 SVG 以 alpha2 小写命名
     flagCode:
       record.alpha2_code == null
@@ -476,17 +480,6 @@ function mapDriverRow(row: unknown): DriverSummary {
         : asString(record.team_name, "driver team name"),
     isCurrent: record.is_current === 1,
   };
-}
-
-// 无永久车号的车手回落最后一次参赛号码（1974 前号码按站分配，视为无）
-function permanentOrLastNumber(record: Record<string, unknown>): string | null {
-  if (record.permanent_number != null) {
-    return asString(record.permanent_number, "driver number");
-  }
-  if (record.last_number != null) {
-    return asString(record.last_number, "driver last number");
-  }
-  return null;
 }
 
 function parseIdentity(

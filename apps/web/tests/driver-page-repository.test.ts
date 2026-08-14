@@ -152,8 +152,9 @@ describe("createDriverRepository with database", () => {
       { year: 2017, round: 4, code: "RUS", name: "Russia", circuit_id: "sochi" },
     ],
     [TEAMS]: [
-      { year: 2017, id: "toro-rosso", name: "Toro Rosso", first_round: 1 },
-      { year: 2017, id: "renault", name: "Renault", first_round: 3 },
+      // SQL 已按 last_round 降序返回：换队后的 Renault 在前
+      { year: 2017, id: "renault", name: "Renault", last_round: 4 },
+      { year: 2017, id: "toro-rosso", name: "Toro Rosso", last_round: 2 },
     ],
     [TEAMMATE_RESULTS]: [
       { year: 2017, round: 1, driver_id: "teammate-a", name: "Teammate A", alpha2_code: "FR", constructor_id: "toro-rosso", position_text: "5", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 5 },
@@ -199,28 +200,42 @@ describe("createDriverRepository with database", () => {
     });
   });
 
+  it("orders team blocks by the team's last round descending", async () => {
+    let sql = "";
+    const db: DriverDatabase = {
+      batch(statements) {
+        sql = statements.find((s) => s.sql.includes(TEAMS))?.sql ?? "";
+        return Promise.resolve(statements.map(() => ({ results: [] })));
+      },
+    };
+
+    await createDriverRepository(db).getDriver("test-driver");
+    expect(sql).toContain("MAX(ra.round) AS last_round");
+    expect(sql).toContain("ORDER BY ra.year DESC, last_round DESC");
+  });
+
   it("splits a mid-season transfer into two team rows with aligned cells", async () => {
     const driver = await createDriverRepository(fakeDb(base)).getDriver("test-driver");
     const season = driver?.seasons[0];
     expect(season?.year).toBe(2017);
-    expect(season?.rounds).toHaveLength(4);
-    expect(season?.teams.map((t) => t.name)).toEqual(["Toro Rosso", "Renault"]);
+    // 车队块按最后参赛轮次降序：换队后的 Renault 在 Toro Rosso 之上
+    expect(season?.teams.map((t) => t.name)).toEqual(["Renault", "Toro Rosso"]);
     expect(season?.teams[0].results.map((c) => c?.text ?? null)).toEqual([
-      "9",
-      "10",
-      null,
-      null,
-    ]);
-    expect(season?.teams[1].results.map((c) => c?.text ?? null)).toEqual([
       null,
       null,
       "7",
       "DNF",
     ]);
+    expect(season?.teams[1].results.map((c) => c?.text ?? null)).toEqual([
+      "9",
+      "10",
+      null,
+      null,
+    ]);
     // pole / fastest / classified（DNF 但有 position_number 才算）标记
-    expect(season?.teams[1].results[2]?.pole).toBe(true);
-    expect(season?.teams[1].results[3]?.fastest).toBe(true);
-    expect(season?.teams[1].results[3]?.classified).toBe(false);
+    expect(season?.teams[0].results[2]?.pole).toBe(true);
+    expect(season?.teams[0].results[3]?.fastest).toBe(true);
+    expect(season?.teams[0].results[3]?.classified).toBe(false);
     // standings 落位
     expect(season?.position).toBe("10");
     expect(season?.points).toBe(54);
@@ -230,20 +245,20 @@ describe("createDriverRepository with database", () => {
     const driver = await createDriverRepository(fakeDb(base)).getDriver("test-driver");
     const season = driver?.seasons[0];
     expect(season?.teams.map((t) => t.teammates.map((m) => m.name))).toEqual([
-      ["Teammate A"],
       ["Teammate B"],
+      ["Teammate A"],
     ]);
     expect(season?.teams[0].teammates[0]).toMatchObject({
-      id: "teammate-a",
-      flagCode: "fr",
+      id: "teammate-b",
+      flagCode: "de",
     });
     // 队友只在自己参赛的站有结果，矩阵与 rounds 对齐
     expect(
       season?.teams[0].teammates[0].results.map((c) => c?.text ?? null),
-    ).toEqual(["5", "6", null, null]);
+    ).toEqual([null, null, "8", "11"]);
     expect(
       season?.teams[1].teammates[0].results.map((c) => c?.text ?? null),
-    ).toEqual([null, null, "8", "11"]);
+    ).toEqual(["5", "6", null, null]);
   });
 
   it("exposes retired gating data (latest season older than active season)", async () => {

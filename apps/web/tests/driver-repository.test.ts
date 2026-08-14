@@ -25,7 +25,7 @@ describe("createDriverRepository with database", () => {
       {
         id: "george-russell",
         name: "George Russell",
-        permanent_number: "63",
+        number: "63",
         alpha2_code: "GB",
         team_id: "mercedes",
         team_name: "Mercedes",
@@ -34,8 +34,7 @@ describe("createDriverRepository with database", () => {
       {
         id: "ayrton-senna",
         name: "Ayrton Senna",
-        permanent_number: null,
-        last_number: "2",
+        number: "2",
         alpha2_code: "BR",
         team_id: "senna",
         team_name: "Senna",
@@ -44,7 +43,7 @@ describe("createDriverRepository with database", () => {
       {
         id: "no-team-driver",
         name: "No Team Driver",
-        permanent_number: null,
+        number: null,
         alpha2_code: null,
         team_id: null,
         team_name: null,
@@ -133,6 +132,8 @@ describe("getDriversByYear", () => {
     expect(sql).toContain("test_driver = 0");
     expect(sql).toContain("ra2.year = ?1");
     expect(sql).toContain("ORDER BY points DESC");
+    // 年份视图号码优先该年实际号码
+    expect(sql).toContain("COALESCE(lr.last_number, d.permanent_number)");
     expect(values).toEqual([1997]);
   });
 
@@ -145,8 +146,7 @@ describe("getDriversByYear", () => {
               {
                 id: "michael-schumacher",
                 name: "Michael Schumacher",
-                permanent_number: null,
-                last_number: "5",
+                number: "5",
                 alpha2_code: "DE",
                 team_id: "ferrari",
                 team_name: "Ferrari",
@@ -154,7 +154,7 @@ describe("getDriversByYear", () => {
               {
                 id: "no-team",
                 name: "No Team",
-                permanent_number: null,
+                number: null,
                 alpha2_code: null,
                 team_id: null,
                 team_name: null,
@@ -196,6 +196,14 @@ describe("getDriversByYear", () => {
       "Mika Häkkinen",
     ]);
     expect(drivers[1]).toMatchObject({ number: "9" });
+  });
+
+  it("shows that year's race number over the permanent one", async () => {
+    // verstappen 永久 3 号，但 2023 作为卫冕冠军用 1 号
+    const drivers = await createDriverRepository().getDriversByYear(2023);
+    expect(drivers.find((d) => d.id === "max-verstappen")).toMatchObject({
+      number: "1",
+    });
   });
 });
 

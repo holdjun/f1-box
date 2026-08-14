@@ -125,6 +125,22 @@ test("verstappen detail shows number history and champion blocks @desktop", asyn
   await expect(numbers).toContainText("2015–2021");
   await expect(numbers).toContainText("2022–2025");
   await expect(page.locator(".season-block.champion").first()).toBeVisible();
+  // 2016 季中转队：换队后的 Red Bull 在 Toro Rosso 之上
+  const blocks2016 = page.locator(".season-block").filter({
+    has: page.locator(".season-year", { hasText: "2016" }),
+  });
+  await expect(blocks2016).toHaveCount(2);
+  await expect(blocks2016.nth(0)).toContainText("Red Bull");
+  await expect(blocks2016.nth(1)).toContainText("Toro Rosso");
+});
+
+test("year view shows that year's race number over the permanent one @desktop", async ({
+  page,
+}) => {
+  await page.goto("/drivers?year=2023");
+  // verstappen 永久 3 号，但 2023 作为卫冕冠军用 1 号
+  const card = page.locator('a[href="/drivers/max-verstappen"]');
+  await expect(card.locator(".card-number")).toHaveText("1");
 });
 
 test("unknown driver returns 404 @desktop", async ({ page }) => {
