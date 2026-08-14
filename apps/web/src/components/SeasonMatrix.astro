@@ -81,7 +81,9 @@ const isBlockHidden = (year: number) =>
       {season.split ? (
         <div
           class="team-split"
+          data-season-block={season.year}
           role="separator"
+          hidden={isBlockHidden(season.year)}
           aria-label="Mid-season team change"
         >
           Mid-season team change

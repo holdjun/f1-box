@@ -145,6 +145,9 @@ test("drivers detail filters season blocks @desktop", async ({ page }) => {
   await panel.getByRole("button", { name: "2021", exact: true }).click();
   await expect(page.locator(".season-block:visible")).toHaveCount(1);
   await expect(page.locator(".season-block:visible .season-year")).toHaveText("2021");
+  // 转队分隔线属于 2020，隐藏年份时不应残留
+  await expect(page.locator(".team-split:visible")).toHaveCount(0);
+  await expect(page.locator(".season-gap:visible")).toHaveCount(0);
   // 多选：追加 2020（两队拆成两个表）
   await panel.getByRole("button", { name: "2020", exact: true }).click();
   await expect(page.locator(".season-block:visible")).toHaveCount(3);
