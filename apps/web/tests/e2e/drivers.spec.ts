@@ -82,10 +82,17 @@ test("russell detail shows hero, bio and current season @desktop", async ({
   await expect(teams).toContainText("Williams");
   await expect(teams.locator(".team-chip").filter({ hasText: "Mercedes" }).first()).toBeVisible();
   await expect(teams.locator("a")).toHaveCount(0);
-  // 生涯矩阵：第一行是车手自己（加粗），队友行跟进且可链接
+  // 生涯矩阵：首行车手自己（白色），队友行灰色带车队标注且可链接
   const current = page.locator(".season-block.current");
-  await expect(current.locator(".driver-cell .driver-link.emphasis")).toHaveText("George Russell");
-  await expect(current.locator(".driver-cell a[href='/drivers/kimi-antonelli']")).toBeVisible();
+  await expect(
+    current.locator(".driver-cell .driver-link").first(),
+  ).toHaveText("George Russell");
+  const antonelli = current.locator(
+    ".driver-cell a[href='/drivers/kimi-antonelli']",
+  );
+  await expect(antonelli).toBeVisible();
+  await expect(antonelli).toHaveClass(/is-muted/);
+  await expect(current.locator(".row-team")).toContainText("Mercedes");
 });
 
 test("verstappen detail shows number history and champion blocks @desktop", async ({

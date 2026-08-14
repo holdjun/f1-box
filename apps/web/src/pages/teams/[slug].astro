@@ -40,7 +40,7 @@ const matrixSeasons = (team?.seasons ?? []).map((season) => ({
   metaText: [season.chassis.join(" / "), season.engines.join(" / ")]
     .filter((part) => part.length > 0)
     .join(" · "),
-  metaHref: null,
+  metaLinks: [],
   tyres: season.tyres,
   rounds: season.rounds,
   rows: season.drivers.map((driver) => ({

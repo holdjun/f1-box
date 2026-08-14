@@ -157,10 +157,10 @@ describe("createDriverRepository with database", () => {
       { year: 2017, id: "renault", name: "Renault", first_round: 3 },
     ],
     [TEAMMATE_RESULTS]: [
-      { year: 2017, round: 1, driver_id: "teammate-a", name: "Teammate A", alpha2_code: "FR", position_text: "5", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 5 },
-      { year: 2017, round: 2, driver_id: "teammate-a", name: "Teammate A", alpha2_code: "FR", position_text: "6", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 6 },
-      { year: 2017, round: 3, driver_id: "teammate-b", name: "Teammate B", alpha2_code: "DE", position_text: "8", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 8 },
-      { year: 2017, round: 4, driver_id: "teammate-b", name: "Teammate B", alpha2_code: "DE", position_text: "11", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 11 },
+      { year: 2017, round: 1, driver_id: "teammate-a", name: "Teammate A", alpha2_code: "FR", team_name: "Toro Rosso", position_text: "5", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 5 },
+      { year: 2017, round: 2, driver_id: "teammate-a", name: "Teammate A", alpha2_code: "FR", team_name: "Toro Rosso", position_text: "6", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 6 },
+      { year: 2017, round: 3, driver_id: "teammate-b", name: "Teammate B", alpha2_code: "DE", team_name: "Renault", position_text: "8", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 8 },
+      { year: 2017, round: 4, driver_id: "teammate-b", name: "Teammate B", alpha2_code: "DE", team_name: "Renault", position_text: "11", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 11 },
     ],
     [RESULTS]: [
       { year: 2017, round: 1, constructor_id: "toro-rosso", position_text: "9", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 9 },
@@ -231,7 +231,12 @@ describe("createDriverRepository with database", () => {
     const driver = await createDriverRepository(fakeDb(base)).getDriver("test-driver");
     const season = driver?.seasons[0];
     expect(season?.teammates.map((t) => t.name)).toEqual(["Teammate A", "Teammate B"]);
-    expect(season?.teammates[0]).toMatchObject({ id: "teammate-a", flagCode: "fr" });
+    expect(season?.teammates[0]).toMatchObject({
+      id: "teammate-a",
+      flagCode: "fr",
+      teamName: "Toro Rosso",
+    });
+    expect(season?.teammates[1]).toMatchObject({ teamName: "Renault" });
     // 队友只在自己参赛的站有结果，矩阵与 rounds 对齐
     expect(season?.teammates[0].results.map((c) => c?.text ?? null)).toEqual([
       "5",

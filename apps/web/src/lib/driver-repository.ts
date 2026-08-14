@@ -52,6 +52,7 @@ export interface DriverSeasonTeammate {
   id: string;
   name: string;
   flagCode: string | null;
+  teamName: string | null;
   results: (RaceCell | null)[];
 }
 
@@ -242,11 +243,13 @@ WHERE srr.driver_id = ?1 AND srr.position_number IS NOT NULL`;
 // 队友：该车手效力车队里的其他车手（替补亦含），结果按站取最佳
 const teammateResultsSql = `
 SELECT ra.year, ra.round, rr.driver_id, d.name, cn.alpha2_code,
+  c.name AS team_name,
   rr.position_text, rr.pole_position, rr.fastest_lap, rr.reason_retired,
   rr.position_number
 FROM race ra
 JOIN race_result rr ON rr.race_id = ra.id
 JOIN driver d ON d.id = rr.driver_id
+JOIN constructor c ON c.id = rr.constructor_id
 LEFT JOIN country cn ON cn.id = d.nationality_country_id
 WHERE rr.driver_id <> ?1
   AND EXISTS (
@@ -648,7 +651,7 @@ function mergeDriverSeasons(
 
   const teammateCells = new Map<
     string,
-    { id: string; name: string; flagCode: string | null; byRound: Map<number, RaceCell> }
+    { id: string; name: string; flagCode: string | null; teamName: string | null; byRound: Map<number, RaceCell> }
   >();
   for (const row of teammateResultRows) {
     const record = asRecord(row, "teammate result row");
@@ -665,6 +668,10 @@ function mergeDriverSeasons(
           record.alpha2_code == null
             ? null
             : asString(record.alpha2_code, "teammate flag").toLowerCase(),
+        teamName:
+          record.team_name == null
+            ? null
+            : asString(record.team_name, "teammate team"),
         byRound: new Map(),
       };
       teammateCells.set(key, entry);
@@ -687,6 +694,7 @@ function mergeDriverSeasons(
         id: entry.id,
         name: entry.name,
         flagCode: entry.flagCode,
+        teamName: entry.teamName,
         results: rawRounds.get(year)!.map((r) => entry.byRound.get(r.round) ?? null),
       }))
       .sort((a, b) => a.name.localeCompare(b.name));

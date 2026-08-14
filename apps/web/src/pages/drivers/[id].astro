@@ -46,14 +46,14 @@ const matrixSeasons = (driver?.seasons ?? []).map((season) => {
         .map((team) => team.results[index])
         .find((cell) => cell !== null) ?? null,
   );
-  const singleTeam = season.teams.length === 1 ? season.teams[0] : null;
   return {
     year: season.year,
     metaText: season.teams.map((team) => team.name).join(" / "),
-    metaHref: singleTeam ? `/teams/${singleTeam.id}` : null,
-    metaColor: singleTeam
-      ? (latestColor(vendorIndexes, singleTeam.id) ?? null)
-      : null,
+    metaLinks: season.teams.map((team) => ({
+      name: team.name,
+      href: `/teams/${team.id}`,
+      color: latestColor(vendorIndexes, team.id),
+    })),
     rounds: season.rounds,
     rows: [
       {
@@ -61,7 +61,6 @@ const matrixSeasons = (driver?.seasons ?? []).map((season) => {
         href: null,
         flagCode: driver?.alpha2Code.toLowerCase() ?? null,
         highlight: false,
-        emphasis: true,
         results: driverResults,
       },
       ...season.teammates.map((teammate) => ({
@@ -69,7 +68,8 @@ const matrixSeasons = (driver?.seasons ?? []).map((season) => {
         href: `/drivers/${teammate.id}`,
         flagCode: teammate.flagCode,
         highlight: false,
-        emphasis: false,
+        muted: true,
+        teamName: teammate.teamName,
         results: teammate.results,
       })),
     ],
@@ -127,7 +127,7 @@ const initialSelected = (() => {
         </div>
       </header>
 
-      {driver.numberStints.length > 1 ? (
+      {driver.numberStints.length > 0 ? (
         <div class="number-history" aria-label="Car number history">
           <span class="number-label">Car number</span>
           {driver.numberStints.map((stint, index) => (

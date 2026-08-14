@@ -14,14 +14,19 @@ interface MatrixRow {
   href: string | null;
   flagCode: string | null;
   highlight: boolean;
-  emphasis?: boolean;
+  muted?: boolean;
+  teamName?: string | null;
   results: (RaceCell | null)[];
+}
+export interface MatrixSeasonMetaLink {
+  name: string;
+  href: string;
+  color: string | null;
 }
 export interface MatrixSeason {
   year: number;
   metaText: string;
-  metaHref: string | null;
-  metaColor?: string | null;
+  metaLinks: MatrixSeasonMetaLink[];
   tyres?: string[];
   rounds: MatrixRound[];
   rows: MatrixRow[];
@@ -97,12 +102,19 @@ const isBlockHidden = (year: number) =>
       >
         <h3>
           <span class="season-year">{season.year}</span>
-          {season.metaHref ? (
-            <a
-              class="season-meta"
-              href={season.metaHref}
-              style={season.metaColor ? `--meta-color: ${season.metaColor}` : undefined}
-            >{season.metaText}</a>
+          {season.metaLinks.length > 0 ? (
+            season.metaLinks.map((link, index) => (
+              <>
+                {index > 0 ? (
+                  <span class="season-meta" aria-hidden="true">/</span>
+                ) : null}
+                <a
+                  class="season-meta season-meta--link"
+                  href={link.href}
+                  style={link.color ? `--meta-color: ${link.color}` : undefined}
+                >{link.name}</a>
+              </>
+            ))
           ) : (
             <span class="season-meta">{season.metaText}</span>
           )}
@@ -151,7 +163,7 @@ const isBlockHidden = (year: number) =>
                         <a
                           class:list={[
                             "driver-link",
-                            { "driver-champion": row.highlight, emphasis: row.emphasis },
+                            { "driver-champion": row.highlight, "is-muted": row.muted },
                           ]}
                           href={row.href}
                           title={row.highlight ? "Drivers' champion" : undefined}
@@ -159,10 +171,13 @@ const isBlockHidden = (year: number) =>
                           {row.name}
                         </a>
                       ) : (
-                        <span class:list={["driver-link", { emphasis: row.emphasis }]}>
+                        <span class:list={["driver-link", { "is-muted": row.muted }]}>
                           {row.name}
                         </span>
                       )}
+                      {row.teamName ? (
+                        <span class="row-team">{row.teamName}</span>
+                      ) : null}
                     </th>
                     {row.results.map((cell) =>
                       cell ? (
@@ -238,8 +253,11 @@ const isBlockHidden = (year: number) =>
     color: var(--muted);
     text-decoration: none;
   }
-  a.season-meta:hover {
-    color: var(--meta-color, var(--coral));
+  a.season-meta--link {
+    color: var(--meta-color, var(--muted));
+  }
+  a.season-meta--link:hover {
+    text-decoration: underline;
   }
   .driver-link.emphasis {
     font-weight: 700;
@@ -306,9 +324,17 @@ const isBlockHidden = (year: number) =>
     color: inherit;
     text-decoration: none;
   }
-  .driver-link:hover {
-    color: var(--coral);
+  a.driver-link:hover {
+    color: var(--paper);
     text-decoration: underline;
+  }
+  .driver-link.is-muted {
+    color: var(--muted);
+  }
+  .row-team {
+    margin-left: 0.5rem;
+    color: var(--muted);
+    font-size: 0.72rem;
   }
   .driver-champion {
     color: #ffc72c;
