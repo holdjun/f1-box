@@ -15,7 +15,6 @@ interface MatrixRow {
   flagCode: string | null;
   highlight: boolean;
   muted?: boolean;
-  teamName?: string | null;
   results: (RaceCell | null)[];
 }
 export interface MatrixSeasonMetaLink {
@@ -27,6 +26,7 @@ export interface MatrixSeason {
   year: number;
   metaText: string;
   metaLinks: MatrixSeasonMetaLink[];
+  split?: boolean;
   tyres?: string[];
   rounds: MatrixRound[];
   rows: MatrixRow[];
@@ -48,7 +48,7 @@ const {
   showChampionKey = false,
   initialSelected = null,
 } = Astro.props;
-const filterYears = seasons.map((season) => season.year);
+const filterYears = [...new Set(seasons.map((season) => season.year))];
 // 有初始筛选时，未选中的赛季块不渲染显式（hidden 由客户端同步）
 const isBlockHidden = (year: number) =>
   initialSelected !== null && !initialSelected.includes(year);
@@ -78,7 +78,15 @@ const isBlockHidden = (year: number) =>
   const gap = prev ? seasonGap(prev.year, season.year) : null;
   return (
     <>
-      {gap ? (
+      {season.split ? (
+        <div
+          class="team-split"
+          role="separator"
+          aria-label="Mid-season team change"
+        >
+          Mid-season team change
+        </div>
+      ) : gap ? (
         <div
           class="season-gap"
           data-season-block={season.year}
@@ -175,9 +183,6 @@ const isBlockHidden = (year: number) =>
                           {row.name}
                         </span>
                       )}
-                      {row.teamName ? (
-                        <span class="row-team">{row.teamName}</span>
-                      ) : null}
                     </th>
                     {row.results.map((cell) =>
                       cell ? (
@@ -331,10 +336,39 @@ const isBlockHidden = (year: number) =>
   .driver-link.is-muted {
     color: var(--muted);
   }
-  .row-team {
-    margin-left: 0.5rem;
+  .team-split {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin: 1.2rem 0 0 0.9rem;
     color: var(--muted);
-    font-size: 0.72rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .team-split::before {
+    content: "";
+    flex: none;
+    width: 2px;
+    height: 2.6rem;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      color-mix(in srgb, var(--coral) 65%, var(--line))
+    );
+  }
+  .team-split::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: repeating-linear-gradient(
+      to right,
+      var(--line) 0 5px,
+      transparent 5px 9px
+    );
+  }
+  .team-split + .season-block {
+    margin-top: 1rem;
   }
   .driver-champion {
     color: #ffc72c;

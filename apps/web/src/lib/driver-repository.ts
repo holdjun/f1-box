@@ -46,13 +46,13 @@ export interface DriverSeasonTeam {
   id: string;
   name: string;
   results: (RaceCell | null)[];
+  teammates: DriverSeasonTeammate[];
 }
 
 export interface DriverSeasonTeammate {
   id: string;
   name: string;
   flagCode: string | null;
-  teamName: string | null;
   results: (RaceCell | null)[];
 }
 
@@ -60,7 +60,6 @@ export interface DriverSeason {
   year: number;
   rounds: SeasonRound[];
   teams: DriverSeasonTeam[];
-  teammates: DriverSeasonTeammate[];
   points: number | null;
   position: string | null;
   championshipWon: boolean;
@@ -243,13 +242,12 @@ WHERE srr.driver_id = ?1 AND srr.position_number IS NOT NULL`;
 // 队友：该车手效力车队里的其他车手（替补亦含），结果按站取最佳
 const teammateResultsSql = `
 SELECT ra.year, ra.round, rr.driver_id, d.name, cn.alpha2_code,
-  c.name AS team_name,
+  rr.constructor_id,
   rr.position_text, rr.pole_position, rr.fastest_lap, rr.reason_retired,
   rr.position_number
 FROM race ra
 JOIN race_result rr ON rr.race_id = ra.id
 JOIN driver d ON d.id = rr.driver_id
-JOIN constructor c ON c.id = rr.constructor_id
 LEFT JOIN country cn ON cn.id = d.nationality_country_id
 WHERE rr.driver_id <> ?1
   AND EXISTS (
@@ -545,7 +543,7 @@ export function mergeTeamStints(seasons: DriverSeason[]): TeamStint[] {
 function withTeamStints(page: Omit<DriverPage, "teamStints">): DriverPage {
   const seasons = page.seasons.map((season) => ({
     ...season,
-    teammates: season.teammates ?? [],
+    teams: season.teams.map((team) => ({ ...team, teammates: team.teammates ?? [] })),
   }));
   return { ...page, seasons, teamStints: mergeTeamStints(page.seasons) };
 }
@@ -577,7 +575,6 @@ function mergeDriverSeasons(
         year,
         rounds: [],
         teams: [],
-        teammates: [],
         points: null,
         position: null,
         championshipWon: false,
@@ -616,30 +613,7 @@ function mergeDriverSeasons(
     );
   }
 
-  for (const row of teamRows) {
-    const record = asRecord(row, "driver team row");
-    const year = asNumber(record.year, "driver team year");
-    // team 年份必然在 roundsSql 并集里，season 必存在
-    const season = seasons.get(year)!;
-    const constructorId = asString(record.id, "driver team id");
-    const byRound = cells.get(`${year}:${constructorId}`);
-    season.teams.push({
-      id: constructorId,
-      name: asString(record.name, "driver team name"),
-      results: rawRounds.get(year)!.map((r) => byRound?.get(r.round) ?? null),
-    });
-  }
-
-  for (const row of standingRows) {
-    const record = asRecord(row, "driver standing row");
-    const season = seasons.get(asNumber(record.year, "driver standing year"));
-    if (!season) continue;
-    season.points = asNumber(record.points, "driver standing points");
-    season.position = asString(record.position_text, "driver standing position");
-    season.championshipWon = season.championshipWon || record.championship_won === 1;
-  }
-
-  // 队友结果与冲刺排名：按 (year, driver) 分组，矩阵对齐 rounds
+  // 队友结果与冲刺排名：按 (year, constructor) 分组，矩阵对齐 rounds
   const teammateSprintRanks = new Map<string, number>();
   for (const row of teammateSprintRankRows) {
     const record = asRecord(row, "teammate sprint rank row");
@@ -651,15 +625,21 @@ function mergeDriverSeasons(
 
   const teammateCells = new Map<
     string,
-    { id: string; name: string; flagCode: string | null; teamName: string | null; byRound: Map<number, RaceCell> }
+    Map<string, { id: string; name: string; flagCode: string | null; byRound: Map<number, RaceCell> }>
   >();
   for (const row of teammateResultRows) {
     const record = asRecord(row, "teammate result row");
     const year = asNumber(record.year, "teammate result year");
     const round = asNumber(record.round, "teammate result round");
     const driverId = asString(record.driver_id, "teammate result driver");
-    const key = `${year}:${driverId}`;
-    let entry = teammateCells.get(key);
+    const constructorId = asString(record.constructor_id, "teammate result constructor");
+    const groupKey = `${year}:${constructorId}`;
+    let group = teammateCells.get(groupKey);
+    if (!group) {
+      group = new Map();
+      teammateCells.set(groupKey, group);
+    }
+    let entry = group.get(driverId);
     if (!entry) {
       entry = {
         id: driverId,
@@ -668,13 +648,9 @@ function mergeDriverSeasons(
           record.alpha2_code == null
             ? null
             : asString(record.alpha2_code, "teammate flag").toLowerCase(),
-        teamName:
-          record.team_name == null
-            ? null
-            : asString(record.team_name, "teammate team"),
         byRound: new Map(),
       };
-      teammateCells.set(key, entry);
+      group.set(driverId, entry);
     }
     // 共享赛车多行，SQL 按排名序，首条即最佳成绩
     if (entry.byRound.has(round)) continue;
@@ -687,17 +663,38 @@ function mergeDriverSeasons(
     );
   }
 
-  for (const [year, season] of seasons) {
-    season.teammates = [...teammateCells.entries()]
-      .filter(([key]) => key.startsWith(`${year}:`))
-      .map(([, entry]) => ({
+  for (const row of teamRows) {
+    const record = asRecord(row, "driver team row");
+    const year = asNumber(record.year, "driver team year");
+    // team 年份必然在 roundsSql 并集里，season 必存在
+    const season = seasons.get(year)!;
+    const constructorId = asString(record.id, "driver team id");
+    const byRound = cells.get(`${year}:${constructorId}`);
+    const teammates = [
+      ...(teammateCells.get(`${year}:${constructorId}`)?.values() ?? []),
+    ]
+      .map((entry) => ({
         id: entry.id,
         name: entry.name,
         flagCode: entry.flagCode,
-        teamName: entry.teamName,
         results: rawRounds.get(year)!.map((r) => entry.byRound.get(r.round) ?? null),
       }))
       .sort((a, b) => a.name.localeCompare(b.name));
+    season.teams.push({
+      id: constructorId,
+      name: asString(record.name, "driver team name"),
+      results: rawRounds.get(year)!.map((r) => byRound?.get(r.round) ?? null),
+      teammates,
+    });
+  }
+
+  for (const row of standingRows) {
+    const record = asRecord(row, "driver standing row");
+    const season = seasons.get(asNumber(record.year, "driver standing year"));
+    if (!season) continue;
+    season.points = asNumber(record.points, "driver standing points");
+    season.position = asString(record.position_text, "driver standing position");
+    season.championshipWon = season.championshipWon || record.championship_won === 1;
   }
 
   return [...seasons.values()].sort((a, b) => b.year - a.year);

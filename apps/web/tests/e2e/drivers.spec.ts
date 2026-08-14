@@ -82,7 +82,7 @@ test("russell detail shows hero, bio and current season @desktop", async ({
   await expect(teams).toContainText("Williams");
   await expect(teams.locator(".team-chip").filter({ hasText: "Mercedes" }).first()).toBeVisible();
   await expect(teams.locator("a")).toHaveCount(0);
-  // 生涯矩阵：首行车手自己（白色），队友行灰色带车队标注且可链接
+  // 生涯矩阵：首行车手自己（白色），队友行灰色且可链接
   const current = page.locator(".season-block.current");
   await expect(
     current.locator(".driver-cell .driver-link").first(),
@@ -92,7 +92,14 @@ test("russell detail shows hero, bio and current season @desktop", async ({
   );
   await expect(antonelli).toBeVisible();
   await expect(antonelli).toHaveClass(/is-muted/);
-  await expect(current.locator(".row-team")).toContainText("Mercedes");
+  // 2020 两队拆成两个表，中间有转队连线
+  await expect(page.locator(".team-split")).toHaveCount(1);
+  const block2020 = page.locator(".season-block").filter({
+    has: page.locator(".season-year", { hasText: "2020" }),
+  });
+  await expect(block2020).toHaveCount(2);
+  await expect(block2020.nth(0)).toContainText("Nicholas Latifi");
+  await expect(block2020.nth(1)).toContainText("Valtteri Bottas");
 });
 
 test("verstappen detail shows number history and champion blocks @desktop", async ({
@@ -138,12 +145,12 @@ test("drivers detail filters season blocks @desktop", async ({ page }) => {
   await panel.getByRole("button", { name: "2021", exact: true }).click();
   await expect(page.locator(".season-block:visible")).toHaveCount(1);
   await expect(page.locator(".season-block:visible .season-year")).toHaveText("2021");
-  // 多选：追加 2020
+  // 多选：追加 2020（两队拆成两个表）
   await panel.getByRole("button", { name: "2020", exact: true }).click();
-  await expect(page.locator(".season-block:visible")).toHaveCount(2);
-  // All 一键回到全量
+  await expect(page.locator(".season-block:visible")).toHaveCount(3);
+  // All 一键回到全量（8 年 9 个表：2020 拆两表）
   await panel.getByRole("button", { name: "All", exact: true }).click();
-  await expect(page.locator(".season-block:visible")).toHaveCount(8);
+  await expect(page.locator(".season-block:visible")).toHaveCount(9);
 });
 
 test("drivers detail selects a decade then adds a year @desktop", async ({
@@ -152,11 +159,11 @@ test("drivers detail selects a decade then adds a year @desktop", async ({
   await page.goto("/drivers/george-russell");
   await page.getByRole("button", { name: "Filter by season" }).click();
   const panel = page.locator(".season-filter__panel");
-  // 整组选 2020s（2020–2026）再追加 2019，得到 8 个全部——验证年代 + 单年组合
+  // 整组选 2020s（2020–2026，2020 两表）再追加 2019
   await panel.getByRole("button", { name: "2020s", exact: true }).click();
-  await expect(page.locator(".season-block:visible")).toHaveCount(7);
-  await panel.getByRole("button", { name: "2019", exact: true }).click();
   await expect(page.locator(".season-block:visible")).toHaveCount(8);
+  await panel.getByRole("button", { name: "2019", exact: true }).click();
+  await expect(page.locator(".season-block:visible")).toHaveCount(9);
 });
 
 test("drivers detail filters via URL @desktop", async ({ page }) => {

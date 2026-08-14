@@ -38,22 +38,19 @@ const latestTeam = driver?.seasons[0]?.teams.at(-1) ?? null;
 const teamColor =
   (latestTeam && latestColor(vendorIndexes, latestTeam.id)) ?? "#84909e";
 
-const matrixSeasons = (driver?.seasons ?? []).map((season) => {
-  // 车手自己的行：多年多队时按站合并（每站取其实际效力车队的成绩）
-  const driverResults = season.rounds.map(
-    (_, index) =>
-      season.teams
-        .map((team) => team.results[index])
-        .find((cell) => cell !== null) ?? null,
-  );
-  return {
+// 多年多队拆成连续多表（每队一表，各自带队友），第二个起加转队连线
+const matrixSeasons = (driver?.seasons ?? []).flatMap((season) =>
+  season.teams.map((team, index) => ({
     year: season.year,
-    metaText: season.teams.map((team) => team.name).join(" / "),
-    metaLinks: season.teams.map((team) => ({
-      name: team.name,
-      href: `/teams/${team.id}`,
-      color: latestColor(vendorIndexes, team.id),
-    })),
+    metaText: team.name,
+    metaLinks: [
+      {
+        name: team.name,
+        href: `/teams/${team.id}`,
+        color: latestColor(vendorIndexes, team.id),
+      },
+    ],
+    split: index > 0,
     rounds: season.rounds,
     rows: [
       {
@@ -61,24 +58,24 @@ const matrixSeasons = (driver?.seasons ?? []).map((season) => {
         href: null,
         flagCode: driver?.alpha2Code.toLowerCase() ?? null,
         highlight: false,
-        results: driverResults,
+        results: team.results,
       },
-      ...season.teammates.map((teammate) => ({
+      ...team.teammates.map((teammate) => ({
         name: teammate.name,
         href: `/drivers/${teammate.id}`,
         flagCode: teammate.flagCode,
         highlight: false,
         muted: true,
-        teamName: teammate.teamName,
         results: teammate.results,
       })),
     ],
-    points: season.points,
-    position: season.position,
-    championshipWon: season.championshipWon,
+    // 积分与夺冠标记只在首表显示，避免拆表重复
+    points: index === 0 ? season.points : null,
+    position: index === 0 ? season.position : null,
+    championshipWon: index === 0 ? season.championshipWon : false,
     current: season.year === currentYear,
-  };
-});
+  })),
+);
 
 // ?year=1997,2007 只显示这些赛季（筛选状态可分享/后退）
 const initialSelected = (() => {

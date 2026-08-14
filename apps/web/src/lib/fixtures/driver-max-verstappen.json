@@ -268,110 +268,109 @@
       null,
       null,
       null
+     ],
+     "teammates": [
+      {
+       "id": "isack-hadjar",
+       "name": "Isack Hadjar",
+       "flagCode": "fr",
+       "results": [
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 15
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 9
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 21
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 9
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+       ]
+      }
      ]
     }
    ],
    "points": 109,
    "position": "6",
-   "championshipWon": false,
-   "teammates": [
-    {
-     "id": "isack-hadjar",
-     "name": "Isack Hadjar",
-     "flagCode": "fr",
-     "teamName": "Red Bull",
-     "results": [
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 15
-      },
-      {
-       "text": "12",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 9
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 21
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 9
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
-     ]
-    }
-   ]
+   "championshipWon": false
   },
   {
    "year": 2025,
@@ -670,222 +669,220 @@
        "classified": false,
        "sprintRank": null
       }
+     ],
+     "teammates": [
+      {
+       "id": "liam-lawson",
+       "name": "Liam Lawson",
+       "flagCode": "nz",
+       "results": [
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 14
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+       ]
+      },
+      {
+       "id": "yuki-tsunoda",
+       "name": "Yuki Tsunoda",
+       "flagCode": "jp",
+       "results": [
+        null,
+        null,
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 6
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "16",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 11
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 7
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 13
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 5
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
      ]
     }
    ],
    "points": 421,
    "position": "2",
-   "championshipWon": false,
-   "teammates": [
-    {
-     "id": "liam-lawson",
-     "name": "Liam Lawson",
-     "flagCode": "nz",
-     "teamName": "Red Bull",
-     "results": [
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "12",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 14
-      },
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
-     ]
-    },
-    {
-     "id": "yuki-tsunoda",
-     "name": "Yuki Tsunoda",
-     "flagCode": "jp",
-     "teamName": "Red Bull",
-     "results": [
-      null,
-      null,
-      {
-       "text": "12",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "9",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "10",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 6
-      },
-      {
-       "text": "10",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "17",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "13",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "12",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "16",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "15",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "13",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 11
-      },
-      {
-       "text": "17",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "9",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "13",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "12",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "7",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 7
-      },
-      {
-       "text": "11",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "17",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 13
-      },
-      {
-       "text": "12",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "10",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 5
-      },
-      {
-       "text": "14",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      }
-     ]
-    }
-   ]
+   "championshipWon": false
   },
   {
    "year": 2024,
@@ -1184,190 +1181,189 @@
        "classified": false,
        "sprintRank": null
       }
+     ],
+     "teammates": [
+      {
+       "id": "sergio-perez",
+       "name": "Sergio P\u00e9rez",
+       "flagCode": "mx",
+       "results": [
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 3
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 3
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 8
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": true,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 9
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 8
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 20
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
      ]
     }
    ],
    "points": 437,
    "position": "1",
-   "championshipWon": true,
-   "teammates": [
-    {
-     "id": "sergio-perez",
-     "name": "Sergio P\u00e9rez",
-     "flagCode": "mx",
-     "teamName": "Red Bull",
-     "results": [
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 3
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 3
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "7",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 8
-      },
-      {
-       "text": "17",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "7",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "7",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "17",
-       "pole": false,
-       "fastest": false,
-       "classified": true,
-       "sprintRank": null
-      },
-      {
-       "text": "10",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "7",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 9
-      },
-      {
-       "text": "17",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "11",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 8
-      },
-      {
-       "text": "10",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 20
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      }
-     ]
-    }
-   ]
+   "championshipWon": true
   },
   {
    "year": 2023,
@@ -1642,176 +1638,175 @@
        "classified": false,
        "sprintRank": null
       }
+     ],
+     "teammates": [
+      {
+       "id": "sergio-perez",
+       "name": "Sergio P\u00e9rez",
+       "flagCode": "mx",
+       "results": [
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": true,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 1
+        },
+        {
+         "text": "2",
+         "pole": true,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "16",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 2
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 5
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 3
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
      ]
     }
    ],
    "points": 575,
    "position": "1",
-   "championshipWon": true,
-   "teammates": [
-    {
-     "id": "sergio-perez",
-     "name": "Sergio P\u00e9rez",
-     "flagCode": "mx",
-     "teamName": "Red Bull",
-     "results": [
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "1",
-       "pole": true,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "1",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 1
-      },
-      {
-       "text": "2",
-       "pole": true,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "16",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 2
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "10",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 5
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 3
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      }
-     ]
-    }
-   ]
+   "championshipWon": true
   },
   {
    "year": 2022,
@@ -2086,176 +2081,175 @@
        "classified": false,
        "sprintRank": null
       }
+     ],
+     "teammates": [
+      {
+       "id": "sergio-perez",
+       "name": "Sergio P\u00e9rez",
+       "flagCode": "mx",
+       "results": [
+        {
+         "text": "18",
+         "pole": false,
+         "fastest": false,
+         "classified": true,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": true,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 3
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 5
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 5
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
      ]
     }
    ],
    "points": 454,
    "position": "1",
-   "championshipWon": true,
-   "teammates": [
-    {
-     "id": "sergio-perez",
-     "name": "Sergio P\u00e9rez",
-     "flagCode": "mx",
-     "teamName": "Red Bull",
-     "results": [
-      {
-       "text": "18",
-       "pole": false,
-       "fastest": false,
-       "classified": true,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": true,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 3
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "1",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 5
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "1",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "7",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 5
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      }
-     ]
-    }
-   ]
+   "championshipWon": true
   },
   {
    "year": 2021,
@@ -2530,176 +2524,175 @@
        "classified": false,
        "sprintRank": null
       }
+     ],
+     "teammates": [
+      {
+       "id": "sergio-perez",
+       "name": "Sergio P\u00e9rez",
+       "flagCode": "mx",
+       "results": [
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "16",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": 20
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "19",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 9
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": 4
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": true,
+         "sprintRank": null
+        }
+       ]
+      }
      ]
     }
    ],
    "points": 395.5,
    "position": "1",
-   "championshipWon": true,
-   "teammates": [
-    {
-     "id": "sergio-perez",
-     "name": "Sergio P\u00e9rez",
-     "flagCode": "mx",
-     "teamName": "Red Bull",
-     "results": [
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "11",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "1",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "16",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": 20
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "19",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": 9
-      },
-      {
-       "text": "9",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": 4
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "15",
-       "pole": false,
-       "fastest": false,
-       "classified": true,
-       "sprintRank": null
-      }
-     ]
-    }
-   ]
+   "championshipWon": true
   },
   {
    "year": 2020,
@@ -2914,141 +2907,140 @@
        "classified": false,
        "sprintRank": null
       }
+     ],
+     "teammates": [
+      {
+       "id": "alexander-albon",
+       "name": "Alexander Albon",
+       "flagCode": "th",
+       "results": [
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": true,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
      ]
     }
    ],
    "points": 214,
    "position": "3",
-   "championshipWon": false,
-   "teammates": [
-    {
-     "id": "alexander-albon",
-     "name": "Alexander Albon",
-     "flagCode": "th",
-     "teamName": "Red Bull",
-     "results": [
-      {
-       "text": "13",
-       "pole": false,
-       "fastest": false,
-       "classified": true,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "15",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "10",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "12",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "15",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "7",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      }
-     ]
-    }
-   ]
+   "championshipWon": false
   },
   {
    "year": 2019,
@@ -3311,198 +3303,196 @@
        "classified": false,
        "sprintRank": null
       }
+     ],
+     "teammates": [
+      {
+       "id": "alexander-albon",
+       "name": "Alexander Albon",
+       "flagCode": "th",
+       "results": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      },
+      {
+       "id": "pierre-gasly",
+       "name": "Pierre Gasly",
+       "flagCode": "fr",
+       "results": [
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": true,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+       ]
+      }
      ]
     }
    ],
    "points": 278,
    "position": "3",
-   "championshipWon": false,
-   "teammates": [
-    {
-     "id": "alexander-albon",
-     "name": "Alexander Albon",
-     "flagCode": "th",
-     "teamName": "Red Bull",
-     "results": [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "14",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      }
-     ]
-    },
-    {
-     "id": "pierre-gasly",
-     "name": "Pierre Gasly",
-     "flagCode": "fr",
-     "teamName": "Red Bull",
-     "results": [
-      {
-       "text": "11",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "10",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "7",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "14",
-       "pole": false,
-       "fastest": false,
-       "classified": true,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
-     ]
-    }
-   ]
+   "championshipWon": false
   },
   {
    "year": 2018,
@@ -3765,169 +3755,168 @@
        "classified": false,
        "sprintRank": null
       }
+     ],
+     "teammates": [
+      {
+       "id": "daniel-ricciardo",
+       "name": "Daniel Ricciardo",
+       "flagCode": "au",
+       "results": [
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": true,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": true,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
      ]
     }
    ],
    "points": 249,
    "position": "4",
-   "championshipWon": false,
-   "teammates": [
-    {
-     "id": "daniel-ricciardo",
-     "name": "Daniel Ricciardo",
-     "flagCode": "au",
-     "teamName": "Red Bull",
-     "results": [
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "1",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "1",
-       "pole": true,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": true,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      }
-     ]
-    }
-   ]
+   "championshipWon": false
   },
   {
    "year": 2017,
@@ -4178,162 +4167,161 @@
        "classified": false,
        "sprintRank": null
       }
+     ],
+     "teammates": [
+      {
+       "id": "daniel-ricciardo",
+       "name": "Daniel Ricciardo",
+       "flagCode": "au",
+       "results": [
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
      ]
     }
    ],
    "points": 168,
    "position": "6",
-   "championshipWon": false,
-   "teammates": [
-    {
-     "id": "daniel-ricciardo",
-     "name": "Daniel Ricciardo",
-     "flagCode": "au",
-     "teamName": "Red Bull",
-     "results": [
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "1",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      }
-     ]
-    }
-   ]
+   "championshipWon": false
   },
   {
    "year": 2016,
@@ -4494,6 +4482,292 @@
       null,
       null,
       null
+     ],
+     "teammates": [
+      {
+       "id": "carlos-sainz-jr",
+       "name": "Carlos Sainz Jr.",
+       "flagCode": "es",
+       "results": [
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "16",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      },
+      {
+       "id": "daniil-kvyat",
+       "name": "Daniil Kvyat",
+       "flagCode": "ru",
+       "results": [
+        null,
+        null,
+        null,
+        null,
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "16",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "18",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
      ]
     },
     {
@@ -4623,479 +4897,220 @@
        "classified": false,
        "sprintRank": null
       }
+     ],
+     "teammates": [
+      {
+       "id": "daniel-ricciardo",
+       "name": "Daniel Ricciardo",
+       "flagCode": "au",
+       "results": [
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": true,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      },
+      {
+       "id": "daniil-kvyat",
+       "name": "Daniil Kvyat",
+       "flagCode": "ru",
+       "results": [
+        {
+         "text": "DNS",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+       ]
+      }
      ]
     }
    ],
    "points": 204,
    "position": "5",
-   "championshipWon": false,
-   "teammates": [
-    {
-     "id": "carlos-sainz-jr",
-     "name": "Carlos Sainz Jr.",
-     "flagCode": "es",
-     "teamName": "Toro Rosso",
-     "results": [
-      {
-       "text": "9",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "9",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "12",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "9",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "14",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "15",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "14",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "11",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "17",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "16",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      }
-     ]
-    },
-    {
-     "id": "daniel-ricciardo",
-     "name": "Daniel Ricciardo",
-     "flagCode": "au",
-     "teamName": "Red Bull",
-     "results": [
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "11",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": true,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "7",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "7",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "4",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "2",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "1",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "6",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "5",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      }
-     ]
-    },
-    {
-     "id": "daniil-kvyat",
-     "name": "Daniil Kvyat",
-     "flagCode": "ru",
-     "teamName": "Red Bull",
-     "results": [
-      {
-       "text": "DNS",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "7",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "3",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "15",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "10",
-       "pole": false,
-       "fastest": true,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "12",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "10",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "16",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "15",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "14",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "9",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "14",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "13",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "11",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "18",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "13",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      }
-     ]
-    }
-   ]
+   "championshipWon": false
   },
   {
    "year": 2015,
@@ -5334,155 +5349,154 @@
        "classified": false,
        "sprintRank": null
       }
+     ],
+     "teammates": [
+      {
+       "id": "carlos-sainz-jr",
+       "name": "Carlos Sainz Jr.",
+       "flagCode": "es",
+       "results": [
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
      ]
     }
    ],
    "points": 49,
    "position": "12",
-   "championshipWon": false,
-   "teammates": [
-    {
-     "id": "carlos-sainz-jr",
-     "name": "Carlos Sainz Jr.",
-     "flagCode": "es",
-     "teamName": "Toro Rosso",
-     "results": [
-      {
-       "text": "9",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "8",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "13",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "9",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "10",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "12",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "11",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "9",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "10",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "7",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "13",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "DNF",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      },
-      {
-       "text": "11",
-       "pole": false,
-       "fastest": false,
-       "classified": false,
-       "sprintRank": null
-      }
-     ]
-    }
-   ]
+   "championshipWon": false
   }
  ],
  "activeSeason": 2026
