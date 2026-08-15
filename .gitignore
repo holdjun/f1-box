@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 .superpowers/
+.agents
 .worktrees/
 node_modules/
 .astro/
