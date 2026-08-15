@@ -14,6 +14,8 @@ function fakeDb(rows: unknown[]): DriverDatabase {
       expect(sql).toContain("ORDER BY ra2.year DESC, ra2.round DESC");
       expect(sql).toContain("test_driver = 0");
       expect(sql).toContain("total_points DESC");
+      // 无永久车号一律回落最后参赛号码（不限年份）
+      expect(sql).toContain("rd.driver_number AS last_number");
       return Promise.resolve([{ results: rows }]);
     },
   };
@@ -86,7 +88,7 @@ describe("createDriverRepository with database", () => {
   it("rejects malformed rows", async () => {
     const db = fakeDb([{ id: "x", name: 42 }]);
     await expect(createDriverRepository(db).getDrivers()).rejects.toThrow(
-      /driver/i,
+      /Invalid row data/,
     );
   });
 });
@@ -107,6 +109,16 @@ describe("drivers fixture", () => {
     // 无永久车号回落最后参赛号码（senna 1994 用 2 号）
     const senna = drivers.find((d) => d.id === "ayrton-senna");
     expect(senna).toMatchObject({ number: "2", isCurrent: false });
+
+    // 1974 前的车手也显示最后一场号码（fangio 1958 用 34 号）
+    const fangio = drivers.find((d) => d.id === "juan-manuel-fangio");
+    expect(fangio).toMatchObject({ number: "34", isCurrent: false });
+
+    // 同口径覆盖所有 1974 前退役车手（stewart 1973 用 5 号，clark 1968 用 4 号）
+    const stewart = drivers.find((d) => d.id === "jackie-stewart");
+    expect(stewart).toMatchObject({ number: "5" });
+    const clark = drivers.find((d) => d.id === "jim-clark");
+    expect(clark).toMatchObject({ number: "4" });
 
     // 按生涯总积分降序：hamilton（5187.5）在 verstappen（3553.5）前
     const hamilton = drivers.findIndex((d) => d.id === "lewis-hamilton");
@@ -134,6 +146,9 @@ describe("getDriversByYear", () => {
     expect(sql).toContain("ORDER BY points DESC");
     // 年份视图号码优先该年实际号码
     expect(sql).toContain("COALESCE(lr.last_number, d.permanent_number)");
+    // 最后参赛探测只对该年参赛者跑，不全表逐人扫描
+    expect(sql).toContain("FROM year_drivers yd");
+    expect(sql).toContain("rd2.driver_id = yd.driver_id");
     expect(values).toEqual([1997]);
   });
 
@@ -196,6 +211,8 @@ describe("getDriversByYear", () => {
       "Mika Häkkinen",
     ]);
     expect(drivers[1]).toMatchObject({ number: "9" });
+    // 车队取该年最后参赛车队（schumacher 生涯最后车队是 Mercedes，1997 在 Ferrari）
+    expect(drivers[0]).toMatchObject({ teamId: "ferrari", teamName: "Ferrari" });
   });
 
   it("shows that year's race number over the permanent one", async () => {
@@ -204,6 +221,14 @@ describe("getDriversByYear", () => {
     expect(drivers.find((d) => d.id === "max-verstappen")).toMatchObject({
       number: "1",
     });
+  });
+
+  it("shows the last race number of that year before the fixed-number era", async () => {
+    // fangio 1958 最后一场用 34 号
+    const drivers = await createDriverRepository().getDriversByYear(1958);
+    expect(drivers).toEqual([
+      expect.objectContaining({ id: "juan-manuel-fangio", number: "34" }),
+    ]);
   });
 });
 

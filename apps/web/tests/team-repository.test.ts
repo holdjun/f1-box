@@ -255,7 +255,7 @@ describe("createTeamRepository with database", () => {
   it("throws on a malformed identity row", async () => {
     const badDb = fakeDb({ "co.id = c.country_id": [{ id: "ferrari" }] });
     await expect(createTeamRepository(badDb).getTeam("ferrari")).rejects.toThrow(
-      /team/i,
+      /Invalid row data/,
     );
   });
 });
@@ -307,9 +307,13 @@ describe("getConstructorsByYear", () => {
     };
 
     await createTeamRepository(db).getConstructorsByYear(1997);
-    expect(sql).toContain("GROUP BY c.id, c.name");
-    expect(sql).toContain("sec.year = ?1");
     expect(sql).toContain("ORDER BY points DESC");
+    expect(sql).toContain("season_entrant_constructor");
+    // 积分榜按 车队×引擎 分行（60 年代多引擎），必须先按车队聚合再 JOIN，
+    // 避免与 entrant 行（每参赛实体一行）形成交叉积
+    expect(sql).toContain("SELECT DISTINCT constructor_id");
+    expect(sql).toContain("GROUP BY constructor_id");
+    expect(sql).not.toContain("scs.year");
     expect(values).toEqual([1997]);
   });
 

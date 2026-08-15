@@ -22,6 +22,8 @@ function fakeDb(responses: Record<string, unknown[]>): DriverDatabase {
 }
 
 const IDENTITY = "co.id = d.nationality_country_id";
+// 两个查询都含 rd.type = 'RACE_RESULT'，键序决定匹配优先级：LAST_NUMBER 在前
+const LAST_NUMBER = "LIMIT 1";
 const NUMBERS = "rd.type = 'RACE_RESULT'";
 const ROUNDS = "gp.abbreviation AS code";
 const TEAMS = "GROUP BY ra.year, rr.constructor_id";
@@ -156,6 +158,8 @@ describe("createDriverRepository with database", () => {
         best_position: 1,
       },
     ],
+    // 键序即匹配优先级：LAST_NUMBER 在 NUMBERS 之前，避免 lastNumberSql 被误匹配
+    [LAST_NUMBER]: [{ driver_number: "7" }],
     [NUMBERS]: [{ year: 2017, driver_number: "7" }],
     [ROUNDS]: [
       { year: 2017, round: 1, code: "AUS", name: "Australia", circuit_id: "melbourne" },
@@ -202,6 +206,7 @@ describe("createDriverRepository with database", () => {
       dateOfDeath: null,
       placeOfBirth: "London",
       permanentNumber: "7",
+      lastNumber: "7",
       activeSeason: 2026,
     });
     expect(driver?.totals).toMatchObject({
@@ -210,6 +215,24 @@ describe("createDriverRepository with database", () => {
       championships: 1,
       bestChampionshipPosition: 1,
     });
+  });
+
+  it("falls back to the last race number when there is no permanent number", async () => {
+    const driver = await createDriverRepository(
+      fakeDb({
+        ...base,
+        [IDENTITY]: [{ ...base[IDENTITY][0], permanent_number: null }],
+        [LAST_NUMBER]: [{ driver_number: "42" }],
+      }),
+    ).getDriver("test-driver");
+    expect(driver).toMatchObject({ permanentNumber: null, lastNumber: "42" });
+  });
+
+  it("returns null lastNumber for a driver without race results", async () => {
+    const driver = await createDriverRepository(
+      fakeDb({ ...base, [LAST_NUMBER]: [] }),
+    ).getDriver("test-driver");
+    expect(driver).toMatchObject({ lastNumber: null });
   });
 
   it("orders team blocks by the team's last round descending", async () => {
@@ -224,6 +247,25 @@ describe("createDriverRepository with database", () => {
     await createDriverRepository(db).getDriver("test-driver");
     expect(sql).toContain("MAX(ra.round) AS last_round");
     expect(sql).toContain("ORDER BY ra.year DESC, last_round DESC");
+  });
+
+  it("derives teammates from raced stints, not entrant rows", async () => {
+    const captured: string[] = [];
+    const db: DriverDatabase = {
+      batch(statements) {
+        captured.push(...statements.map((s) => s.sql));
+        return Promise.resolve(statements.map(() => ({ results: [] })));
+      },
+    };
+
+    await createDriverRepository(db).getDriver("test-driver");
+    // 正式阵容行缺失的替补（如 Bearman 2024）也要有队友：门槛改用实际参赛 stint
+    const teammates = captured.find((sql) => sql.includes("rr.driver_id <> ?1"));
+    expect(teammates).not.toContain("season_entrant_driver");
+    expect(teammates).toContain("WITH stint");
+    const sprint = captured.find((sql) => sql.includes("srr.driver_id <> ?1"));
+    expect(sprint).not.toContain("season_entrant_driver");
+    expect(sprint).toContain("WITH stint");
   });
 
   it("splits a mid-season transfer into two team rows with aligned cells", async () => {
@@ -288,7 +330,7 @@ describe("createDriverRepository with database", () => {
     const db = fakeDb({ ...base, [IDENTITY]: [{ id: "x", name: 42 }] });
     await expect(
       createDriverRepository(db).getDriver("x"),
-    ).rejects.toThrow(/driver/i);
+    ).rejects.toThrow(/Invalid row data/);
   });
 
   it("derives number stints only from the fixed-number era, in round order", async () => {
@@ -301,7 +343,9 @@ describe("createDriverRepository with database", () => {
       },
     };
     await createDriverRepository(db).getDriver("any");
-    const numbers = captured.find((sql) => sql.includes(NUMBERS));
+    const numbers = captured.find(
+      (sql) => sql.includes("GROUP BY ra.year, rd.driver_number"),
+    );
     expect(numbers).toContain("ra.year >= 1974");
     expect(numbers).toContain("MIN(ra.round)");
   });

@@ -6,14 +6,13 @@
 
 ## 用户可见行为
 
-- `/teams` 不显示年份或统计文字，但排序按当前参赛状态、冠军数、胜场、参赛场次、积分和名称稳定排序。
+- `/teams` 不显示年份或统计文字，排序按生涯总积分降序、名字稳定排序。年份筛选与该年排序见 2026-08-13-season-filter 需求。
 - 车队详情页将 chronology 连续链与当前身份在连续链之前的独立早期参赛段分开显示。
 - 统计数据仍只属于当前 constructor 身份，不因展示继承链而合并到其他身份。
 
 ## 验收标准
 
-- 当前赛季车队出现在历史车队之前。
-- Ferrari、McLaren、Williams、Mercedes、Red Bull 等高成就车队出现在目录前部。
+- Ferrari、McLaren、Williams、Mercedes、Red Bull 等高积分车队出现在目录前部。
 - Alfa Romeo 页面能区分 1950–1951、1979–1985 独立参赛段与 1993 年开始的 Sauber 连续链。
 - Sauber 页面不会因为浏览继承链而显示 Alfa Romeo 1950/1979 的统计赛季。
 - 旧路由和无数据库 fixture 仍能正常工作。

@@ -1,3 +1,10 @@
+import { asNumber, asRecord, asString } from "./db-parse.js";
+import {
+  deriveSeasonYears,
+  mapSeasonYearRows,
+  seasonYearsSql,
+} from "./season-years.js";
+
 export interface TeamTotals {
   entries: number;
   wins: number;
@@ -256,18 +263,24 @@ SELECT c.id, c.name
 FROM constructor c
 ORDER BY c.total_points DESC, c.name`;
 
-// 年份目录按该年积分榜降序；积分榜按车队×引擎供应商分行（60 年代多引擎），
-// 先 SUM 合并。无积分榜的垫底按名字排。
+// 年份目录按该年积分榜降序；积分榜按 车队×引擎 分行（60 年代多引擎）且
+// entrant 表每参赛实体一行，两者都先按车队折叠再 JOIN，避免交叉积重复计分。
+// 无积分榜的垫底按名字排。
 const constructorsByYearSql = `
-SELECT c.id, c.name, COALESCE(SUM(scs.points), 0) AS points
-FROM season_entrant_constructor sec
+SELECT c.id, c.name, COALESCE(scs.points, 0) AS points
+FROM (
+  SELECT DISTINCT constructor_id
+  FROM season_entrant_constructor
+  WHERE year = ?1
+) sec
 JOIN constructor c ON c.id = sec.constructor_id
-LEFT JOIN season_constructor_standing scs ON scs.constructor_id = c.id AND scs.year = ?1
-WHERE sec.year = ?1
-GROUP BY c.id, c.name
+LEFT JOIN (
+  SELECT constructor_id, SUM(points) AS points
+  FROM season_constructor_standing
+  WHERE year = ?1
+  GROUP BY constructor_id
+) scs ON scs.constructor_id = c.id
 ORDER BY points DESC, c.name`;
-
-const seasonYearsSql = `SELECT year FROM season ORDER BY year DESC`;
 
 export function createTeamRepository(db?: TeamDatabase): TeamRepository {
   return {
@@ -385,16 +398,10 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
       if (!db) {
         // DEV 从 fixture 参赛年份推导；生产读 season 表
         const { default: fixture } = await import("./fixtures/constructors.json");
-        const years = new Set<number>();
-        for (const team of fixture as ConstructorCatalogFixture[]) {
-          for (const key of Object.keys(team.seasons)) years.add(Number(key));
-        }
-        return [...years].sort((a, b) => b - a);
+        return deriveSeasonYears(fixture as ConstructorCatalogFixture[]);
       }
       const rows = await db.batch([{ sql: seasonYearsSql, values: [] }]);
-      return rows[0].results.map((row) =>
-        asNumber(asRecord(row, "season year").year, "season year"),
-      );
+      return mapSeasonYearRows(rows[0].results);
     },
   };
 }
@@ -695,25 +702,4 @@ function splitNames(value: unknown): string[] {
     .split(",")
     .map((name) => name.trim())
     .filter((name) => name.length > 0);
-}
-
-function asRecord(value: unknown, label: string): Record<string, unknown> {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    throw new Error(`Invalid team data: expected ${label} to be an object`);
-  }
-  return value as Record<string, unknown>;
-}
-
-function asString(value: unknown, label: string): string {
-  if (typeof value !== "string") {
-    throw new Error(`Invalid team data: expected ${label} to be a string`);
-  }
-  return value;
-}
-
-function asNumber(value: unknown, label: string): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`Invalid team data: expected ${label} to be a number`);
-  }
-  return value;
 }

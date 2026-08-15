@@ -5,6 +5,12 @@ import {
   type RaceCell,
   type SeasonRound,
 } from "./team-repository.js";
+import { asNumber, asRecord, asString } from "./db-parse.js";
+import {
+  deriveSeasonYears,
+  mapSeasonYearRows,
+  seasonYearsSql,
+} from "./season-years.js";
 
 export interface DriverSummary {
   id: string;
@@ -19,7 +25,11 @@ export interface DriverSummary {
 // DEV 目录 fixture 附带积分与逐年号码数据；生产由 SQL 提供
 interface DriverCatalogFixture extends DriverSummary {
   points: number;
-  seasons: Record<string, { points: number; number?: string } | undefined>;
+  seasons: Record<
+    string,
+    | { points: number; number?: string; teamId?: string; teamName?: string }
+    | undefined
+  >;
 }
 
 export interface DriverTotals {
@@ -83,6 +93,8 @@ export interface DriverPage {
   dateOfDeath: string | null;
   placeOfBirth: string;
   permanentNumber: string | null;
+  // 无永久车号时回落最后一场号码（与目录卡同口径）；hero 不再用 monogram
+  lastNumber: string | null;
   totals: DriverTotals;
   numberStints: NumberStint[];
   teamStints: TeamStint[];
@@ -117,9 +129,9 @@ export function createD1DriverDatabase(d1: D1Database): DriverDatabase {
 }
 
 // 最后车队取自实际参赛的末站（与详情页 hero 同一口径）；相关子查询走
-// (driver_id, type) 索引逐人定位，避免全表开窗。号码在 1974 年前按站分配
-// 无身份意义，与车号时间线同口径只取 1974 起。全量视图号码=永久车号，
-// 无则回落最后参赛号码。目录按生涯总积分降序。
+// (driver_id, type) 索引逐人定位，避免全表开窗。号码与目录卡同口径：
+// 全量视图号码=永久车号，无则回落最后参赛号码（不限年份，1958 的 34 号也算）。
+// 目录按生涯总积分降序。
 const driversSql = `
 WITH latest_season AS (
   SELECT MAX(year) AS year FROM season
@@ -131,7 +143,7 @@ current_drivers AS (
 ),
 last_race AS (
   SELECT rd.driver_id, rd.constructor_id, c.name AS team_name,
-    CASE WHEN ra.year >= 1974 THEN rd.driver_number END AS last_number
+    rd.driver_number AS last_number
   FROM driver d
   JOIN race_data rd ON rd.rowid = (
     SELECT rd2.rowid
@@ -141,7 +153,6 @@ last_race AS (
     ORDER BY ra2.year DESC, ra2.round DESC
     LIMIT 1
   )
-  JOIN race ra ON ra.id = rd.race_id
   JOIN constructor c ON c.id = rd.constructor_id
 )
 SELECT d.id, d.name, COALESCE(d.permanent_number, lr.last_number) AS number,
@@ -154,8 +165,9 @@ LEFT JOIN current_drivers cd ON cd.driver_id = d.id
 ORDER BY d.total_points DESC, d.name`;
 
 // 年份目录：卡片显示该年车队与号码（季中转会取该年最后参赛车队），按该年
-// 积分榜降序；无积分榜的（如替补）垫底按名字排。号码优先该年实际号码
-// （如卫冕冠军 1 号），1974 前才回落永久车号。
+// 积分榜降序；无积分榜的（如替补）垫底按名字排。号码取该年最后一场实际号码
+// （如卫冕冠军 1 号），无该年号码才回落永久车号。last_race 只对该年参赛者
+// （year_drivers）跑相关子查询，避免全量表逐人探测
 const driversByYearSql = `
 WITH year_drivers AS (
   SELECT DISTINCT driver_id
@@ -164,13 +176,13 @@ WITH year_drivers AS (
 ),
 last_race AS (
   SELECT rd.driver_id, rd.constructor_id, c.name AS team_name,
-    CASE WHEN ?1 >= 1974 THEN rd.driver_number END AS last_number
-  FROM driver d
+    rd.driver_number AS last_number
+  FROM year_drivers yd
   JOIN race_data rd ON rd.rowid = (
     SELECT rd2.rowid
     FROM race_data rd2
     JOIN race ra2 ON ra2.id = rd2.race_id
-    WHERE rd2.driver_id = d.id AND rd2.type = 'RACE_RESULT' AND ra2.year = ?1
+    WHERE rd2.driver_id = yd.driver_id AND rd2.type = 'RACE_RESULT' AND ra2.year = ?1
     ORDER BY ra2.round DESC
     LIMIT 1
   )
@@ -186,8 +198,6 @@ LEFT JOIN last_race lr ON lr.driver_id = d.id
 LEFT JOIN season_driver_standing sds ON sds.driver_id = d.id AND sds.year = ?1
 ORDER BY points DESC, d.name`;
 
-const seasonYearsSql = `SELECT year FROM season ORDER BY year DESC`;
-
 const identitySql = `
 SELECT d.id, d.name, d.full_name, co.name AS country_name, co.alpha2_code,
   d.date_of_birth, d.date_of_death, d.place_of_birth, d.permanent_number,
@@ -200,6 +210,15 @@ SELECT d.id, d.name, d.full_name, co.name AS country_name, co.alpha2_code,
 FROM driver d
 JOIN country co ON co.id = d.nationality_country_id
 WHERE d.id = ?1`;
+
+// 最后参赛号码（不限年份）：无永久车号的车手 hero 用它替代 monogram
+const lastNumberSql = `
+SELECT rd.driver_number
+FROM race_data rd
+JOIN race ra ON ra.id = rd.race_id
+WHERE rd.driver_id = ?1 AND rd.type = 'RACE_RESULT'
+ORDER BY ra.year DESC, ra.round DESC
+LIMIT 1`;
 
 // 号变更：仅取 1974 起——此前车号按站分配，无身份意义；1974 起 FIA 固定
 // 车队整季编号。年内按最早轮次排序，repository 侧合并连续同年号区间
@@ -225,7 +244,6 @@ WHERE ra.year IN (
 )
 ORDER BY ra.year, ra.round`;
 
-// 行=该年该车手的 constructor 条目；first_round 定行序（季中转会多行）
 // 行=该年该车手的 constructor 条目；车队块按该队最后参赛轮次降序，换队后
 // 的车队在上，临时替补（如只跑一场）也遵循同一口径
 const teamsSql = `
@@ -251,34 +269,42 @@ FROM race ra
 JOIN sprint_race_result srr ON srr.race_id = ra.id
 WHERE srr.driver_id = ?1 AND srr.position_number IS NOT NULL`;
 
-// 队友：该车手效力车队里的其他车手（替补亦含），结果按站取最佳
+// 队友：与该车手同年同队实际参赛的其他车手。门槛用实际比赛结果推导的 stint，
+// 而非 season_entrant_driver——替补登场常无正式阵容行（如 Bearman 2024 代打），
+// 按阵容过滤会丢掉这些队友。结果按站取最佳
 const teammateResultsSql = `
+WITH stints AS (
+  SELECT DISTINCT ra.year, rr.constructor_id
+  FROM race ra
+  JOIN race_result rr ON rr.race_id = ra.id
+  WHERE rr.driver_id = ?1
+)
 SELECT ra.year, ra.round, rr.driver_id, d.name, cn.alpha2_code,
   rr.constructor_id,
   rr.position_text, rr.pole_position, rr.fastest_lap, rr.reason_retired,
   rr.position_number
-FROM race ra
-JOIN race_result rr ON rr.race_id = ra.id
+FROM stints s
+JOIN race ra ON ra.year = s.year
+JOIN race_result rr
+  ON rr.race_id = ra.id AND rr.constructor_id = s.constructor_id
 JOIN driver d ON d.id = rr.driver_id
 LEFT JOIN country cn ON cn.id = d.nationality_country_id
 WHERE rr.driver_id <> ?1
-  AND EXISTS (
-    SELECT 1 FROM season_entrant_driver sed
-    WHERE sed.driver_id = ?1 AND sed.test_driver = 0
-      AND sed.constructor_id = rr.constructor_id AND sed.year = ra.year
-  )
 ORDER BY rr.position_display_order`;
 
 const teammateSprintRankSql = `
+WITH stints AS (
+  SELECT DISTINCT ra.year, rr.constructor_id
+  FROM race ra
+  JOIN race_result rr ON rr.race_id = ra.id
+  WHERE rr.driver_id = ?1
+)
 SELECT ra.year, ra.round, srr.driver_id, srr.position_number
-FROM race ra
-JOIN sprint_race_result srr ON srr.race_id = ra.id
-WHERE srr.driver_id <> ?1 AND srr.position_number IS NOT NULL
-  AND EXISTS (
-    SELECT 1 FROM season_entrant_driver sed
-    WHERE sed.driver_id = ?1 AND sed.test_driver = 0
-      AND sed.constructor_id = srr.constructor_id AND sed.year = ra.year
-  )`;
+FROM stints s
+JOIN race ra ON ra.year = s.year
+JOIN sprint_race_result srr
+  ON srr.race_id = ra.id AND srr.constructor_id = s.constructor_id
+WHERE srr.driver_id <> ?1 AND srr.position_number IS NOT NULL`;
 
 // 逐年单行，无需变体合并
 const standingsSql = `
@@ -346,8 +372,10 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
           if (entry) {
             rows.push({
               ...summary,
-              // 年份视图优先该年号码，无该年号码（1974 前按站分配）才回落
+              // 年份视图优先该年号码与车队，无才回落生涯值（与生产 SQL 同口径）
               number: entry.number ?? summary.number,
+              teamId: entry.teamId ?? summary.teamId,
+              teamName: entry.teamName ?? summary.teamName,
               points: entry.points,
             });
           }
@@ -365,17 +393,11 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
       if (!db) {
         // DEV 从 fixture 参赛年份推导；生产读 season 表
         const { default: fixture } = await import("./fixtures/drivers.json");
-        const years = new Set<number>();
-        for (const driver of fixture as DriverCatalogFixture[]) {
-          for (const key of Object.keys(driver.seasons)) years.add(Number(key));
-        }
-        return [...years].sort((a, b) => b - a);
+        return deriveSeasonYears(fixture as DriverCatalogFixture[]);
       }
 
       const [rows] = await db.batch([{ sql: seasonYearsSql, values: [] }]);
-      return rows.results.map((row) =>
-        asNumber(asRecord(row, "season year").year, "season year"),
-      );
+      return mapSeasonYearRows(rows.results);
     },
 
     async getDriver(slug) {
@@ -398,6 +420,7 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
 
       const [
         identityRows,
+        lastNumberRows,
         numberRows,
         roundRows,
         teamRows,
@@ -412,6 +435,7 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
         teammateSprintRankRows,
       ] = await db.batch([
         { sql: identitySql, values: [slug] },
+        { sql: lastNumberSql, values: [slug] },
         { sql: numberStintsSql, values: [slug] },
         { sql: roundsSql, values: [slug] },
         { sql: teamsSql, values: [slug] },
@@ -428,6 +452,7 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
 
       if (identityRows.results.length === 0) return null;
       const identity = parseIdentity(identityRows.results[0]);
+      const lastNumberRow = lastNumberRows.results[0];
 
       const seasons = mergeDriverSeasons(
         roundRows.results,
@@ -441,6 +466,10 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
 
       return {
         ...identity,
+        lastNumber:
+          lastNumberRow === undefined
+            ? null
+            : asString(asRecord(lastNumberRow, "last number row").driver_number, "last number"),
         numberStints: mergeNumberStints(numberRows.results),
         teamStints: mergeTeamStints(seasons),
         currentSeason: buildCurrentSeason(
@@ -486,7 +515,7 @@ function mapDriverRow(row: unknown): DriverSummary {
 
 function parseIdentity(
   value: unknown,
-): Omit<DriverPage, "numberStints" | "teamStints" | "currentSeason" | "seasons" | "activeSeason"> {
+): Omit<DriverPage, "lastNumber" | "numberStints" | "teamStints" | "currentSeason" | "seasons" | "activeSeason"> {
   const record = asRecord(value, "driver identity");
   return {
     id: asString(record.id, "driver id"),
@@ -562,13 +591,9 @@ export function mergeTeamStints(seasons: DriverSeason[]): TeamStint[] {
   return stints;
 }
 
-// fixture 不存 teamStints，运行期从 seasons 补齐，保证 DEV 与 D1 同构
+// fixture 与 D1 结果同构，仅 teamStints 需运行期从 seasons 推导
 function withTeamStints(page: Omit<DriverPage, "teamStints">): DriverPage {
-  const seasons = page.seasons.map((season) => ({
-    ...season,
-    teams: season.teams.map((team) => ({ ...team, teammates: team.teammates ?? [] })),
-  }));
-  return { ...page, seasons, teamStints: mergeTeamStints(page.seasons) };
+  return { ...page, teamStints: mergeTeamStints(page.seasons) };
 }
 
 function mergeDriverSeasons(
@@ -722,25 +747,4 @@ function mergeDriverSeasons(
   }
 
   return [...seasons.values()].sort((a, b) => b.year - a.year);
-}
-
-function asRecord(value: unknown, label: string): Record<string, unknown> {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    throw new Error(`Invalid driver data: expected ${label} to be an object`);
-  }
-  return value as Record<string, unknown>;
-}
-
-function asString(value: unknown, label: string): string {
-  if (typeof value !== "string") {
-    throw new Error(`Invalid driver data: expected ${label} to be a string`);
-  }
-  return value;
-}
-
-function asNumber(value: unknown, label: string): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`Invalid driver data: expected ${label} to be a number`);
-  }
-  return value;
 }

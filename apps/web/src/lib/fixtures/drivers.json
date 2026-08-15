@@ -11,83 +11,123 @@
     "seasons": {
       "2007": {
         "points": 109,
-        "number": "2"
+        "number": "2",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2008": {
         "points": 98,
-        "number": "22"
+        "number": "22",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2009": {
         "points": 49,
-        "number": "1"
+        "number": "1",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2010": {
         "points": 240,
-        "number": "2"
+        "number": "2",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2011": {
         "points": 227,
-        "number": "3"
+        "number": "3",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2012": {
         "points": 190,
-        "number": "4"
+        "number": "4",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2013": {
         "points": 189,
-        "number": "10"
+        "number": "10",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2014": {
         "points": 384,
-        "number": "44"
+        "number": "44",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2015": {
         "points": 381,
-        "number": "44"
+        "number": "44",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2016": {
         "points": 380,
-        "number": "44"
+        "number": "44",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2017": {
         "points": 363,
-        "number": "44"
+        "number": "44",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2018": {
         "points": 408,
-        "number": "44"
+        "number": "44",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2019": {
         "points": 413,
-        "number": "44"
+        "number": "44",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2020": {
         "points": 347,
-        "number": "44"
+        "number": "44",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2021": {
         "points": 387.5,
-        "number": "44"
+        "number": "44",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2022": {
         "points": 240,
-        "number": "44"
+        "number": "44",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2023": {
         "points": 234,
-        "number": "44"
+        "number": "44",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2024": {
         "points": 223,
-        "number": "44"
+        "number": "44",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2025": {
         "points": 156,
-        "number": "44"
+        "number": "44",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2026": {
         "points": 169,
-        "number": "44"
+        "number": "44",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       }
     }
   },
@@ -103,51 +143,75 @@
     "seasons": {
       "2015": {
         "points": 49,
-        "number": "33"
+        "number": "33",
+        "teamId": "toro-rosso",
+        "teamName": "Toro Rosso"
       },
       "2016": {
         "points": 204,
-        "number": "33"
+        "number": "33",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2017": {
         "points": 168,
-        "number": "33"
+        "number": "33",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2018": {
         "points": 249,
-        "number": "33"
+        "number": "33",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2019": {
         "points": 278,
-        "number": "33"
+        "number": "33",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2020": {
         "points": 214,
-        "number": "33"
+        "number": "33",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2021": {
         "points": 395.5,
-        "number": "33"
+        "number": "33",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2022": {
         "points": 454,
-        "number": "1"
+        "number": "1",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2023": {
         "points": 575,
-        "number": "1"
+        "number": "1",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2024": {
         "points": 437,
-        "number": "1"
+        "number": "1",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2025": {
         "points": 421,
-        "number": "1"
+        "number": "1",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2026": {
         "points": 109,
-        "number": "3"
+        "number": "3",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       }
     }
   },
@@ -163,67 +227,99 @@
     "seasons": {
       "2007": {
         "points": 6,
-        "number": "19"
+        "number": "19",
+        "teamId": "toro-rosso",
+        "teamName": "Toro Rosso"
       },
       "2008": {
         "points": 35,
-        "number": "15"
+        "number": "15",
+        "teamId": "toro-rosso",
+        "teamName": "Toro Rosso"
       },
       "2009": {
         "points": 84,
-        "number": "15"
+        "number": "15",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2010": {
         "points": 256,
-        "number": "5"
+        "number": "5",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2011": {
         "points": 392,
-        "number": "1"
+        "number": "1",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2012": {
         "points": 281,
-        "number": "1"
+        "number": "1",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2013": {
         "points": 397,
-        "number": "1"
+        "number": "1",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2014": {
         "points": 167,
-        "number": "1"
+        "number": "1",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2015": {
         "points": 278,
-        "number": "5"
+        "number": "5",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2016": {
         "points": 212,
-        "number": "5"
+        "number": "5",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2017": {
         "points": 317,
-        "number": "5"
+        "number": "5",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2018": {
         "points": 320,
-        "number": "5"
+        "number": "5",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2019": {
         "points": 240,
-        "number": "5"
+        "number": "5",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2020": {
         "points": 33,
-        "number": "5"
+        "number": "5",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2021": {
         "points": 43,
-        "number": "5"
+        "number": "5",
+        "teamId": "aston-martin",
+        "teamName": "Aston Martin"
       },
       "2022": {
         "points": 37,
-        "number": "5"
+        "number": "5",
+        "teamId": "aston-martin",
+        "teamName": "Aston Martin"
       }
     }
   },
@@ -239,95 +335,141 @@
     "seasons": {
       "2001": {
         "points": 0,
-        "number": "21"
+        "number": "21",
+        "teamId": "minardi",
+        "teamName": "Minardi"
       },
       "2003": {
         "points": 55,
-        "number": "8"
+        "number": "8",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "2004": {
         "points": 59,
-        "number": "8"
+        "number": "8",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "2005": {
         "points": 133,
-        "number": "5"
+        "number": "5",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "2006": {
         "points": 134,
-        "number": "1"
+        "number": "1",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "2007": {
         "points": 109,
-        "number": "1"
+        "number": "1",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2008": {
         "points": 61,
-        "number": "5"
+        "number": "5",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "2009": {
         "points": 26,
-        "number": "7"
+        "number": "7",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "2010": {
         "points": 252,
-        "number": "8"
+        "number": "8",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2011": {
         "points": 257,
-        "number": "5"
+        "number": "5",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2012": {
         "points": 278,
-        "number": "5"
+        "number": "5",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2013": {
         "points": 242,
-        "number": "3"
+        "number": "3",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2014": {
         "points": 161,
-        "number": "14"
+        "number": "14",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2015": {
         "points": 11,
-        "number": "14"
+        "number": "14",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2016": {
         "points": 54,
-        "number": "14"
+        "number": "14",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2017": {
         "points": 17,
-        "number": "14"
+        "number": "14",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2018": {
         "points": 50,
-        "number": "14"
+        "number": "14",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2021": {
         "points": 81,
-        "number": "14"
+        "number": "14",
+        "teamId": "alpine",
+        "teamName": "Alpine"
       },
       "2022": {
         "points": 81,
-        "number": "14"
+        "number": "14",
+        "teamId": "alpine",
+        "teamName": "Alpine"
       },
       "2023": {
         "points": 206,
-        "number": "14"
+        "number": "14",
+        "teamId": "aston-martin",
+        "teamName": "Aston Martin"
       },
       "2024": {
         "points": 70,
-        "number": "14"
+        "number": "14",
+        "teamId": "aston-martin",
+        "teamName": "Aston Martin"
       },
       "2025": {
         "points": 56,
-        "number": "14"
+        "number": "14",
+        "teamId": "aston-martin",
+        "teamName": "Aston Martin"
       },
       "2026": {
         "points": 1,
-        "number": "14"
+        "number": "14",
+        "teamId": "aston-martin",
+        "teamName": "Aston Martin"
       }
     }
   },
@@ -343,39 +485,57 @@
     "seasons": {
       "2018": {
         "points": 39,
-        "number": "16"
+        "number": "16",
+        "teamId": "sauber",
+        "teamName": "Sauber"
       },
       "2019": {
         "points": 264,
-        "number": "16"
+        "number": "16",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2020": {
         "points": 98,
-        "number": "16"
+        "number": "16",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2021": {
         "points": 159,
-        "number": "16"
+        "number": "16",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2022": {
         "points": 308,
-        "number": "16"
+        "number": "16",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2023": {
         "points": 206,
-        "number": "16"
+        "number": "16",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2024": {
         "points": 356,
-        "number": "16"
+        "number": "16",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2025": {
         "points": 242,
-        "number": "16"
+        "number": "16",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2026": {
         "points": 138,
-        "number": "16"
+        "number": "16",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       }
     }
   },
@@ -391,55 +551,81 @@
     "seasons": {
       "2013": {
         "points": 4,
-        "number": "17"
+        "number": "17",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2014": {
         "points": 186,
-        "number": "77"
+        "number": "77",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2015": {
         "points": 136,
-        "number": "77"
+        "number": "77",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2016": {
         "points": 85,
-        "number": "77"
+        "number": "77",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2017": {
         "points": 305,
-        "number": "77"
+        "number": "77",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2018": {
         "points": 247,
-        "number": "77"
+        "number": "77",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2019": {
         "points": 326,
-        "number": "77"
+        "number": "77",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2020": {
         "points": 223,
-        "number": "77"
+        "number": "77",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2021": {
         "points": 226,
-        "number": "77"
+        "number": "77",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2022": {
         "points": 49,
-        "number": "77"
+        "number": "77",
+        "teamId": "alfa-romeo",
+        "teamName": "Alfa Romeo"
       },
       "2023": {
         "points": 10,
-        "number": "77"
+        "number": "77",
+        "teamId": "alfa-romeo",
+        "teamName": "Alfa Romeo"
       },
       "2024": {
         "points": 0,
-        "number": "77"
+        "number": "77",
+        "teamId": "kick-sauber",
+        "teamName": "Kick Sauber"
       },
       "2026": {
         "points": 0,
-        "number": "77"
+        "number": "77",
+        "teamId": "cadillac",
+        "teamName": "Cadillac"
       }
     }
   },
@@ -455,63 +641,93 @@
     "seasons": {
       "2011": {
         "points": 14,
-        "number": "17"
+        "number": "17",
+        "teamId": "sauber",
+        "teamName": "Sauber"
       },
       "2012": {
         "points": 66,
-        "number": "15"
+        "number": "15",
+        "teamId": "sauber",
+        "teamName": "Sauber"
       },
       "2013": {
         "points": 49,
-        "number": "6"
+        "number": "6",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2014": {
         "points": 59,
-        "number": "11"
+        "number": "11",
+        "teamId": "force-india",
+        "teamName": "Force India"
       },
       "2015": {
         "points": 78,
-        "number": "11"
+        "number": "11",
+        "teamId": "force-india",
+        "teamName": "Force India"
       },
       "2016": {
         "points": 101,
-        "number": "11"
+        "number": "11",
+        "teamId": "force-india",
+        "teamName": "Force India"
       },
       "2017": {
         "points": 100,
-        "number": "11"
+        "number": "11",
+        "teamId": "force-india",
+        "teamName": "Force India"
       },
       "2018": {
         "points": 62,
-        "number": "11"
+        "number": "11",
+        "teamId": "force-india",
+        "teamName": "Force India"
       },
       "2019": {
         "points": 52,
-        "number": "11"
+        "number": "11",
+        "teamId": "racing-point",
+        "teamName": "Racing Point"
       },
       "2020": {
         "points": 125,
-        "number": "11"
+        "number": "11",
+        "teamId": "racing-point",
+        "teamName": "Racing Point"
       },
       "2021": {
         "points": 190,
-        "number": "11"
+        "number": "11",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2022": {
         "points": 305,
-        "number": "11"
+        "number": "11",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2023": {
         "points": 285,
-        "number": "11"
+        "number": "11",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2024": {
         "points": 152,
-        "number": "11"
+        "number": "11",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2026": {
         "points": 0,
-        "number": "11"
+        "number": "11",
+        "teamId": "cadillac",
+        "teamName": "Cadillac"
       }
     }
   },
@@ -527,79 +743,117 @@
     "seasons": {
       "1991": {
         "points": 4,
-        "number": "19"
+        "number": "19",
+        "teamId": "benetton",
+        "teamName": "Benetton"
       },
       "1992": {
         "points": 53,
-        "number": "19"
+        "number": "19",
+        "teamId": "benetton",
+        "teamName": "Benetton"
       },
       "1993": {
         "points": 52,
-        "number": "5"
+        "number": "5",
+        "teamId": "benetton",
+        "teamName": "Benetton"
       },
       "1994": {
         "points": 92,
-        "number": "5"
+        "number": "5",
+        "teamId": "benetton",
+        "teamName": "Benetton"
       },
       "1995": {
         "points": 102,
-        "number": "1"
+        "number": "1",
+        "teamId": "benetton",
+        "teamName": "Benetton"
       },
       "1996": {
         "points": 59,
-        "number": "1"
+        "number": "1",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "1997": {
         "points": 78,
-        "number": "5"
+        "number": "5",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "1998": {
         "points": 86,
-        "number": "3"
+        "number": "3",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "1999": {
         "points": 44,
-        "number": "3"
+        "number": "3",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2000": {
         "points": 108,
-        "number": "3"
+        "number": "3",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2001": {
         "points": 123,
-        "number": "1"
+        "number": "1",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2002": {
         "points": 144,
-        "number": "1"
+        "number": "1",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2003": {
         "points": 93,
-        "number": "1"
+        "number": "1",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2004": {
         "points": 148,
-        "number": "1"
+        "number": "1",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2005": {
         "points": 62,
-        "number": "1"
+        "number": "1",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2006": {
         "points": 121,
-        "number": "5"
+        "number": "5",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2010": {
         "points": 72,
-        "number": "3"
+        "number": "3",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2011": {
         "points": 76,
-        "number": "7"
+        "number": "7",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2012": {
         "points": 49,
-        "number": "7"
+        "number": "7",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       }
     }
   },
@@ -615,35 +869,51 @@
     "seasons": {
       "2019": {
         "points": 49,
-        "number": "4"
+        "number": "4",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2020": {
         "points": 97,
-        "number": "4"
+        "number": "4",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2021": {
         "points": 160,
-        "number": "4"
+        "number": "4",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2022": {
         "points": 122,
-        "number": "4"
+        "number": "4",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2023": {
         "points": 205,
-        "number": "4"
+        "number": "4",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2024": {
         "points": 374,
-        "number": "4"
+        "number": "4",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2025": {
         "points": 423,
-        "number": "4"
+        "number": "4",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2026": {
         "points": 128,
-        "number": "1"
+        "number": "1",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       }
     }
   },
@@ -659,51 +929,75 @@
     "seasons": {
       "2015": {
         "points": 18,
-        "number": "55"
+        "number": "55",
+        "teamId": "toro-rosso",
+        "teamName": "Toro Rosso"
       },
       "2016": {
         "points": 46,
-        "number": "55"
+        "number": "55",
+        "teamId": "toro-rosso",
+        "teamName": "Toro Rosso"
       },
       "2017": {
         "points": 54,
-        "number": "55"
+        "number": "55",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "2018": {
         "points": 53,
-        "number": "55"
+        "number": "55",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "2019": {
         "points": 96,
-        "number": "55"
+        "number": "55",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2020": {
         "points": 105,
-        "number": "55"
+        "number": "55",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2021": {
         "points": 164.5,
-        "number": "55"
+        "number": "55",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2022": {
         "points": 246,
-        "number": "55"
+        "number": "55",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2023": {
         "points": 200,
-        "number": "55"
+        "number": "55",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2024": {
         "points": 290,
-        "number": "55"
+        "number": "55",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "2025": {
         "points": 64,
-        "number": "55"
+        "number": "55",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2026": {
         "points": 6,
-        "number": "55"
+        "number": "55",
+        "teamId": "williams",
+        "teamName": "Williams"
       }
     }
   },
@@ -719,35 +1013,51 @@
     "seasons": {
       "2019": {
         "points": 0,
-        "number": "63"
+        "number": "63",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2020": {
         "points": 3,
-        "number": "63"
+        "number": "63",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2021": {
         "points": 16,
-        "number": "63"
+        "number": "63",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2022": {
         "points": 275,
-        "number": "63"
+        "number": "63",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2023": {
         "points": 175,
-        "number": "63"
+        "number": "63",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2024": {
         "points": 245,
-        "number": "63"
+        "number": "63",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2025": {
         "points": 319,
-        "number": "63"
+        "number": "63",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2026": {
         "points": 160,
-        "number": "63"
+        "number": "63",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       }
     }
   },
@@ -763,19 +1073,27 @@
     "seasons": {
       "2023": {
         "points": 97,
-        "number": "81"
+        "number": "81",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2024": {
         "points": 292,
-        "number": "81"
+        "number": "81",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2025": {
         "points": 410,
-        "number": "81"
+        "number": "81",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2026": {
         "points": 92,
-        "number": "81"
+        "number": "81",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       }
     }
   },
@@ -791,55 +1109,81 @@
     "seasons": {
       "1980": {
         "points": 5,
-        "number": "8"
+        "number": "8",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1981": {
         "points": 43,
-        "number": "15"
+        "number": "15",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "1982": {
         "points": 34,
-        "number": "15"
+        "number": "15",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "1983": {
         "points": 57,
-        "number": "15"
+        "number": "15",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "1984": {
         "points": 71.5,
-        "number": "7"
+        "number": "7",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1985": {
         "points": 73,
-        "number": "2"
+        "number": "2",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1986": {
         "points": 72,
-        "number": "1"
+        "number": "1",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1987": {
         "points": 46,
-        "number": "1"
+        "number": "1",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1988": {
         "points": 87,
-        "number": "11"
+        "number": "11",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1989": {
         "points": 76,
-        "number": "2"
+        "number": "2",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1990": {
         "points": 71,
-        "number": "1"
+        "number": "1",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "1991": {
         "points": 34,
-        "number": "27"
+        "number": "27",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "1993": {
         "points": 99,
-        "number": "2"
+        "number": "2",
+        "teamId": "williams",
+        "teamName": "Williams"
       }
     }
   },
@@ -855,63 +1199,93 @@
     "seasons": {
       "2010": {
         "points": 22,
-        "number": "10"
+        "number": "10",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2012": {
         "points": 63,
-        "number": "12"
+        "number": "12",
+        "teamId": "force-india",
+        "teamName": "Force India"
       },
       "2013": {
         "points": 51,
-        "number": "11"
+        "number": "11",
+        "teamId": "sauber",
+        "teamName": "Sauber"
       },
       "2014": {
         "points": 96,
-        "number": "27"
+        "number": "27",
+        "teamId": "force-india",
+        "teamName": "Force India"
       },
       "2015": {
         "points": 58,
-        "number": "27"
+        "number": "27",
+        "teamId": "force-india",
+        "teamName": "Force India"
       },
       "2016": {
         "points": 72,
-        "number": "27"
+        "number": "27",
+        "teamId": "force-india",
+        "teamName": "Force India"
       },
       "2017": {
         "points": 43,
-        "number": "27"
+        "number": "27",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "2018": {
         "points": 69,
-        "number": "27"
+        "number": "27",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "2019": {
         "points": 37,
-        "number": "27"
+        "number": "27",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "2020": {
         "points": 10,
-        "number": "27"
+        "number": "27",
+        "teamId": "racing-point",
+        "teamName": "Racing Point"
       },
       "2022": {
         "points": 0,
-        "number": "27"
+        "number": "27",
+        "teamId": "aston-martin",
+        "teamName": "Aston Martin"
       },
       "2023": {
         "points": 9,
-        "number": "27"
+        "number": "27",
+        "teamId": "haas",
+        "teamName": "Haas"
       },
       "2024": {
         "points": 41,
-        "number": "27"
+        "number": "27",
+        "teamId": "haas",
+        "teamName": "Haas"
       },
       "2025": {
         "points": 51,
-        "number": "27"
+        "number": "27",
+        "teamId": "kick-sauber",
+        "teamName": "Kick Sauber"
       },
       "2026": {
         "points": 2,
-        "number": "27"
+        "number": "27",
+        "teamId": "audi",
+        "teamName": "Audi"
       }
     }
   },
@@ -927,47 +1301,69 @@
     "seasons": {
       "1984": {
         "points": 13,
-        "number": "19"
+        "number": "19",
+        "teamId": "toleman",
+        "teamName": "Toleman"
       },
       "1985": {
         "points": 38,
-        "number": "12"
+        "number": "12",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1986": {
         "points": 55,
-        "number": "12"
+        "number": "12",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1987": {
         "points": 57,
-        "number": "12"
+        "number": "12",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1988": {
         "points": 90,
-        "number": "12"
+        "number": "12",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1989": {
         "points": 60,
-        "number": "1"
+        "number": "1",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1990": {
         "points": 78,
-        "number": "27"
+        "number": "27",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1991": {
         "points": 96,
-        "number": "1"
+        "number": "1",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1992": {
         "points": 50,
-        "number": "1"
+        "number": "1",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1993": {
         "points": 73,
-        "number": "8"
+        "number": "8",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1994": {
         "points": 0,
-        "number": "2"
+        "number": "2",
+        "teamId": "williams",
+        "teamName": "Williams"
       }
     }
   },
@@ -983,43 +1379,63 @@
     "seasons": {
       "2017": {
         "points": 0,
-        "number": "10"
+        "number": "10",
+        "teamId": "toro-rosso",
+        "teamName": "Toro Rosso"
       },
       "2018": {
         "points": 29,
-        "number": "10"
+        "number": "10",
+        "teamId": "toro-rosso",
+        "teamName": "Toro Rosso"
       },
       "2019": {
         "points": 95,
-        "number": "10"
+        "number": "10",
+        "teamId": "toro-rosso",
+        "teamName": "Toro Rosso"
       },
       "2020": {
         "points": 75,
-        "number": "10"
+        "number": "10",
+        "teamId": "alphatauri",
+        "teamName": "AlphaTauri"
       },
       "2021": {
         "points": 110,
-        "number": "10"
+        "number": "10",
+        "teamId": "alphatauri",
+        "teamName": "AlphaTauri"
       },
       "2022": {
         "points": 23,
-        "number": "10"
+        "number": "10",
+        "teamId": "alphatauri",
+        "teamName": "AlphaTauri"
       },
       "2023": {
         "points": 62,
-        "number": "10"
+        "number": "10",
+        "teamId": "alpine",
+        "teamName": "Alpine"
       },
       "2024": {
         "points": 42,
-        "number": "10"
+        "number": "10",
+        "teamId": "alpine",
+        "teamName": "Alpine"
       },
       "2025": {
         "points": 22,
-        "number": "10"
+        "number": "10",
+        "teamId": "alpine",
+        "teamName": "Alpine"
       },
       "2026": {
         "points": 42,
-        "number": "10"
+        "number": "10",
+        "teamId": "alpine",
+        "teamName": "Alpine"
       }
     }
   },
@@ -1035,43 +1451,63 @@
     "seasons": {
       "2016": {
         "points": 0,
-        "number": "31"
+        "number": "31",
+        "teamId": "manor",
+        "teamName": "Manor"
       },
       "2017": {
         "points": 87,
-        "number": "31"
+        "number": "31",
+        "teamId": "force-india",
+        "teamName": "Force India"
       },
       "2018": {
         "points": 49,
-        "number": "31"
+        "number": "31",
+        "teamId": "force-india",
+        "teamName": "Force India"
       },
       "2020": {
         "points": 62,
-        "number": "31"
+        "number": "31",
+        "teamId": "renault",
+        "teamName": "Renault"
       },
       "2021": {
         "points": 74,
-        "number": "31"
+        "number": "31",
+        "teamId": "alpine",
+        "teamName": "Alpine"
       },
       "2022": {
         "points": 92,
-        "number": "31"
+        "number": "31",
+        "teamId": "alpine",
+        "teamName": "Alpine"
       },
       "2023": {
         "points": 58,
-        "number": "31"
+        "number": "31",
+        "teamId": "alpine",
+        "teamName": "Alpine"
       },
       "2024": {
         "points": 23,
-        "number": "31"
+        "number": "31",
+        "teamId": "alpine",
+        "teamName": "Alpine"
       },
       "2025": {
         "points": 38,
-        "number": "31"
+        "number": "31",
+        "teamId": "haas",
+        "teamName": "Haas"
       },
       "2026": {
         "points": 3,
-        "number": "31"
+        "number": "31",
+        "teamId": "haas",
+        "teamName": "Haas"
       }
     }
   },
@@ -1087,59 +1523,87 @@
     "seasons": {
       "1978": {
         "points": 0,
-        "number": "66"
+        "number": "66",
+        "teamId": "brabham",
+        "teamName": "Brabham"
       },
       "1979": {
         "points": 3,
-        "number": "6"
+        "number": "6",
+        "teamId": "brabham",
+        "teamName": "Brabham"
       },
       "1980": {
         "points": 54,
-        "number": "5"
+        "number": "5",
+        "teamId": "brabham",
+        "teamName": "Brabham"
       },
       "1981": {
         "points": 50,
-        "number": "5"
+        "number": "5",
+        "teamId": "brabham",
+        "teamName": "Brabham"
       },
       "1982": {
         "points": 20,
-        "number": "1"
+        "number": "1",
+        "teamId": "brabham",
+        "teamName": "Brabham"
       },
       "1983": {
         "points": 59,
-        "number": "5"
+        "number": "5",
+        "teamId": "brabham",
+        "teamName": "Brabham"
       },
       "1984": {
         "points": 29,
-        "number": "1"
+        "number": "1",
+        "teamId": "brabham",
+        "teamName": "Brabham"
       },
       "1985": {
         "points": 21,
-        "number": "7"
+        "number": "7",
+        "teamId": "brabham",
+        "teamName": "Brabham"
       },
       "1986": {
         "points": 69,
-        "number": "6"
+        "number": "6",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "1987": {
         "points": 73,
-        "number": "6"
+        "number": "6",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "1988": {
         "points": 22,
-        "number": "1"
+        "number": "1",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1989": {
         "points": 12,
-        "number": "11"
+        "number": "11",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1990": {
         "points": 43,
-        "number": "20"
+        "number": "20",
+        "teamId": "benetton",
+        "teamName": "Benetton"
       },
       "1991": {
         "points": 26.5,
-        "number": "20"
+        "number": "20",
+        "teamId": "benetton",
+        "teamName": "Benetton"
       }
     }
   },
@@ -1154,53 +1618,82 @@
     "points": 420.5,
     "seasons": {
       "1971": {
-        "points": 0
+        "points": 0,
+        "number": "26",
+        "teamId": "march",
+        "teamName": "March"
       },
       "1972": {
-        "points": 0
+        "points": 0,
+        "number": "5",
+        "teamId": "march",
+        "teamName": "March"
       },
       "1973": {
-        "points": 2
+        "points": 2,
+        "number": "21",
+        "teamId": "brm",
+        "teamName": "BRM"
       },
       "1974": {
         "points": 38,
-        "number": "12"
+        "number": "12",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "1975": {
         "points": 64.5,
-        "number": "12"
+        "number": "12",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "1976": {
         "points": 68,
-        "number": "1"
+        "number": "1",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "1977": {
         "points": 72,
-        "number": "11"
+        "number": "11",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "1978": {
         "points": 44,
-        "number": "1"
+        "number": "1",
+        "teamId": "brabham",
+        "teamName": "Brabham"
       },
       "1979": {
         "points": 4,
-        "number": "5"
+        "number": "5",
+        "teamId": "brabham",
+        "teamName": "Brabham"
       },
       "1982": {
         "points": 30,
-        "number": "8"
+        "number": "8",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1983": {
         "points": 12,
-        "number": "8"
+        "number": "8",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1984": {
         "points": 72,
-        "number": "8"
+        "number": "8",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1985": {
         "points": 14,
-        "number": "1"
+        "number": "1",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       }
     }
   },
@@ -1216,47 +1709,69 @@
     "seasons": {
       "1991": {
         "points": 2,
-        "number": "11"
+        "number": "11",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1992": {
         "points": 11,
-        "number": "11"
+        "number": "11",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1993": {
         "points": 4,
-        "number": "7"
+        "number": "7",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1994": {
         "points": 26,
-        "number": "7"
+        "number": "7",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1995": {
         "points": 17,
-        "number": "8"
+        "number": "8",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1996": {
         "points": 31,
-        "number": "7"
+        "number": "7",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1997": {
         "points": 27,
-        "number": "9"
+        "number": "9",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1998": {
         "points": 100,
-        "number": "8"
+        "number": "8",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "1999": {
         "points": 76,
-        "number": "1"
+        "number": "1",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2000": {
         "points": 89,
-        "number": "1"
+        "number": "1",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       },
       "2001": {
         "points": 37,
-        "number": "3"
+        "number": "3",
+        "teamId": "mclaren",
+        "teamName": "McLaren"
       }
     }
   },
@@ -1272,18 +1787,22 @@
     "seasons": {
       "2025": {
         "points": 150,
-        "number": "12"
+        "number": "12",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "2026": {
         "points": 219,
-        "number": "12"
+        "number": "12",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       }
     }
   },
   {
     "id": "jackie-stewart",
     "name": "Jackie Stewart",
-    "number": null,
+    "number": "5",
     "flagCode": "gb",
     "teamId": "tyrrell",
     "teamName": "Tyrrell",
@@ -1291,31 +1810,58 @@
     "points": 360,
     "seasons": {
       "1965": {
-        "points": 33
+        "points": 33,
+        "number": "4",
+        "teamId": "brm",
+        "teamName": "BRM"
       },
       "1966": {
-        "points": 14
+        "points": 14,
+        "number": "4",
+        "teamId": "brm",
+        "teamName": "BRM"
       },
       "1967": {
-        "points": 10
+        "points": 10,
+        "number": "7",
+        "teamId": "brm",
+        "teamName": "BRM"
       },
       "1968": {
-        "points": 36
+        "points": 36,
+        "number": "15",
+        "teamId": "matra",
+        "teamName": "Matra"
       },
       "1969": {
-        "points": 63
+        "points": 63,
+        "number": "3",
+        "teamId": "matra",
+        "teamName": "Matra"
       },
       "1970": {
-        "points": 25
+        "points": 25,
+        "number": "1",
+        "teamId": "tyrrell",
+        "teamName": "Tyrrell"
       },
       "1971": {
-        "points": 62
+        "points": 62,
+        "number": "8",
+        "teamId": "tyrrell",
+        "teamName": "Tyrrell"
       },
       "1972": {
-        "points": 45
+        "points": 45,
+        "number": "1",
+        "teamId": "tyrrell",
+        "teamName": "Tyrrell"
       },
       "1973": {
-        "points": 71
+        "points": 71,
+        "number": "5",
+        "teamId": "tyrrell",
+        "teamName": "Tyrrell"
       }
     }
   },
@@ -1331,43 +1877,63 @@
     "seasons": {
       "2017": {
         "points": 40,
-        "number": "18"
+        "number": "18",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2018": {
         "points": 6,
-        "number": "18"
+        "number": "18",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2019": {
         "points": 21,
-        "number": "18"
+        "number": "18",
+        "teamId": "racing-point",
+        "teamName": "Racing Point"
       },
       "2020": {
         "points": 75,
-        "number": "18"
+        "number": "18",
+        "teamId": "racing-point",
+        "teamName": "Racing Point"
       },
       "2021": {
         "points": 34,
-        "number": "18"
+        "number": "18",
+        "teamId": "aston-martin",
+        "teamName": "Aston Martin"
       },
       "2022": {
         "points": 18,
-        "number": "18"
+        "number": "18",
+        "teamId": "aston-martin",
+        "teamName": "Aston Martin"
       },
       "2023": {
         "points": 74,
-        "number": "18"
+        "number": "18",
+        "teamId": "aston-martin",
+        "teamName": "Aston Martin"
       },
       "2024": {
         "points": 24,
-        "number": "18"
+        "number": "18",
+        "teamId": "aston-martin",
+        "teamName": "Aston Martin"
       },
       "2025": {
         "points": 33,
-        "number": "18"
+        "number": "18",
+        "teamId": "aston-martin",
+        "teamName": "Aston Martin"
       },
       "2026": {
         "points": 0,
-        "number": "18"
+        "number": "18",
+        "teamId": "aston-martin",
+        "teamName": "Aston Martin"
       }
     }
   },
@@ -1383,38 +1949,52 @@
     "seasons": {
       "2019": {
         "points": 92,
-        "number": "23"
+        "number": "23",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2020": {
         "points": 105,
-        "number": "23"
+        "number": "23",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       },
       "2022": {
         "points": 4,
-        "number": "23"
+        "number": "23",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2023": {
         "points": 27,
-        "number": "23"
+        "number": "23",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2024": {
         "points": 12,
-        "number": "23"
+        "number": "23",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2025": {
         "points": 73,
-        "number": "23"
+        "number": "23",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2026": {
         "points": 5,
-        "number": "23"
+        "number": "23",
+        "teamId": "williams",
+        "teamName": "Williams"
       }
     }
   },
   {
     "id": "juan-manuel-fangio",
     "name": "Juan Manuel Fangio",
-    "number": null,
+    "number": "34",
     "flagCode": "ar",
     "teamId": "maserati",
     "teamName": "Maserati",
@@ -1422,35 +2002,59 @@
     "points": 277.64,
     "seasons": {
       "1950": {
-        "points": 27
+        "points": 27,
+        "number": "60",
+        "teamId": "alfa-romeo",
+        "teamName": "Alfa Romeo"
       },
       "1951": {
-        "points": 31
+        "points": 31,
+        "number": "22",
+        "teamId": "alfa-romeo",
+        "teamName": "Alfa Romeo"
       },
       "1953": {
-        "points": 28
+        "points": 28,
+        "number": "50",
+        "teamId": "maserati",
+        "teamName": "Maserati"
       },
       "1954": {
-        "points": 42
+        "points": 42,
+        "number": "2",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "1955": {
-        "points": 40
+        "points": 40,
+        "number": "18",
+        "teamId": "mercedes",
+        "teamName": "Mercedes"
       },
       "1956": {
-        "points": 30
+        "points": 30,
+        "number": "26",
+        "teamId": "ferrari",
+        "teamName": "Ferrari"
       },
       "1957": {
-        "points": 40
+        "points": 40,
+        "number": "2",
+        "teamId": "maserati",
+        "teamName": "Maserati"
       },
       "1958": {
-        "points": 7
+        "points": 7,
+        "number": "34",
+        "teamId": "maserati",
+        "teamName": "Maserati"
       }
     }
   },
   {
     "id": "jim-clark",
     "name": "Jim Clark",
-    "number": null,
+    "number": "4",
     "flagCode": "gb",
     "teamId": "lotus",
     "teamName": "Lotus",
@@ -1458,31 +2062,58 @@
     "points": 274,
     "seasons": {
       "1960": {
-        "points": 8
+        "points": 8,
+        "number": "12",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1961": {
-        "points": 11
+        "points": 11,
+        "number": "14",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1962": {
-        "points": 30
+        "points": 30,
+        "number": "1",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1963": {
-        "points": 54
+        "points": 54,
+        "number": "1",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1964": {
-        "points": 32
+        "points": 32,
+        "number": "1",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1965": {
-        "points": 54
+        "points": 54,
+        "number": "5",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1966": {
-        "points": 16
+        "points": 16,
+        "number": "1",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1967": {
-        "points": 41
+        "points": 41,
+        "number": "5",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       },
       "1968": {
-        "points": 9
+        "points": 9,
+        "number": "4",
+        "teamId": "lotus",
+        "teamName": "Lotus"
       }
     }
   },
@@ -1498,11 +2129,15 @@
     "seasons": {
       "2025": {
         "points": 51,
-        "number": "6"
+        "number": "6",
+        "teamId": "racing-bulls",
+        "teamName": "Racing Bulls"
       },
       "2026": {
         "points": 68,
-        "number": "6"
+        "number": "6",
+        "teamId": "red-bull",
+        "teamName": "Red Bull"
       }
     }
   },
@@ -1518,19 +2153,27 @@
     "seasons": {
       "2023": {
         "points": 2,
-        "number": "40"
+        "number": "40",
+        "teamId": "alphatauri",
+        "teamName": "AlphaTauri"
       },
       "2024": {
         "points": 4,
-        "number": "30"
+        "number": "30",
+        "teamId": "rb",
+        "teamName": "RB"
       },
       "2025": {
         "points": 38,
-        "number": "30"
+        "number": "30",
+        "teamId": "racing-bulls",
+        "teamName": "Racing Bulls"
       },
       "2026": {
         "points": 43,
-        "number": "30"
+        "number": "30",
+        "teamId": "racing-bulls",
+        "teamName": "Racing Bulls"
       }
     }
   },
@@ -1546,15 +2189,21 @@
     "seasons": {
       "2024": {
         "points": 7,
-        "number": "50"
+        "number": "50",
+        "teamId": "haas",
+        "teamName": "Haas"
       },
       "2025": {
         "points": 41,
-        "number": "87"
+        "number": "87",
+        "teamId": "haas",
+        "teamName": "Haas"
       },
       "2026": {
         "points": 18,
-        "number": "87"
+        "number": "87",
+        "teamId": "haas",
+        "teamName": "Haas"
       }
     }
   },
@@ -1570,11 +2219,15 @@
     "seasons": {
       "2025": {
         "points": 19,
-        "number": "5"
+        "number": "5",
+        "teamId": "kick-sauber",
+        "teamName": "Kick Sauber"
       },
       "2026": {
         "points": 10,
-        "number": "5"
+        "number": "5",
+        "teamId": "audi",
+        "teamName": "Audi"
       }
     }
   },
@@ -1590,15 +2243,21 @@
     "seasons": {
       "2024": {
         "points": 5,
-        "number": "43"
+        "number": "43",
+        "teamId": "williams",
+        "teamName": "Williams"
       },
       "2025": {
         "points": 0,
-        "number": "43"
+        "number": "43",
+        "teamId": "alpine",
+        "teamName": "Alpine"
       },
       "2026": {
         "points": 19,
-        "number": "43"
+        "number": "43",
+        "teamId": "alpine",
+        "teamName": "Alpine"
       }
     }
   },
@@ -1614,7 +2273,9 @@
     "seasons": {
       "2026": {
         "points": 23,
-        "number": "41"
+        "number": "41",
+        "teamId": "racing-bulls",
+        "teamName": "Racing Bulls"
       }
     }
   }
