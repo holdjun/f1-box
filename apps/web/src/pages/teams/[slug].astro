@@ -10,7 +10,12 @@ import {
   createTeamRepository,
 } from "../../lib/team-repository.js";
 import { resolveSeasonSelection } from "../../lib/routing.js";
-import { getTeamBranding, vendorIndexes } from "../../lib/vendor.js";
+import {
+  colorForYear,
+  getTeamBranding,
+  latestColor,
+  vendorIndexes,
+} from "../../lib/vendor.js";
 
 const slug = (Astro.params.slug ?? "").toLowerCase();
 const repository = import.meta.env.DEV
@@ -33,6 +38,11 @@ if (team) {
 const currentYear = team?.activeSeason ?? null;
 const standaloneLineage = team?.lineage.filter((entry) => entry.segment === "standalone") ?? [];
 const continuityLineage = team?.lineage.filter((entry) => entry.segment === "continuity") ?? [];
+// lineage chip 用该身份期末的队色（与车手页 stint chip 同口径），当前身份取最新色
+const lineageColor = (yearTo: number | null, id: string) =>
+  (yearTo === null
+    ? latestColor(vendorIndexes, id)
+    : colorForYear(vendorIndexes, id, yearTo)) ?? "#84909e";
 const flagSrc = team ? `/vendor/country-flags/${team.alpha2Code.toLowerCase()}.svg` : null;
 
 const matrixSeasons = (team?.seasons ?? []).map((season) => ({
@@ -105,7 +115,11 @@ const initialSelected = resolveSeasonSelection(
                 {standaloneLineage.map((entry, index) => (
                   <span class="lineage-item">
                     {index > 0 ? <span class="lineage-separator">·</span> : null}
-                    <a class="lineage-chip" href={`/teams/${entry.id}`}>
+                    <a
+                      class="lineage-chip"
+                      href={`/teams/${entry.id}`}
+                      style={`--chip-color: ${lineageColor(entry.yearTo, entry.id)}`}
+                    >
                       {entry.name}
                       <span class="lineage-years">
                         {entry.yearTo === null || entry.yearTo === entry.yearFrom
@@ -125,7 +139,11 @@ const initialSelected = resolveSeasonSelection(
                 {continuityLineage.map((entry, index) => (
                   <span class="lineage-item">
                     {index > 0 ? <span class="lineage-arrow">→</span> : null}
-                    <a class="lineage-chip" href={`/teams/${entry.id}`}>
+                    <a
+                      class="lineage-chip"
+                      href={`/teams/${entry.id}`}
+                      style={`--chip-color: ${lineageColor(entry.yearTo, entry.id)}`}
+                    >
                       {entry.name}
                       <span class="lineage-years">
                         {entry.yearTo === null || entry.yearTo === entry.yearFrom
@@ -299,18 +317,18 @@ const initialSelected = resolveSeasonSelection(
     color: var(--muted);
   }
   .lineage-chip {
+    /* 身份名用该时期末的队色，缺配色回落灰 */
     display: inline-flex;
     align-items: baseline;
     gap: 0.4rem;
     padding: 0.15rem 0.6rem;
-    border: 1px solid var(--line);
+    border: 1px solid color-mix(in srgb, var(--chip-color) 45%, transparent);
     border-radius: 999px;
-    color: var(--muted-light);
+    color: var(--chip-color);
     text-decoration: none;
   }
   .lineage-chip:hover {
-    border-color: var(--coral);
-    color: var(--coral);
+    text-decoration: underline;
   }
   .lineage-years {
     color: var(--muted);
