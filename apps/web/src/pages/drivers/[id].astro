@@ -38,9 +38,9 @@ const flagSrc = driver
 const latestTeam = driver?.seasons[0]?.teams[0] ?? null;
 const teamColor =
   (latestTeam && latestColor(vendorIndexes, latestTeam.id)) ?? "#84909e";
-// hero 号码：永久车号优先，无则回落最后一场号码（不再用 monogram）
+// hero 号码：与目录卡同口径，最后参赛号码优先（现役即当前号码），永久车号兜底
 const driverNumber = driver
-  ? (driver.permanentNumber ?? driver.lastNumber)
+  ? (driver.lastNumber ?? driver.permanentNumber)
   : null;
 
 // 多年多队拆成连续多表（每队一表，各自带队友），第二个起加转队连线；

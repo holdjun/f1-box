@@ -14,8 +14,9 @@ function fakeDb(rows: unknown[]): DriverDatabase {
       expect(sql).toContain("ORDER BY ra2.year DESC, ra2.round DESC");
       expect(sql).toContain("test_driver = 0");
       expect(sql).toContain("total_points DESC");
-      // 无永久车号一律回落最后参赛号码（不限年份）
+      // 号码取最后参赛号码（现役即当前号码，如卫冕冠军的 1 号），永久车号兜底
       expect(sql).toContain("rd.driver_number AS last_number");
+      expect(sql).toContain("COALESCE(lr.last_number, d.permanent_number)");
       return Promise.resolve([{ results: rows }]);
     },
   };
@@ -106,7 +107,7 @@ describe("drivers fixture", () => {
       isCurrent: true,
     });
 
-    // 无永久车号回落最后参赛号码（senna 1994 用 2 号）
+    // 号码=最后参赛号码（senna 1994 最后用 2 号）
     const senna = drivers.find((d) => d.id === "ayrton-senna");
     expect(senna).toMatchObject({ number: "2", isCurrent: false });
 
@@ -119,6 +120,10 @@ describe("drivers fixture", () => {
     expect(stewart).toMatchObject({ number: "5" });
     const clark = drivers.find((d) => d.id === "jim-clark");
     expect(clark).toMatchObject({ number: "4" });
+
+    // 现役车手显示当前号码而非永久车号（norris 2026 作为卫冕冠军用 1 号）
+    const norris = drivers.find((d) => d.id === "lando-norris");
+    expect(norris).toMatchObject({ number: "1", isCurrent: true });
 
     // 按生涯总积分降序：hamilton（5187.5）在 verstappen（3553.5）前
     const hamilton = drivers.findIndex((d) => d.id === "lewis-hamilton");

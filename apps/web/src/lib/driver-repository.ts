@@ -93,7 +93,7 @@ export interface DriverPage {
   dateOfDeath: string | null;
   placeOfBirth: string;
   permanentNumber: string | null;
-  // 无永久车号时回落最后一场号码（与目录卡同口径）；hero 不再用 monogram
+  // 最后参赛号码：目录卡与 hero 都优先显示它（现役即当前号码），永久车号兜底
   lastNumber: string | null;
   totals: DriverTotals;
   numberStints: NumberStint[];
@@ -129,8 +129,8 @@ export function createD1DriverDatabase(d1: D1Database): DriverDatabase {
 }
 
 // 最后车队取自实际参赛的末站（与详情页 hero 同一口径）；相关子查询走
-// (driver_id, type) 索引逐人定位，避免全表开窗。号码与目录卡同口径：
-// 全量视图号码=永久车号，无则回落最后参赛号码（不限年份，1958 的 34 号也算）。
+// (driver_id, type) 索引逐人定位，避免全表开窗。号码与目录卡、hero 同口径：
+// 取最后参赛号码（现役即当前号码，如卫冕冠军的 1 号），永久车号仅作兜底。
 // 目录按生涯总积分降序。
 const driversSql = `
 WITH latest_season AS (
@@ -155,7 +155,7 @@ last_race AS (
   )
   JOIN constructor c ON c.id = rd.constructor_id
 )
-SELECT d.id, d.name, COALESCE(d.permanent_number, lr.last_number) AS number,
+SELECT d.id, d.name, COALESCE(lr.last_number, d.permanent_number) AS number,
   co.alpha2_code, lr.constructor_id AS team_id, lr.team_name,
   CASE WHEN cd.driver_id IS NULL THEN 0 ELSE 1 END AS is_current
 FROM driver d
@@ -211,7 +211,7 @@ FROM driver d
 JOIN country co ON co.id = d.nationality_country_id
 WHERE d.id = ?1`;
 
-// 最后参赛号码（不限年份）：无永久车号的车手 hero 用它替代 monogram
+// 最后参赛号码（不限年份）：目录卡与 hero 的号码首选，永久车号兜底
 const lastNumberSql = `
 SELECT rd.driver_number
 FROM race_data rd

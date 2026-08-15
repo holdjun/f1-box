@@ -11,7 +11,7 @@ test("drivers catalog renders the full fixture field @desktop", async ({
   ).toBeVisible();
 });
 
-test("russell card shows permanent number, team and flag @desktop", async ({
+test("russell card shows number, team and flag @desktop", async ({
   page,
 }) => {
   await page.goto("/drivers");
@@ -41,6 +41,15 @@ test("drivers without a permanent number show their last race number @desktop", 
   const card = page.locator('a[href="/drivers/ayrton-senna"]');
   // senna 1994 最后用 2 号
   await expect(card.locator(".card-number")).toHaveText("2");
+});
+
+test("reigning champion card shows the current number @desktop", async ({
+  page,
+}) => {
+  await page.goto("/drivers");
+  // norris 永久 4 号，2026 作为卫冕冠军用 1 号；目录显示当前号码
+  const card = page.locator('a[href="/drivers/lando-norris"]');
+  await expect(card.locator(".card-number")).toHaveText("1");
 });
 
 test("drivers catalog orders by career points @desktop", async ({ page }) => {
