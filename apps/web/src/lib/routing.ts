@@ -17,3 +17,22 @@ export function parseYearParam(value: string | null): number[] | null {
   ];
   return years.length > 0 ? years.sort((a, b) => a - b) : null;
 }
+
+// 目录页：单年份参数，且必须在已知年份内（无效回落 null = 全部）
+export function resolveCatalogYear(value: string | null, years: number[]): number | null {
+  const param = parseYearParam(value);
+  return param !== null && param.length === 1 && years.includes(param[0])
+    ? param[0]
+    : null;
+}
+
+// 详情页：多选年份参数，过滤到该实体实际参赛年份；无交集回落 null（= 全部）
+export function resolveSeasonSelection(
+  value: string | null,
+  seasonYears: Set<number>,
+): number[] | null {
+  const param = parseYearParam(value);
+  if (param === null) return null;
+  const valid = param.filter((year) => seasonYears.has(year));
+  return valid.length > 0 ? valid : null;
+}

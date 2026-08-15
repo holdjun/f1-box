@@ -13,17 +13,14 @@ import {
   latestColor,
   vendorIndexes,
 } from "../../lib/vendor.js";
+import { resolveCatalogYear } from "../../lib/routing.js";
 
 const repository = import.meta.env.DEV
   ? createTeamRepository()
   : createTeamRepository(createD1TeamDatabase(env.F1_DB));
 
 const years = await repository.getSeasonYears();
-const yearParam = Astro.url.searchParams.get("year");
-const year =
-  yearParam !== null && years.includes(Number(yearParam))
-    ? Number(yearParam)
-    : null;
+const year = resolveCatalogYear(Astro.url.searchParams.get("year"), years);
 const constructors =
   year === null
     ? await repository.getConstructors()

@@ -9,17 +9,14 @@ import {
 } from "../../lib/driver-repository.js";
 import { latestColor, vendorIndexes } from "../../lib/vendor.js";
 import { monogram } from "../../lib/tokens.js";
+import { resolveCatalogYear } from "../../lib/routing.js";
 
 const repository = import.meta.env.DEV
   ? createDriverRepository()
   : createDriverRepository(createD1DriverDatabase(env.F1_DB));
 
 const years = await repository.getSeasonYears();
-const yearParam = Astro.url.searchParams.get("year");
-const year =
-  yearParam !== null && years.includes(Number(yearParam))
-    ? Number(yearParam)
-    : null;
+const year = resolveCatalogYear(Astro.url.searchParams.get("year"), years);
 const drivers =
   year === null
     ? await repository.getDrivers()

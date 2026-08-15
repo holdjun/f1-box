@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { parseYearParam, splitYearPath } from "../src/lib/routing.js";
+import {
+  parseYearParam,
+  resolveCatalogYear,
+  resolveSeasonSelection,
+  splitYearPath,
+} from "../src/lib/routing.js";
 
 describe("splitYearPath", () => {
   it("splits a year-scoped path", () => {
@@ -28,5 +33,39 @@ describe("parseYearParam", () => {
     expect(parseYearParam("")).toBeNull();
     expect(parseYearParam("abc")).toBeNull();
     expect(parseYearParam("1900,2020")).toEqual([2020]);
+  });
+});
+
+describe("resolveCatalogYear", () => {
+  const years = [2026, 2025, 1997];
+
+  it("resolves a year present in the catalog", () => {
+    expect(resolveCatalogYear("1997", years)).toBe(1997);
+  });
+
+  it("returns null for missing, non-numeric or unknown years", () => {
+    expect(resolveCatalogYear(null, years)).toBeNull();
+    expect(resolveCatalogYear("abc", years)).toBeNull();
+    expect(resolveCatalogYear("1998", years)).toBeNull();
+    expect(resolveCatalogYear("1997,2007", years)).toBeNull();
+  });
+
+  it("shares parseYearParam semantics for trailing separators", () => {
+    expect(resolveCatalogYear("1997,", years)).toBe(1997);
+  });
+});
+
+describe("resolveSeasonSelection", () => {
+  const seasonYears = new Set([2026, 2021, 2020, 2019]);
+
+  it("keeps only years the entity raced in", () => {
+    expect(resolveSeasonSelection("2020,1997", seasonYears)).toEqual([2020]);
+    expect(resolveSeasonSelection("2021", seasonYears)).toEqual([2021]);
+  });
+
+  it("returns null when nothing matches or the param is invalid", () => {
+    expect(resolveSeasonSelection(null, seasonYears)).toBeNull();
+    expect(resolveSeasonSelection("1997,1998", seasonYears)).toBeNull();
+    expect(resolveSeasonSelection("abc", seasonYears)).toBeNull();
   });
 });

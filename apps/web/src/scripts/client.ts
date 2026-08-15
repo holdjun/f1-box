@@ -71,8 +71,76 @@ function enhanceRails(root: ParentNode = document): void {
   });
 }
 
-// 详情页赛季筛选：触发器展开面板，点选年份/年代控制 data-season-block 显隐
+// 详情页赛季筛选：触发器展开面板，点选年份/年代控制 data-season-block 显隐。
+// document/window 级监听只注册一次（astro:page-load 后旧监听会残留累积），
+// 触发时运行时查询当前 DOM，对页面上的 filter 实例都生效
+let seasonFilterGlobalsBound = false;
+
+function closeSeasonFilter(bar: HTMLElement): void {
+  const trigger = bar.querySelector<HTMLElement>("[data-season-filter-trigger]");
+  const panel = bar.querySelector<HTMLElement>("[data-season-filter-panel]");
+  if (!panel) return;
+  panel.hidden = true;
+  panel.classList.remove("season-filter__panel--up");
+  panel.style.maxHeight = "";
+  trigger?.setAttribute("aria-expanded", "false");
+}
+
+function positionSeasonFilter(bar: HTMLElement): void {
+  const trigger = bar.querySelector<HTMLElement>("[data-season-filter-trigger]");
+  const panel = bar.querySelector<HTMLElement>("[data-season-filter-panel]");
+  if (!trigger || !panel) return;
+  // 触发器下方空间不足时向上展开，并限制高度避免溢出视口
+  const triggerBox = trigger.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - triggerBox.bottom;
+  const spaceAbove = triggerBox.top;
+  const expandUp = spaceBelow < spaceAbove;
+  panel.classList.toggle("season-filter__panel--up", expandUp);
+  const available = expandUp ? spaceAbove : spaceBelow;
+  panel.style.maxHeight = `${Math.max(Math.min(available - 16, 480), 160)}px`;
+}
+
+function bindSeasonFilterGlobals(): void {
+  if (seasonFilterGlobalsBound) return;
+  seasonFilterGlobalsBound = true;
+
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    document.querySelectorAll<HTMLElement>("[data-season-filter]").forEach((bar) => {
+      if (bar.dataset.enhanced !== "true") return;
+      if (!bar.contains(target)) closeSeasonFilter(bar);
+    });
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    document.querySelectorAll<HTMLElement>("[data-season-filter]").forEach((bar) => {
+      if (bar.dataset.enhanced !== "true") return;
+      closeSeasonFilter(bar);
+    });
+  });
+  // 滚动时跟随触发器重新定位（sticky 粘顶后方向可能变化），而非关闭
+  let scrollTick = false;
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (scrollTick) return;
+      scrollTick = true;
+      requestAnimationFrame(() => {
+        document.querySelectorAll<HTMLElement>("[data-season-filter]").forEach((bar) => {
+          if (bar.dataset.enhanced !== "true") return;
+          const panel = bar.querySelector<HTMLElement>("[data-season-filter-panel]");
+          if (panel && !panel.hidden) positionSeasonFilter(bar);
+        });
+        scrollTick = false;
+      });
+    },
+    { passive: true },
+  );
+}
+
 function enhanceSeasonFilters(root: ParentNode = document): void {
+  bindSeasonFilterGlobals();
   root.querySelectorAll<HTMLElement>("[data-season-filter]").forEach((bar) => {
     if (bar.dataset.enhanced === "true") return;
     bar.dataset.enhanced = "true";
@@ -85,53 +153,16 @@ function enhanceSeasonFilters(root: ParentNode = document): void {
     );
     if (!trigger || !panel) return;
 
-    // 触发器下方空间不足时向上展开，并限制高度避免溢出视口
-    const positionPanel = () => {
-      const triggerBox = trigger.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - triggerBox.bottom;
-      const spaceAbove = triggerBox.top;
-      const expandUp = spaceBelow < spaceAbove;
-      panel.classList.toggle("season-filter__panel--up", expandUp);
-      const available = expandUp ? spaceAbove : spaceBelow;
-      panel.style.maxHeight = `${Math.max(Math.min(available - 16, 480), 160)}px`;
-    };
     const open = () => {
       panel.hidden = false;
-      positionPanel();
+      positionSeasonFilter(bar);
       trigger.setAttribute("aria-expanded", "true");
-    };
-    const close = () => {
-      panel.hidden = true;
-      panel.classList.remove("season-filter__panel--up");
-      panel.style.maxHeight = "";
-      trigger.setAttribute("aria-expanded", "false");
     };
 
     trigger.addEventListener("click", () => {
       if (panel.hidden) open();
-      else close();
+      else closeSeasonFilter(bar);
     });
-    document.addEventListener("click", (event) => {
-      if (panel.hidden) return;
-      if (event.target instanceof Node && !bar.contains(event.target)) close();
-    });
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !panel.hidden) close();
-    });
-    // 滚动时跟随触发器重新定位（sticky 粘顶后方向可能变化），而非关闭
-    let scrollTick = false;
-    window.addEventListener(
-      "scroll",
-      () => {
-        if (panel.hidden || scrollTick) return;
-        scrollTick = true;
-        requestAnimationFrame(() => {
-          positionPanel();
-          scrollTick = false;
-        });
-      },
-      { passive: true },
-    );
 
     // link 模式：面板内是 <a> 链接，点击即导航，无需额外交互
     if (bar.dataset.mode !== "toggle") return;
