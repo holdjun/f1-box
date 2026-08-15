@@ -154,8 +154,9 @@ const initialSelected = resolveSeasonSelection(
           {driver.teamStints.map((stint, index) => (
             <span class="number-item">
               {index > 0 ? <span class="number-arrow">→</span> : null}
-              <span
+              <a
                 class="team-chip"
+                href={`/teams/${stint.id}`}
                 style={`--stint-color: ${colorForYear(vendorIndexes, stint.id, stint.yearTo) ?? "#84909e"}`}
               >
                 {stint.name}
@@ -164,7 +165,7 @@ const initialSelected = resolveSeasonSelection(
                     ? stint.yearFrom
                     : `${stint.yearFrom}–${stint.yearTo}`}
                 </span>
-              </span>
+              </a>
             </span>
           ))}
         </div>
@@ -312,18 +313,18 @@ const initialSelected = resolveSeasonSelection(
   }
   .number-chip,
   .team-chip {
+    /* 车队名用该 stint 结束年份的队色，时间交叉时取新年份的配色 */
     display: inline-flex;
     align-items: baseline;
     gap: 0.4rem;
     padding: 0.15rem 0.6rem;
-    border: 1px solid var(--line);
+    border: 1px solid color-mix(in srgb, var(--stint-color) 45%, transparent);
     border-radius: 999px;
-    color: var(--muted-light);
-  }
-  .team-chip {
-    /* 车队名用该 stint 结束年份的队色，时间交叉时取新年份的配色 */
-    border-color: color-mix(in srgb, var(--stint-color) 45%, transparent);
     color: var(--stint-color);
+    text-decoration: none;
+  }
+  a.team-chip:hover {
+    text-decoration: underline;
   }
   .number-years {
     color: var(--muted);

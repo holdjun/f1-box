@@ -101,11 +101,14 @@ test("russell detail shows hero, bio and current season @desktop", async ({
   await expect(page.getByLabel("2026 season")).toBeVisible();
   await expect(page.getByLabel("Career stats")).toBeVisible();
   await expect(page.locator(".season-block.current")).toHaveCount(1);
-  // 待过车队链路：Williams → Mercedes；chip 纯展示不可点击（与车号一致）
+  // 待过车队链路：Williams → Mercedes（含 2020 代打一场）；chip 链接车队页
   const teams = page.getByLabel("Teams driven for");
   await expect(teams).toContainText("Williams");
-  await expect(teams.locator(".team-chip").filter({ hasText: "Mercedes" }).first()).toBeVisible();
-  await expect(teams.locator("a")).toHaveCount(0);
+  const chips = teams.locator("a.team-chip");
+  await expect(chips).toHaveCount(4);
+  await expect(chips.nth(0)).toHaveAttribute("href", "/teams/williams");
+  await expect(chips.nth(1)).toHaveAttribute("href", "/teams/mercedes");
+  await expect(chips.nth(3)).toHaveAttribute("href", "/teams/mercedes");
   // chip 用该 stint 结束年份的队色：2019 Williams（#ffffff）与 2020–2021（#005aff）不同
   const williamsChips = teams.locator(".team-chip").filter({ hasText: "Williams" });
   await expect(williamsChips).toHaveCount(2);
