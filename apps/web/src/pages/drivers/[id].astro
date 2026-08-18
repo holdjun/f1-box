@@ -11,7 +11,8 @@ import {
 } from "../../lib/driver-repository.js";
 import { formatUtcLongDate } from "../../lib/time.js";
 import { monogram } from "../../lib/tokens.js";
-import { latestColor, vendorIndexes } from "../../lib/vendor.js";
+import { resolveSeasonSelection } from "../../lib/routing.js";
+import { colorForYear, latestColor, vendorIndexes } from "../../lib/vendor.js";
 
 const slug = (Astro.params.id ?? "").toLowerCase();
 const repository = import.meta.env.DEV
@@ -33,28 +34,62 @@ const currentYear = driver?.activeSeason ?? null;
 const flagSrc = driver
   ? `/vendor/country-flags/${driver.alpha2Code.toLowerCase()}.svg`
   : null;
-const latestTeam = driver?.seasons[0]?.teams.at(-1) ?? null;
+// 矩阵块按最后参赛轮次降序：teams[0] 是当前（或最后效力的）车队
+const latestTeam = driver?.seasons[0]?.teams[0] ?? null;
 const teamColor =
   (latestTeam && latestColor(vendorIndexes, latestTeam.id)) ?? "#84909e";
+// hero 号码：与目录卡同口径，最后参赛号码优先（现役即当前号码），永久车号兜底
+const driverNumber = driver
+  ? (driver.lastNumber ?? driver.permanentNumber)
+  : null;
 
-const matrixSeasons = (driver?.seasons ?? []).map((season) => ({
-  year: season.year,
-  metaText: season.teams.map((team) => team.name).join(" / "),
-  metaHref:
-    season.teams.length === 1 ? `/teams/${season.teams[0].id}` : null,
-  rounds: season.rounds,
-  rows: season.teams.map((team) => ({
-    name: team.name,
-    href: `/teams/${team.id}`,
-    flagCode: null,
-    highlight: false,
-    results: team.results,
+// 多年多队拆成连续多表（每队一表，各自带队友），第二个起加转队连线；
+// 已入季未出赛（如季初）的赛季没有车队，仍保留一块空表与将来轮次空列
+const matrixSeasons = (driver?.seasons ?? []).flatMap((season) =>
+  (season.teams.length > 0 ? season.teams : [null]).map((team, index) => ({
+    year: season.year,
+    metaText: team?.name ?? "",
+    metaLinks: team
+      ? [
+          {
+            name: team.name,
+            href: `/teams/${team.id}`,
+            color: colorForYear(vendorIndexes, team.id, season.year),
+          },
+        ]
+      : [],
+    split: index > 0,
+    rounds: season.rounds,
+    rows: [
+      {
+        name: driver?.name ?? "",
+        href: null,
+        flagCode: driver?.alpha2Code.toLowerCase() ?? null,
+        highlight: false,
+        results: team?.results ?? season.rounds.map(() => null),
+      },
+      ...(team?.teammates ?? []).map((teammate) => ({
+        name: teammate.name,
+        href: `/drivers/${teammate.id}`,
+        flagCode: teammate.flagCode,
+        highlight: false,
+        muted: true,
+        results: teammate.results,
+      })),
+    ],
+    // 积分与夺冠标记只在首表显示，避免拆表重复
+    points: index === 0 ? season.points : null,
+    position: index === 0 ? season.position : null,
+    championshipWon: index === 0 ? season.championshipWon : false,
+    current: season.year === currentYear,
   })),
-  points: season.points,
-  position: season.position,
-  championshipWon: season.championshipWon,
-  current: season.year === currentYear,
-}));
+);
+
+// ?year=1997,2007 只显示这些赛季（筛选状态可分享/后退）
+const initialSelected = resolveSeasonSelection(
+  Astro.url.searchParams.get("year"),
+  new Set((driver?.seasons ?? []).map((s) => s.year)),
+);
 ---
 
 {driver ? (
@@ -66,8 +101,8 @@ const matrixSeasons = (driver?.seasons ?? []).map((season) => ({
     <main id="main-content" class="page-shell">
       <header class="driver-hero" style={`--team-color: ${teamColor}`}>
         <span class="driver-number-frame">
-          {driver.permanentNumber !== null ? (
-            <span class="driver-number">{driver.permanentNumber}</span>
+          {driverNumber !== null ? (
+            <span class="driver-number">{driverNumber}</span>
           ) : (
             <span class="driver-monogram" aria-hidden="true">
               {monogram(driver.name)}
@@ -119,7 +154,11 @@ const matrixSeasons = (driver?.seasons ?? []).map((season) => ({
           {driver.teamStints.map((stint, index) => (
             <span class="number-item">
               {index > 0 ? <span class="number-arrow">→</span> : null}
-              <a class="team-chip" href={`/teams/${stint.id}`}>
+              <a
+                class="team-chip"
+                href={`/teams/${stint.id}`}
+                style={`--stint-color: ${colorForYear(vendorIndexes, stint.id, stint.yearTo) ?? "#84909e"}`}
+              >
                 {stint.name}
                 <span class="number-years">
                   {stint.yearFrom === stint.yearTo
@@ -158,7 +197,11 @@ const matrixSeasons = (driver?.seasons ?? []).map((season) => ({
 
       <section aria-labelledby="history-title">
         <h2 id="history-title">Season results</h2>
-        <SeasonMatrix seasons={matrixSeasons} rowLabel="Constructor" />
+        <SeasonMatrix
+          seasons={matrixSeasons}
+          rowLabel="Constructor"
+          initialSelected={initialSelected}
+        />
         <HistoryEnd
           summary={`${driver.seasons.at(-1)?.year ?? driver.activeSeason}–${driver.seasons[0]?.year ?? driver.activeSeason} · ${driver.seasons.length} ${driver.seasons.length === 1 ? "season" : "seasons"} of Grand Prix history`}
           backHref="/drivers"
@@ -270,20 +313,18 @@ const matrixSeasons = (driver?.seasons ?? []).map((season) => ({
   }
   .number-chip,
   .team-chip {
+    /* 车队名用该 stint 结束年份的队色，时间交叉时取新年份的配色 */
     display: inline-flex;
     align-items: baseline;
     gap: 0.4rem;
     padding: 0.15rem 0.6rem;
-    border: 1px solid var(--line);
+    border: 1px solid color-mix(in srgb, var(--stint-color) 45%, transparent);
     border-radius: 999px;
-    color: var(--muted-light);
-  }
-  .team-chip {
+    color: var(--stint-color);
     text-decoration: none;
   }
-  .team-chip:hover {
-    border-color: var(--coral);
-    color: var(--coral);
+  a.team-chip:hover {
+    text-decoration: underline;
   }
   .number-years {
     color: var(--muted);

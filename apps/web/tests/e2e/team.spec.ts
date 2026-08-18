@@ -101,6 +101,36 @@ test("teams index lists all constructors @desktop", async ({ page }) => {
   await expect(page.locator(".team-card")).toHaveCount(187);
   await expect(page.locator('a[href="/teams/ferrari"]')).toBeVisible();
   await expect(page.locator('a[href="/teams/mercedes"]')).toBeVisible();
+  // 按总积分排序：ferrari 11338 分第一
+  await expect(page.locator(".card-name").first()).toHaveText("Ferrari");
+});
+
+test("teams index filters to a season @desktop", async ({ page }) => {
+  await page.goto("/teams?year=1997");
+  await expect(page.locator(".team-card")).toHaveCount(12);
+  await expect(page.locator('a[href="/teams/ferrari"]')).toBeVisible();
+  await expect(page.locator(".season-filter__summary")).toHaveText("1997");
+  // 按该年积分排序：1997 WCC Williams 123 分第一
+  await expect(page.locator(".card-name").first()).toHaveText("Williams");
+});
+
+test("ferrari detail filters season blocks @desktop", async ({ page }) => {
+  await page.goto("/teams/ferrari");
+  await page.getByRole("button", { name: "Filter by season" }).click();
+  const panel = page.locator(".season-filter__panel");
+  await panel.getByRole("button", { name: "1997", exact: true }).click();
+  await expect(page.locator(".season-block:visible")).toHaveCount(1);
+  await expect(page.locator(".season-block:visible .season-year")).toHaveText("1997");
+  await panel.getByRole("button", { name: "All", exact: true }).click();
+  await expect(page.locator(".season-block:visible")).toHaveCount(77);
+});
+
+test("ferrari detail filters multiple seasons via URL @desktop", async ({
+  page,
+}) => {
+  await page.goto("/teams/ferrari?year=1997,2007");
+  await expect(page.locator(".season-block:visible")).toHaveCount(2);
+  await expect(page.locator(".season-filter__summary")).toHaveText("1997, 2007");
 });
 
 test("team logos render inside a stable contain frame @desktop", async ({

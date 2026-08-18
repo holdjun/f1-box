@@ -139,7 +139,7 @@ describe("createTeamRepository with database", () => {
     ]);
   });
 
-  it("orders the team catalog by current status and career prominence", async () => {
+  it("orders the team catalog by total points", async () => {
     let sql = "";
     const rankedDb: TeamDatabase = {
       batch(statements) {
@@ -156,10 +156,7 @@ describe("createTeamRepository with database", () => {
     };
 
     await createTeamRepository(rankedDb).getConstructors();
-    expect(sql).toContain("total_championship_wins DESC");
-    expect(sql).toContain("total_race_wins DESC");
-    expect(sql).toContain("total_race_entries DESC");
-    expect(sql).toContain("season_entrant_constructor");
+    expect(sql).toContain("ORDER BY c.total_points DESC, c.name");
   });
 
   it("builds the per-round result matrix with markers", async () => {
@@ -258,7 +255,7 @@ describe("createTeamRepository with database", () => {
   it("throws on a malformed identity row", async () => {
     const badDb = fakeDb({ "co.id = c.country_id": [{ id: "ferrari" }] });
     await expect(createTeamRepository(badDb).getTeam("ferrari")).rejects.toThrow(
-      /team/i,
+      /Invalid row data/,
     );
   });
 });
@@ -294,5 +291,66 @@ describe("seasonGap", () => {
   it("describes the missing span between distant seasons", () => {
     expect(seasonGap(2019, 1985)).toEqual({ from: 1986, to: 2018, seasons: 33 });
     expect(seasonGap(1979, 1951)).toEqual({ from: 1952, to: 1978, seasons: 27 });
+  });
+});
+
+describe("getConstructorsByYear", () => {
+  it("filters to the given year and merges multi-line standings", async () => {
+    let sql = "";
+    let values: readonly unknown[] = [];
+    const db: TeamDatabase = {
+      batch(statements) {
+        sql = statements[0].sql;
+        values = statements[0].values;
+        return Promise.resolve([{ results: [] }]);
+      },
+    };
+
+    await createTeamRepository(db).getConstructorsByYear(1997);
+    expect(sql).toContain("ORDER BY points DESC");
+    expect(sql).toContain("season_entrant_constructor");
+    // 积分榜按 车队×引擎 分行（60 年代多引擎），必须先按车队聚合再 JOIN，
+    // 避免与 entrant 行（每参赛实体一行）形成交叉积
+    expect(sql).toContain("SELECT DISTINCT constructor_id");
+    expect(sql).toContain("GROUP BY constructor_id");
+    expect(sql).not.toContain("scs.year");
+    expect(values).toEqual([1997]);
+  });
+
+  it("maps rows", async () => {
+    const db: TeamDatabase = {
+      batch() {
+        return Promise.resolve([
+          { results: [{ id: "ferrari", name: "Ferrari" }] },
+        ]);
+      },
+    };
+
+    const teams = await createTeamRepository(db).getConstructorsByYear(1997);
+    expect(teams).toEqual([{ id: "ferrari", name: "Ferrari" }]);
+  });
+
+  it("orders the DEV year view by that year's points", async () => {
+    const teams = await createTeamRepository().getConstructorsByYear(1997);
+    // 1997 WCC：Williams 123 分压过 Ferrari 102
+    expect(teams[0]).toEqual({ id: "williams", name: "Williams" });
+  });
+});
+
+describe("getSeasonYears", () => {
+  it("returns years in descending order", async () => {
+    const db: TeamDatabase = {
+      batch() {
+        return Promise.resolve([{ results: [{ year: 2026 }, { year: 1950 }] }]);
+      },
+    };
+
+    const years = await createTeamRepository(db).getSeasonYears();
+    expect(years).toEqual([2026, 1950]);
+  });
+
+  it("orders the DEV catalog by total points", async () => {
+    const teams = await createTeamRepository().getConstructors();
+    expect(teams[0]).toEqual({ id: "ferrari", name: "Ferrari" });
   });
 });

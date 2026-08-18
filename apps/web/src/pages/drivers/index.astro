@@ -2,18 +2,25 @@
 import { env } from "cloudflare:workers";
 
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import SeasonFilter from "../../components/SeasonFilter.astro";
 import {
   createD1DriverDatabase,
   createDriverRepository,
 } from "../../lib/driver-repository.js";
 import { latestColor, vendorIndexes } from "../../lib/vendor.js";
 import { monogram } from "../../lib/tokens.js";
+import { resolveCatalogYear } from "../../lib/routing.js";
 
 const repository = import.meta.env.DEV
   ? createDriverRepository()
   : createDriverRepository(createD1DriverDatabase(env.F1_DB));
 
-const drivers = await repository.getDrivers();
+const years = await repository.getSeasonYears();
+const year = resolveCatalogYear(Astro.url.searchParams.get("year"), years);
+const drivers =
+  year === null
+    ? await repository.getDrivers()
+    : await repository.getDriversByYear(year);
 
 // 目录查询是全库最重的聚合，边缘短暂缓存吸收重复请求
 Astro.response.headers.set(
@@ -25,6 +32,14 @@ Astro.response.headers.set(
 <BaseLayout title="Drivers" active="drivers">
   <main id="main-content" class="page-shell">
     <h1>Drivers</h1>
+    <SeasonFilter
+      years={years}
+      mode="link"
+      baseHref="/drivers"
+      current={year}
+      label="Filter by season"
+      sticky
+    />
     <div class="driver-grid">
       {drivers.map((driver) => (
         <a
@@ -61,7 +76,7 @@ Astro.response.headers.set(
 
 <style>
   h1 {
-    margin: 0 0 1.5rem;
+    margin: 0 0 0.5rem;
   }
   .driver-grid {
     display: grid;
@@ -99,7 +114,7 @@ Astro.response.headers.set(
     height: 3rem;
     flex: none;
   }
-  /* 无照片版权可用：放大永久车号作标识 */
+  /* 无照片版权可用：放大车号作标识 */
   .card-number {
     font-family: var(--display);
     font-size: 2.8rem;

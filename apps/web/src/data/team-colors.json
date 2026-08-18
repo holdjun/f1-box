@@ -1136,6 +1136,118 @@
      ]
     }
    ]
+  },
+  "bar": {
+   "name": "BAR",
+   "colors": [
+    "#0050a0"
+   ],
+   "periods": [
+    {
+     "from": 1999,
+     "to": 2005,
+     "colors": [
+      "#0050a0"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "midland": {
+   "name": "Midland",
+   "colors": [
+    "#c8102e"
+   ],
+   "periods": [
+    {
+     "from": 2006,
+     "to": 2006,
+     "colors": [
+      "#c8102e"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "spyker": {
+   "name": "Spyker",
+   "colors": [
+    "#f26522"
+   ],
+   "periods": [
+    {
+     "from": 2007,
+     "to": 2007,
+     "colors": [
+      "#f26522"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "virgin": {
+   "name": "Virgin",
+   "colors": [
+    "#cc0000"
+   ],
+   "periods": [
+    {
+     "from": 2010,
+     "to": 2011,
+     "colors": [
+      "#cc0000"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "lotus-racing": {
+   "name": "Lotus Racing",
+   "colors": [
+    "#007a45"
+   ],
+   "periods": [
+    {
+     "from": 2010,
+     "to": 2011,
+     "colors": [
+      "#007a45"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "leyton-house": {
+   "name": "Leyton House",
+   "colors": [
+    "#00684b"
+   ],
+   "periods": [
+    {
+     "from": 1990,
+     "to": 1991,
+     "colors": [
+      "#00684b"
+     ]
+    }
+   ],
+   "source": "curated"
+  },
+  "manor": {
+   "name": "Manor",
+   "colors": [
+    "#1e56c8"
+   ],
+   "periods": [
+    {
+     "from": 2016,
+     "to": 2016,
+     "colors": [
+      "#1e56c8"
+     ]
+    }
+   ],
+   "source": "curated"
   }
  }
 }

@@ -1,1 +1,5517 @@
-{"id":"max-verstappen","name":"Max Verstappen","fullName":"Max Emilian Verstappen","countryName":"Netherlands","alpha2Code":"NL","dateOfBirth":"1997-09-30","dateOfDeath":null,"placeOfBirth":"Hasselt","permanentNumber":"3","totals":{"entries":244,"starts":244,"wins":71,"podiums":131,"poles":48,"fastestLaps":37,"points":3553.5,"sprintWins":13,"championships":4,"bestChampionshipPosition":1},"numberStints":[{"number":"33","yearFrom":2015,"yearTo":2021},{"number":"1","yearFrom":2022,"yearTo":2025},{"number":"3","yearFrom":2026,"yearTo":2026}],"currentSeason":{"year":2026,"position":"6","points":109,"grandPrix":{"races":11,"points":100,"wins":0,"podiums":4,"poles":0,"top10s":8,"fastestLaps":1,"dnfs":2},"sprint":{"races":4,"points":9,"wins":0,"podiums":0,"poles":0,"top10s":4}},"seasons":[{"year":2026,"rounds":[{"code":"AUS","name":"Australia","circuitId":"melbourne"},{"code":"CHN","name":"China","circuitId":"shanghai"},{"code":"JPN","name":"Japan","circuitId":"suzuka"},{"code":"MIA","name":"Miami","circuitId":"miami"},{"code":"CAN","name":"Canada","circuitId":"montreal"},{"code":"MCO","name":"Monaco","circuitId":"monaco"},{"code":"BAR","name":"Barcelona-Catalunya","circuitId":"catalunya"},{"code":"AUT","name":"Austria","circuitId":"spielberg"},{"code":"GBR","name":"Great Britain","circuitId":"silverstone"},{"code":"BEL","name":"Belgium","circuitId":"spa-francorchamps"},{"code":"HUN","name":"Hungary","circuitId":"hungaroring"},{"code":"NLD","name":"Netherlands","circuitId":"zandvoort"},{"code":"ITA","name":"Italy","circuitId":"monza"},{"code":"ESP","name":"Spain","circuitId":"madring"},{"code":"AZE","name":"Azerbaijan","circuitId":"baku"},{"code":"SGP","name":"Singapore","circuitId":"marina-bay"},{"code":"USA","name":"United States","circuitId":"austin"},{"code":"MEX","name":"Mexico","circuitId":"mexico-city"},{"code":"SAO","name":"São Paulo","circuitId":"interlagos"},{"code":"LAS","name":"Las Vegas","circuitId":"las-vegas"},{"code":"QAT","name":"Qatar","circuitId":"lusail"},{"code":"ABD","name":"Abu Dhabi","circuitId":"yas-marina"}],"teams":[{"id":"red-bull","name":"Red Bull","results":[{"text":"6","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":9},{"text":"8","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":5},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":7},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"20","pole":false,"fastest":false,"classified":true,"sprintRank":6},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},null,null,null,null,null,null,null,null,null,null,null]}],"points":109,"position":"6","championshipWon":false},{"year":2025,"rounds":[{"code":"AUS","name":"Australia","circuitId":"melbourne"},{"code":"CHN","name":"China","circuitId":"shanghai"},{"code":"JPN","name":"Japan","circuitId":"suzuka"},{"code":"BHR","name":"Bahrain","circuitId":"bahrain"},{"code":"SAU","name":"Saudi Arabia","circuitId":"jeddah"},{"code":"MIA","name":"Miami","circuitId":"miami"},{"code":"EMR","name":"Emilia Romagna","circuitId":"imola"},{"code":"MCO","name":"Monaco","circuitId":"monaco"},{"code":"ESP","name":"Spain","circuitId":"catalunya"},{"code":"CAN","name":"Canada","circuitId":"montreal"},{"code":"AUT","name":"Austria","circuitId":"spielberg"},{"code":"GBR","name":"Great Britain","circuitId":"silverstone"},{"code":"BEL","name":"Belgium","circuitId":"spa-francorchamps"},{"code":"HUN","name":"Hungary","circuitId":"hungaroring"},{"code":"NLD","name":"Netherlands","circuitId":"zandvoort"},{"code":"ITA","name":"Italy","circuitId":"monza"},{"code":"AZE","name":"Azerbaijan","circuitId":"baku"},{"code":"SGP","name":"Singapore","circuitId":"marina-bay"},{"code":"USA","name":"United States","circuitId":"austin"},{"code":"MEX","name":"Mexico","circuitId":"mexico-city"},{"code":"SAO","name":"São Paulo","circuitId":"interlagos"},{"code":"LAS","name":"Las Vegas","circuitId":"las-vegas"},{"code":"QAT","name":"Qatar","circuitId":"lusail"},{"code":"ABD","name":"Abu Dhabi","circuitId":"yas-marina"}],"teams":[{"id":"red-bull","name":"Red Bull","results":[{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":3},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"6","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":true,"fastest":false,"classified":false,"sprintRank":17},{"text":"1","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"10","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":1},{"text":"9","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":1},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":4},{"text":"1","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":4},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null}]}],"points":421,"position":"2","championshipWon":false},{"year":2024,"rounds":[{"code":"BHR","name":"Bahrain","circuitId":"bahrain"},{"code":"SAU","name":"Saudi Arabia","circuitId":"jeddah"},{"code":"AUS","name":"Australia","circuitId":"melbourne"},{"code":"JPN","name":"Japan","circuitId":"suzuka"},{"code":"CHN","name":"China","circuitId":"shanghai"},{"code":"MIA","name":"Miami","circuitId":"miami"},{"code":"EMR","name":"Emilia Romagna","circuitId":"imola"},{"code":"MCO","name":"Monaco","circuitId":"monaco"},{"code":"CAN","name":"Canada","circuitId":"montreal"},{"code":"ESP","name":"Spain","circuitId":"catalunya"},{"code":"AUT","name":"Austria","circuitId":"spielberg"},{"code":"GBR","name":"Great Britain","circuitId":"silverstone"},{"code":"HUN","name":"Hungary","circuitId":"hungaroring"},{"code":"BEL","name":"Belgium","circuitId":"spa-francorchamps"},{"code":"NLD","name":"Netherlands","circuitId":"zandvoort"},{"code":"ITA","name":"Italy","circuitId":"monza"},{"code":"AZE","name":"Azerbaijan","circuitId":"baku"},{"code":"SGP","name":"Singapore","circuitId":"marina-bay"},{"code":"USA","name":"United States","circuitId":"austin"},{"code":"MEX","name":"Mexico","circuitId":"mexico-city"},{"code":"SAO","name":"São Paulo","circuitId":"interlagos"},{"code":"LAS","name":"Las Vegas","circuitId":"las-vegas"},{"code":"QAT","name":"Qatar","circuitId":"lusail"},{"code":"ABD","name":"Abu Dhabi","circuitId":"yas-marina"}],"teams":[{"id":"red-bull","name":"Red Bull","results":[{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":1},{"text":"2","pole":true,"fastest":false,"classified":false,"sprintRank":1},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"6","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":true,"fastest":false,"classified":false,"sprintRank":1},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"6","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":1},{"text":"6","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":true,"classified":false,"sprintRank":4},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":8},{"text":"6","pole":false,"fastest":false,"classified":false,"sprintRank":null}]}],"points":437,"position":"1","championshipWon":true},{"year":2023,"rounds":[{"code":"BHR","name":"Bahrain","circuitId":"bahrain"},{"code":"SAU","name":"Saudi Arabia","circuitId":"jeddah"},{"code":"AUS","name":"Australia","circuitId":"melbourne"},{"code":"AZE","name":"Azerbaijan","circuitId":"baku"},{"code":"MIA","name":"Miami","circuitId":"miami"},{"code":"MCO","name":"Monaco","circuitId":"monaco"},{"code":"ESP","name":"Spain","circuitId":"catalunya"},{"code":"CAN","name":"Canada","circuitId":"montreal"},{"code":"AUT","name":"Austria","circuitId":"spielberg"},{"code":"GBR","name":"Great Britain","circuitId":"silverstone"},{"code":"HUN","name":"Hungary","circuitId":"hungaroring"},{"code":"BEL","name":"Belgium","circuitId":"spa-francorchamps"},{"code":"NLD","name":"Netherlands","circuitId":"zandvoort"},{"code":"ITA","name":"Italy","circuitId":"monza"},{"code":"SGP","name":"Singapore","circuitId":"marina-bay"},{"code":"JPN","name":"Japan","circuitId":"suzuka"},{"code":"QAT","name":"Qatar","circuitId":"lusail"},{"code":"USA","name":"United States","circuitId":"austin"},{"code":"MEX","name":"Mexico","circuitId":"mexico-city"},{"code":"SAO","name":"São Paulo","circuitId":"interlagos"},{"code":"LAS","name":"Las Vegas","circuitId":"las-vegas"},{"code":"ABD","name":"Abu Dhabi","circuitId":"yas-marina"}],"teams":[{"id":"red-bull","name":"Red Bull","results":[{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":3},{"text":"1","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":1},{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":1},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":2},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":1},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":1},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":null}]}],"points":575,"position":"1","championshipWon":true},{"year":2022,"rounds":[{"code":"BHR","name":"Bahrain","circuitId":"bahrain"},{"code":"SAU","name":"Saudi Arabia","circuitId":"jeddah"},{"code":"AUS","name":"Australia","circuitId":"melbourne"},{"code":"EMR","name":"Emilia Romagna","circuitId":"imola"},{"code":"MIA","name":"Miami","circuitId":"miami"},{"code":"ESP","name":"Spain","circuitId":"catalunya"},{"code":"MCO","name":"Monaco","circuitId":"monaco"},{"code":"AZE","name":"Azerbaijan","circuitId":"baku"},{"code":"CAN","name":"Canada","circuitId":"montreal"},{"code":"GBR","name":"Great Britain","circuitId":"silverstone"},{"code":"AUT","name":"Austria","circuitId":"spielberg"},{"code":"FRA","name":"France","circuitId":"paul-ricard"},{"code":"HUN","name":"Hungary","circuitId":"hungaroring"},{"code":"BEL","name":"Belgium","circuitId":"spa-francorchamps"},{"code":"NLD","name":"Netherlands","circuitId":"zandvoort"},{"code":"ITA","name":"Italy","circuitId":"monza"},{"code":"SGP","name":"Singapore","circuitId":"marina-bay"},{"code":"JPN","name":"Japan","circuitId":"suzuka"},{"code":"USA","name":"United States","circuitId":"austin"},{"code":"MEX","name":"Mexico","circuitId":"mexico-city"},{"code":"SAO","name":"São Paulo","circuitId":"interlagos"},{"code":"ABD","name":"Abu Dhabi","circuitId":"yas-marina"}],"teams":[{"id":"red-bull","name":"Red Bull","results":[{"text":"19","pole":false,"fastest":false,"classified":true,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":1},{"text":"1","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"7","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":true,"fastest":true,"classified":false,"sprintRank":1},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"7","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"6","pole":false,"fastest":false,"classified":false,"sprintRank":4},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null}]}],"points":454,"position":"1","championshipWon":true},{"year":2021,"rounds":[{"code":"BHR","name":"Bahrain","circuitId":"bahrain"},{"code":"EMR","name":"Emilia Romagna","circuitId":"imola"},{"code":"PRT","name":"Portugal","circuitId":"portimao"},{"code":"ESP","name":"Spain","circuitId":"catalunya"},{"code":"MCO","name":"Monaco","circuitId":"monaco"},{"code":"AZE","name":"Azerbaijan","circuitId":"baku"},{"code":"FRA","name":"France","circuitId":"paul-ricard"},{"code":"STE","name":"Styria","circuitId":"spielberg"},{"code":"AUT","name":"Austria","circuitId":"spielberg"},{"code":"GBR","name":"Great Britain","circuitId":"silverstone"},{"code":"HUN","name":"Hungary","circuitId":"hungaroring"},{"code":"BEL","name":"Belgium","circuitId":"spa-francorchamps"},{"code":"NLD","name":"Netherlands","circuitId":"zandvoort"},{"code":"ITA","name":"Italy","circuitId":"monza"},{"code":"RUS","name":"Russia","circuitId":"sochi"},{"code":"TUR","name":"Turkey","circuitId":"istanbul"},{"code":"USA","name":"United States","circuitId":"austin"},{"code":"MEX","name":"Mexico","circuitId":"mexico-city"},{"code":"SAO","name":"São Paulo","circuitId":"interlagos"},{"code":"QAT","name":"Qatar","circuitId":"lusail"},{"code":"SAU","name":"Saudi Arabia","circuitId":"jeddah"},{"code":"ABD","name":"Abu Dhabi","circuitId":"yas-marina"}],"teams":[{"id":"red-bull","name":"Red Bull","results":[{"text":"2","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"18","pole":false,"fastest":true,"classified":true,"sprintRank":null},{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":null},{"text":"DNF","pole":true,"fastest":false,"classified":false,"sprintRank":1},{"text":"9","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":true,"fastest":false,"classified":false,"sprintRank":2},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":2},{"text":"2","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":true,"classified":false,"sprintRank":null}]}],"points":395.5,"position":"1","championshipWon":true},{"year":2020,"rounds":[{"code":"AUT","name":"Austria","circuitId":"spielberg"},{"code":"STE","name":"Styria","circuitId":"spielberg"},{"code":"HUN","name":"Hungary","circuitId":"hungaroring"},{"code":"GBR","name":"Great Britain","circuitId":"silverstone"},{"code":"70A","name":"70th Anniversary","circuitId":"silverstone"},{"code":"ESP","name":"Spain","circuitId":"catalunya"},{"code":"BEL","name":"Belgium","circuitId":"spa-francorchamps"},{"code":"ITA","name":"Italy","circuitId":"monza"},{"code":"TUS","name":"Tuscany","circuitId":"mugello"},{"code":"RUS","name":"Russia","circuitId":"sochi"},{"code":"EIF","name":"Eifel","circuitId":"nurburgring"},{"code":"PRT","name":"Portugal","circuitId":"portimao"},{"code":"EMR","name":"Emilia Romagna","circuitId":"imola"},{"code":"TUR","name":"Turkey","circuitId":"istanbul"},{"code":"BHR","name":"Bahrain","circuitId":"bahrain"},{"code":"SAK","name":"Sakhir","circuitId":"bahrain"},{"code":"ABD","name":"Abu Dhabi","circuitId":"yas-marina"}],"teams":[{"id":"red-bull","name":"Red Bull","results":[{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"6","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null}]}],"points":214,"position":"3","championshipWon":false},{"year":2019,"rounds":[{"code":"AUS","name":"Australia","circuitId":"melbourne"},{"code":"BHR","name":"Bahrain","circuitId":"bahrain"},{"code":"CHN","name":"China","circuitId":"shanghai"},{"code":"AZE","name":"Azerbaijan","circuitId":"baku"},{"code":"ESP","name":"Spain","circuitId":"catalunya"},{"code":"MCO","name":"Monaco","circuitId":"monaco"},{"code":"CAN","name":"Canada","circuitId":"montreal"},{"code":"FRA","name":"France","circuitId":"paul-ricard"},{"code":"AUT","name":"Austria","circuitId":"spielberg"},{"code":"GBR","name":"Great Britain","circuitId":"silverstone"},{"code":"DEU","name":"Germany","circuitId":"hockenheimring"},{"code":"HUN","name":"Hungary","circuitId":"hungaroring"},{"code":"BEL","name":"Belgium","circuitId":"spa-francorchamps"},{"code":"ITA","name":"Italy","circuitId":"monza"},{"code":"SGP","name":"Singapore","circuitId":"marina-bay"},{"code":"RUS","name":"Russia","circuitId":"sochi"},{"code":"JPN","name":"Japan","circuitId":"suzuka"},{"code":"MEX","name":"Mexico","circuitId":"mexico-city"},{"code":"USA","name":"United States","circuitId":"austin"},{"code":"BRA","name":"Brazil","circuitId":"interlagos"},{"code":"ABD","name":"Abu Dhabi","circuitId":"yas-marina"}],"teams":[{"id":"red-bull","name":"Red Bull","results":[{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"2","pole":true,"fastest":true,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"8","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"6","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":true,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null}]}],"points":278,"position":"3","championshipWon":false},{"year":2018,"rounds":[{"code":"AUS","name":"Australia","circuitId":"melbourne"},{"code":"BHR","name":"Bahrain","circuitId":"bahrain"},{"code":"CHN","name":"China","circuitId":"shanghai"},{"code":"AZE","name":"Azerbaijan","circuitId":"baku"},{"code":"ESP","name":"Spain","circuitId":"catalunya"},{"code":"MCO","name":"Monaco","circuitId":"monaco"},{"code":"CAN","name":"Canada","circuitId":"montreal"},{"code":"FRA","name":"France","circuitId":"paul-ricard"},{"code":"AUT","name":"Austria","circuitId":"spielberg"},{"code":"GBR","name":"Great Britain","circuitId":"silverstone"},{"code":"DEU","name":"Germany","circuitId":"hockenheimring"},{"code":"HUN","name":"Hungary","circuitId":"hungaroring"},{"code":"BEL","name":"Belgium","circuitId":"spa-francorchamps"},{"code":"ITA","name":"Italy","circuitId":"monza"},{"code":"SGP","name":"Singapore","circuitId":"marina-bay"},{"code":"RUS","name":"Russia","circuitId":"sochi"},{"code":"JPN","name":"Japan","circuitId":"suzuka"},{"code":"USA","name":"United States","circuitId":"austin"},{"code":"MEX","name":"Mexico","circuitId":"mexico-city"},{"code":"BRA","name":"Brazil","circuitId":"interlagos"},{"code":"ABD","name":"Abu Dhabi","circuitId":"yas-marina"}],"teams":[{"id":"red-bull","name":"Red Bull","results":[{"text":"6","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"9","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"15","pole":false,"fastest":false,"classified":true,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null}]}],"points":249,"position":"4","championshipWon":false},{"year":2017,"rounds":[{"code":"AUS","name":"Australia","circuitId":"melbourne"},{"code":"CHN","name":"China","circuitId":"shanghai"},{"code":"BHR","name":"Bahrain","circuitId":"bahrain"},{"code":"RUS","name":"Russia","circuitId":"sochi"},{"code":"ESP","name":"Spain","circuitId":"catalunya"},{"code":"MCO","name":"Monaco","circuitId":"monaco"},{"code":"CAN","name":"Canada","circuitId":"montreal"},{"code":"AZE","name":"Azerbaijan","circuitId":"baku"},{"code":"AUT","name":"Austria","circuitId":"spielberg"},{"code":"GBR","name":"Great Britain","circuitId":"silverstone"},{"code":"HUN","name":"Hungary","circuitId":"hungaroring"},{"code":"BEL","name":"Belgium","circuitId":"spa-francorchamps"},{"code":"ITA","name":"Italy","circuitId":"monza"},{"code":"SGP","name":"Singapore","circuitId":"marina-bay"},{"code":"MYS","name":"Malaysia","circuitId":"sepang"},{"code":"JPN","name":"Japan","circuitId":"suzuka"},{"code":"USA","name":"United States","circuitId":"austin"},{"code":"MEX","name":"Mexico","circuitId":"mexico-city"},{"code":"BRA","name":"Brazil","circuitId":"interlagos"},{"code":"ABD","name":"Abu Dhabi","circuitId":"yas-marina"}],"teams":[{"id":"red-bull","name":"Red Bull","results":[{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"10","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null}]}],"points":168,"position":"6","championshipWon":false},{"year":2016,"rounds":[{"code":"AUS","name":"Australia","circuitId":"melbourne"},{"code":"BHR","name":"Bahrain","circuitId":"bahrain"},{"code":"CHN","name":"China","circuitId":"shanghai"},{"code":"RUS","name":"Russia","circuitId":"sochi"},{"code":"ESP","name":"Spain","circuitId":"catalunya"},{"code":"MCO","name":"Monaco","circuitId":"monaco"},{"code":"CAN","name":"Canada","circuitId":"montreal"},{"code":"EUR","name":"Europe","circuitId":"baku"},{"code":"AUT","name":"Austria","circuitId":"spielberg"},{"code":"GBR","name":"Great Britain","circuitId":"silverstone"},{"code":"HUN","name":"Hungary","circuitId":"hungaroring"},{"code":"DEU","name":"Germany","circuitId":"hockenheimring"},{"code":"BEL","name":"Belgium","circuitId":"spa-francorchamps"},{"code":"ITA","name":"Italy","circuitId":"monza"},{"code":"SGP","name":"Singapore","circuitId":"marina-bay"},{"code":"MYS","name":"Malaysia","circuitId":"sepang"},{"code":"JPN","name":"Japan","circuitId":"suzuka"},{"code":"USA","name":"United States","circuitId":"austin"},{"code":"MEX","name":"Mexico","circuitId":"mexico-city"},{"code":"BRA","name":"Brazil","circuitId":"interlagos"},{"code":"ABD","name":"Abu Dhabi","circuitId":"yas-marina"}],"teams":[{"id":"toro-rosso","name":"Toro Rosso","results":[{"text":"10","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"6","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"8","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},{"id":"red-bull","name":"Red Bull","results":[null,null,null,null,{"text":"1","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"8","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"5","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"11","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"7","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"6","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"2","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"3","pole":false,"fastest":true,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null}]}],"points":204,"position":"5","championshipWon":false},{"year":2015,"rounds":[{"code":"AUS","name":"Australia","circuitId":"melbourne"},{"code":"MYS","name":"Malaysia","circuitId":"sepang"},{"code":"CHN","name":"China","circuitId":"shanghai"},{"code":"BHR","name":"Bahrain","circuitId":"bahrain"},{"code":"ESP","name":"Spain","circuitId":"catalunya"},{"code":"MCO","name":"Monaco","circuitId":"monaco"},{"code":"CAN","name":"Canada","circuitId":"montreal"},{"code":"AUT","name":"Austria","circuitId":"spielberg"},{"code":"GBR","name":"Great Britain","circuitId":"silverstone"},{"code":"HUN","name":"Hungary","circuitId":"hungaroring"},{"code":"BEL","name":"Belgium","circuitId":"spa-francorchamps"},{"code":"ITA","name":"Italy","circuitId":"monza"},{"code":"SGP","name":"Singapore","circuitId":"marina-bay"},{"code":"JPN","name":"Japan","circuitId":"suzuka"},{"code":"RUS","name":"Russia","circuitId":"sochi"},{"code":"USA","name":"United States","circuitId":"austin"},{"code":"MEX","name":"Mexico","circuitId":"mexico-city"},{"code":"BRA","name":"Brazil","circuitId":"interlagos"},{"code":"ABD","name":"Abu Dhabi","circuitId":"yas-marina"}],"teams":[{"id":"toro-rosso","name":"Toro Rosso","results":[{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"7","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"17","pole":false,"fastest":false,"classified":true,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"11","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"15","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"8","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"DNF","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"8","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"12","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"8","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"9","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"10","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"4","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"9","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"9","pole":false,"fastest":false,"classified":false,"sprintRank":null},{"text":"16","pole":false,"fastest":false,"classified":false,"sprintRank":null}]}],"points":49,"position":"12","championshipWon":false}],"activeSeason":2026}
+{
+ "id": "max-verstappen",
+ "name": "Max Verstappen",
+ "fullName": "Max Emilian Verstappen",
+ "countryName": "Netherlands",
+ "alpha2Code": "NL",
+ "dateOfBirth": "1997-09-30",
+ "dateOfDeath": null,
+ "placeOfBirth": "Hasselt",
+ "permanentNumber": "3",
+ "totals": {
+  "entries": 244,
+  "starts": 244,
+  "wins": 71,
+  "podiums": 131,
+  "poles": 48,
+  "fastestLaps": 37,
+  "points": 3553.5,
+  "sprintWins": 13,
+  "championships": 4,
+  "bestChampionshipPosition": 1
+ },
+ "numberStints": [
+  {
+   "number": "33",
+   "yearFrom": 2015,
+   "yearTo": 2021
+  },
+  {
+   "number": "1",
+   "yearFrom": 2022,
+   "yearTo": 2025
+  },
+  {
+   "number": "3",
+   "yearFrom": 2026,
+   "yearTo": 2026
+  }
+ ],
+ "currentSeason": {
+  "year": 2026,
+  "position": "6",
+  "points": 109,
+  "grandPrix": {
+   "races": 11,
+   "points": 100,
+   "wins": 0,
+   "podiums": 4,
+   "poles": 0,
+   "top10s": 8,
+   "fastestLaps": 1,
+   "dnfs": 2
+  },
+  "sprint": {
+   "races": 4,
+   "points": 9,
+   "wins": 0,
+   "podiums": 0,
+   "poles": 0,
+   "top10s": 4
+  }
+ },
+ "seasons": [
+  {
+   "year": 2026,
+   "rounds": [
+    {
+     "code": "AUS",
+     "name": "Australia",
+     "circuitId": "melbourne"
+    },
+    {
+     "code": "CHN",
+     "name": "China",
+     "circuitId": "shanghai"
+    },
+    {
+     "code": "JPN",
+     "name": "Japan",
+     "circuitId": "suzuka"
+    },
+    {
+     "code": "MIA",
+     "name": "Miami",
+     "circuitId": "miami"
+    },
+    {
+     "code": "CAN",
+     "name": "Canada",
+     "circuitId": "montreal"
+    },
+    {
+     "code": "MCO",
+     "name": "Monaco",
+     "circuitId": "monaco"
+    },
+    {
+     "code": "BAR",
+     "name": "Barcelona-Catalunya",
+     "circuitId": "catalunya"
+    },
+    {
+     "code": "AUT",
+     "name": "Austria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "GBR",
+     "name": "Great Britain",
+     "circuitId": "silverstone"
+    },
+    {
+     "code": "BEL",
+     "name": "Belgium",
+     "circuitId": "spa-francorchamps"
+    },
+    {
+     "code": "HUN",
+     "name": "Hungary",
+     "circuitId": "hungaroring"
+    },
+    {
+     "code": "NLD",
+     "name": "Netherlands",
+     "circuitId": "zandvoort"
+    },
+    {
+     "code": "ITA",
+     "name": "Italy",
+     "circuitId": "monza"
+    },
+    {
+     "code": "ESP",
+     "name": "Spain",
+     "circuitId": "madring"
+    },
+    {
+     "code": "AZE",
+     "name": "Azerbaijan",
+     "circuitId": "baku"
+    },
+    {
+     "code": "SGP",
+     "name": "Singapore",
+     "circuitId": "marina-bay"
+    },
+    {
+     "code": "USA",
+     "name": "United States",
+     "circuitId": "austin"
+    },
+    {
+     "code": "MEX",
+     "name": "Mexico",
+     "circuitId": "mexico-city"
+    },
+    {
+     "code": "SAO",
+     "name": "S\u00e3o Paulo",
+     "circuitId": "interlagos"
+    },
+    {
+     "code": "LAS",
+     "name": "Las Vegas",
+     "circuitId": "las-vegas"
+    },
+    {
+     "code": "QAT",
+     "name": "Qatar",
+     "circuitId": "lusail"
+    },
+    {
+     "code": "ABD",
+     "name": "Abu Dhabi",
+     "circuitId": "yas-marina"
+    }
+   ],
+   "teams": [
+    {
+     "id": "red-bull",
+     "name": "Red Bull",
+     "results": [
+      {
+       "text": "6",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 9
+      },
+      {
+       "text": "8",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 5
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 7
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "20",
+       "pole": false,
+       "fastest": false,
+       "classified": true,
+       "sprintRank": 6
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "teammates": [
+      {
+       "id": "isack-hadjar",
+       "name": "Isack Hadjar",
+       "flagCode": "fr",
+       "results": [
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 15
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 9
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 21
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 9
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+       ]
+      }
+     ],
+     "lastRound": 11
+    }
+   ],
+   "points": 109,
+   "position": "6",
+   "championshipWon": false
+  },
+  {
+   "year": 2025,
+   "rounds": [
+    {
+     "code": "AUS",
+     "name": "Australia",
+     "circuitId": "melbourne"
+    },
+    {
+     "code": "CHN",
+     "name": "China",
+     "circuitId": "shanghai"
+    },
+    {
+     "code": "JPN",
+     "name": "Japan",
+     "circuitId": "suzuka"
+    },
+    {
+     "code": "BHR",
+     "name": "Bahrain",
+     "circuitId": "bahrain"
+    },
+    {
+     "code": "SAU",
+     "name": "Saudi Arabia",
+     "circuitId": "jeddah"
+    },
+    {
+     "code": "MIA",
+     "name": "Miami",
+     "circuitId": "miami"
+    },
+    {
+     "code": "EMR",
+     "name": "Emilia Romagna",
+     "circuitId": "imola"
+    },
+    {
+     "code": "MCO",
+     "name": "Monaco",
+     "circuitId": "monaco"
+    },
+    {
+     "code": "ESP",
+     "name": "Spain",
+     "circuitId": "catalunya"
+    },
+    {
+     "code": "CAN",
+     "name": "Canada",
+     "circuitId": "montreal"
+    },
+    {
+     "code": "AUT",
+     "name": "Austria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "GBR",
+     "name": "Great Britain",
+     "circuitId": "silverstone"
+    },
+    {
+     "code": "BEL",
+     "name": "Belgium",
+     "circuitId": "spa-francorchamps"
+    },
+    {
+     "code": "HUN",
+     "name": "Hungary",
+     "circuitId": "hungaroring"
+    },
+    {
+     "code": "NLD",
+     "name": "Netherlands",
+     "circuitId": "zandvoort"
+    },
+    {
+     "code": "ITA",
+     "name": "Italy",
+     "circuitId": "monza"
+    },
+    {
+     "code": "AZE",
+     "name": "Azerbaijan",
+     "circuitId": "baku"
+    },
+    {
+     "code": "SGP",
+     "name": "Singapore",
+     "circuitId": "marina-bay"
+    },
+    {
+     "code": "USA",
+     "name": "United States",
+     "circuitId": "austin"
+    },
+    {
+     "code": "MEX",
+     "name": "Mexico",
+     "circuitId": "mexico-city"
+    },
+    {
+     "code": "SAO",
+     "name": "S\u00e3o Paulo",
+     "circuitId": "interlagos"
+    },
+    {
+     "code": "LAS",
+     "name": "Las Vegas",
+     "circuitId": "las-vegas"
+    },
+    {
+     "code": "QAT",
+     "name": "Qatar",
+     "circuitId": "lusail"
+    },
+    {
+     "code": "ABD",
+     "name": "Abu Dhabi",
+     "circuitId": "yas-marina"
+    }
+   ],
+   "teams": [
+    {
+     "id": "red-bull",
+     "name": "Red Bull",
+     "results": [
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 3
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "6",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 17
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "10",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 1
+      },
+      {
+       "text": "9",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 1
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 4
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 4
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      }
+     ],
+     "teammates": [
+      {
+       "id": "liam-lawson",
+       "name": "Liam Lawson",
+       "flagCode": "nz",
+       "results": [
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 14
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+       ]
+      },
+      {
+       "id": "yuki-tsunoda",
+       "name": "Yuki Tsunoda",
+       "flagCode": "jp",
+       "results": [
+        null,
+        null,
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 6
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "16",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 11
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 7
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 13
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 5
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
+     ],
+     "lastRound": 24
+    }
+   ],
+   "points": 421,
+   "position": "2",
+   "championshipWon": false
+  },
+  {
+   "year": 2024,
+   "rounds": [
+    {
+     "code": "BHR",
+     "name": "Bahrain",
+     "circuitId": "bahrain"
+    },
+    {
+     "code": "SAU",
+     "name": "Saudi Arabia",
+     "circuitId": "jeddah"
+    },
+    {
+     "code": "AUS",
+     "name": "Australia",
+     "circuitId": "melbourne"
+    },
+    {
+     "code": "JPN",
+     "name": "Japan",
+     "circuitId": "suzuka"
+    },
+    {
+     "code": "CHN",
+     "name": "China",
+     "circuitId": "shanghai"
+    },
+    {
+     "code": "MIA",
+     "name": "Miami",
+     "circuitId": "miami"
+    },
+    {
+     "code": "EMR",
+     "name": "Emilia Romagna",
+     "circuitId": "imola"
+    },
+    {
+     "code": "MCO",
+     "name": "Monaco",
+     "circuitId": "monaco"
+    },
+    {
+     "code": "CAN",
+     "name": "Canada",
+     "circuitId": "montreal"
+    },
+    {
+     "code": "ESP",
+     "name": "Spain",
+     "circuitId": "catalunya"
+    },
+    {
+     "code": "AUT",
+     "name": "Austria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "GBR",
+     "name": "Great Britain",
+     "circuitId": "silverstone"
+    },
+    {
+     "code": "HUN",
+     "name": "Hungary",
+     "circuitId": "hungaroring"
+    },
+    {
+     "code": "BEL",
+     "name": "Belgium",
+     "circuitId": "spa-francorchamps"
+    },
+    {
+     "code": "NLD",
+     "name": "Netherlands",
+     "circuitId": "zandvoort"
+    },
+    {
+     "code": "ITA",
+     "name": "Italy",
+     "circuitId": "monza"
+    },
+    {
+     "code": "AZE",
+     "name": "Azerbaijan",
+     "circuitId": "baku"
+    },
+    {
+     "code": "SGP",
+     "name": "Singapore",
+     "circuitId": "marina-bay"
+    },
+    {
+     "code": "USA",
+     "name": "United States",
+     "circuitId": "austin"
+    },
+    {
+     "code": "MEX",
+     "name": "Mexico",
+     "circuitId": "mexico-city"
+    },
+    {
+     "code": "SAO",
+     "name": "S\u00e3o Paulo",
+     "circuitId": "interlagos"
+    },
+    {
+     "code": "LAS",
+     "name": "Las Vegas",
+     "circuitId": "las-vegas"
+    },
+    {
+     "code": "QAT",
+     "name": "Qatar",
+     "circuitId": "lusail"
+    },
+    {
+     "code": "ABD",
+     "name": "Abu Dhabi",
+     "circuitId": "yas-marina"
+    }
+   ],
+   "teams": [
+    {
+     "id": "red-bull",
+     "name": "Red Bull",
+     "results": [
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 1
+      },
+      {
+       "text": "2",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 1
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "6",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 1
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "6",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 1
+      },
+      {
+       "text": "6",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": 4
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 8
+      },
+      {
+       "text": "6",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      }
+     ],
+     "teammates": [
+      {
+       "id": "sergio-perez",
+       "name": "Sergio P\u00e9rez",
+       "flagCode": "mx",
+       "results": [
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 3
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 3
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 8
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": true,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 9
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 8
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 20
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
+     ],
+     "lastRound": 24
+    }
+   ],
+   "points": 437,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 2023,
+   "rounds": [
+    {
+     "code": "BHR",
+     "name": "Bahrain",
+     "circuitId": "bahrain"
+    },
+    {
+     "code": "SAU",
+     "name": "Saudi Arabia",
+     "circuitId": "jeddah"
+    },
+    {
+     "code": "AUS",
+     "name": "Australia",
+     "circuitId": "melbourne"
+    },
+    {
+     "code": "AZE",
+     "name": "Azerbaijan",
+     "circuitId": "baku"
+    },
+    {
+     "code": "MIA",
+     "name": "Miami",
+     "circuitId": "miami"
+    },
+    {
+     "code": "MCO",
+     "name": "Monaco",
+     "circuitId": "monaco"
+    },
+    {
+     "code": "ESP",
+     "name": "Spain",
+     "circuitId": "catalunya"
+    },
+    {
+     "code": "CAN",
+     "name": "Canada",
+     "circuitId": "montreal"
+    },
+    {
+     "code": "AUT",
+     "name": "Austria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "GBR",
+     "name": "Great Britain",
+     "circuitId": "silverstone"
+    },
+    {
+     "code": "HUN",
+     "name": "Hungary",
+     "circuitId": "hungaroring"
+    },
+    {
+     "code": "BEL",
+     "name": "Belgium",
+     "circuitId": "spa-francorchamps"
+    },
+    {
+     "code": "NLD",
+     "name": "Netherlands",
+     "circuitId": "zandvoort"
+    },
+    {
+     "code": "ITA",
+     "name": "Italy",
+     "circuitId": "monza"
+    },
+    {
+     "code": "SGP",
+     "name": "Singapore",
+     "circuitId": "marina-bay"
+    },
+    {
+     "code": "JPN",
+     "name": "Japan",
+     "circuitId": "suzuka"
+    },
+    {
+     "code": "QAT",
+     "name": "Qatar",
+     "circuitId": "lusail"
+    },
+    {
+     "code": "USA",
+     "name": "United States",
+     "circuitId": "austin"
+    },
+    {
+     "code": "MEX",
+     "name": "Mexico",
+     "circuitId": "mexico-city"
+    },
+    {
+     "code": "SAO",
+     "name": "S\u00e3o Paulo",
+     "circuitId": "interlagos"
+    },
+    {
+     "code": "LAS",
+     "name": "Las Vegas",
+     "circuitId": "las-vegas"
+    },
+    {
+     "code": "ABD",
+     "name": "Abu Dhabi",
+     "circuitId": "yas-marina"
+    }
+   ],
+   "teams": [
+    {
+     "id": "red-bull",
+     "name": "Red Bull",
+     "results": [
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 3
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": 1
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 1
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": 2
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 1
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 1
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      }
+     ],
+     "teammates": [
+      {
+       "id": "sergio-perez",
+       "name": "Sergio P\u00e9rez",
+       "flagCode": "mx",
+       "results": [
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": true,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 1
+        },
+        {
+         "text": "2",
+         "pole": true,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "16",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 2
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 5
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 3
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
+     ],
+     "lastRound": 22
+    }
+   ],
+   "points": 575,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 2022,
+   "rounds": [
+    {
+     "code": "BHR",
+     "name": "Bahrain",
+     "circuitId": "bahrain"
+    },
+    {
+     "code": "SAU",
+     "name": "Saudi Arabia",
+     "circuitId": "jeddah"
+    },
+    {
+     "code": "AUS",
+     "name": "Australia",
+     "circuitId": "melbourne"
+    },
+    {
+     "code": "EMR",
+     "name": "Emilia Romagna",
+     "circuitId": "imola"
+    },
+    {
+     "code": "MIA",
+     "name": "Miami",
+     "circuitId": "miami"
+    },
+    {
+     "code": "ESP",
+     "name": "Spain",
+     "circuitId": "catalunya"
+    },
+    {
+     "code": "MCO",
+     "name": "Monaco",
+     "circuitId": "monaco"
+    },
+    {
+     "code": "AZE",
+     "name": "Azerbaijan",
+     "circuitId": "baku"
+    },
+    {
+     "code": "CAN",
+     "name": "Canada",
+     "circuitId": "montreal"
+    },
+    {
+     "code": "GBR",
+     "name": "Great Britain",
+     "circuitId": "silverstone"
+    },
+    {
+     "code": "AUT",
+     "name": "Austria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "FRA",
+     "name": "France",
+     "circuitId": "paul-ricard"
+    },
+    {
+     "code": "HUN",
+     "name": "Hungary",
+     "circuitId": "hungaroring"
+    },
+    {
+     "code": "BEL",
+     "name": "Belgium",
+     "circuitId": "spa-francorchamps"
+    },
+    {
+     "code": "NLD",
+     "name": "Netherlands",
+     "circuitId": "zandvoort"
+    },
+    {
+     "code": "ITA",
+     "name": "Italy",
+     "circuitId": "monza"
+    },
+    {
+     "code": "SGP",
+     "name": "Singapore",
+     "circuitId": "marina-bay"
+    },
+    {
+     "code": "JPN",
+     "name": "Japan",
+     "circuitId": "suzuka"
+    },
+    {
+     "code": "USA",
+     "name": "United States",
+     "circuitId": "austin"
+    },
+    {
+     "code": "MEX",
+     "name": "Mexico",
+     "circuitId": "mexico-city"
+    },
+    {
+     "code": "SAO",
+     "name": "S\u00e3o Paulo",
+     "circuitId": "interlagos"
+    },
+    {
+     "code": "ABD",
+     "name": "Abu Dhabi",
+     "circuitId": "yas-marina"
+    }
+   ],
+   "teams": [
+    {
+     "id": "red-bull",
+     "name": "Red Bull",
+     "results": [
+      {
+       "text": "19",
+       "pole": false,
+       "fastest": false,
+       "classified": true,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": 1
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "7",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": 1
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "7",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "6",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 4
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      }
+     ],
+     "teammates": [
+      {
+       "id": "sergio-perez",
+       "name": "Sergio P\u00e9rez",
+       "flagCode": "mx",
+       "results": [
+        {
+         "text": "18",
+         "pole": false,
+         "fastest": false,
+         "classified": true,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": true,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 3
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 5
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 5
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
+     ],
+     "lastRound": 22
+    }
+   ],
+   "points": 454,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 2021,
+   "rounds": [
+    {
+     "code": "BHR",
+     "name": "Bahrain",
+     "circuitId": "bahrain"
+    },
+    {
+     "code": "EMR",
+     "name": "Emilia Romagna",
+     "circuitId": "imola"
+    },
+    {
+     "code": "PRT",
+     "name": "Portugal",
+     "circuitId": "portimao"
+    },
+    {
+     "code": "ESP",
+     "name": "Spain",
+     "circuitId": "catalunya"
+    },
+    {
+     "code": "MCO",
+     "name": "Monaco",
+     "circuitId": "monaco"
+    },
+    {
+     "code": "AZE",
+     "name": "Azerbaijan",
+     "circuitId": "baku"
+    },
+    {
+     "code": "FRA",
+     "name": "France",
+     "circuitId": "paul-ricard"
+    },
+    {
+     "code": "STE",
+     "name": "Styria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "AUT",
+     "name": "Austria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "GBR",
+     "name": "Great Britain",
+     "circuitId": "silverstone"
+    },
+    {
+     "code": "HUN",
+     "name": "Hungary",
+     "circuitId": "hungaroring"
+    },
+    {
+     "code": "BEL",
+     "name": "Belgium",
+     "circuitId": "spa-francorchamps"
+    },
+    {
+     "code": "NLD",
+     "name": "Netherlands",
+     "circuitId": "zandvoort"
+    },
+    {
+     "code": "ITA",
+     "name": "Italy",
+     "circuitId": "monza"
+    },
+    {
+     "code": "RUS",
+     "name": "Russia",
+     "circuitId": "sochi"
+    },
+    {
+     "code": "TUR",
+     "name": "Turkey",
+     "circuitId": "istanbul"
+    },
+    {
+     "code": "USA",
+     "name": "United States",
+     "circuitId": "austin"
+    },
+    {
+     "code": "MEX",
+     "name": "Mexico",
+     "circuitId": "mexico-city"
+    },
+    {
+     "code": "SAO",
+     "name": "S\u00e3o Paulo",
+     "circuitId": "interlagos"
+    },
+    {
+     "code": "QAT",
+     "name": "Qatar",
+     "circuitId": "lusail"
+    },
+    {
+     "code": "SAU",
+     "name": "Saudi Arabia",
+     "circuitId": "jeddah"
+    },
+    {
+     "code": "ABD",
+     "name": "Abu Dhabi",
+     "circuitId": "yas-marina"
+    }
+   ],
+   "teams": [
+    {
+     "id": "red-bull",
+     "name": "Red Bull",
+     "results": [
+      {
+       "text": "2",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "18",
+       "pole": false,
+       "fastest": true,
+       "classified": true,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 1
+      },
+      {
+       "text": "9",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 2
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": 2
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      }
+     ],
+     "teammates": [
+      {
+       "id": "sergio-perez",
+       "name": "Sergio P\u00e9rez",
+       "flagCode": "mx",
+       "results": [
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "16",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": 20
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "19",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": 9
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": 4
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": true,
+         "sprintRank": null
+        }
+       ]
+      }
+     ],
+     "lastRound": 22
+    }
+   ],
+   "points": 395.5,
+   "position": "1",
+   "championshipWon": true
+  },
+  {
+   "year": 2020,
+   "rounds": [
+    {
+     "code": "AUT",
+     "name": "Austria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "STE",
+     "name": "Styria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "HUN",
+     "name": "Hungary",
+     "circuitId": "hungaroring"
+    },
+    {
+     "code": "GBR",
+     "name": "Great Britain",
+     "circuitId": "silverstone"
+    },
+    {
+     "code": "70A",
+     "name": "70th Anniversary",
+     "circuitId": "silverstone"
+    },
+    {
+     "code": "ESP",
+     "name": "Spain",
+     "circuitId": "catalunya"
+    },
+    {
+     "code": "BEL",
+     "name": "Belgium",
+     "circuitId": "spa-francorchamps"
+    },
+    {
+     "code": "ITA",
+     "name": "Italy",
+     "circuitId": "monza"
+    },
+    {
+     "code": "TUS",
+     "name": "Tuscany",
+     "circuitId": "mugello"
+    },
+    {
+     "code": "RUS",
+     "name": "Russia",
+     "circuitId": "sochi"
+    },
+    {
+     "code": "EIF",
+     "name": "Eifel",
+     "circuitId": "nurburgring"
+    },
+    {
+     "code": "PRT",
+     "name": "Portugal",
+     "circuitId": "portimao"
+    },
+    {
+     "code": "EMR",
+     "name": "Emilia Romagna",
+     "circuitId": "imola"
+    },
+    {
+     "code": "TUR",
+     "name": "Turkey",
+     "circuitId": "istanbul"
+    },
+    {
+     "code": "BHR",
+     "name": "Bahrain",
+     "circuitId": "bahrain"
+    },
+    {
+     "code": "SAK",
+     "name": "Sakhir",
+     "circuitId": "bahrain"
+    },
+    {
+     "code": "ABD",
+     "name": "Abu Dhabi",
+     "circuitId": "yas-marina"
+    }
+   ],
+   "teams": [
+    {
+     "id": "red-bull",
+     "name": "Red Bull",
+     "results": [
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "6",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      }
+     ],
+     "teammates": [
+      {
+       "id": "alexander-albon",
+       "name": "Alexander Albon",
+       "flagCode": "th",
+       "results": [
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": true,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
+     ],
+     "lastRound": 17
+    }
+   ],
+   "points": 214,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 2019,
+   "rounds": [
+    {
+     "code": "AUS",
+     "name": "Australia",
+     "circuitId": "melbourne"
+    },
+    {
+     "code": "BHR",
+     "name": "Bahrain",
+     "circuitId": "bahrain"
+    },
+    {
+     "code": "CHN",
+     "name": "China",
+     "circuitId": "shanghai"
+    },
+    {
+     "code": "AZE",
+     "name": "Azerbaijan",
+     "circuitId": "baku"
+    },
+    {
+     "code": "ESP",
+     "name": "Spain",
+     "circuitId": "catalunya"
+    },
+    {
+     "code": "MCO",
+     "name": "Monaco",
+     "circuitId": "monaco"
+    },
+    {
+     "code": "CAN",
+     "name": "Canada",
+     "circuitId": "montreal"
+    },
+    {
+     "code": "FRA",
+     "name": "France",
+     "circuitId": "paul-ricard"
+    },
+    {
+     "code": "AUT",
+     "name": "Austria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "GBR",
+     "name": "Great Britain",
+     "circuitId": "silverstone"
+    },
+    {
+     "code": "DEU",
+     "name": "Germany",
+     "circuitId": "hockenheimring"
+    },
+    {
+     "code": "HUN",
+     "name": "Hungary",
+     "circuitId": "hungaroring"
+    },
+    {
+     "code": "BEL",
+     "name": "Belgium",
+     "circuitId": "spa-francorchamps"
+    },
+    {
+     "code": "ITA",
+     "name": "Italy",
+     "circuitId": "monza"
+    },
+    {
+     "code": "SGP",
+     "name": "Singapore",
+     "circuitId": "marina-bay"
+    },
+    {
+     "code": "RUS",
+     "name": "Russia",
+     "circuitId": "sochi"
+    },
+    {
+     "code": "JPN",
+     "name": "Japan",
+     "circuitId": "suzuka"
+    },
+    {
+     "code": "MEX",
+     "name": "Mexico",
+     "circuitId": "mexico-city"
+    },
+    {
+     "code": "USA",
+     "name": "United States",
+     "circuitId": "austin"
+    },
+    {
+     "code": "BRA",
+     "name": "Brazil",
+     "circuitId": "interlagos"
+    },
+    {
+     "code": "ABD",
+     "name": "Abu Dhabi",
+     "circuitId": "yas-marina"
+    }
+   ],
+   "teams": [
+    {
+     "id": "red-bull",
+     "name": "Red Bull",
+     "results": [
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": true,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "8",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "6",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": true,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      }
+     ],
+     "teammates": [
+      {
+       "id": "alexander-albon",
+       "name": "Alexander Albon",
+       "flagCode": "th",
+       "results": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      },
+      {
+       "id": "pierre-gasly",
+       "name": "Pierre Gasly",
+       "flagCode": "fr",
+       "results": [
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": true,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+       ]
+      }
+     ],
+     "lastRound": 21
+    }
+   ],
+   "points": 278,
+   "position": "3",
+   "championshipWon": false
+  },
+  {
+   "year": 2018,
+   "rounds": [
+    {
+     "code": "AUS",
+     "name": "Australia",
+     "circuitId": "melbourne"
+    },
+    {
+     "code": "BHR",
+     "name": "Bahrain",
+     "circuitId": "bahrain"
+    },
+    {
+     "code": "CHN",
+     "name": "China",
+     "circuitId": "shanghai"
+    },
+    {
+     "code": "AZE",
+     "name": "Azerbaijan",
+     "circuitId": "baku"
+    },
+    {
+     "code": "ESP",
+     "name": "Spain",
+     "circuitId": "catalunya"
+    },
+    {
+     "code": "MCO",
+     "name": "Monaco",
+     "circuitId": "monaco"
+    },
+    {
+     "code": "CAN",
+     "name": "Canada",
+     "circuitId": "montreal"
+    },
+    {
+     "code": "FRA",
+     "name": "France",
+     "circuitId": "paul-ricard"
+    },
+    {
+     "code": "AUT",
+     "name": "Austria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "GBR",
+     "name": "Great Britain",
+     "circuitId": "silverstone"
+    },
+    {
+     "code": "DEU",
+     "name": "Germany",
+     "circuitId": "hockenheimring"
+    },
+    {
+     "code": "HUN",
+     "name": "Hungary",
+     "circuitId": "hungaroring"
+    },
+    {
+     "code": "BEL",
+     "name": "Belgium",
+     "circuitId": "spa-francorchamps"
+    },
+    {
+     "code": "ITA",
+     "name": "Italy",
+     "circuitId": "monza"
+    },
+    {
+     "code": "SGP",
+     "name": "Singapore",
+     "circuitId": "marina-bay"
+    },
+    {
+     "code": "RUS",
+     "name": "Russia",
+     "circuitId": "sochi"
+    },
+    {
+     "code": "JPN",
+     "name": "Japan",
+     "circuitId": "suzuka"
+    },
+    {
+     "code": "USA",
+     "name": "United States",
+     "circuitId": "austin"
+    },
+    {
+     "code": "MEX",
+     "name": "Mexico",
+     "circuitId": "mexico-city"
+    },
+    {
+     "code": "BRA",
+     "name": "Brazil",
+     "circuitId": "interlagos"
+    },
+    {
+     "code": "ABD",
+     "name": "Abu Dhabi",
+     "circuitId": "yas-marina"
+    }
+   ],
+   "teams": [
+    {
+     "id": "red-bull",
+     "name": "Red Bull",
+     "results": [
+      {
+       "text": "6",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "9",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "15",
+       "pole": false,
+       "fastest": false,
+       "classified": true,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      }
+     ],
+     "teammates": [
+      {
+       "id": "daniel-ricciardo",
+       "name": "Daniel Ricciardo",
+       "flagCode": "au",
+       "results": [
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": true,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": true,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
+     ],
+     "lastRound": 21
+    }
+   ],
+   "points": 249,
+   "position": "4",
+   "championshipWon": false
+  },
+  {
+   "year": 2017,
+   "rounds": [
+    {
+     "code": "AUS",
+     "name": "Australia",
+     "circuitId": "melbourne"
+    },
+    {
+     "code": "CHN",
+     "name": "China",
+     "circuitId": "shanghai"
+    },
+    {
+     "code": "BHR",
+     "name": "Bahrain",
+     "circuitId": "bahrain"
+    },
+    {
+     "code": "RUS",
+     "name": "Russia",
+     "circuitId": "sochi"
+    },
+    {
+     "code": "ESP",
+     "name": "Spain",
+     "circuitId": "catalunya"
+    },
+    {
+     "code": "MCO",
+     "name": "Monaco",
+     "circuitId": "monaco"
+    },
+    {
+     "code": "CAN",
+     "name": "Canada",
+     "circuitId": "montreal"
+    },
+    {
+     "code": "AZE",
+     "name": "Azerbaijan",
+     "circuitId": "baku"
+    },
+    {
+     "code": "AUT",
+     "name": "Austria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "GBR",
+     "name": "Great Britain",
+     "circuitId": "silverstone"
+    },
+    {
+     "code": "HUN",
+     "name": "Hungary",
+     "circuitId": "hungaroring"
+    },
+    {
+     "code": "BEL",
+     "name": "Belgium",
+     "circuitId": "spa-francorchamps"
+    },
+    {
+     "code": "ITA",
+     "name": "Italy",
+     "circuitId": "monza"
+    },
+    {
+     "code": "SGP",
+     "name": "Singapore",
+     "circuitId": "marina-bay"
+    },
+    {
+     "code": "MYS",
+     "name": "Malaysia",
+     "circuitId": "sepang"
+    },
+    {
+     "code": "JPN",
+     "name": "Japan",
+     "circuitId": "suzuka"
+    },
+    {
+     "code": "USA",
+     "name": "United States",
+     "circuitId": "austin"
+    },
+    {
+     "code": "MEX",
+     "name": "Mexico",
+     "circuitId": "mexico-city"
+    },
+    {
+     "code": "BRA",
+     "name": "Brazil",
+     "circuitId": "interlagos"
+    },
+    {
+     "code": "ABD",
+     "name": "Abu Dhabi",
+     "circuitId": "yas-marina"
+    }
+   ],
+   "teams": [
+    {
+     "id": "red-bull",
+     "name": "Red Bull",
+     "results": [
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "10",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      }
+     ],
+     "teammates": [
+      {
+       "id": "daniel-ricciardo",
+       "name": "Daniel Ricciardo",
+       "flagCode": "au",
+       "results": [
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
+     ],
+     "lastRound": 20
+    }
+   ],
+   "points": 168,
+   "position": "6",
+   "championshipWon": false
+  },
+  {
+   "year": 2016,
+   "rounds": [
+    {
+     "code": "AUS",
+     "name": "Australia",
+     "circuitId": "melbourne"
+    },
+    {
+     "code": "BHR",
+     "name": "Bahrain",
+     "circuitId": "bahrain"
+    },
+    {
+     "code": "CHN",
+     "name": "China",
+     "circuitId": "shanghai"
+    },
+    {
+     "code": "RUS",
+     "name": "Russia",
+     "circuitId": "sochi"
+    },
+    {
+     "code": "ESP",
+     "name": "Spain",
+     "circuitId": "catalunya"
+    },
+    {
+     "code": "MCO",
+     "name": "Monaco",
+     "circuitId": "monaco"
+    },
+    {
+     "code": "CAN",
+     "name": "Canada",
+     "circuitId": "montreal"
+    },
+    {
+     "code": "EUR",
+     "name": "Europe",
+     "circuitId": "baku"
+    },
+    {
+     "code": "AUT",
+     "name": "Austria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "GBR",
+     "name": "Great Britain",
+     "circuitId": "silverstone"
+    },
+    {
+     "code": "HUN",
+     "name": "Hungary",
+     "circuitId": "hungaroring"
+    },
+    {
+     "code": "DEU",
+     "name": "Germany",
+     "circuitId": "hockenheimring"
+    },
+    {
+     "code": "BEL",
+     "name": "Belgium",
+     "circuitId": "spa-francorchamps"
+    },
+    {
+     "code": "ITA",
+     "name": "Italy",
+     "circuitId": "monza"
+    },
+    {
+     "code": "SGP",
+     "name": "Singapore",
+     "circuitId": "marina-bay"
+    },
+    {
+     "code": "MYS",
+     "name": "Malaysia",
+     "circuitId": "sepang"
+    },
+    {
+     "code": "JPN",
+     "name": "Japan",
+     "circuitId": "suzuka"
+    },
+    {
+     "code": "USA",
+     "name": "United States",
+     "circuitId": "austin"
+    },
+    {
+     "code": "MEX",
+     "name": "Mexico",
+     "circuitId": "mexico-city"
+    },
+    {
+     "code": "BRA",
+     "name": "Brazil",
+     "circuitId": "interlagos"
+    },
+    {
+     "code": "ABD",
+     "name": "Abu Dhabi",
+     "circuitId": "yas-marina"
+    }
+   ],
+   "teams": [
+    {
+     "id": "red-bull",
+     "name": "Red Bull",
+     "results": [
+      null,
+      null,
+      null,
+      null,
+      {
+       "text": "1",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "8",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "5",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "11",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "7",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "6",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "2",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "3",
+       "pole": false,
+       "fastest": true,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      }
+     ],
+     "teammates": [
+      {
+       "id": "daniel-ricciardo",
+       "name": "Daniel Ricciardo",
+       "flagCode": "au",
+       "results": [
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": true,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "4",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "2",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "1",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "5",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      },
+      {
+       "id": "daniil-kvyat",
+       "name": "Daniil Kvyat",
+       "flagCode": "ru",
+       "results": [
+        {
+         "text": "DNS",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "3",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+       ]
+      }
+     ],
+     "lastRound": 21
+    },
+    {
+     "id": "toro-rosso",
+     "name": "Toro Rosso",
+     "results": [
+      {
+       "text": "10",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "6",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "8",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "teammates": [
+      {
+       "id": "carlos-sainz-jr",
+       "name": "Carlos Sainz Jr.",
+       "flagCode": "es",
+       "results": [
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "17",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "16",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "6",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      },
+      {
+       "id": "daniil-kvyat",
+       "name": "Daniil Kvyat",
+       "flagCode": "ru",
+       "results": [
+        null,
+        null,
+        null,
+        null,
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": true,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "16",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "15",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "14",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "18",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
+     ],
+     "lastRound": 4
+    }
+   ],
+   "points": 204,
+   "position": "5",
+   "championshipWon": false
+  },
+  {
+   "year": 2015,
+   "rounds": [
+    {
+     "code": "AUS",
+     "name": "Australia",
+     "circuitId": "melbourne"
+    },
+    {
+     "code": "MYS",
+     "name": "Malaysia",
+     "circuitId": "sepang"
+    },
+    {
+     "code": "CHN",
+     "name": "China",
+     "circuitId": "shanghai"
+    },
+    {
+     "code": "BHR",
+     "name": "Bahrain",
+     "circuitId": "bahrain"
+    },
+    {
+     "code": "ESP",
+     "name": "Spain",
+     "circuitId": "catalunya"
+    },
+    {
+     "code": "MCO",
+     "name": "Monaco",
+     "circuitId": "monaco"
+    },
+    {
+     "code": "CAN",
+     "name": "Canada",
+     "circuitId": "montreal"
+    },
+    {
+     "code": "AUT",
+     "name": "Austria",
+     "circuitId": "spielberg"
+    },
+    {
+     "code": "GBR",
+     "name": "Great Britain",
+     "circuitId": "silverstone"
+    },
+    {
+     "code": "HUN",
+     "name": "Hungary",
+     "circuitId": "hungaroring"
+    },
+    {
+     "code": "BEL",
+     "name": "Belgium",
+     "circuitId": "spa-francorchamps"
+    },
+    {
+     "code": "ITA",
+     "name": "Italy",
+     "circuitId": "monza"
+    },
+    {
+     "code": "SGP",
+     "name": "Singapore",
+     "circuitId": "marina-bay"
+    },
+    {
+     "code": "JPN",
+     "name": "Japan",
+     "circuitId": "suzuka"
+    },
+    {
+     "code": "RUS",
+     "name": "Russia",
+     "circuitId": "sochi"
+    },
+    {
+     "code": "USA",
+     "name": "United States",
+     "circuitId": "austin"
+    },
+    {
+     "code": "MEX",
+     "name": "Mexico",
+     "circuitId": "mexico-city"
+    },
+    {
+     "code": "BRA",
+     "name": "Brazil",
+     "circuitId": "interlagos"
+    },
+    {
+     "code": "ABD",
+     "name": "Abu Dhabi",
+     "circuitId": "yas-marina"
+    }
+   ],
+   "teams": [
+    {
+     "id": "toro-rosso",
+     "name": "Toro Rosso",
+     "results": [
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "7",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "17",
+       "pole": false,
+       "fastest": false,
+       "classified": true,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "11",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "15",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "8",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "DNF",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "8",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "12",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "8",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "9",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "10",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "4",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "9",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "9",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      },
+      {
+       "text": "16",
+       "pole": false,
+       "fastest": false,
+       "classified": false,
+       "sprintRank": null
+      }
+     ],
+     "teammates": [
+      {
+       "id": "carlos-sainz-jr",
+       "name": "Carlos Sainz Jr.",
+       "flagCode": "es",
+       "results": [
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "8",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "12",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "9",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "10",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "7",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "13",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "DNF",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        },
+        {
+         "text": "11",
+         "pole": false,
+         "fastest": false,
+         "classified": false,
+         "sprintRank": null
+        }
+       ]
+      }
+     ],
+     "lastRound": 19
+    }
+   ],
+   "points": 49,
+   "position": "12",
+   "championshipWon": false
+  }
+ ],
+ "activeSeason": 2026,
+ "lastNumber": "3"
+}

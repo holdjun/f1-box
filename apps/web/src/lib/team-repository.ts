@@ -1,3 +1,10 @@
+import { asNumber, asRecord, asString } from "./db-parse.js";
+import {
+  deriveSeasonYears,
+  mapSeasonYearRows,
+  seasonYearsSql,
+} from "./season-years.js";
+
 export interface TeamTotals {
   entries: number;
   wins: number;
@@ -87,11 +94,19 @@ export interface TeamPage {
 export interface TeamRepository {
   getTeam(slug: string): Promise<TeamPage | null>;
   getConstructors(): Promise<ConstructorRef[]>;
+  getConstructorsByYear(year: number): Promise<ConstructorRef[]>;
+  getSeasonYears(): Promise<number[]>;
 }
 
 export interface ConstructorRef {
   id: string;
   name: string;
+}
+
+// DEV 目录 fixture 附带积分数据；生产由 SQL 提供
+interface ConstructorCatalogFixture extends ConstructorRef {
+  points: number;
+  seasons: Record<string, { points: number } | undefined>;
 }
 
 export interface TeamDatabase {
@@ -244,23 +259,28 @@ ORDER BY cc.position_display_order`;
 const maxSeasonSql = `SELECT MAX(year) AS year FROM season`;
 
 const constructorsSql = `
-WITH latest_season AS (
-  SELECT MAX(year) AS year FROM season
-), current_teams AS (
-  SELECT DISTINCT constructor_id
-  FROM season_entrant_constructor
-  WHERE year = (SELECT year FROM latest_season)
-)
 SELECT c.id, c.name
 FROM constructor c
-LEFT JOIN current_teams current_team ON current_team.constructor_id = c.id
-ORDER BY
-  CASE WHEN current_team.constructor_id IS NULL THEN 1 ELSE 0 END,
-  c.total_championship_wins DESC,
-  c.total_race_wins DESC,
-  c.total_race_entries DESC,
-  c.total_points DESC,
-  c.name`;
+ORDER BY c.total_points DESC, c.name`;
+
+// 年份目录按该年积分榜降序；积分榜按 车队×引擎 分行（60 年代多引擎）且
+// entrant 表每参赛实体一行，两者都先按车队折叠再 JOIN，避免交叉积重复计分。
+// 无积分榜的垫底按名字排。
+const constructorsByYearSql = `
+SELECT c.id, c.name, COALESCE(scs.points, 0) AS points
+FROM (
+  SELECT DISTINCT constructor_id
+  FROM season_entrant_constructor
+  WHERE year = ?1
+) sec
+JOIN constructor c ON c.id = sec.constructor_id
+LEFT JOIN (
+  SELECT constructor_id, SUM(points) AS points
+  FROM season_constructor_standing
+  WHERE year = ?1
+  GROUP BY constructor_id
+) scs ON scs.constructor_id = c.id
+ORDER BY points DESC, c.name`;
 
 export function createTeamRepository(db?: TeamDatabase): TeamRepository {
   return {
@@ -350,17 +370,47 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
     async getConstructors() {
       if (!db) {
         const { default: fixture } = await import("./fixtures/constructors.json");
-        return fixture as ConstructorRef[];
+        return (fixture as ConstructorCatalogFixture[]).map(
+          ({ points, seasons, ...ref }) => ref,
+        );
       }
       const rows = await db.batch([{ sql: constructorsSql, values: [] }]);
-      return rows[0].results.map((row) => {
-        const record = asRecord(row, "constructor row");
-        return {
-          id: asString(record.id, "constructor id"),
-          name: asString(record.name, "constructor name"),
-        };
-      });
+      return rows[0].results.map(mapConstructorRef);
     },
+
+    async getConstructorsByYear(year) {
+      if (!db) {
+        const { default: fixture } = await import("./fixtures/constructors.json");
+        const rows: (ConstructorRef & { points: number })[] = [];
+        for (const { seasons, ...ref } of fixture as ConstructorCatalogFixture[]) {
+          const entry = seasons[String(year)];
+          if (entry) rows.push({ ...ref, points: entry.points });
+        }
+        return rows
+          .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name))
+          .map(({ points, ...row }) => row);
+      }
+      const rows = await db.batch([{ sql: constructorsByYearSql, values: [year] }]);
+      return rows[0].results.map(mapConstructorRef);
+    },
+
+    async getSeasonYears() {
+      if (!db) {
+        // DEV 从 fixture 参赛年份推导；生产读 season 表
+        const { default: fixture } = await import("./fixtures/constructors.json");
+        return deriveSeasonYears(fixture as ConstructorCatalogFixture[]);
+      }
+      const rows = await db.batch([{ sql: seasonYearsSql, values: [] }]);
+      return mapSeasonYearRows(rows[0].results);
+    },
+  };
+}
+
+function mapConstructorRef(row: unknown): ConstructorRef {
+  const record = asRecord(row, "constructor row");
+  return {
+    id: asString(record.id, "constructor id"),
+    name: asString(record.name, "constructor name"),
   };
 }
 
@@ -652,25 +702,4 @@ function splitNames(value: unknown): string[] {
     .split(",")
     .map((name) => name.trim())
     .filter((name) => name.length > 0);
-}
-
-function asRecord(value: unknown, label: string): Record<string, unknown> {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    throw new Error(`Invalid team data: expected ${label} to be an object`);
-  }
-  return value as Record<string, unknown>;
-}
-
-function asString(value: unknown, label: string): string {
-  if (typeof value !== "string") {
-    throw new Error(`Invalid team data: expected ${label} to be a string`);
-  }
-  return value;
-}
-
-function asNumber(value: unknown, label: string): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`Invalid team data: expected ${label} to be a number`);
-  }
-  return value;
 }

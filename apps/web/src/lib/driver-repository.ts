@@ -5,6 +5,12 @@ import {
   type RaceCell,
   type SeasonRound,
 } from "./team-repository.js";
+import { asNumber, asRecord, asString } from "./db-parse.js";
+import {
+  deriveSeasonYears,
+  mapSeasonYearRows,
+  seasonYearsSql,
+} from "./season-years.js";
 
 export interface DriverSummary {
   id: string;
@@ -14,6 +20,16 @@ export interface DriverSummary {
   teamId: string | null;
   teamName: string | null;
   isCurrent: boolean;
+}
+
+// DEV 目录 fixture 附带积分与逐年号码数据；生产由 SQL 提供
+interface DriverCatalogFixture extends DriverSummary {
+  points: number;
+  seasons: Record<
+    string,
+    | { points: number; number?: string; teamId?: string; teamName?: string }
+    | undefined
+  >;
 }
 
 export interface DriverTotals {
@@ -45,6 +61,16 @@ export interface TeamStint {
 export interface DriverSeasonTeam {
   id: string;
   name: string;
+  // 该队最后参赛轮次：矩阵块按此降序（换队后在上），stint 时间线按此升序
+  lastRound: number;
+  results: (RaceCell | null)[];
+  teammates: DriverSeasonTeammate[];
+}
+
+export interface DriverSeasonTeammate {
+  id: string;
+  name: string;
+  flagCode: string | null;
   results: (RaceCell | null)[];
 }
 
@@ -67,6 +93,8 @@ export interface DriverPage {
   dateOfDeath: string | null;
   placeOfBirth: string;
   permanentNumber: string | null;
+  // 最后参赛号码：目录卡与 hero 都优先显示它（现役即当前号码），永久车号兜底
+  lastNumber: string | null;
   totals: DriverTotals;
   numberStints: NumberStint[];
   teamStints: TeamStint[];
@@ -77,6 +105,8 @@ export interface DriverPage {
 
 export interface DriverRepository {
   getDrivers(): Promise<DriverSummary[]>;
+  getDriversByYear(year: number): Promise<DriverSummary[]>;
+  getSeasonYears(): Promise<number[]>;
   getDriver(slug: string): Promise<DriverPage | null>;
 }
 
@@ -99,8 +129,9 @@ export function createD1DriverDatabase(d1: D1Database): DriverDatabase {
 }
 
 // 最后车队取自实际参赛的末站（与详情页 hero 同一口径）；相关子查询走
-// (driver_id, type) 索引逐人定位，避免全表开窗。
-// 当前赛季车手优先，其余按生涯成就排序，与车队目录同一哲学。
+// (driver_id, type) 索引逐人定位，避免全表开窗。号码与目录卡、hero 同口径：
+// 取最后参赛号码（现役即当前号码，如卫冕冠军的 1 号），永久车号仅作兜底。
+// 目录按生涯总积分降序。
 const driversSql = `
 WITH latest_season AS (
   SELECT MAX(year) AS year FROM season
@@ -110,8 +141,9 @@ current_drivers AS (
   FROM season_entrant_driver
   WHERE year = (SELECT year FROM latest_season) AND test_driver = 0
 ),
-last_team AS (
-  SELECT rd.driver_id, rd.constructor_id, c.name AS team_name
+last_race AS (
+  SELECT rd.driver_id, rd.constructor_id, c.name AS team_name,
+    rd.driver_number AS last_number
   FROM driver d
   JOIN race_data rd ON rd.rowid = (
     SELECT rd2.rowid
@@ -123,19 +155,48 @@ last_team AS (
   )
   JOIN constructor c ON c.id = rd.constructor_id
 )
-SELECT d.id, d.name, d.permanent_number, co.alpha2_code,
-  lt.constructor_id AS team_id, lt.team_name,
+SELECT d.id, d.name, COALESCE(lr.last_number, d.permanent_number) AS number,
+  co.alpha2_code, lr.constructor_id AS team_id, lr.team_name,
   CASE WHEN cd.driver_id IS NULL THEN 0 ELSE 1 END AS is_current
 FROM driver d
 LEFT JOIN country co ON co.id = d.nationality_country_id
-LEFT JOIN last_team lt ON lt.driver_id = d.id
+LEFT JOIN last_race lr ON lr.driver_id = d.id
 LEFT JOIN current_drivers cd ON cd.driver_id = d.id
-ORDER BY
-  CASE WHEN cd.driver_id IS NULL THEN 1 ELSE 0 END,
-  d.total_championship_wins DESC,
-  d.total_race_wins DESC,
-  d.total_race_entries DESC,
-  d.name`;
+ORDER BY d.total_points DESC, d.name`;
+
+// 年份目录：卡片显示该年车队与号码（季中转会取该年最后参赛车队），按该年
+// 积分榜降序；无积分榜的（如替补）垫底按名字排。号码取该年最后一场实际号码
+// （如卫冕冠军 1 号），无该年号码才回落永久车号。last_race 只对该年参赛者
+// （year_drivers）跑相关子查询，避免全量表逐人探测
+const driversByYearSql = `
+WITH year_drivers AS (
+  SELECT DISTINCT driver_id
+  FROM season_entrant_driver
+  WHERE year = ?1 AND test_driver = 0
+),
+last_race AS (
+  SELECT rd.driver_id, rd.constructor_id, c.name AS team_name,
+    rd.driver_number AS last_number
+  FROM year_drivers yd
+  JOIN race_data rd ON rd.rowid = (
+    SELECT rd2.rowid
+    FROM race_data rd2
+    JOIN race ra2 ON ra2.id = rd2.race_id
+    WHERE rd2.driver_id = yd.driver_id AND rd2.type = 'RACE_RESULT' AND ra2.year = ?1
+    ORDER BY ra2.round DESC
+    LIMIT 1
+  )
+  JOIN constructor c ON c.id = rd.constructor_id
+)
+SELECT d.id, d.name, COALESCE(lr.last_number, d.permanent_number) AS number,
+  co.alpha2_code, lr.constructor_id AS team_id, lr.team_name,
+  COALESCE(sds.points, 0) AS points
+FROM year_drivers yd
+JOIN driver d ON d.id = yd.driver_id
+LEFT JOIN country co ON co.id = d.nationality_country_id
+LEFT JOIN last_race lr ON lr.driver_id = d.id
+LEFT JOIN season_driver_standing sds ON sds.driver_id = d.id AND sds.year = ?1
+ORDER BY points DESC, d.name`;
 
 const identitySql = `
 SELECT d.id, d.name, d.full_name, co.name AS country_name, co.alpha2_code,
@@ -149,6 +210,15 @@ SELECT d.id, d.name, d.full_name, co.name AS country_name, co.alpha2_code,
 FROM driver d
 JOIN country co ON co.id = d.nationality_country_id
 WHERE d.id = ?1`;
+
+// 最后参赛号码（不限年份）：目录卡与 hero 的号码首选，永久车号兜底
+const lastNumberSql = `
+SELECT rd.driver_number
+FROM race_data rd
+JOIN race ra ON ra.id = rd.race_id
+WHERE rd.driver_id = ?1 AND rd.type = 'RACE_RESULT'
+ORDER BY ra.year DESC, ra.round DESC
+LIMIT 1`;
 
 // 号变更：仅取 1974 起——此前车号按站分配，无身份意义；1974 起 FIA 固定
 // 车队整季编号。年内按最早轮次排序，repository 侧合并连续同年号区间
@@ -174,15 +244,16 @@ WHERE ra.year IN (
 )
 ORDER BY ra.year, ra.round`;
 
-// 行=该年该车手的 constructor 条目；first_round 定行序（季中转会多行）
+// 行=该年该车手的 constructor 条目；车队块按该队最后参赛轮次降序，换队后
+// 的车队在上，临时替补（如只跑一场）也遵循同一口径
 const teamsSql = `
-SELECT ra.year, rr.constructor_id AS id, c.name, MIN(ra.round) AS first_round
+SELECT ra.year, rr.constructor_id AS id, c.name, MAX(ra.round) AS last_round
 FROM race ra
 JOIN race_result rr ON rr.race_id = ra.id
 JOIN constructor c ON c.id = rr.constructor_id
 WHERE rr.driver_id = ?1
 GROUP BY ra.year, rr.constructor_id, c.name
-ORDER BY ra.year DESC, first_round`;
+ORDER BY ra.year DESC, last_round DESC`;
 
 const resultsSql = `
 SELECT ra.year, ra.round, rr.constructor_id, rr.position_text, rr.pole_position,
@@ -197,6 +268,43 @@ SELECT ra.year, ra.round, srr.position_number
 FROM race ra
 JOIN sprint_race_result srr ON srr.race_id = ra.id
 WHERE srr.driver_id = ?1 AND srr.position_number IS NOT NULL`;
+
+// 队友：与该车手同年同队实际参赛的其他车手。门槛用实际比赛结果推导的 stint，
+// 而非 season_entrant_driver——替补登场常无正式阵容行（如 Bearman 2024 代打），
+// 按阵容过滤会丢掉这些队友。结果按站取最佳
+const teammateResultsSql = `
+WITH stints AS (
+  SELECT DISTINCT ra.year, rr.constructor_id
+  FROM race ra
+  JOIN race_result rr ON rr.race_id = ra.id
+  WHERE rr.driver_id = ?1
+)
+SELECT ra.year, ra.round, rr.driver_id, d.name, cn.alpha2_code,
+  rr.constructor_id,
+  rr.position_text, rr.pole_position, rr.fastest_lap, rr.reason_retired,
+  rr.position_number
+FROM stints s
+JOIN race ra ON ra.year = s.year
+JOIN race_result rr
+  ON rr.race_id = ra.id AND rr.constructor_id = s.constructor_id
+JOIN driver d ON d.id = rr.driver_id
+LEFT JOIN country cn ON cn.id = d.nationality_country_id
+WHERE rr.driver_id <> ?1
+ORDER BY rr.position_display_order`;
+
+const teammateSprintRankSql = `
+WITH stints AS (
+  SELECT DISTINCT ra.year, rr.constructor_id
+  FROM race ra
+  JOIN race_result rr ON rr.race_id = ra.id
+  WHERE rr.driver_id = ?1
+)
+SELECT ra.year, ra.round, srr.driver_id, srr.position_number
+FROM stints s
+JOIN race ra ON ra.year = s.year
+JOIN sprint_race_result srr
+  ON srr.race_id = ra.id AND srr.constructor_id = s.constructor_id
+WHERE srr.driver_id <> ?1 AND srr.position_number IS NOT NULL`;
 
 // 逐年单行，无需变体合并
 const standingsSql = `
@@ -246,35 +354,50 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
       if (!db) {
         // fixture 仅 DEV 用，动态导入避免打进生产 bundle
         const { default: fixture } = await import("./fixtures/drivers.json");
-        return fixture as DriverSummary[];
+        return (fixture as DriverCatalogFixture[]).map(
+          ({ points, seasons, ...summary }) => summary,
+        );
       }
 
       const [rows] = await db.batch([{ sql: driversSql, values: [] }]);
-      return rows.results.map((row) => {
-        const record = asRecord(row, "driver row");
-        return {
-          id: asString(record.id, "driver id"),
-          name: asString(record.name, "driver name"),
-          number:
-            record.permanent_number == null
-              ? null
-              : asString(record.permanent_number, "driver number"),
-          // 国旗 SVG 以 alpha2 小写命名
-          flagCode:
-            record.alpha2_code == null
-              ? null
-              : asString(record.alpha2_code, "driver flag code").toLowerCase(),
-          teamId:
-            record.team_id == null
-              ? null
-              : asString(record.team_id, "driver team id"),
-          teamName:
-            record.team_name == null
-              ? null
-              : asString(record.team_name, "driver team name"),
-          isCurrent: record.is_current === 1,
-        };
-      });
+      return rows.results.map(mapDriverRow);
+    },
+
+    async getDriversByYear(year) {
+      if (!db) {
+        const { default: fixture } = await import("./fixtures/drivers.json");
+        const rows: (DriverSummary & { points: number })[] = [];
+        for (const { seasons, ...summary } of fixture as DriverCatalogFixture[]) {
+          const entry = seasons[String(year)];
+          if (entry) {
+            rows.push({
+              ...summary,
+              // 年份视图优先该年号码与车队，无才回落生涯值（与生产 SQL 同口径）
+              number: entry.number ?? summary.number,
+              teamId: entry.teamId ?? summary.teamId,
+              teamName: entry.teamName ?? summary.teamName,
+              points: entry.points,
+            });
+          }
+        }
+        return rows
+          .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name))
+          .map(({ points, ...row }) => row);
+      }
+
+      const [rows] = await db.batch([{ sql: driversByYearSql, values: [year] }]);
+      return rows.results.map(mapDriverRow);
+    },
+
+    async getSeasonYears() {
+      if (!db) {
+        // DEV 从 fixture 参赛年份推导；生产读 season 表
+        const { default: fixture } = await import("./fixtures/drivers.json");
+        return deriveSeasonYears(fixture as DriverCatalogFixture[]);
+      }
+
+      const [rows] = await db.batch([{ sql: seasonYearsSql, values: [] }]);
+      return mapSeasonYearRows(rows.results);
     },
 
     async getDriver(slug) {
@@ -297,6 +420,7 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
 
       const [
         identityRows,
+        lastNumberRows,
         numberRows,
         roundRows,
         teamRows,
@@ -307,8 +431,11 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
         sprintStatRows,
         sprintPoleRows,
         maxSeasonRows,
+        teammateResultRows,
+        teammateSprintRankRows,
       ] = await db.batch([
         { sql: identitySql, values: [slug] },
+        { sql: lastNumberSql, values: [slug] },
         { sql: numberStintsSql, values: [slug] },
         { sql: roundsSql, values: [slug] },
         { sql: teamsSql, values: [slug] },
@@ -319,10 +446,13 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
         { sql: sprintStatsSql, values: [slug] },
         { sql: sprintPolesSql, values: [slug] },
         { sql: maxSeasonSql, values: [] },
+        { sql: teammateResultsSql, values: [slug] },
+        { sql: teammateSprintRankSql, values: [slug] },
       ]);
 
       if (identityRows.results.length === 0) return null;
       const identity = parseIdentity(identityRows.results[0]);
+      const lastNumberRow = lastNumberRows.results[0];
 
       const seasons = mergeDriverSeasons(
         roundRows.results,
@@ -330,10 +460,16 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
         resultRows.results,
         sprintRankRows.results,
         standingRows.results,
+        teammateResultRows.results,
+        teammateSprintRankRows.results,
       );
 
       return {
         ...identity,
+        lastNumber:
+          lastNumberRow === undefined
+            ? null
+            : asString(asRecord(lastNumberRow, "last number row").driver_number, "last number"),
         numberStints: mergeNumberStints(numberRows.results),
         teamStints: mergeTeamStints(seasons),
         currentSeason: buildCurrentSeason(
@@ -353,9 +489,33 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
   };
 }
 
+// 目录行映射：按年查询的行没有 is_current，isCurrent 自然为 false
+function mapDriverRow(row: unknown): DriverSummary {
+  const record = asRecord(row, "driver row");
+  return {
+    id: asString(record.id, "driver id"),
+    name: asString(record.name, "driver name"),
+    number: record.number == null ? null : asString(record.number, "driver number"),
+    // 国旗 SVG 以 alpha2 小写命名
+    flagCode:
+      record.alpha2_code == null
+        ? null
+        : asString(record.alpha2_code, "driver flag code").toLowerCase(),
+    teamId:
+      record.team_id == null
+        ? null
+        : asString(record.team_id, "driver team id"),
+    teamName:
+      record.team_name == null
+        ? null
+        : asString(record.team_name, "driver team name"),
+    isCurrent: record.is_current === 1,
+  };
+}
+
 function parseIdentity(
   value: unknown,
-): Omit<DriverPage, "numberStints" | "teamStints" | "currentSeason" | "seasons" | "activeSeason"> {
+): Omit<DriverPage, "lastNumber" | "numberStints" | "teamStints" | "currentSeason" | "seasons" | "activeSeason"> {
   const record = asRecord(value, "driver identity");
   return {
     id: asString(record.id, "driver id"),
@@ -409,11 +569,12 @@ export function mergeNumberStints(rows: unknown[]): NumberStint[] {
 }
 
 // 连续同队年合并为区间；换队或断档开新段（同 mergeNumberStints 模式）。
-// seasons 降序，先翻成升序；季中转会一年两队时各自成段
+// seasons 降序，先翻成升序；同年多队按最后参赛轮次升序还原时间线
+// （矩阵里换队后的队在上，chips 里先效力的队在前）
 export function mergeTeamStints(seasons: DriverSeason[]): TeamStint[] {
   const stints: TeamStint[] = [];
   for (const season of [...seasons].reverse()) {
-    for (const team of season.teams) {
+    for (const team of [...season.teams].sort((a, b) => a.lastRound - b.lastRound)) {
       const last = stints.at(-1);
       if (last && last.id === team.id && last.yearTo === season.year - 1) {
         last.yearTo = season.year;
@@ -430,7 +591,7 @@ export function mergeTeamStints(seasons: DriverSeason[]): TeamStint[] {
   return stints;
 }
 
-// fixture 不存 teamStints，运行期从 seasons 补齐，保证 DEV 与 D1 同构
+// fixture 与 D1 结果同构，仅 teamStints 需运行期从 seasons 推导
 function withTeamStints(page: Omit<DriverPage, "teamStints">): DriverPage {
   return { ...page, teamStints: mergeTeamStints(page.seasons) };
 }
@@ -441,6 +602,8 @@ function mergeDriverSeasons(
   resultRows: unknown[],
   sprintRankRows: unknown[],
   standingRows: unknown[],
+  teammateResultRows: unknown[],
+  teammateSprintRankRows: unknown[],
 ): DriverSeason[] {
   const seasons = new Map<number, DriverSeason>();
   const rawRounds = new Map<number, { round: number; code: string; name: string; circuitId: string }[]>();
@@ -498,6 +661,56 @@ function mergeDriverSeasons(
     );
   }
 
+  // 队友结果与冲刺排名：按 (year, constructor) 分组，矩阵对齐 rounds
+  const teammateSprintRanks = new Map<string, number>();
+  for (const row of teammateSprintRankRows) {
+    const record = asRecord(row, "teammate sprint rank row");
+    teammateSprintRanks.set(
+      `${asNumber(record.year, "teammate sprint year")}:${asNumber(record.round, "teammate sprint round")}:${asString(record.driver_id, "teammate sprint driver")}`,
+      asNumber(record.position_number, "teammate sprint rank"),
+    );
+  }
+
+  const teammateCells = new Map<
+    string,
+    Map<string, { id: string; name: string; flagCode: string | null; byRound: Map<number, RaceCell> }>
+  >();
+  for (const row of teammateResultRows) {
+    const record = asRecord(row, "teammate result row");
+    const year = asNumber(record.year, "teammate result year");
+    const round = asNumber(record.round, "teammate result round");
+    const driverId = asString(record.driver_id, "teammate result driver");
+    const constructorId = asString(record.constructor_id, "teammate result constructor");
+    const groupKey = `${year}:${constructorId}`;
+    let group = teammateCells.get(groupKey);
+    if (!group) {
+      group = new Map();
+      teammateCells.set(groupKey, group);
+    }
+    let entry = group.get(driverId);
+    if (!entry) {
+      entry = {
+        id: driverId,
+        name: asString(record.name, "teammate name"),
+        flagCode:
+          record.alpha2_code == null
+            ? null
+            : asString(record.alpha2_code, "teammate flag").toLowerCase(),
+        byRound: new Map(),
+      };
+      group.set(driverId, entry);
+    }
+    // 共享赛车多行，SQL 按排名序，首条即最佳成绩
+    if (entry.byRound.has(round)) continue;
+    entry.byRound.set(
+      round,
+      buildRaceCell(
+        record,
+        teammateSprintRanks.get(`${year}:${round}:${driverId}`) ?? null,
+      ),
+    );
+  }
+
   for (const row of teamRows) {
     const record = asRecord(row, "driver team row");
     const year = asNumber(record.year, "driver team year");
@@ -505,10 +718,22 @@ function mergeDriverSeasons(
     const season = seasons.get(year)!;
     const constructorId = asString(record.id, "driver team id");
     const byRound = cells.get(`${year}:${constructorId}`);
+    const teammates = [
+      ...(teammateCells.get(`${year}:${constructorId}`)?.values() ?? []),
+    ]
+      .map((entry) => ({
+        id: entry.id,
+        name: entry.name,
+        flagCode: entry.flagCode,
+        results: rawRounds.get(year)!.map((r) => entry.byRound.get(r.round) ?? null),
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
     season.teams.push({
       id: constructorId,
       name: asString(record.name, "driver team name"),
+      lastRound: asNumber(record.last_round, "driver team last round"),
       results: rawRounds.get(year)!.map((r) => byRound?.get(r.round) ?? null),
+      teammates,
     });
   }
 
@@ -522,25 +747,4 @@ function mergeDriverSeasons(
   }
 
   return [...seasons.values()].sort((a, b) => b.year - a.year);
-}
-
-function asRecord(value: unknown, label: string): Record<string, unknown> {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    throw new Error(`Invalid driver data: expected ${label} to be an object`);
-  }
-  return value as Record<string, unknown>;
-}
-
-function asString(value: unknown, label: string): string {
-  if (typeof value !== "string") {
-    throw new Error(`Invalid driver data: expected ${label} to be a string`);
-  }
-  return value;
-}
-
-function asNumber(value: unknown, label: string): number {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`Invalid driver data: expected ${label} to be a number`);
-  }
-  return value;
 }

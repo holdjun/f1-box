@@ -1,1 +1,4548 @@
-[{"id":"afm","name":"AFM"},{"id":"ags","name":"AGS"},{"id":"ats-wheels","name":"ATS"},{"id":"ats","name":"ATS"},{"id":"adams","name":"Adams"},{"id":"alfa-romeo","name":"Alfa Romeo"},{"id":"alfa-special","name":"Alfa Special"},{"id":"alphatauri","name":"AlphaTauri"},{"id":"alpine","name":"Alpine"},{"id":"alta","name":"Alta"},{"id":"amon","name":"Amon"},{"id":"andrea-moda","name":"Andrea Moda"},{"id":"apollon","name":"Apollon"},{"id":"arrows","name":"Arrows"},{"id":"arzani-volpini","name":"Arzani-Volpini"},{"id":"aston-butterworth","name":"Aston Butterworth"},{"id":"aston-martin","name":"Aston Martin"},{"id":"audi","name":"Audi"},{"id":"bar","name":"BAR"},{"id":"bmw","name":"BMW"},{"id":"bmw-sauber","name":"BMW Sauber"},{"id":"brm","name":"BRM"},{"id":"brp","name":"BRP"},{"id":"balsa","name":"Balsa"},{"id":"behra-porsche","name":"Behra-Porsche"},{"id":"bellasi","name":"Bellasi"},{"id":"benetton","name":"Benetton"},{"id":"boro","name":"Boro"},{"id":"brabham","name":"Brabham"},{"id":"brawn","name":"Brawn"},{"id":"bromme","name":"Bromme"},{"id":"bugatti","name":"Bugatti"},{"id":"cadillac","name":"Cadillac"},{"id":"caterham","name":"Caterham"},{"id":"christensen","name":"Christensen"},{"id":"cisitalia","name":"Cisitalia"},{"id":"coloni","name":"Coloni"},{"id":"connaught","name":"Connaught"},{"id":"connew","name":"Connew"},{"id":"cooper","name":"Cooper"},{"id":"dallara","name":"Dallara"},{"id":"de-tomaso","name":"De Tomaso"},{"id":"deidt","name":"Deidt"},{"id":"del-roy","name":"Del Roy"},{"id":"derrington-francis","name":"Derrington-Francis"},{"id":"dunn","name":"Dunn"},{"id":"emw","name":"EMW"},{"id":"enb","name":"ENB"},{"id":"era","name":"ERA"},{"id":"eagle","name":"Eagle"},{"id":"eifelland","name":"Eifelland"},{"id":"elder","name":"Elder"},{"id":"emeryson","name":"Emeryson"},{"id":"ensign","name":"Ensign"},{"id":"epperly","name":"Epperly"},{"id":"eurobrun","name":"EuroBrun"},{"id":"ewing","name":"Ewing"},{"id":"first","name":"FIRST"},{"id":"ferguson","name":"Ferguson"},{"id":"ferrari","name":"Ferrari"},{"id":"fittipaldi","name":"Fittipaldi"},{"id":"fondmetal","name":"Fondmetal"},{"id":"footwork","name":"Footwork"},{"id":"force-india","name":"Force India"},{"id":"forti","name":"Forti"},{"id":"frank-williams-racing-cars","name":"Frank Williams Racing Cars"},{"id":"frazer-nash","name":"Frazer-Nash"},{"id":"fry","name":"Fry"},{"id":"gilby","name":"Gilby"},{"id":"gordini","name":"Gordini"},{"id":"greifzu","name":"Greifzu"},{"id":"hrt","name":"HRT"},{"id":"hwm","name":"HWM"},{"id":"haas","name":"Haas"},{"id":"hall","name":"Hall"},{"id":"heck","name":"Heck"},{"id":"hesketh","name":"Hesketh"},{"id":"hill","name":"Hill"},{"id":"honda","name":"Honda"},{"id":"iso-marlboro","name":"Iso-Marlboro"},{"id":"jbw","name":"JBW"},{"id":"jaguar","name":"Jaguar"},{"id":"jordan","name":"Jordan"},{"id":"kauhsen","name":"Kauhsen"},{"id":"kick-sauber","name":"Kick Sauber"},{"id":"klenk","name":"Klenk"},{"id":"kojima","name":"Kojima"},{"id":"krakau","name":"Krakau"},{"id":"kurtis-kraft","name":"Kurtis Kraft"},{"id":"kuzma","name":"Kuzma"},{"id":"lds","name":"LDS"},{"id":"lec","name":"LEC"},{"id":"lancia","name":"Lancia"},{"id":"langley","name":"Langley"},{"id":"larrousse","name":"Larrousse"},{"id":"lesovsky","name":"Lesovsky"},{"id":"leyton-house","name":"Leyton House"},{"id":"life","name":"Life"},{"id":"ligier","name":"Ligier"},{"id":"lola","name":"Lola"},{"id":"lotus-f1","name":"Lotus"},{"id":"lotus","name":"Lotus"},{"id":"lotus-racing","name":"Lotus Racing"},{"id":"lyncar","name":"Lyncar"},{"id":"maki","name":"Maki"},{"id":"manor","name":"Manor"},{"id":"march","name":"March"},{"id":"marchese","name":"Marchese"},{"id":"martini","name":"Martini"},{"id":"marussia","name":"Marussia"},{"id":"maserati","name":"Maserati"},{"id":"matra","name":"Matra"},{"id":"mcguire","name":"McGuire"},{"id":"mclaren","name":"McLaren"},{"id":"mercedes","name":"Mercedes"},{"id":"merzario","name":"Merzario"},{"id":"meskowski","name":"Meskowski"},{"id":"midland","name":"Midland"},{"id":"minardi","name":"Minardi"},{"id":"modena","name":"Modena"},{"id":"moore","name":"Moore"},{"id":"nacke","name":"Nacke"},{"id":"nichels","name":"Nichels"},{"id":"osca","name":"O.S.C.A."},{"id":"olson","name":"Olson"},{"id":"onyx","name":"Onyx"},{"id":"osella","name":"Osella"},{"id":"pacific","name":"Pacific"},{"id":"pankratz","name":"Pankratz"},{"id":"parnelli","name":"Parnelli"},{"id":"pawl","name":"Pawl"},{"id":"penske","name":"Penske"},{"id":"phillips","name":"Phillips"},{"id":"politoys","name":"Politoys"},{"id":"porsche","name":"Porsche"},{"id":"prost","name":"Prost"},{"id":"protos","name":"Protos"},{"id":"ram","name":"RAM"},{"id":"rb","name":"RB"},{"id":"racing-bulls","name":"Racing Bulls"},{"id":"racing-point","name":"Racing Point"},{"id":"rae","name":"Rae"},{"id":"rebaque","name":"Rebaque"},{"id":"red-bull","name":"Red Bull"},{"id":"reif","name":"Reif"},{"id":"renault","name":"Renault"},{"id":"rial","name":"Rial"},{"id":"sauber","name":"Sauber"},{"id":"scarab","name":"Scarab"},{"id":"schroeder","name":"Schroeder"},{"id":"scirocco","name":"Scirocco"},{"id":"shadow","name":"Shadow"},{"id":"shannon","name":"Shannon"},{"id":"sherman","name":"Sherman"},{"id":"simca-gordini","name":"Simca-Gordini"},{"id":"simtek","name":"Simtek"},{"id":"snowberger","name":"Snowberger"},{"id":"spirit","name":"Spirit"},{"id":"spyker","name":"Spyker"},{"id":"stebro","name":"Stebro"},{"id":"stevens","name":"Stevens"},{"id":"stewart","name":"Stewart"},{"id":"super-aguri","name":"Super Aguri"},{"id":"surtees","name":"Surtees"},{"id":"sutton","name":"Sutton"},{"id":"talbot-lago","name":"Talbot-Lago"},{"id":"tec-mec","name":"Tec-Mec"},{"id":"tecno","name":"Tecno"},{"id":"theodore","name":"Theodore"},{"id":"token","name":"Token"},{"id":"toleman","name":"Toleman"},{"id":"toro-rosso","name":"Toro Rosso"},{"id":"toyota","name":"Toyota"},{"id":"trevis","name":"Trevis"},{"id":"trojan","name":"Trojan"},{"id":"turner","name":"Turner"},{"id":"tyrrell","name":"Tyrrell"},{"id":"vanwall","name":"Vanwall"},{"id":"venturi","name":"Venturi"},{"id":"veritas","name":"Veritas"},{"id":"virgin","name":"Virgin"},{"id":"watson","name":"Watson"},{"id":"wetteroth","name":"Wetteroth"},{"id":"williams","name":"Williams"},{"id":"wolf","name":"Wolf"},{"id":"wolf-williams","name":"Wolf-Williams"},{"id":"zakspeed","name":"Zakspeed"}]
+[
+  {
+    "id": "ferrari",
+    "name": "Ferrari",
+    "points": 11338,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      },
+      "1956": {
+        "points": 0
+      },
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 40
+      },
+      "1959": {
+        "points": 32
+      },
+      "1960": {
+        "points": 26
+      },
+      "1961": {
+        "points": 40
+      },
+      "1962": {
+        "points": 18
+      },
+      "1963": {
+        "points": 26
+      },
+      "1964": {
+        "points": 45
+      },
+      "1965": {
+        "points": 26
+      },
+      "1966": {
+        "points": 31
+      },
+      "1967": {
+        "points": 20
+      },
+      "1968": {
+        "points": 32
+      },
+      "1969": {
+        "points": 7
+      },
+      "1970": {
+        "points": 52
+      },
+      "1971": {
+        "points": 33
+      },
+      "1972": {
+        "points": 33
+      },
+      "1973": {
+        "points": 12
+      },
+      "1974": {
+        "points": 65
+      },
+      "1975": {
+        "points": 72.5
+      },
+      "1976": {
+        "points": 83
+      },
+      "1977": {
+        "points": 95
+      },
+      "1978": {
+        "points": 58
+      },
+      "1979": {
+        "points": 113
+      },
+      "1980": {
+        "points": 8
+      },
+      "1981": {
+        "points": 34
+      },
+      "1982": {
+        "points": 74
+      },
+      "1983": {
+        "points": 89
+      },
+      "1984": {
+        "points": 57.5
+      },
+      "1985": {
+        "points": 82
+      },
+      "1986": {
+        "points": 37
+      },
+      "1987": {
+        "points": 53
+      },
+      "1988": {
+        "points": 65
+      },
+      "1989": {
+        "points": 59
+      },
+      "1990": {
+        "points": 110
+      },
+      "1991": {
+        "points": 55.5
+      },
+      "1992": {
+        "points": 21
+      },
+      "1993": {
+        "points": 28
+      },
+      "1994": {
+        "points": 71
+      },
+      "1995": {
+        "points": 73
+      },
+      "1996": {
+        "points": 70
+      },
+      "1997": {
+        "points": 102
+      },
+      "1998": {
+        "points": 133
+      },
+      "1999": {
+        "points": 128
+      },
+      "2000": {
+        "points": 170
+      },
+      "2001": {
+        "points": 179
+      },
+      "2002": {
+        "points": 221
+      },
+      "2003": {
+        "points": 158
+      },
+      "2004": {
+        "points": 262
+      },
+      "2005": {
+        "points": 100
+      },
+      "2006": {
+        "points": 201
+      },
+      "2007": {
+        "points": 204
+      },
+      "2008": {
+        "points": 172
+      },
+      "2009": {
+        "points": 70
+      },
+      "2010": {
+        "points": 396
+      },
+      "2011": {
+        "points": 375
+      },
+      "2012": {
+        "points": 400
+      },
+      "2013": {
+        "points": 354
+      },
+      "2014": {
+        "points": 216
+      },
+      "2015": {
+        "points": 428
+      },
+      "2016": {
+        "points": 398
+      },
+      "2017": {
+        "points": 522
+      },
+      "2018": {
+        "points": 571
+      },
+      "2019": {
+        "points": 504
+      },
+      "2020": {
+        "points": 131
+      },
+      "2021": {
+        "points": 323.5
+      },
+      "2022": {
+        "points": 554
+      },
+      "2023": {
+        "points": 406
+      },
+      "2024": {
+        "points": 652
+      },
+      "2025": {
+        "points": 398
+      },
+      "2026": {
+        "points": 307
+      }
+    }
+  },
+  {
+    "id": "mercedes",
+    "name": "Mercedes",
+    "points": 8538.5,
+    "seasons": {
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      },
+      "2010": {
+        "points": 214
+      },
+      "2011": {
+        "points": 165
+      },
+      "2012": {
+        "points": 142
+      },
+      "2013": {
+        "points": 360
+      },
+      "2014": {
+        "points": 701
+      },
+      "2015": {
+        "points": 703
+      },
+      "2016": {
+        "points": 765
+      },
+      "2017": {
+        "points": 668
+      },
+      "2018": {
+        "points": 655
+      },
+      "2019": {
+        "points": 739
+      },
+      "2020": {
+        "points": 573
+      },
+      "2021": {
+        "points": 613.5
+      },
+      "2022": {
+        "points": 515
+      },
+      "2023": {
+        "points": 409
+      },
+      "2024": {
+        "points": 468
+      },
+      "2025": {
+        "points": 469
+      },
+      "2026": {
+        "points": 379
+      }
+    }
+  },
+  {
+    "id": "red-bull",
+    "name": "Red Bull",
+    "points": 8465,
+    "seasons": {
+      "2005": {
+        "points": 34
+      },
+      "2006": {
+        "points": 16
+      },
+      "2007": {
+        "points": 24
+      },
+      "2008": {
+        "points": 29
+      },
+      "2009": {
+        "points": 153.5
+      },
+      "2010": {
+        "points": 498
+      },
+      "2011": {
+        "points": 650
+      },
+      "2012": {
+        "points": 460
+      },
+      "2013": {
+        "points": 596
+      },
+      "2014": {
+        "points": 405
+      },
+      "2015": {
+        "points": 187
+      },
+      "2016": {
+        "points": 468
+      },
+      "2017": {
+        "points": 368
+      },
+      "2018": {
+        "points": 419
+      },
+      "2019": {
+        "points": 417
+      },
+      "2020": {
+        "points": 319
+      },
+      "2021": {
+        "points": 585.5
+      },
+      "2022": {
+        "points": 759
+      },
+      "2023": {
+        "points": 860
+      },
+      "2024": {
+        "points": 589
+      },
+      "2025": {
+        "points": 451
+      },
+      "2026": {
+        "points": 177
+      }
+    }
+  },
+  {
+    "id": "mclaren",
+    "name": "McLaren",
+    "points": 8328.5,
+    "seasons": {
+      "1966": {
+        "points": 3
+      },
+      "1967": {
+        "points": 3
+      },
+      "1968": {
+        "points": 52
+      },
+      "1969": {
+        "points": 38
+      },
+      "1970": {
+        "points": 35
+      },
+      "1971": {
+        "points": 10
+      },
+      "1972": {
+        "points": 47
+      },
+      "1973": {
+        "points": 58
+      },
+      "1974": {
+        "points": 73
+      },
+      "1975": {
+        "points": 53
+      },
+      "1976": {
+        "points": 74
+      },
+      "1977": {
+        "points": 60
+      },
+      "1978": {
+        "points": 15
+      },
+      "1979": {
+        "points": 15
+      },
+      "1980": {
+        "points": 11
+      },
+      "1981": {
+        "points": 28
+      },
+      "1982": {
+        "points": 69
+      },
+      "1983": {
+        "points": 34
+      },
+      "1984": {
+        "points": 143.5
+      },
+      "1985": {
+        "points": 90
+      },
+      "1986": {
+        "points": 96
+      },
+      "1987": {
+        "points": 76
+      },
+      "1988": {
+        "points": 199
+      },
+      "1989": {
+        "points": 141
+      },
+      "1990": {
+        "points": 121
+      },
+      "1991": {
+        "points": 139
+      },
+      "1992": {
+        "points": 99
+      },
+      "1993": {
+        "points": 84
+      },
+      "1994": {
+        "points": 42
+      },
+      "1995": {
+        "points": 30
+      },
+      "1996": {
+        "points": 49
+      },
+      "1997": {
+        "points": 63
+      },
+      "1998": {
+        "points": 156
+      },
+      "1999": {
+        "points": 124
+      },
+      "2000": {
+        "points": 152
+      },
+      "2001": {
+        "points": 102
+      },
+      "2002": {
+        "points": 65
+      },
+      "2003": {
+        "points": 142
+      },
+      "2004": {
+        "points": 69
+      },
+      "2005": {
+        "points": 182
+      },
+      "2006": {
+        "points": 110
+      },
+      "2007": {
+        "points": 0
+      },
+      "2008": {
+        "points": 151
+      },
+      "2009": {
+        "points": 71
+      },
+      "2010": {
+        "points": 454
+      },
+      "2011": {
+        "points": 497
+      },
+      "2012": {
+        "points": 378
+      },
+      "2013": {
+        "points": 122
+      },
+      "2014": {
+        "points": 181
+      },
+      "2015": {
+        "points": 27
+      },
+      "2016": {
+        "points": 76
+      },
+      "2017": {
+        "points": 30
+      },
+      "2018": {
+        "points": 62
+      },
+      "2019": {
+        "points": 145
+      },
+      "2020": {
+        "points": 202
+      },
+      "2021": {
+        "points": 275
+      },
+      "2022": {
+        "points": 159
+      },
+      "2023": {
+        "points": 302
+      },
+      "2024": {
+        "points": 666
+      },
+      "2025": {
+        "points": 833
+      },
+      "2026": {
+        "points": 220
+      }
+    }
+  },
+  {
+    "id": "williams",
+    "name": "Williams",
+    "points": 3785,
+    "seasons": {
+      "1978": {
+        "points": 11
+      },
+      "1979": {
+        "points": 75
+      },
+      "1980": {
+        "points": 120
+      },
+      "1981": {
+        "points": 95
+      },
+      "1982": {
+        "points": 58
+      },
+      "1983": {
+        "points": 38
+      },
+      "1984": {
+        "points": 25.5
+      },
+      "1985": {
+        "points": 71
+      },
+      "1986": {
+        "points": 141
+      },
+      "1987": {
+        "points": 137
+      },
+      "1988": {
+        "points": 20
+      },
+      "1989": {
+        "points": 77
+      },
+      "1990": {
+        "points": 57
+      },
+      "1991": {
+        "points": 125
+      },
+      "1992": {
+        "points": 164
+      },
+      "1993": {
+        "points": 168
+      },
+      "1994": {
+        "points": 118
+      },
+      "1995": {
+        "points": 112
+      },
+      "1996": {
+        "points": 175
+      },
+      "1997": {
+        "points": 123
+      },
+      "1998": {
+        "points": 38
+      },
+      "1999": {
+        "points": 35
+      },
+      "2000": {
+        "points": 36
+      },
+      "2001": {
+        "points": 80
+      },
+      "2002": {
+        "points": 92
+      },
+      "2003": {
+        "points": 144
+      },
+      "2004": {
+        "points": 88
+      },
+      "2005": {
+        "points": 66
+      },
+      "2006": {
+        "points": 11
+      },
+      "2007": {
+        "points": 33
+      },
+      "2008": {
+        "points": 26
+      },
+      "2009": {
+        "points": 34.5
+      },
+      "2010": {
+        "points": 69
+      },
+      "2011": {
+        "points": 5
+      },
+      "2012": {
+        "points": 76
+      },
+      "2013": {
+        "points": 5
+      },
+      "2014": {
+        "points": 320
+      },
+      "2015": {
+        "points": 257
+      },
+      "2016": {
+        "points": 138
+      },
+      "2017": {
+        "points": 83
+      },
+      "2018": {
+        "points": 7
+      },
+      "2019": {
+        "points": 1
+      },
+      "2020": {
+        "points": 0
+      },
+      "2021": {
+        "points": 23
+      },
+      "2022": {
+        "points": 8
+      },
+      "2023": {
+        "points": 28
+      },
+      "2024": {
+        "points": 17
+      },
+      "2025": {
+        "points": 137
+      },
+      "2026": {
+        "points": 11
+      }
+    }
+  },
+  {
+    "id": "renault",
+    "name": "Renault",
+    "points": 1777,
+    "seasons": {
+      "1977": {
+        "points": 0
+      },
+      "1978": {
+        "points": 3
+      },
+      "1979": {
+        "points": 26
+      },
+      "1980": {
+        "points": 38
+      },
+      "1981": {
+        "points": 54
+      },
+      "1982": {
+        "points": 62
+      },
+      "1983": {
+        "points": 79
+      },
+      "1984": {
+        "points": 34
+      },
+      "1985": {
+        "points": 16
+      },
+      "2002": {
+        "points": 23
+      },
+      "2003": {
+        "points": 88
+      },
+      "2004": {
+        "points": 105
+      },
+      "2005": {
+        "points": 191
+      },
+      "2006": {
+        "points": 206
+      },
+      "2007": {
+        "points": 51
+      },
+      "2008": {
+        "points": 80
+      },
+      "2009": {
+        "points": 26
+      },
+      "2010": {
+        "points": 163
+      },
+      "2011": {
+        "points": 73
+      },
+      "2016": {
+        "points": 8
+      },
+      "2017": {
+        "points": 57
+      },
+      "2018": {
+        "points": 122
+      },
+      "2019": {
+        "points": 91
+      },
+      "2020": {
+        "points": 181
+      }
+    }
+  },
+  {
+    "id": "lotus",
+    "name": "Lotus",
+    "points": 1514,
+    "seasons": {
+      "1958": {
+        "points": 3
+      },
+      "1959": {
+        "points": 5
+      },
+      "1960": {
+        "points": 34
+      },
+      "1961": {
+        "points": 32
+      },
+      "1962": {
+        "points": 37
+      },
+      "1963": {
+        "points": 58
+      },
+      "1964": {
+        "points": 40
+      },
+      "1965": {
+        "points": 56
+      },
+      "1966": {
+        "points": 21
+      },
+      "1967": {
+        "points": 50
+      },
+      "1968": {
+        "points": 62
+      },
+      "1969": {
+        "points": 47
+      },
+      "1970": {
+        "points": 59
+      },
+      "1971": {
+        "points": 21
+      },
+      "1972": {
+        "points": 61
+      },
+      "1973": {
+        "points": 92
+      },
+      "1974": {
+        "points": 42
+      },
+      "1975": {
+        "points": 9
+      },
+      "1976": {
+        "points": 29
+      },
+      "1977": {
+        "points": 62
+      },
+      "1978": {
+        "points": 86
+      },
+      "1979": {
+        "points": 39
+      },
+      "1980": {
+        "points": 14
+      },
+      "1981": {
+        "points": 22
+      },
+      "1982": {
+        "points": 30
+      },
+      "1983": {
+        "points": 12
+      },
+      "1984": {
+        "points": 47
+      },
+      "1985": {
+        "points": 71
+      },
+      "1986": {
+        "points": 58
+      },
+      "1987": {
+        "points": 64
+      },
+      "1988": {
+        "points": 23
+      },
+      "1989": {
+        "points": 15
+      },
+      "1990": {
+        "points": 3
+      },
+      "1991": {
+        "points": 3
+      },
+      "1992": {
+        "points": 13
+      },
+      "1993": {
+        "points": 12
+      },
+      "1994": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "force-india",
+    "name": "Force India",
+    "points": 1098,
+    "seasons": {
+      "2008": {
+        "points": 0
+      },
+      "2009": {
+        "points": 13
+      },
+      "2010": {
+        "points": 68
+      },
+      "2011": {
+        "points": 69
+      },
+      "2012": {
+        "points": 109
+      },
+      "2013": {
+        "points": 77
+      },
+      "2014": {
+        "points": 155
+      },
+      "2015": {
+        "points": 136
+      },
+      "2016": {
+        "points": 173
+      },
+      "2017": {
+        "points": 187
+      },
+      "2018": {
+        "points": 52
+      }
+    }
+  },
+  {
+    "id": "brabham",
+    "name": "Brabham",
+    "points": 983,
+    "seasons": {
+      "1962": {
+        "points": 6
+      },
+      "1963": {
+        "points": 28
+      },
+      "1964": {
+        "points": 37
+      },
+      "1965": {
+        "points": 32
+      },
+      "1966": {
+        "points": 44
+      },
+      "1967": {
+        "points": 65
+      },
+      "1968": {
+        "points": 10
+      },
+      "1969": {
+        "points": 49
+      },
+      "1970": {
+        "points": 35
+      },
+      "1971": {
+        "points": 5
+      },
+      "1972": {
+        "points": 7
+      },
+      "1973": {
+        "points": 22
+      },
+      "1974": {
+        "points": 35
+      },
+      "1975": {
+        "points": 54
+      },
+      "1976": {
+        "points": 9
+      },
+      "1977": {
+        "points": 27
+      },
+      "1978": {
+        "points": 53
+      },
+      "1979": {
+        "points": 7
+      },
+      "1980": {
+        "points": 55
+      },
+      "1981": {
+        "points": 61
+      },
+      "1982": {
+        "points": 41
+      },
+      "1983": {
+        "points": 72
+      },
+      "1984": {
+        "points": 38
+      },
+      "1985": {
+        "points": 26
+      },
+      "1986": {
+        "points": 2
+      },
+      "1987": {
+        "points": 10
+      },
+      "1989": {
+        "points": 8
+      },
+      "1990": {
+        "points": 2
+      },
+      "1991": {
+        "points": 3
+      },
+      "1992": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "benetton",
+    "name": "Benetton",
+    "points": 861.5,
+    "seasons": {
+      "1986": {
+        "points": 19
+      },
+      "1987": {
+        "points": 28
+      },
+      "1988": {
+        "points": 39
+      },
+      "1989": {
+        "points": 39
+      },
+      "1990": {
+        "points": 71
+      },
+      "1991": {
+        "points": 38.5
+      },
+      "1992": {
+        "points": 91
+      },
+      "1993": {
+        "points": 72
+      },
+      "1994": {
+        "points": 103
+      },
+      "1995": {
+        "points": 137
+      },
+      "1996": {
+        "points": 68
+      },
+      "1997": {
+        "points": 67
+      },
+      "1998": {
+        "points": 33
+      },
+      "1999": {
+        "points": 16
+      },
+      "2000": {
+        "points": 20
+      },
+      "2001": {
+        "points": 10
+      }
+    }
+  },
+  {
+    "id": "tyrrell",
+    "name": "Tyrrell",
+    "points": 711,
+    "seasons": {
+      "1970": {
+        "points": 0
+      },
+      "1971": {
+        "points": 73
+      },
+      "1972": {
+        "points": 51
+      },
+      "1973": {
+        "points": 82
+      },
+      "1974": {
+        "points": 52
+      },
+      "1975": {
+        "points": 25
+      },
+      "1976": {
+        "points": 71
+      },
+      "1977": {
+        "points": 27
+      },
+      "1978": {
+        "points": 38
+      },
+      "1979": {
+        "points": 28
+      },
+      "1980": {
+        "points": 12
+      },
+      "1981": {
+        "points": 10
+      },
+      "1982": {
+        "points": 25
+      },
+      "1983": {
+        "points": 12
+      },
+      "1984": {
+        "points": 0
+      },
+      "1985": {
+        "points": 7
+      },
+      "1986": {
+        "points": 11
+      },
+      "1987": {
+        "points": 11
+      },
+      "1988": {
+        "points": 5
+      },
+      "1989": {
+        "points": 16
+      },
+      "1990": {
+        "points": 16
+      },
+      "1991": {
+        "points": 12
+      },
+      "1992": {
+        "points": 8
+      },
+      "1993": {
+        "points": 0
+      },
+      "1994": {
+        "points": 13
+      },
+      "1995": {
+        "points": 5
+      },
+      "1996": {
+        "points": 5
+      },
+      "1997": {
+        "points": 2
+      },
+      "1998": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "lotus-f1",
+    "name": "Lotus",
+    "points": 706,
+    "seasons": {
+      "2012": {
+        "points": 303
+      },
+      "2013": {
+        "points": 315
+      },
+      "2014": {
+        "points": 10
+      },
+      "2015": {
+        "points": 78
+      }
+    }
+  },
+  {
+    "id": "alpine",
+    "name": "Alpine",
+    "points": 596,
+    "seasons": {
+      "2021": {
+        "points": 155
+      },
+      "2022": {
+        "points": 173
+      },
+      "2023": {
+        "points": 120
+      },
+      "2024": {
+        "points": 65
+      },
+      "2025": {
+        "points": 22
+      },
+      "2026": {
+        "points": 61
+      }
+    }
+  },
+  {
+    "id": "aston-martin",
+    "name": "Aston Martin",
+    "points": 596,
+    "seasons": {
+      "1959": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      },
+      "2021": {
+        "points": 77
+      },
+      "2022": {
+        "points": 55
+      },
+      "2023": {
+        "points": 280
+      },
+      "2024": {
+        "points": 94
+      },
+      "2025": {
+        "points": 89
+      },
+      "2026": {
+        "points": 1
+      }
+    }
+  },
+  {
+    "id": "sauber",
+    "name": "Sauber",
+    "points": 557,
+    "seasons": {
+      "1993": {
+        "points": 12
+      },
+      "1994": {
+        "points": 12
+      },
+      "1995": {
+        "points": 18
+      },
+      "1996": {
+        "points": 11
+      },
+      "1997": {
+        "points": 16
+      },
+      "1998": {
+        "points": 10
+      },
+      "1999": {
+        "points": 5
+      },
+      "2000": {
+        "points": 6
+      },
+      "2001": {
+        "points": 21
+      },
+      "2002": {
+        "points": 11
+      },
+      "2003": {
+        "points": 19
+      },
+      "2004": {
+        "points": 34
+      },
+      "2005": {
+        "points": 20
+      },
+      "2010": {
+        "points": 44
+      },
+      "2011": {
+        "points": 44
+      },
+      "2012": {
+        "points": 126
+      },
+      "2013": {
+        "points": 57
+      },
+      "2014": {
+        "points": 0
+      },
+      "2015": {
+        "points": 36
+      },
+      "2016": {
+        "points": 2
+      },
+      "2017": {
+        "points": 5
+      },
+      "2018": {
+        "points": 48
+      }
+    }
+  },
+  {
+    "id": "brm",
+    "name": "BRM",
+    "points": 535.5,
+    "seasons": {
+      "1951": {
+        "points": 0
+      },
+      "1956": {
+        "points": 0
+      },
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 18
+      },
+      "1959": {
+        "points": 18
+      },
+      "1960": {
+        "points": 8
+      },
+      "1961": {
+        "points": 7
+      },
+      "1962": {
+        "points": 42
+      },
+      "1963": {
+        "points": 36
+      },
+      "1964": {
+        "points": 42
+      },
+      "1965": {
+        "points": 45
+      },
+      "1966": {
+        "points": 22
+      },
+      "1967": {
+        "points": 17
+      },
+      "1968": {
+        "points": 28
+      },
+      "1969": {
+        "points": 7
+      },
+      "1970": {
+        "points": 23
+      },
+      "1971": {
+        "points": 36
+      },
+      "1972": {
+        "points": 14
+      },
+      "1973": {
+        "points": 12
+      },
+      "1974": {
+        "points": 10
+      },
+      "1975": {
+        "points": 0
+      },
+      "1976": {
+        "points": 0
+      },
+      "1977": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "toro-rosso",
+    "name": "Toro Rosso",
+    "points": 500,
+    "seasons": {
+      "2006": {
+        "points": 1
+      },
+      "2007": {
+        "points": 8
+      },
+      "2008": {
+        "points": 39
+      },
+      "2009": {
+        "points": 8
+      },
+      "2010": {
+        "points": 13
+      },
+      "2011": {
+        "points": 41
+      },
+      "2012": {
+        "points": 26
+      },
+      "2013": {
+        "points": 33
+      },
+      "2014": {
+        "points": 30
+      },
+      "2015": {
+        "points": 67
+      },
+      "2016": {
+        "points": 63
+      },
+      "2017": {
+        "points": 53
+      },
+      "2018": {
+        "points": 33
+      },
+      "2019": {
+        "points": 85
+      }
+    }
+  },
+  {
+    "id": "cooper",
+    "name": "Cooper",
+    "points": 480.5,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      },
+      "1956": {
+        "points": 0
+      },
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 31
+      },
+      "1959": {
+        "points": 40
+      },
+      "1960": {
+        "points": 54
+      },
+      "1961": {
+        "points": 14
+      },
+      "1962": {
+        "points": 29
+      },
+      "1963": {
+        "points": 25
+      },
+      "1964": {
+        "points": 16
+      },
+      "1965": {
+        "points": 14
+      },
+      "1966": {
+        "points": 30
+      },
+      "1967": {
+        "points": 34
+      },
+      "1968": {
+        "points": 14
+      },
+      "1969": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "haas",
+    "name": "Haas",
+    "points": 407,
+    "seasons": {
+      "2016": {
+        "points": 29
+      },
+      "2017": {
+        "points": 47
+      },
+      "2018": {
+        "points": 93
+      },
+      "2019": {
+        "points": 28
+      },
+      "2020": {
+        "points": 3
+      },
+      "2021": {
+        "points": 0
+      },
+      "2022": {
+        "points": 37
+      },
+      "2023": {
+        "points": 12
+      },
+      "2024": {
+        "points": 58
+      },
+      "2025": {
+        "points": 79
+      },
+      "2026": {
+        "points": 21
+      }
+    }
+  },
+  {
+    "id": "ligier",
+    "name": "Ligier",
+    "points": 388,
+    "seasons": {
+      "1976": {
+        "points": 20
+      },
+      "1977": {
+        "points": 18
+      },
+      "1978": {
+        "points": 19
+      },
+      "1979": {
+        "points": 61
+      },
+      "1980": {
+        "points": 66
+      },
+      "1981": {
+        "points": 44
+      },
+      "1982": {
+        "points": 20
+      },
+      "1983": {
+        "points": 0
+      },
+      "1984": {
+        "points": 3
+      },
+      "1985": {
+        "points": 23
+      },
+      "1986": {
+        "points": 29
+      },
+      "1987": {
+        "points": 1
+      },
+      "1988": {
+        "points": 0
+      },
+      "1989": {
+        "points": 3
+      },
+      "1990": {
+        "points": 0
+      },
+      "1991": {
+        "points": 0
+      },
+      "1992": {
+        "points": 6
+      },
+      "1993": {
+        "points": 23
+      },
+      "1994": {
+        "points": 13
+      },
+      "1995": {
+        "points": 24
+      },
+      "1996": {
+        "points": 15
+      }
+    }
+  },
+  {
+    "id": "alphatauri",
+    "name": "AlphaTauri",
+    "points": 309,
+    "seasons": {
+      "2020": {
+        "points": 107
+      },
+      "2021": {
+        "points": 142
+      },
+      "2022": {
+        "points": 35
+      },
+      "2023": {
+        "points": 25
+      }
+    }
+  },
+  {
+    "id": "bmw-sauber",
+    "name": "BMW Sauber",
+    "points": 308,
+    "seasons": {
+      "2006": {
+        "points": 36
+      },
+      "2007": {
+        "points": 101
+      },
+      "2008": {
+        "points": 135
+      },
+      "2009": {
+        "points": 36
+      }
+    }
+  },
+  {
+    "id": "jordan",
+    "name": "Jordan",
+    "points": 291,
+    "seasons": {
+      "1991": {
+        "points": 13
+      },
+      "1992": {
+        "points": 1
+      },
+      "1993": {
+        "points": 3
+      },
+      "1994": {
+        "points": 28
+      },
+      "1995": {
+        "points": 21
+      },
+      "1996": {
+        "points": 22
+      },
+      "1997": {
+        "points": 33
+      },
+      "1998": {
+        "points": 34
+      },
+      "1999": {
+        "points": 61
+      },
+      "2000": {
+        "points": 17
+      },
+      "2001": {
+        "points": 19
+      },
+      "2002": {
+        "points": 9
+      },
+      "2003": {
+        "points": 13
+      },
+      "2004": {
+        "points": 5
+      },
+      "2005": {
+        "points": 12
+      }
+    }
+  },
+  {
+    "id": "racing-point",
+    "name": "Racing Point",
+    "points": 283,
+    "seasons": {
+      "2019": {
+        "points": 73
+      },
+      "2020": {
+        "points": 195
+      }
+    }
+  },
+  {
+    "id": "toyota",
+    "name": "Toyota",
+    "points": 278.5,
+    "seasons": {
+      "2002": {
+        "points": 2
+      },
+      "2003": {
+        "points": 16
+      },
+      "2004": {
+        "points": 9
+      },
+      "2005": {
+        "points": 88
+      },
+      "2006": {
+        "points": 35
+      },
+      "2007": {
+        "points": 13
+      },
+      "2008": {
+        "points": 56
+      },
+      "2009": {
+        "points": 59.5
+      }
+    }
+  },
+  {
+    "id": "bar",
+    "name": "BAR",
+    "points": 227,
+    "seasons": {
+      "1999": {
+        "points": 0
+      },
+      "2000": {
+        "points": 20
+      },
+      "2001": {
+        "points": 17
+      },
+      "2002": {
+        "points": 7
+      },
+      "2003": {
+        "points": 26
+      },
+      "2004": {
+        "points": 119
+      },
+      "2005": {
+        "points": 38
+      }
+    }
+  },
+  {
+    "id": "alfa-romeo",
+    "name": "Alfa Romeo",
+    "points": 199,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1951": {
+        "points": 0
+      },
+      "1979": {
+        "points": 0
+      },
+      "1980": {
+        "points": 4
+      },
+      "1981": {
+        "points": 10
+      },
+      "1982": {
+        "points": 7
+      },
+      "1983": {
+        "points": 18
+      },
+      "1984": {
+        "points": 11
+      },
+      "1985": {
+        "points": 0
+      },
+      "2019": {
+        "points": 57
+      },
+      "2020": {
+        "points": 8
+      },
+      "2021": {
+        "points": 13
+      },
+      "2022": {
+        "points": 55
+      },
+      "2023": {
+        "points": 16
+      }
+    }
+  },
+  {
+    "id": "march",
+    "name": "March",
+    "points": 185,
+    "seasons": {
+      "1970": {
+        "points": 48
+      },
+      "1971": {
+        "points": 33
+      },
+      "1972": {
+        "points": 15
+      },
+      "1973": {
+        "points": 14
+      },
+      "1974": {
+        "points": 6
+      },
+      "1975": {
+        "points": 7.5
+      },
+      "1976": {
+        "points": 19
+      },
+      "1977": {
+        "points": 0
+      },
+      "1978": {
+        "points": 0
+      },
+      "1981": {
+        "points": 0
+      },
+      "1982": {
+        "points": 0
+      },
+      "1987": {
+        "points": 1
+      },
+      "1988": {
+        "points": 22
+      },
+      "1989": {
+        "points": 4
+      },
+      "1992": {
+        "points": 3
+      },
+      "1993": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "matra",
+    "name": "Matra",
+    "points": 184,
+    "seasons": {
+      "1966": {
+        "points": 0
+      },
+      "1967": {
+        "points": 0
+      },
+      "1968": {
+        "points": 53
+      },
+      "1969": {
+        "points": 66
+      },
+      "1970": {
+        "points": 23
+      },
+      "1971": {
+        "points": 9
+      },
+      "1972": {
+        "points": 12
+      }
+    }
+  },
+  {
+    "id": "brawn",
+    "name": "Brawn",
+    "points": 172,
+    "seasons": {
+      "2009": {
+        "points": 172
+      }
+    }
+  },
+  {
+    "id": "racing-bulls",
+    "name": "Racing Bulls",
+    "points": 158,
+    "seasons": {
+      "2025": {
+        "points": 92
+      },
+      "2026": {
+        "points": 66
+      }
+    }
+  },
+  {
+    "id": "honda",
+    "name": "Honda",
+    "points": 156,
+    "seasons": {
+      "1964": {
+        "points": 0
+      },
+      "1965": {
+        "points": 11
+      },
+      "1966": {
+        "points": 3
+      },
+      "1967": {
+        "points": 20
+      },
+      "1968": {
+        "points": 14
+      },
+      "2006": {
+        "points": 86
+      },
+      "2007": {
+        "points": 6
+      },
+      "2008": {
+        "points": 14
+      }
+    }
+  },
+  {
+    "id": "arrows",
+    "name": "Arrows",
+    "points": 142,
+    "seasons": {
+      "1978": {
+        "points": 11
+      },
+      "1979": {
+        "points": 5
+      },
+      "1980": {
+        "points": 11
+      },
+      "1981": {
+        "points": 10
+      },
+      "1982": {
+        "points": 5
+      },
+      "1983": {
+        "points": 4
+      },
+      "1984": {
+        "points": 6
+      },
+      "1985": {
+        "points": 14
+      },
+      "1986": {
+        "points": 1
+      },
+      "1987": {
+        "points": 11
+      },
+      "1988": {
+        "points": 23
+      },
+      "1989": {
+        "points": 13
+      },
+      "1990": {
+        "points": 2
+      },
+      "1997": {
+        "points": 9
+      },
+      "1998": {
+        "points": 6
+      },
+      "1999": {
+        "points": 1
+      },
+      "2000": {
+        "points": 7
+      },
+      "2001": {
+        "points": 1
+      },
+      "2002": {
+        "points": 2
+      }
+    }
+  },
+  {
+    "id": "wolf",
+    "name": "Wolf",
+    "points": 79,
+    "seasons": {
+      "1977": {
+        "points": 55
+      },
+      "1978": {
+        "points": 24
+      },
+      "1979": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "kick-sauber",
+    "name": "Kick Sauber",
+    "points": 74,
+    "seasons": {
+      "2024": {
+        "points": 4
+      },
+      "2025": {
+        "points": 70
+      }
+    }
+  },
+  {
+    "id": "shadow",
+    "name": "Shadow",
+    "points": 68.5,
+    "seasons": {
+      "1973": {
+        "points": 9
+      },
+      "1974": {
+        "points": 7
+      },
+      "1975": {
+        "points": 9.5
+      },
+      "1976": {
+        "points": 10
+      },
+      "1977": {
+        "points": 23
+      },
+      "1978": {
+        "points": 6
+      },
+      "1979": {
+        "points": 3
+      },
+      "1980": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "vanwall",
+    "name": "Vanwall",
+    "points": 68,
+    "seasons": {
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      },
+      "1956": {
+        "points": 0
+      },
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 48
+      },
+      "1959": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "surtees",
+    "name": "Surtees",
+    "points": 54,
+    "seasons": {
+      "1970": {
+        "points": 3
+      },
+      "1971": {
+        "points": 8
+      },
+      "1972": {
+        "points": 18
+      },
+      "1973": {
+        "points": 7
+      },
+      "1974": {
+        "points": 3
+      },
+      "1975": {
+        "points": 0
+      },
+      "1976": {
+        "points": 7
+      },
+      "1977": {
+        "points": 6
+      },
+      "1978": {
+        "points": 1
+      }
+    }
+  },
+  {
+    "id": "porsche",
+    "name": "Porsche",
+    "points": 50,
+    "seasons": {
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 0
+      },
+      "1959": {
+        "points": 0
+      },
+      "1960": {
+        "points": 1
+      },
+      "1961": {
+        "points": 22
+      },
+      "1962": {
+        "points": 18
+      },
+      "1963": {
+        "points": 5
+      },
+      "1964": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "jaguar",
+    "name": "Jaguar",
+    "points": 49,
+    "seasons": {
+      "2000": {
+        "points": 4
+      },
+      "2001": {
+        "points": 9
+      },
+      "2002": {
+        "points": 8
+      },
+      "2003": {
+        "points": 18
+      },
+      "2004": {
+        "points": 10
+      }
+    }
+  },
+  {
+    "id": "hesketh",
+    "name": "Hesketh",
+    "points": 48,
+    "seasons": {
+      "1974": {
+        "points": 15
+      },
+      "1975": {
+        "points": 33
+      },
+      "1976": {
+        "points": 0
+      },
+      "1977": {
+        "points": 0
+      },
+      "1978": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "stewart",
+    "name": "Stewart",
+    "points": 47,
+    "seasons": {
+      "1997": {
+        "points": 6
+      },
+      "1998": {
+        "points": 5
+      },
+      "1999": {
+        "points": 36
+      }
+    }
+  },
+  {
+    "id": "rb",
+    "name": "RB",
+    "points": 46,
+    "seasons": {
+      "2024": {
+        "points": 46
+      }
+    }
+  },
+  {
+    "id": "fittipaldi",
+    "name": "Fittipaldi",
+    "points": 44,
+    "seasons": {
+      "1975": {
+        "points": 0
+      },
+      "1976": {
+        "points": 3
+      },
+      "1977": {
+        "points": 11
+      },
+      "1978": {
+        "points": 17
+      },
+      "1979": {
+        "points": 1
+      },
+      "1980": {
+        "points": 11
+      },
+      "1981": {
+        "points": 0
+      },
+      "1982": {
+        "points": 1
+      }
+    }
+  },
+  {
+    "id": "lola",
+    "name": "Lola",
+    "points": 43,
+    "seasons": {
+      "1962": {
+        "points": 19
+      },
+      "1963": {
+        "points": 0
+      },
+      "1967": {
+        "points": 0
+      },
+      "1968": {
+        "points": 0
+      },
+      "1974": {
+        "points": 1
+      },
+      "1975": {
+        "points": 0
+      },
+      "1985": {
+        "points": 0
+      },
+      "1986": {
+        "points": 6
+      },
+      "1987": {
+        "points": 3
+      },
+      "1988": {
+        "points": 0
+      },
+      "1989": {
+        "points": 1
+      },
+      "1990": {
+        "points": 11
+      },
+      "1991": {
+        "points": 2
+      },
+      "1993": {
+        "points": 0
+      },
+      "1997": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "minardi",
+    "name": "Minardi",
+    "points": 38,
+    "seasons": {
+      "1985": {
+        "points": 0
+      },
+      "1986": {
+        "points": 0
+      },
+      "1987": {
+        "points": 0
+      },
+      "1988": {
+        "points": 1
+      },
+      "1989": {
+        "points": 6
+      },
+      "1990": {
+        "points": 0
+      },
+      "1991": {
+        "points": 6
+      },
+      "1992": {
+        "points": 1
+      },
+      "1993": {
+        "points": 7
+      },
+      "1994": {
+        "points": 5
+      },
+      "1995": {
+        "points": 1
+      },
+      "1996": {
+        "points": 0
+      },
+      "1997": {
+        "points": 0
+      },
+      "1998": {
+        "points": 0
+      },
+      "1999": {
+        "points": 1
+      },
+      "2000": {
+        "points": 0
+      },
+      "2001": {
+        "points": 0
+      },
+      "2002": {
+        "points": 2
+      },
+      "2003": {
+        "points": 0
+      },
+      "2004": {
+        "points": 1
+      },
+      "2005": {
+        "points": 7
+      }
+    }
+  },
+  {
+    "id": "prost",
+    "name": "Prost",
+    "points": 35,
+    "seasons": {
+      "1997": {
+        "points": 21
+      },
+      "1998": {
+        "points": 1
+      },
+      "1999": {
+        "points": 9
+      },
+      "2000": {
+        "points": 0
+      },
+      "2001": {
+        "points": 4
+      }
+    }
+  },
+  {
+    "id": "epperly",
+    "name": "Epperly",
+    "points": 29,
+    "seasons": {
+      "1955": {
+        "points": 0
+      },
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 0
+      },
+      "1959": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "watson",
+    "name": "Watson",
+    "points": 28,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1956": {
+        "points": 0
+      },
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 0
+      },
+      "1959": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "toleman",
+    "name": "Toleman",
+    "points": 26,
+    "seasons": {
+      "1981": {
+        "points": 0
+      },
+      "1982": {
+        "points": 0
+      },
+      "1983": {
+        "points": 10
+      },
+      "1984": {
+        "points": 16
+      },
+      "1985": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "footwork",
+    "name": "Footwork",
+    "points": 25,
+    "seasons": {
+      "1991": {
+        "points": 0
+      },
+      "1992": {
+        "points": 6
+      },
+      "1993": {
+        "points": 4
+      },
+      "1994": {
+        "points": 9
+      },
+      "1995": {
+        "points": 5
+      },
+      "1996": {
+        "points": 1
+      }
+    }
+  },
+  {
+    "id": "penske",
+    "name": "Penske",
+    "points": 23,
+    "seasons": {
+      "1974": {
+        "points": 0
+      },
+      "1975": {
+        "points": 2
+      },
+      "1976": {
+        "points": 20
+      },
+      "1977": {
+        "points": 1
+      }
+    }
+  },
+  {
+    "id": "ensign",
+    "name": "Ensign",
+    "points": 19,
+    "seasons": {
+      "1973": {
+        "points": 0
+      },
+      "1974": {
+        "points": 0
+      },
+      "1975": {
+        "points": 1
+      },
+      "1976": {
+        "points": 2
+      },
+      "1977": {
+        "points": 10
+      },
+      "1978": {
+        "points": 1
+      },
+      "1979": {
+        "points": 0
+      },
+      "1980": {
+        "points": 0
+      },
+      "1981": {
+        "points": 5
+      },
+      "1982": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "eagle",
+    "name": "Eagle",
+    "points": 17,
+    "seasons": {
+      "1966": {
+        "points": 4
+      },
+      "1967": {
+        "points": 13
+      },
+      "1968": {
+        "points": 0
+      },
+      "1969": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "dallara",
+    "name": "Dallara",
+    "points": 15,
+    "seasons": {
+      "1988": {
+        "points": 0
+      },
+      "1989": {
+        "points": 8
+      },
+      "1990": {
+        "points": 0
+      },
+      "1991": {
+        "points": 5
+      },
+      "1992": {
+        "points": 2
+      }
+    }
+  },
+  {
+    "id": "audi",
+    "name": "Audi",
+    "points": 12,
+    "seasons": {
+      "2026": {
+        "points": 12
+      }
+    }
+  },
+  {
+    "id": "brp",
+    "name": "BRP",
+    "points": 11,
+    "seasons": {
+      "1963": {
+        "points": 6
+      },
+      "1964": {
+        "points": 5
+      }
+    }
+  },
+  {
+    "id": "maserati",
+    "name": "Maserati",
+    "points": 9,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      },
+      "1956": {
+        "points": 0
+      },
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 6
+      },
+      "1959": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "leyton-house",
+    "name": "Leyton House",
+    "points": 8,
+    "seasons": {
+      "1990": {
+        "points": 7
+      },
+      "1991": {
+        "points": 1
+      }
+    }
+  },
+  {
+    "id": "ats-wheels",
+    "name": "ATS",
+    "points": 7,
+    "seasons": {
+      "1978": {
+        "points": 0
+      },
+      "1979": {
+        "points": 2
+      },
+      "1980": {
+        "points": 0
+      },
+      "1981": {
+        "points": 1
+      },
+      "1982": {
+        "points": 4
+      },
+      "1983": {
+        "points": 0
+      },
+      "1984": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "lesovsky",
+    "name": "Lesovsky",
+    "points": 7,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1956": {
+        "points": 0
+      },
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 0
+      },
+      "1959": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "frank-williams-racing-cars",
+    "name": "Frank Williams Racing Cars",
+    "points": 6,
+    "seasons": {
+      "1975": {
+        "points": 6
+      }
+    }
+  },
+  {
+    "id": "iso-marlboro",
+    "name": "Iso-Marlboro",
+    "points": 6,
+    "seasons": {
+      "1973": {
+        "points": 2
+      },
+      "1974": {
+        "points": 4
+      }
+    }
+  },
+  {
+    "id": "onyx",
+    "name": "Onyx",
+    "points": 6,
+    "seasons": {
+      "1989": {
+        "points": 6
+      },
+      "1990": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "parnelli",
+    "name": "Parnelli",
+    "points": 6,
+    "seasons": {
+      "1974": {
+        "points": 0
+      },
+      "1975": {
+        "points": 5
+      },
+      "1976": {
+        "points": 1
+      }
+    }
+  },
+  {
+    "id": "rial",
+    "name": "Rial",
+    "points": 6,
+    "seasons": {
+      "1988": {
+        "points": 3
+      },
+      "1989": {
+        "points": 3
+      }
+    }
+  },
+  {
+    "id": "larrousse",
+    "name": "Larrousse",
+    "points": 5,
+    "seasons": {
+      "1993": {
+        "points": 3
+      },
+      "1994": {
+        "points": 2
+      },
+      "1995": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "osella",
+    "name": "Osella",
+    "points": 5,
+    "seasons": {
+      "1980": {
+        "points": 0
+      },
+      "1981": {
+        "points": 0
+      },
+      "1982": {
+        "points": 3
+      },
+      "1983": {
+        "points": 0
+      },
+      "1984": {
+        "points": 2
+      },
+      "1985": {
+        "points": 0
+      },
+      "1986": {
+        "points": 0
+      },
+      "1987": {
+        "points": 0
+      },
+      "1988": {
+        "points": 0
+      },
+      "1989": {
+        "points": 0
+      },
+      "1990": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "kurtis-kraft",
+    "name": "Kurtis Kraft",
+    "points": 4,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      },
+      "1956": {
+        "points": 0
+      },
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 0
+      },
+      "1959": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "super-aguri",
+    "name": "Super Aguri",
+    "points": 4,
+    "seasons": {
+      "2006": {
+        "points": 0
+      },
+      "2007": {
+        "points": 4
+      },
+      "2008": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "hill",
+    "name": "Hill",
+    "points": 3,
+    "seasons": {
+      "1975": {
+        "points": 3
+      }
+    }
+  },
+  {
+    "id": "phillips",
+    "name": "Phillips",
+    "points": 3,
+    "seasons": {
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      },
+      "1956": {
+        "points": 0
+      },
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 0
+      },
+      "1959": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "ags",
+    "name": "AGS",
+    "points": 2,
+    "seasons": {
+      "1986": {
+        "points": 0
+      },
+      "1987": {
+        "points": 1
+      },
+      "1988": {
+        "points": 0
+      },
+      "1989": {
+        "points": 1
+      },
+      "1990": {
+        "points": 0
+      },
+      "1991": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "marussia",
+    "name": "Marussia",
+    "points": 2,
+    "seasons": {
+      "2012": {
+        "points": 0
+      },
+      "2013": {
+        "points": 0
+      },
+      "2014": {
+        "points": 2
+      },
+      "2015": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "theodore",
+    "name": "Theodore",
+    "points": 2,
+    "seasons": {
+      "1978": {
+        "points": 0
+      },
+      "1981": {
+        "points": 1
+      },
+      "1982": {
+        "points": 0
+      },
+      "1983": {
+        "points": 1
+      }
+    }
+  },
+  {
+    "id": "zakspeed",
+    "name": "Zakspeed",
+    "points": 2,
+    "seasons": {
+      "1985": {
+        "points": 0
+      },
+      "1986": {
+        "points": 0
+      },
+      "1987": {
+        "points": 2
+      },
+      "1988": {
+        "points": 0
+      },
+      "1989": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "manor",
+    "name": "Manor",
+    "points": 1,
+    "seasons": {
+      "2016": {
+        "points": 1
+      }
+    }
+  },
+  {
+    "id": "spyker",
+    "name": "Spyker",
+    "points": 1,
+    "seasons": {
+      "2007": {
+        "points": 1
+      }
+    }
+  },
+  {
+    "id": "tecno",
+    "name": "Tecno",
+    "points": 1,
+    "seasons": {
+      "1969": {
+        "points": 0
+      },
+      "1972": {
+        "points": 0
+      },
+      "1973": {
+        "points": 1
+      }
+    }
+  },
+  {
+    "id": "trevis",
+    "name": "Trevis",
+    "points": 1,
+    "seasons": {
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "venturi",
+    "name": "Venturi",
+    "points": 1,
+    "seasons": {
+      "1992": {
+        "points": 1
+      }
+    }
+  },
+  {
+    "id": "adams",
+    "name": "Adams",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "afm",
+    "name": "AFM",
+    "points": 0,
+    "seasons": {
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "alfa-special",
+    "name": "Alfa Special",
+    "points": 0,
+    "seasons": {
+      "1963": {
+        "points": 0
+      },
+      "1965": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "alta",
+    "name": "Alta",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "amon",
+    "name": "Amon",
+    "points": 0,
+    "seasons": {
+      "1974": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "andrea-moda",
+    "name": "Andrea Moda",
+    "points": 0,
+    "seasons": {
+      "1992": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "apollon",
+    "name": "Apollon",
+    "points": 0,
+    "seasons": {
+      "1977": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "arzani-volpini",
+    "name": "Arzani-Volpini",
+    "points": 0,
+    "seasons": {
+      "1955": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "aston-butterworth",
+    "name": "Aston Butterworth",
+    "points": 0,
+    "seasons": {
+      "1952": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "ats",
+    "name": "ATS",
+    "points": 0,
+    "seasons": {
+      "1963": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "balsa",
+    "name": "Balsa",
+    "points": 0,
+    "seasons": {
+      "1952": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "behra-porsche",
+    "name": "Behra-Porsche",
+    "points": 0,
+    "seasons": {
+      "1959": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "bellasi",
+    "name": "Bellasi",
+    "points": 0,
+    "seasons": {
+      "1970": {
+        "points": 0
+      },
+      "1971": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "bmw",
+    "name": "BMW",
+    "points": 0,
+    "seasons": {
+      "1969": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "boro",
+    "name": "Boro",
+    "points": 0,
+    "seasons": {
+      "1976": {
+        "points": 0
+      },
+      "1977": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "bromme",
+    "name": "Bromme",
+    "points": 0,
+    "seasons": {
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1954": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "bugatti",
+    "name": "Bugatti",
+    "points": 0,
+    "seasons": {
+      "1956": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "cadillac",
+    "name": "Cadillac",
+    "points": 0,
+    "seasons": {
+      "2026": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "caterham",
+    "name": "Caterham",
+    "points": 0,
+    "seasons": {
+      "2012": {
+        "points": 0
+      },
+      "2013": {
+        "points": 0
+      },
+      "2014": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "christensen",
+    "name": "Christensen",
+    "points": 0,
+    "seasons": {
+      "1959": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "cisitalia",
+    "name": "Cisitalia",
+    "points": 0,
+    "seasons": {
+      "1952": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "coloni",
+    "name": "Coloni",
+    "points": 0,
+    "seasons": {
+      "1987": {
+        "points": 0
+      },
+      "1988": {
+        "points": 0
+      },
+      "1989": {
+        "points": 0
+      },
+      "1990": {
+        "points": 0
+      },
+      "1991": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "connaught",
+    "name": "Connaught",
+    "points": 0,
+    "seasons": {
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      },
+      "1956": {
+        "points": 0
+      },
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 0
+      },
+      "1959": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "connew",
+    "name": "Connew",
+    "points": 0,
+    "seasons": {
+      "1972": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "de-tomaso",
+    "name": "De Tomaso",
+    "points": 0,
+    "seasons": {
+      "1961": {
+        "points": 0
+      },
+      "1962": {
+        "points": 0
+      },
+      "1963": {
+        "points": 0
+      },
+      "1970": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "deidt",
+    "name": "Deidt",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "del-roy",
+    "name": "Del Roy",
+    "points": 0,
+    "seasons": {
+      "1953": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "derrington-francis",
+    "name": "Derrington-Francis",
+    "points": 0,
+    "seasons": {
+      "1964": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "dunn",
+    "name": "Dunn",
+    "points": 0,
+    "seasons": {
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 0
+      },
+      "1959": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "eifelland",
+    "name": "Eifelland",
+    "points": 0,
+    "seasons": {
+      "1972": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "elder",
+    "name": "Elder",
+    "points": 0,
+    "seasons": {
+      "1959": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "emeryson",
+    "name": "Emeryson",
+    "points": 0,
+    "seasons": {
+      "1956": {
+        "points": 0
+      },
+      "1961": {
+        "points": 0
+      },
+      "1962": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "emw",
+    "name": "EMW",
+    "points": 0,
+    "seasons": {
+      "1953": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "enb",
+    "name": "ENB",
+    "points": 0,
+    "seasons": {
+      "1962": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "era",
+    "name": "ERA",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "eurobrun",
+    "name": "EuroBrun",
+    "points": 0,
+    "seasons": {
+      "1988": {
+        "points": 0
+      },
+      "1989": {
+        "points": 0
+      },
+      "1990": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "ewing",
+    "name": "Ewing",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "ferguson",
+    "name": "Ferguson",
+    "points": 0,
+    "seasons": {
+      "1961": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "first",
+    "name": "FIRST",
+    "points": 0,
+    "seasons": {
+      "1989": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "fondmetal",
+    "name": "Fondmetal",
+    "points": 0,
+    "seasons": {
+      "1991": {
+        "points": 0
+      },
+      "1992": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "forti",
+    "name": "Forti",
+    "points": 0,
+    "seasons": {
+      "1995": {
+        "points": 0
+      },
+      "1996": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "frazer-nash",
+    "name": "Frazer-Nash",
+    "points": 0,
+    "seasons": {
+      "1952": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "fry",
+    "name": "Fry",
+    "points": 0,
+    "seasons": {
+      "1959": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "gilby",
+    "name": "Gilby",
+    "points": 0,
+    "seasons": {
+      "1961": {
+        "points": 0
+      },
+      "1962": {
+        "points": 0
+      },
+      "1963": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "gordini",
+    "name": "Gordini",
+    "points": 0,
+    "seasons": {
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      },
+      "1956": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "greifzu",
+    "name": "Greifzu",
+    "points": 0,
+    "seasons": {
+      "1953": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "hall",
+    "name": "Hall",
+    "points": 0,
+    "seasons": {
+      "1951": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "heck",
+    "name": "Heck",
+    "points": 0,
+    "seasons": {
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "hrt",
+    "name": "HRT",
+    "points": 0,
+    "seasons": {
+      "2010": {
+        "points": 0
+      },
+      "2011": {
+        "points": 0
+      },
+      "2012": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "hwm",
+    "name": "HWM",
+    "points": 0,
+    "seasons": {
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "jbw",
+    "name": "JBW",
+    "points": 0,
+    "seasons": {
+      "1959": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      },
+      "1961": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "kauhsen",
+    "name": "Kauhsen",
+    "points": 0,
+    "seasons": {
+      "1979": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "klenk",
+    "name": "Klenk",
+    "points": 0,
+    "seasons": {
+      "1954": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "kojima",
+    "name": "Kojima",
+    "points": 0,
+    "seasons": {
+      "1976": {
+        "points": 0
+      },
+      "1977": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "krakau",
+    "name": "Krakau",
+    "points": 0,
+    "seasons": {
+      "1952": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "kuzma",
+    "name": "Kuzma",
+    "points": 0,
+    "seasons": {
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      },
+      "1956": {
+        "points": 0
+      },
+      "1957": {
+        "points": 0
+      },
+      "1958": {
+        "points": 0
+      },
+      "1959": {
+        "points": 0
+      },
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "lancia",
+    "name": "Lancia",
+    "points": 0,
+    "seasons": {
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "langley",
+    "name": "Langley",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "lds",
+    "name": "LDS",
+    "points": 0,
+    "seasons": {
+      "1962": {
+        "points": 0
+      },
+      "1963": {
+        "points": 0
+      },
+      "1965": {
+        "points": 0
+      },
+      "1967": {
+        "points": 0
+      },
+      "1968": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "lec",
+    "name": "LEC",
+    "points": 0,
+    "seasons": {
+      "1977": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "life",
+    "name": "Life",
+    "points": 0,
+    "seasons": {
+      "1990": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "lotus-racing",
+    "name": "Lotus Racing",
+    "points": 0,
+    "seasons": {
+      "2010": {
+        "points": 0
+      },
+      "2011": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "lyncar",
+    "name": "Lyncar",
+    "points": 0,
+    "seasons": {
+      "1974": {
+        "points": 0
+      },
+      "1975": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "maki",
+    "name": "Maki",
+    "points": 0,
+    "seasons": {
+      "1974": {
+        "points": 0
+      },
+      "1975": {
+        "points": 0
+      },
+      "1976": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "marchese",
+    "name": "Marchese",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1951": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "martini",
+    "name": "Martini",
+    "points": 0,
+    "seasons": {
+      "1978": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "mcguire",
+    "name": "McGuire",
+    "points": 0,
+    "seasons": {
+      "1977": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "merzario",
+    "name": "Merzario",
+    "points": 0,
+    "seasons": {
+      "1978": {
+        "points": 0
+      },
+      "1979": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "meskowski",
+    "name": "Meskowski",
+    "points": 0,
+    "seasons": {
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "midland",
+    "name": "Midland",
+    "points": 0,
+    "seasons": {
+      "2006": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "modena",
+    "name": "Modena",
+    "points": 0,
+    "seasons": {
+      "1991": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "moore",
+    "name": "Moore",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1951": {
+        "points": 0
+      },
+      "1959": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "nacke",
+    "name": "Nacke",
+    "points": 0,
+    "seasons": {
+      "1952": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "nichels",
+    "name": "Nichels",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1954": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "osca",
+    "name": "O.S.C.A.",
+    "points": 0,
+    "seasons": {
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1958": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "olson",
+    "name": "Olson",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "pacific",
+    "name": "Pacific",
+    "points": 0,
+    "seasons": {
+      "1994": {
+        "points": 0
+      },
+      "1995": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "pankratz",
+    "name": "Pankratz",
+    "points": 0,
+    "seasons": {
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "pawl",
+    "name": "Pawl",
+    "points": 0,
+    "seasons": {
+      "1951": {
+        "points": 0
+      },
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "politoys",
+    "name": "Politoys",
+    "points": 0,
+    "seasons": {
+      "1972": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "protos",
+    "name": "Protos",
+    "points": 0,
+    "seasons": {
+      "1967": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "rae",
+    "name": "Rae",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "ram",
+    "name": "RAM",
+    "points": 0,
+    "seasons": {
+      "1983": {
+        "points": 0
+      },
+      "1984": {
+        "points": 0
+      },
+      "1985": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "rebaque",
+    "name": "Rebaque",
+    "points": 0,
+    "seasons": {
+      "1979": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "reif",
+    "name": "Reif",
+    "points": 0,
+    "seasons": {
+      "1952": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "scarab",
+    "name": "Scarab",
+    "points": 0,
+    "seasons": {
+      "1960": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "schroeder",
+    "name": "Schroeder",
+    "points": 0,
+    "seasons": {
+      "1951": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "scirocco",
+    "name": "Scirocco",
+    "points": 0,
+    "seasons": {
+      "1963": {
+        "points": 0
+      },
+      "1964": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "shannon",
+    "name": "Shannon",
+    "points": 0,
+    "seasons": {
+      "1966": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "sherman",
+    "name": "Sherman",
+    "points": 0,
+    "seasons": {
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "simca-gordini",
+    "name": "Simca-Gordini",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "simtek",
+    "name": "Simtek",
+    "points": 0,
+    "seasons": {
+      "1994": {
+        "points": 0
+      },
+      "1995": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "snowberger",
+    "name": "Snowberger",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "spirit",
+    "name": "Spirit",
+    "points": 0,
+    "seasons": {
+      "1983": {
+        "points": 0
+      },
+      "1984": {
+        "points": 0
+      },
+      "1985": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "stebro",
+    "name": "Stebro",
+    "points": 0,
+    "seasons": {
+      "1963": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "stevens",
+    "name": "Stevens",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      },
+      "1954": {
+        "points": 0
+      },
+      "1955": {
+        "points": 0
+      },
+      "1956": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "sutton",
+    "name": "Sutton",
+    "points": 0,
+    "seasons": {
+      "1959": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "talbot-lago",
+    "name": "Talbot-Lago",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      },
+      "1951": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "tec-mec",
+    "name": "Tec-Mec",
+    "points": 0,
+    "seasons": {
+      "1959": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "token",
+    "name": "Token",
+    "points": 0,
+    "seasons": {
+      "1974": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "trojan",
+    "name": "Trojan",
+    "points": 0,
+    "seasons": {
+      "1974": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "turner",
+    "name": "Turner",
+    "points": 0,
+    "seasons": {
+      "1953": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "veritas",
+    "name": "Veritas",
+    "points": 0,
+    "seasons": {
+      "1951": {
+        "points": 0
+      },
+      "1952": {
+        "points": 0
+      },
+      "1953": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "virgin",
+    "name": "Virgin",
+    "points": 0,
+    "seasons": {
+      "2010": {
+        "points": 0
+      },
+      "2011": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "wetteroth",
+    "name": "Wetteroth",
+    "points": 0,
+    "seasons": {
+      "1950": {
+        "points": 0
+      }
+    }
+  },
+  {
+    "id": "wolf-williams",
+    "name": "Wolf-Williams",
+    "points": 0,
+    "seasons": {
+      "1976": {
+        "points": 0
+      }
+    }
+  }
+]

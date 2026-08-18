@@ -1,0 +1,297 @@
+---
+import { summarizeYears } from "../lib/season-summary.js";
+
+interface Props {
+  years: number[];
+  mode: "link" | "toggle";
+  baseHref?: string;
+  current?: number | null;
+  label?: string;
+  sticky?: boolean;
+  initialSelected?: number[] | null;
+}
+
+const {
+  years,
+  mode,
+  baseHref = "",
+  current = null,
+  label = "Season",
+  sticky = false,
+  initialSelected = null,
+} = Astro.props;
+
+interface DecadeGroup {
+  label: string;
+  years: number[];
+}
+
+// 年份按年代分组（1950s / 1960s / … / 2020s），年代与组内年份均降序
+function groupDecades(years: number[]): DecadeGroup[] {
+  const groups = new Map<number, number[]>();
+  for (const year of years) {
+    const decade = Math.floor(year / 10) * 10;
+    const list = groups.get(decade) ?? [];
+    list.push(year);
+    groups.set(decade, list);
+  }
+  return [...groups.entries()]
+    .sort((a, b) => b[0] - a[0])
+    .map(([decade, list]) => ({
+      label: `${decade}s`,
+      years: list.sort((a, b) => b - a),
+    }));
+}
+
+const decades = groupDecades(years);
+const isSelected = (year: number) =>
+  mode === "link" ? current === year : initialSelected?.includes(year) ?? false;
+const summary =
+  mode === "link"
+    ? current === null
+      ? "All seasons"
+      : String(current)
+    : summarizeYears(initialSelected ?? []);
+const count =
+  initialSelected && initialSelected.length > 0
+    ? `${initialSelected.length} selected`
+    : "All seasons";
+---
+
+<div
+  class:list={["season-filter", { "season-filter--sticky": sticky }]}
+  data-season-filter
+  data-mode={mode}
+  data-initial-selected={initialSelected?.join(",") ?? ""}
+>
+  <button
+    type="button"
+    class="season-filter__trigger"
+    aria-expanded="false"
+    aria-label={label}
+    data-season-filter-trigger
+  >
+    <span class="season-filter__summary" data-season-filter-summary
+      >{summary}</span
+    >
+    <svg class="season-filter__caret" viewBox="0 0 12 8" aria-hidden="true">
+      <path d="M1 1l5 5 5-5"></path>
+    </svg>
+  </button>
+
+  <div class="season-filter__panel" data-season-filter-panel hidden>
+    <div class="season-filter__actions">
+      {mode === "link" ? (
+        <a
+          class:list={[
+            "season-filter__action",
+            { "is-active": current === null },
+          ]}
+          href={baseHref}
+        >All seasons</a>
+      ) : (
+        <button
+          type="button"
+          class="season-filter__action"
+          data-season-filter-all
+        >All</button>
+      )}
+      {mode === "toggle" ? (
+        <span class="season-filter__count" data-season-filter-count
+          >{count}</span
+        >
+      ) : null}
+    </div>
+
+    <div class="season-filter__groups">
+      {decades.map((decade) => (
+        <div class="season-filter__group">
+          {mode === "toggle" ? (
+            <button
+              type="button"
+              class="season-filter__decade"
+              data-season-decade={decade.label}
+            >{decade.label}</button>
+          ) : (
+            <span class="season-filter__decade">{decade.label}</span>
+          )}
+          <div class="season-filter__years">
+            {decade.years.map((year) =>
+              mode === "link" ? (
+                <a
+                  class:list={[
+                    "season-filter__year",
+                    { "is-active": current === year },
+                  ]}
+                  href={`${baseHref}?year=${year}`}
+                  data-season-year={year}
+                >{year}</a>
+              ) : (
+                <button
+                  type="button"
+                  class:list={[
+                    "season-filter__year",
+                    { "is-active": isSelected(year) },
+                  ]}
+                  data-season-year={year}
+                  aria-pressed={isSelected(year)}
+                >{year}</button>
+              ),
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .season-filter {
+    position: relative;
+    margin-block: 1rem 1.25rem;
+  }
+  .season-filter--sticky {
+    position: sticky;
+    z-index: 5;
+    top: 0.5rem;
+  }
+  .season-filter__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.25rem;
+    padding: 0.35rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--ink-soft);
+    color: var(--paper);
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.6);
+    transition: border-color 160ms ease, color 160ms ease;
+  }
+  .season-filter__trigger:hover {
+    border-color: var(--muted);
+  }
+  .season-filter__trigger[aria-expanded="true"] {
+    border-color: var(--coral);
+  }
+  .season-filter__caret {
+    width: 0.7rem;
+    height: auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
+    transition: transform 160ms ease;
+  }
+  .season-filter__trigger[aria-expanded="true"] .season-filter__caret {
+    transform: rotate(180deg);
+  }
+  .season-filter__panel {
+    position: absolute;
+    z-index: 10;
+    top: calc(100% + 0.4rem);
+    left: 0;
+    width: min(92vw, 26rem);
+    max-height: min(72vh, 30rem);
+    overflow-y: auto;
+    padding: 0.9rem 1rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--ink-soft);
+    box-shadow: 0 18px 44px -18px rgba(0, 0, 0, 0.7);
+  }
+  .season-filter__panel--up {
+    top: auto;
+    bottom: calc(100% + 0.4rem);
+  }
+  .season-filter__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .season-filter__action {
+    padding: 0.2rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted-light);
+    font: inherit;
+    font-size: 0.72rem;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .season-filter__action:hover,
+  .season-filter__action.is-active {
+    border-color: var(--coral);
+    color: var(--coral);
+  }
+  .season-filter__count {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 0.7rem;
+  }
+  .season-filter__group {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 0.5rem;
+    align-items: baseline;
+    padding-block: 0.4rem;
+  }
+  .season-filter__decade {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-align: left;
+  }
+  button.season-filter__decade {
+    cursor: pointer;
+  }
+  button.season-filter__decade:hover,
+  button.season-filter__decade.is-active {
+    color: var(--coral);
+  }
+  .season-filter__years {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  .season-filter__year {
+    flex: 0 0 auto;
+    min-width: 2.9rem;
+    padding: 0.18rem 0.55rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted-light);
+    font: inherit;
+    font-size: 0.74rem;
+    line-height: 1.4;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
+  }
+  .season-filter__year:hover {
+    color: var(--paper);
+    border-color: var(--muted);
+  }
+  .season-filter__year.is-active {
+    border-color: var(--coral);
+    background: var(--coral);
+    color: var(--ink);
+    font-weight: 700;
+  }
+</style>

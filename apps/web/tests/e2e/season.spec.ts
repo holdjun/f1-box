@@ -11,6 +11,12 @@ test("@desktop root redirects to active season racing page", async ({ page }) =>
   expect(browserRequests.some((url) => /jolpi|ergast/i.test(url))).toBe(false);
 });
 
+test("@desktop non-numeric year falls back home instead of chaining undefined", async ({ page }) => {
+  await page.goto("/undefined");
+  await page.waitForURL(/\/2026\/racing$/);
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+});
+
 test("@desktop racing page lists the full calendar", async ({ page }) => {
   await page.goto("/2026/racing");
   const raceLinks = page.locator('main a[href^="/2026/racing/"]');

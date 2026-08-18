@@ -1,4 +1,5 @@
 ---
+import SeasonFilter from "./SeasonFilter.astro";
 import { seasonGap, type RaceCell } from "../lib/team-repository.js";
 import { formatPosition, resultClass } from "../lib/result-display.js";
 import { alpha2Flag } from "../lib/tokens.js";
@@ -10,15 +11,22 @@ interface MatrixRound {
 }
 interface MatrixRow {
   name: string;
-  href: string;
+  href: string | null;
   flagCode: string | null;
   highlight: boolean;
+  muted?: boolean;
   results: (RaceCell | null)[];
+}
+export interface MatrixSeasonMetaLink {
+  name: string;
+  href: string;
+  color: string | null;
 }
 export interface MatrixSeason {
   year: number;
   metaText: string;
-  metaHref: string | null;
+  metaLinks: MatrixSeasonMetaLink[];
+  split?: boolean;
   tyres?: string[];
   rounds: MatrixRound[];
   rows: MatrixRow[];
@@ -31,11 +39,28 @@ interface Props {
   seasons: MatrixSeason[];
   rowLabel: string;
   showChampionKey?: boolean;
+  initialSelected?: number[] | null;
 }
 
-const { seasons, rowLabel, showChampionKey = false } = Astro.props;
+const {
+  seasons,
+  rowLabel,
+  showChampionKey = false,
+  initialSelected = null,
+} = Astro.props;
+const filterYears = [...new Set(seasons.map((season) => season.year))];
+// 有初始筛选时，未选中的赛季块不渲染显式（hidden 由客户端同步）
+const isBlockHidden = (year: number) =>
+  initialSelected !== null && !initialSelected.includes(year);
 ---
 
+<SeasonFilter
+  years={filterYears}
+  mode="toggle"
+  label="Filter by season"
+  sticky
+  initialSelected={initialSelected}
+/>
 <p class="legend" aria-label="Table legend">
   <span class="key"><i class="result-win"></i>Win</span>
   <span class="key"><i class="result-podium"></i>Podium</span>
@@ -53,10 +78,22 @@ const { seasons, rowLabel, showChampionKey = false } = Astro.props;
   const gap = prev ? seasonGap(prev.year, season.year) : null;
   return (
     <>
-      {gap ? (
+      {season.split ? (
+        <div
+          class="team-split"
+          data-season-block={season.year}
+          role="separator"
+          hidden={isBlockHidden(season.year)}
+          aria-label="Mid-season team change"
+        >
+          Mid-season team change
+        </div>
+      ) : gap ? (
         <div
           class="season-gap"
+          data-season-block={season.year}
           role="separator"
+          hidden={isBlockHidden(season.year)}
           aria-label={`${gap.seasons} seasons without entries, ${gap.from} to ${gap.to}`}
         >
           <span class="season-gap__label">
@@ -70,11 +107,24 @@ const { seasons, rowLabel, showChampionKey = false } = Astro.props;
           "season-block",
           { champion: season.championshipWon, current: season.current },
         ]}
+        data-season-block={season.year}
+        hidden={isBlockHidden(season.year)}
       >
         <h3>
           <span class="season-year">{season.year}</span>
-          {season.metaHref ? (
-            <a class="season-meta" href={season.metaHref}>{season.metaText}</a>
+          {season.metaLinks.length > 0 ? (
+            season.metaLinks.map((link, index) => (
+              <>
+                {index > 0 ? (
+                  <span class="season-meta" aria-hidden="true">/</span>
+                ) : null}
+                <a
+                  class="season-meta season-meta--link"
+                  href={link.href}
+                  style={link.color ? `--meta-color: ${link.color}` : undefined}
+                >{link.name}</a>
+              </>
+            ))
           ) : (
             <span class="season-meta">{season.metaText}</span>
           )}
@@ -119,16 +169,22 @@ const { seasons, rowLabel, showChampionKey = false } = Astro.props;
                           {alpha2Flag(row.flagCode)}
                         </span>
                       ) : null}
-                      <a
-                        class:list={[
-                          "driver-link",
-                          { "driver-champion": row.highlight },
-                        ]}
-                        href={row.href}
-                        title={row.highlight ? "Drivers' champion" : undefined}
-                      >
-                        {row.name}
-                      </a>
+                      {row.href ? (
+                        <a
+                          class:list={[
+                            "driver-link",
+                            { "driver-champion": row.highlight, "is-muted": row.muted },
+                          ]}
+                          href={row.href}
+                          title={row.highlight ? "Drivers' champion" : undefined}
+                        >
+                          {row.name}
+                        </a>
+                      ) : (
+                        <span class:list={["driver-link", { "is-muted": row.muted }]}>
+                          {row.name}
+                        </span>
+                      )}
                     </th>
                     {row.results.map((cell) =>
                       cell ? (
@@ -204,8 +260,11 @@ const { seasons, rowLabel, showChampionKey = false } = Astro.props;
     color: var(--muted);
     text-decoration: none;
   }
-  a.season-meta:hover {
-    color: var(--coral);
+  a.season-meta--link {
+    color: var(--meta-color, var(--muted));
+  }
+  a.season-meta--link:hover {
+    text-decoration: underline;
   }
   .season-pts {
     margin-left: auto;
@@ -251,7 +310,7 @@ const { seasons, rowLabel, showChampionKey = false } = Astro.props;
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem 1.1rem;
-    margin: 0.6rem 0 0;
+    margin: 0;
     font-size: 0.72rem;
     color: var(--muted);
   }
@@ -269,9 +328,46 @@ const { seasons, rowLabel, showChampionKey = false } = Astro.props;
     color: inherit;
     text-decoration: none;
   }
-  .driver-link:hover {
-    color: var(--coral);
+  a.driver-link:hover {
+    color: var(--paper);
     text-decoration: underline;
+  }
+  .driver-link.is-muted {
+    color: var(--muted);
+  }
+  .team-split {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin: 1.2rem 0 0 0.9rem;
+    color: var(--muted);
+    font-size: 0.68rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .team-split::before {
+    content: "";
+    flex: none;
+    width: 2px;
+    height: 2.6rem;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      color-mix(in srgb, var(--coral) 65%, var(--line))
+    );
+  }
+  .team-split::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: repeating-linear-gradient(
+      to right,
+      var(--line) 0 5px,
+      transparent 5px 9px
+    );
+  }
+  .team-split + .season-block {
+    margin-top: 1rem;
   }
   .driver-champion {
     color: #ffc72c;

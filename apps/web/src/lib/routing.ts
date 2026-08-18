@@ -3,3 +3,36 @@ export function splitYearPath(pathname: string): { year: number | null; rest: st
   if (!match) return { year: null, rest: pathname };
   return { year: Number(match[1]), rest: match[2] || "" };
 }
+
+// 解析 ?year=1997 或 ?year=1997,2007 → 年份数组；无效/缺失返回 null（= 全部）
+export function parseYearParam(value: string | null): number[] | null {
+  if (value === null || value.trim() === "") return null;
+  const years = [
+    ...new Set(
+      value
+        .split(",")
+        .map((part) => Number(part.trim()))
+        .filter((year) => Number.isInteger(year) && year >= 1950 && year <= 2100),
+    ),
+  ];
+  return years.length > 0 ? years.sort((a, b) => a - b) : null;
+}
+
+// 目录页：单年份参数，且必须在已知年份内（无效回落 null = 全部）
+export function resolveCatalogYear(value: string | null, years: number[]): number | null {
+  const param = parseYearParam(value);
+  return param !== null && param.length === 1 && years.includes(param[0])
+    ? param[0]
+    : null;
+}
+
+// 详情页：多选年份参数，过滤到该实体实际参赛年份；无交集回落 null（= 全部）
+export function resolveSeasonSelection(
+  value: string | null,
+  seasonYears: Set<number>,
+): number[] | null {
+  const param = parseYearParam(value);
+  if (param === null) return null;
+  const valid = param.filter((year) => seasonYears.has(year));
+  return valid.length > 0 ? valid : null;
+}

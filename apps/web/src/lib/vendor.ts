@@ -55,6 +55,26 @@ export function latestColor(indexes: VendorIndexes, teamId: string): string | nu
   return latestColors(indexes, teamId)[0] ?? null;
 }
 
+// 取车队在指定年份的配色：覆盖该年的 period；早于最早 period 用最老配色；
+// 车队缺失或期间无定义回落 null/最新色
+// （data lookup 语义：colors(team, year)，year < oldest → oldest）
+export function colorForYear(
+  indexes: VendorIndexes,
+  teamId: string,
+  year: number,
+): string | null {
+  const team = indexes.colors[teamId];
+  if (!team) return null;
+  const containing = team.periods.find(
+    (period) => period.from <= year && (period.to === null || period.to >= year),
+  );
+  if (containing) return containing.colors[0] ?? null;
+  if (team.periods[0] && year < team.periods[0].from) {
+    return team.periods[0].colors[0] ?? null;
+  }
+  return team.colors[0] ?? null;
+}
+
 export function logoSrcFor(indexes: VendorIndexes, teamId: string): string | null {
   const logo = logoFor(indexes, teamId);
   return logo ? logoUrl(logo.file) : null;

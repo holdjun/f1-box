@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 .superpowers/
+.agents
 .worktrees/
 node_modules/
 .astro/
@@ -21,3 +22,4 @@ test-results/
 # research reference binaries (copyrighted / large)
 docs/research/shots/
 docs/research/assets/
+.pi-lens.json
