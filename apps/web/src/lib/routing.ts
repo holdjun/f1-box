@@ -36,3 +36,25 @@ export function resolveSeasonSelection(
   const valid = param.filter((year) => seasonYears.has(year));
   return valid.length > 0 ? valid : null;
 }
+
+export const raceTabKeys = [
+  "race-result", "fastest-laps", "pit-stop-summary", "starting-grid",
+  "qualifying", "practice-1", "practice-2", "practice-3",
+] as const;
+export type RaceTabKey = (typeof raceTabKeys)[number];
+
+// 顺序即分站子导航显示顺序（与 f1.com 一致）
+export const RACE_TAB_LABELS: Record<RaceTabKey, string> = {
+  "race-result": "Race Result",
+  "fastest-laps": "Fastest Laps",
+  "pit-stop-summary": "Pit Stop Summary",
+  "starting-grid": "Starting Grid",
+  qualifying: "Qualifying",
+  "practice-1": "Practice 1",
+  "practice-2": "Practice 2",
+  "practice-3": "Practice 3",
+};
+
+export function resolveRaceTab(value: string): RaceTabKey | null {
+  return (raceTabKeys as readonly string[]).includes(value) ? (value as RaceTabKey) : null;
+}
