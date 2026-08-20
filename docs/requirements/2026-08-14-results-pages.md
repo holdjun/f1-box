@@ -31,6 +31,12 @@
 - 数据源：生产走 D1（env.F1_DB）；本地 DEV 走 fixtures 真实数据快照
 - `pnpm check`、`pnpm test`、`pnpm --dir apps/web build`、e2e 全绿；桌面与 375px 移动端视觉检查通过
 
+## 验收反馈迭代（2026-08-20）
+
+- 年份选择器重做：results 系列页面与日历页改用页面内容区的 SeasonFilter（年代分组面板，参考 f1.com 页面内选择器）；全局 header 内的年份 pill 列表（YearSelector）退役删除
+- 车手/车队可点击：结果表、列表页、积分榜的车手链接 `/drivers/[id]`、车队链接 `/teams/[slug]`（复用已有详情页）
+- 积分榜表格风格与 races 页对齐（result-table 样式、monogram/logo 单元格）
+
 ## 范围外
 
 - 练习赛之外的历史 session 类型（practice-4、pre-qualifying、warming-up）不做子页面

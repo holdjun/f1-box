@@ -2067,3 +2067,25 @@ git commit -m "refactor: retire legacy race pages and back calendar with f1db"
 - 类型一致性：所有模型单一定义于 race-results-repository.ts；tab key/标签单一定义于 routing.ts；RACE_TAB_FIELDS 由 RaceTabsNav 与 [tab].astro 共用；StandingsTable/RaceCard 直接吃 repository 导出类型；fakeDb 片段与 SQL 文本逐条对齐。
 - 已核实（2026-08-18，远端 D1 + 本地 dump 双重验证）：全部表/视图与列存在；standings 表无 wins 列（聚合口径已验证：Antonelli 6 胜 / Mercedes 8 胜与 11 站结果吻合）；driver.name 为显示名；season 表 1950–2026；pit_stop 数据自 1994 年；2026 已完赛 11 站；日历/积分榜/澳洲站 fixture 均已按真实数据内嵌本计划。
 - 已知取舍：未来分站页（hero + 空态）DEV fixture 只含澳洲站，无法 e2e 覆盖，任务 8 的 preview 视觉检查验证；R2 读取只剩首页 getIndex，Jolpica 退役时处理。
+
+---
+
+## 任务 9：年份选择器改造（SeasonFilter 迁入页面 + YearSelector 退役）
+
+文件：修改 `SeasonFilter.astro`（hrefFor + 隐藏 All seasons）、`BaseLayout.astro`、`SiteHeader.astro`、`YearSelector.astro`（删除）、results 系列页面（`races/index.astro`、`[slug]/[tab].astro`、`drivers.astro`、`teams.astro`、`[year]/racing.astro`）；测试 e2e
+
+- [ ] 步骤 1：SeasonFilter 扩展：Props 追加 `hrefFor?: (year: number) => string` 与 `showAll?: boolean`（link 模式默认 true）。年份链接 href 用 `hrefFor ? hrefFor(year) : \`${baseHref}?year=${year}\``；`showAll === false` 时不渲染 All seasons 行。client.ts 的 link 模式无需改动（点击即导航）。
+- [ ] 步骤 2：results 系列页面（races 列表、分站 [tab]、drivers、teams）与日历页 [year]/racing：页面内容区 h1 下方放 `<SeasonFilter years={availableYears} mode="link" sticky current={year} :hrefFor={(y) => ...\` label="Season" showAll={false} />`（hrefFor 指向各自年份路径：列表 `/results/${y}/races`、分站 `/results/${y}/races/${slug}/${tab}`、drivers/teams 对应路径、日历 `/${y}/racing`）。同时移除这些页面传给 BaseLayout 的 `availableYears` 与 `yearHref`（年份选择不再在 header；[tab] 的 404 分支同样移除）。
+- [ ] 步骤 3：退役 YearSelector：无页面再传 availableYears 后，删除 `YearSelector.astro`，并从 `SiteHeader.astro` 与 `BaseLayout.astro` 移除 availableYears/rest/yearHref 三个 props 及透传（grep 确认无残留调用方）。
+- [ ] 步骤 4：e2e 更新（先 RED）：results 页断言 `.season-filter` trigger 显示 2026、点击展开面板后存在链接 `/results/2025/races`；header 不再渲染年份 pill（`.year-selector` 不存在）。
+- [ ] 步骤 5：验证（`pnpm --filter @f1-box/web test`、`check`、`test:e2e`）后提交：`feat: move results season selection into page filter`。
+
+## 任务 10：车手/车队链接化 + 积分榜风格对齐
+
+文件：修改 `race-results-repository.ts`（RaceSummary.winnerDriverId）、`season-races-2026.json`、`race-results-repository.test.ts`、`RaceTable.astro`、`races/index.astro`、`StandingsTable.astro`、e2e
+
+- [ ] 步骤 1：repository：seasonCalendarSql 增加 `wd.id AS winner_driver_id`；RaceSummary 增加 `winnerDriverId: string | null`（映射同其他 winner 字段）；fixture 22 行补 winnerDriverId（已完赛站 = 冠军 driver id，如 george-russell、kimi-antonelli；未来站 null）；单测 fake 行与断言同步。
+- [ ] 步骤 2：RaceTable：Driver 单元格的 `vendor-cell--driver` 包一层 `<a href={\`/drivers/${row.driverId}\`}>`（monogram+名+code 整体可点），Team 单元格 `<a href={\`/teams/${row.constructorId}\`}>`；链接继承文字色（复用 vendor-cell 样式，加 `a.vendor-cell { color: inherit; text-decoration: none; }` 或等价）。列表页 Winner/Team 单元格同理链接（winnerDriverId/winnerTeamId）。
+- [ ] 步骤 3：StandingsTable 改造为 races 风格：table class 换 `result-table`；Driver/Constructor 单元格用 vendor-cell（车手 monogram+名+code 链接 `/drivers/{driverId}`；车队 logo+名链接 `/teams/{teamId}`）；Points 用 points-cell；移除 points-bar（若 global.css 的 .points-bar 仅此消费则连带删除）。StandingsTable 需要 year prop（monogram 取 `colorForYear(vendorIndexes, constructorId, year)`；车队 standings 行的 monogram 底色用 teamId 当年色）。
+- [ ] 步骤 4：e2e 更新（先 RED）：列表首行 Winner 链接 `/drivers/george-russell`、Team 链接 `/teams/mercedes`；race-result 表首行 Driver 链接 `/drivers/george-russell`；积分榜首行链接 `/drivers/kimi-antonelli`（drivers）、`/teams/mercedes`（teams）。
+- [ ] 步骤 5：验证后提交：`feat: link drivers and teams across results tables`。
