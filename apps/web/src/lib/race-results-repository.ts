@@ -177,6 +177,57 @@ JOIN constructor ct ON rr.constructor_id = ct.id
 WHERE rr.race_id = ${raceIdSubquery}
 ORDER BY rr.position_display_order`;
 
+const qualifyingSql = `SELECT qr.position_number, qr.position_text, qr.driver_number,
+       d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
+       ct.id AS constructor_id, ct.name AS constructor_name,
+       qr.q1, qr.q2, qr.q3, qr.laps
+FROM qualifying_result qr
+JOIN driver d ON qr.driver_id = d.id
+JOIN constructor ct ON qr.constructor_id = ct.id
+WHERE qr.race_id = ${raceIdSubquery}
+ORDER BY qr.position_display_order`;
+
+const startingGridSql = `SELECT sg.position_number, sg.position_text, sg.driver_number,
+       d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
+       ct.id AS constructor_id, ct.name AS constructor_name, sg.time
+FROM starting_grid_position sg
+JOIN driver d ON sg.driver_id = d.id
+JOIN constructor ct ON sg.constructor_id = ct.id
+WHERE sg.race_id = ${raceIdSubquery}
+ORDER BY sg.position_display_order`;
+
+const fastestLapsSql = `SELECT fl.position_number, fl.position_text, fl.driver_number,
+       d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
+       ct.id AS constructor_id, ct.name AS constructor_name,
+       fl.lap, fl.time, fl.time_millis
+FROM fastest_lap fl
+JOIN driver d ON fl.driver_id = d.id
+JOIN constructor ct ON fl.constructor_id = ct.id
+WHERE fl.race_id = ${raceIdSubquery}
+ORDER BY fl.position_display_order`;
+
+// f1.com pit-stop-summary 口径：按车手聚合单停
+const pitStopsSql = `SELECT ps.driver_number,
+       d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
+       ct.id AS constructor_id, ct.name AS constructor_name,
+       COUNT(*) AS stops, SUM(ps.time_millis) AS total_millis
+FROM pit_stop ps
+JOIN driver d ON ps.driver_id = d.id
+JOIN constructor ct ON ps.constructor_id = ct.id
+WHERE ps.race_id = ${raceIdSubquery}
+GROUP BY ps.driver_id, ps.driver_number, d.name, d.abbreviation, ct.id, ct.name
+ORDER BY stops ASC, total_millis ASC`;
+
+const practiceSql = (n: 1 | 2 | 3) => `SELECT p.position_number, p.position_text, p.driver_number,
+       d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
+       ct.id AS constructor_id, ct.name AS constructor_name,
+       p.time, p.gap, p.laps
+FROM free_practice_${n}_result p
+JOIN driver d ON p.driver_id = d.id
+JOIN constructor ct ON p.constructor_id = ct.id
+WHERE p.race_id = ${raceIdSubquery}
+ORDER BY p.position_display_order`;
+
 function buildSessions(r: Record<string, unknown>): RaceSession[] {
   const defs: [string, string, string, string][] = [
     ["practice-1", "Practice 1", "free_practice_1_date", "free_practice_1_time"],
@@ -248,6 +299,63 @@ function mapRaceResultRow(row: unknown): RaceResultRow {
   };
 }
 
+function mapQualifyingRow(row: unknown): QualifyingRow {
+  const r = asRecord(row, "qualifying row");
+  return {
+    ...mapPositionFields(r),
+    ...mapDriverFields(r),
+    q1: r.q1 === null ? null : asString(r.q1, "q1"),
+    q2: r.q2 === null ? null : asString(r.q2, "q2"),
+    q3: r.q3 === null ? null : asString(r.q3, "q3"),
+    laps: r.laps === null ? null : asNumber(r.laps, "laps"),
+  };
+}
+
+function mapGridRow(row: unknown): GridRow {
+  const r = asRecord(row, "starting grid row");
+  return {
+    ...mapPositionFields(r),
+    ...mapDriverFields(r),
+    time: r.time === null ? null : asString(r.time, "time"),
+  };
+}
+
+function mapFastestLapRow(row: unknown, courseLength: number): FastestLapRow {
+  const r = asRecord(row, "fastest lap row");
+  return {
+    ...mapPositionFields(r),
+    ...mapDriverFields(r),
+    lap: r.lap === null ? null : asNumber(r.lap, "lap"),
+    time: r.time === null ? null : asString(r.time, "time"),
+    avgSpeedKph: formatAvgSpeedKph(
+      courseLength,
+      r.time_millis === null ? null : asNumber(r.time_millis, "lap millis"),
+    ),
+  };
+}
+
+function mapPitStopRow(row: unknown): PitStopRow {
+  const r = asRecord(row, "pit stop row");
+  return {
+    ...mapDriverFields(r),
+    stops: asNumber(r.stops, "stops"),
+    totalSeconds: formatSeconds(
+      r.total_millis === null ? null : asNumber(r.total_millis, "pit stop millis"),
+    ),
+  };
+}
+
+function mapPracticeRow(row: unknown): PracticeRow {
+  const r = asRecord(row, "practice row");
+  return {
+    ...mapPositionFields(r),
+    ...mapDriverFields(r),
+    time: r.time === null ? null : asString(r.time, "time"),
+    gap: r.gap === null ? null : asString(r.gap, "gap"),
+    laps: r.laps === null ? null : asNumber(r.laps, "laps"),
+  };
+}
+
 export interface RaceResultsRepository {
   getSeasonCalendar(year: number): Promise<RaceSummary[]>;
   listRaces(year: number): Promise<RaceSummary[]>;
@@ -290,9 +398,20 @@ export function createRaceResultsRepository(db?: RaceResultsDatabase): RaceResul
         const { default: fixture } = await import("./fixtures/race-australia-2026.json");
         return fixture as RacePage;
       }
-      const [metaRows, raceRows] = await db.batch([
-        { sql: raceMetaSql, values: [year, slug] },
-        { sql: raceResultSql, values: [year, slug] },
+      const values = [year, slug];
+      const [
+        metaRows, raceRows, qualifyingRows, gridRows, fastestLapRows, pitStopRows,
+        practice1Rows, practice2Rows, practice3Rows,
+      ] = await db.batch([
+        { sql: raceMetaSql, values },
+        { sql: raceResultSql, values },
+        { sql: qualifyingSql, values },
+        { sql: startingGridSql, values },
+        { sql: fastestLapsSql, values },
+        { sql: pitStopsSql, values },
+        { sql: practiceSql(1), values },
+        { sql: practiceSql(2), values },
+        { sql: practiceSql(3), values },
       ]);
       if (metaRows.results.length === 0) return null;
       const meta = mapRaceMeta(metaRows.results[0]);
@@ -300,8 +419,13 @@ export function createRaceResultsRepository(db?: RaceResultsDatabase): RaceResul
         meta,
         tabs: {
           raceResult: raceRows.results.map(mapRaceResultRow),
-          qualifying: [], startingGrid: [], fastestLaps: [], pitStops: [],
-          practice1: [], practice2: [], practice3: [],
+          qualifying: qualifyingRows.results.map(mapQualifyingRow),
+          startingGrid: gridRows.results.map(mapGridRow),
+          fastestLaps: fastestLapRows.results.map((row) => mapFastestLapRow(row, meta.courseLength)),
+          pitStops: pitStopRows.results.map(mapPitStopRow),
+          practice1: practice1Rows.results.map(mapPracticeRow),
+          practice2: practice2Rows.results.map(mapPracticeRow),
+          practice3: practice3Rows.results.map(mapPracticeRow),
         },
       };
     },

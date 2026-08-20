@@ -97,10 +97,25 @@ const metaRow = {
   sprint_race_date: null, sprint_race_time: null,
 };
 
+// getRacePage 一次 batch 9 条语句；未登记的语句抛错，用本助手把其余 tab 置空
+function tabFragments(extra: Record<string, unknown[]>): Record<string, unknown[]> {
+  return {
+    circuit_name: [metaRow],
+    "FROM race_result rr": [],
+    "FROM qualifying_result": [],
+    "FROM starting_grid_position": [],
+    "FROM fastest_lap": [],
+    "FROM pit_stop": [],
+    "FROM free_practice_1_result": [],
+    "FROM free_practice_2_result": [],
+    "FROM free_practice_3_result": [],
+    ...extra,
+  };
+}
+
 describe("createRaceResultsRepository getRacePage", () => {
   it("maps race meta, sessions and race result rows", async () => {
-    const db = fakeDbBySql({
-      circuit_name: [metaRow],
+    const db = fakeDbBySql(tabFragments({
       "FROM race_result rr": [
         { position_number: 1, position_text: "1", driver_number: "63",
           driver_id: "george-russell", driver_name: "George Russell", driver_code: "RUS",
@@ -110,8 +125,12 @@ describe("createRaceResultsRepository getRacePage", () => {
           driver_id: "lewis-hamilton", driver_name: "Lewis Hamilton", driver_code: "HAM",
           constructor_id: "ferrari", constructor_name: "Ferrari", laps: 30,
           time: null, reason_retired: "Collision", gap: null, points: 0 },
+        { position_number: 2, position_text: "2", driver_number: "4",
+          driver_id: "lando-norris", driver_name: "Lando Norris", driver_code: "NOR",
+          constructor_id: "mclaren", constructor_name: "McLaren", laps: 58,
+          time: null, reason_retired: null, gap: "+26.874", points: 18 },
       ],
-    });
+    }));
     const page = await createRaceResultsRepository(db).getRacePage(2026, "australia");
     expect(page?.meta.round).toBe(1);
     expect(page?.meta.sessions).toEqual([
@@ -124,11 +143,67 @@ describe("createRaceResultsRepository getRacePage", () => {
     expect(page?.tabs.raceResult[0].driverName).toBe("George Russell");
     expect(page?.tabs.raceResult[1].time).toBeNull();
     expect(page?.tabs.raceResult[1].retiredReason).toBe("Collision");
+    // 有名次但被套圈：time 为空时视图回退到 gap
+    expect(page?.tabs.raceResult[2].time).toBeNull();
+    expect(page?.tabs.raceResult[2].gap).toBe("+26.874");
   });
 
   it("returns null for unknown slug", async () => {
-    const db = fakeDbBySql({ circuit_name: [], "FROM race_result rr": [] });
+    const db = fakeDbBySql(tabFragments({ circuit_name: [] }));
     expect(await createRaceResultsRepository(db).getRacePage(2026, "nope")).toBeNull();
+  });
+
+  it("maps qualifying rows", async () => {
+    const db = fakeDbBySql(tabFragments({
+      "FROM qualifying_result": [{ position_number: 1, position_text: "1", driver_number: "63",
+        driver_id: "george-russell", driver_name: "George Russell", driver_code: "RUS",
+        constructor_id: "mercedes", constructor_name: "Mercedes",
+        q1: "1:19.507", q2: "1:18.934", q3: "1:18.518", laps: 22 }],
+    }));
+    const page = await createRaceResultsRepository(db).getRacePage(2026, "australia");
+    expect(page?.tabs.qualifying[0].q3).toBe("1:18.518");
+  });
+
+  it("maps starting grid rows with null time", async () => {
+    const db = fakeDbBySql(tabFragments({
+      "FROM starting_grid_position": [{ position_number: 20, position_text: "20", driver_number: "1",
+        driver_id: "max-verstappen", driver_name: "Max Verstappen", driver_code: "VER",
+        constructor_id: "red-bull", constructor_name: "Red Bull Racing", time: null }],
+    }));
+    const page = await createRaceResultsRepository(db).getRacePage(2026, "australia");
+    expect(page?.tabs.startingGrid[0].time).toBeNull();
+  });
+
+  it("maps fastest lap rows with computed avg speed", async () => {
+    const db = fakeDbBySql(tabFragments({
+      "FROM fastest_lap": [{ position_number: 1, position_text: "1", driver_number: "63",
+        driver_id: "george-russell", driver_name: "George Russell", driver_code: "RUS",
+        constructor_id: "mercedes", constructor_name: "Mercedes",
+        lap: 43, time: "1:22.091", time_millis: 82091 }],
+    }));
+    const page = await createRaceResultsRepository(db).getRacePage(2026, "australia");
+    expect(page?.tabs.fastestLaps[0].avgSpeedKph).toBe("231.460");
+  });
+
+  it("maps pit stop rows aggregated per driver", async () => {
+    const db = fakeDbBySql(tabFragments({
+      "FROM pit_stop": [{ driver_number: "43", driver_id: "franco-colapinto",
+        driver_name: "Franco Colapinto", driver_code: "COL",
+        constructor_id: "alpine", constructor_name: "Alpine", stops: 1, total_millis: 27733 }],
+    }));
+    const page = await createRaceResultsRepository(db).getRacePage(2026, "australia");
+    expect(page?.tabs.pitStops[0]).toMatchObject({ stops: 1, totalSeconds: "27.733" });
+  });
+
+  it("maps practice rows", async () => {
+    const db = fakeDbBySql(tabFragments({
+      "FROM free_practice_1_result": [{ position_number: 1, position_text: "1", driver_number: "63",
+        driver_id: "george-russell", driver_name: "George Russell", driver_code: "RUS",
+        constructor_id: "mercedes", constructor_name: "Mercedes",
+        time: "1:20.100", gap: null, laps: 24 }],
+    }));
+    const page = await createRaceResultsRepository(db).getRacePage(2026, "australia");
+    expect(page?.tabs.practice1[0].gap).toBeNull();
   });
 
   it("DEV fixture serves only australia 2026", async () => {

@@ -75,10 +75,203 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
           )}
         </tbody>
       </>
+    ) : tab === "qualifying" ? (
+      <>
+        <thead>
+          <tr>
+            <th scope="col">Pos</th><th scope="col">No.</th><th scope="col">Driver</th>
+            <th scope="col">Team</th><th scope="col">Q1</th>
+            <th scope="col">Q2</th><th scope="col">Q3</th><th scope="col">Laps</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(rows as QualifyingRow[]).length === 0 ? (
+            <tr><td class="empty-cell" colspan={columnCount}>{empty}</td></tr>
+          ) : (
+            (rows as QualifyingRow[]).map((row) => (
+              <tr>
+                <td class="position-cell">{positionLabel(row.position, row.positionText)}</td>
+                <td>{row.driverNumber ?? "—"}</td>
+                <td>
+                  <span class="vendor-cell vendor-cell--driver" style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
+                    <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
+                    <span class="vendor-cell__name">{row.driverName}</span>
+                    <small>{row.driverCode}</small>
+                  </span>
+                </td>
+                <td>
+                  <span class="vendor-cell">
+                    {teamLogo(row.constructorId) ? (
+                      <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
+                    ) : null}
+                    {row.constructorName}
+                  </span>
+                </td>
+                <td>{row.q1 ?? "—"}</td>
+                <td>{row.q2 ?? "—"}</td>
+                <td>{row.q3 ?? "—"}</td>
+                <td>{row.laps ?? "—"}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </>
+    ) : tab === "starting-grid" ? (
+      <>
+        <thead>
+          <tr>
+            <th scope="col">Pos</th><th scope="col">No.</th><th scope="col">Driver</th>
+            <th scope="col">Team</th><th scope="col">Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(rows as GridRow[]).length === 0 ? (
+            <tr><td class="empty-cell" colspan={columnCount}>{empty}</td></tr>
+          ) : (
+            (rows as GridRow[]).map((row) => (
+              <tr>
+                <td class="position-cell">{positionLabel(row.position, row.positionText)}</td>
+                <td>{row.driverNumber ?? "—"}</td>
+                <td>
+                  <span class="vendor-cell vendor-cell--driver" style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
+                    <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
+                    <span class="vendor-cell__name">{row.driverName}</span>
+                    <small>{row.driverCode}</small>
+                  </span>
+                </td>
+                <td>
+                  <span class="vendor-cell">
+                    {teamLogo(row.constructorId) ? (
+                      <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
+                    ) : null}
+                    {row.constructorName}
+                  </span>
+                </td>
+                <td>{row.time ?? "—"}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </>
+    ) : tab === "fastest-laps" ? (
+      <>
+        <thead>
+          <tr>
+            <th scope="col">Pos</th><th scope="col">No.</th><th scope="col">Driver</th>
+            <th scope="col">Team</th><th scope="col">Lap</th>
+            <th scope="col">Time</th><th scope="col">Avg. Speed</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(rows as FastestLapRow[]).length === 0 ? (
+            <tr><td class="empty-cell" colspan={columnCount}>{empty}</td></tr>
+          ) : (
+            (rows as FastestLapRow[]).map((row) => (
+              <tr>
+                <td class="position-cell">{positionLabel(row.position, row.positionText)}</td>
+                <td>{row.driverNumber ?? "—"}</td>
+                <td>
+                  <span class="vendor-cell vendor-cell--driver" style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
+                    <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
+                    <span class="vendor-cell__name">{row.driverName}</span>
+                    <small>{row.driverCode}</small>
+                  </span>
+                </td>
+                <td>
+                  <span class="vendor-cell">
+                    {teamLogo(row.constructorId) ? (
+                      <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
+                    ) : null}
+                    {row.constructorName}
+                  </span>
+                </td>
+                <td>{row.lap ?? "—"}</td>
+                <td>{row.time ?? "—"}</td>
+                <td>{row.avgSpeedKph ?? "—"}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </>
+    ) : tab === "pit-stop-summary" ? (
+      <>
+        <thead>
+          <tr>
+            <th scope="col">Pos</th><th scope="col">No.</th><th scope="col">Driver</th>
+            <th scope="col">Team</th><th scope="col">Stops</th><th scope="col">Total Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(rows as PitStopRow[]).length === 0 ? (
+            <tr><td class="empty-cell" colspan={columnCount}>{empty}</td></tr>
+          ) : (
+            (rows as PitStopRow[]).map((row, rowIndex) => (
+              <tr>
+                <td class="position-cell">{String(rowIndex + 1).padStart(2, "0")}</td>
+                <td>{row.driverNumber ?? "—"}</td>
+                <td>
+                  <span class="vendor-cell vendor-cell--driver" style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
+                    <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
+                    <span class="vendor-cell__name">{row.driverName}</span>
+                    <small>{row.driverCode}</small>
+                  </span>
+                </td>
+                <td>
+                  <span class="vendor-cell">
+                    {teamLogo(row.constructorId) ? (
+                      <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
+                    ) : null}
+                    {row.constructorName}
+                  </span>
+                </td>
+                <td>{row.stops}</td>
+                <td>{row.totalSeconds ?? "—"}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </>
     ) : (
-      <tbody>
-        <tr><td class="empty-cell">{empty}</td></tr>
-      </tbody>
+      // 剩下的 practice-1/2/3 列结构相同，共用一个分支
+      <>
+        <thead>
+          <tr>
+            <th scope="col">Pos</th><th scope="col">No.</th><th scope="col">Driver</th>
+            <th scope="col">Team</th><th scope="col">Time</th>
+            <th scope="col">Gap</th><th scope="col">Laps</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(rows as PracticeRow[]).length === 0 ? (
+            <tr><td class="empty-cell" colspan={columnCount}>{empty}</td></tr>
+          ) : (
+            (rows as PracticeRow[]).map((row) => (
+              <tr>
+                <td class="position-cell">{positionLabel(row.position, row.positionText)}</td>
+                <td>{row.driverNumber ?? "—"}</td>
+                <td>
+                  <span class="vendor-cell vendor-cell--driver" style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
+                    <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
+                    <span class="vendor-cell__name">{row.driverName}</span>
+                    <small>{row.driverCode}</small>
+                  </span>
+                </td>
+                <td>
+                  <span class="vendor-cell">
+                    {teamLogo(row.constructorId) ? (
+                      <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
+                    ) : null}
+                    {row.constructorName}
+                  </span>
+                </td>
+                <td>{row.time ?? "—"}</td>
+                <td>{row.gap ?? "—"}</td>
+                <td>{row.laps ?? "—"}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </>
     )}
   </table>
 </div>

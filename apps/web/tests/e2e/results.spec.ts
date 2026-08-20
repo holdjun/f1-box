@@ -55,6 +55,19 @@ test.describe("race detail", () => {
     expect((await page.goto("/results/2026/races/nope/race-result"))?.status()).toBe(404);
     expect((await page.goto("/results/2026/races/australia/sprint"))?.status()).toBe(404);
   });
+
+  test("@desktop tab nav switches between result types", async ({ page }) => {
+    await page.goto("/results/2026/races/australia/race-result");
+    const nav = page.getByRole("navigation", { name: "Race result types" });
+    await nav.getByRole("link", { name: "Qualifying" }).click();
+    await page.waitForURL(/\/results\/2026\/races\/australia\/qualifying$/);
+    await expect(page.getByRole("table", { name: "Qualifying classification" })).toBeVisible();
+    await nav.getByRole("link", { name: "Fastest Laps" }).click();
+    await page.waitForURL(/\/results\/2026\/races\/australia\/fastest-laps$/);
+    await expect(page.getByRole("table", { name: "Fastest laps" })).toBeVisible();
+    await nav.getByRole("link", { name: "Pit Stop Summary" }).click();
+    await expect(page.getByRole("table", { name: "Pit stop summary" })).toBeVisible();
+  });
 });
 
 test("@mobile results pages have no page overflow", async ({ page }) => {
