@@ -17,6 +17,7 @@ interface Props {
   year?: number;
   availableYears?: number[];
   rest?: string;
+  yearHref?: (year: number) => string;
   season?: number;
   sourceName?: string;
   fetchedAt?: string;
@@ -30,6 +31,7 @@ const {
   year,
   availableYears,
   rest,
+  yearHref,
   season,
   sourceName,
   fetchedAt,
@@ -49,7 +51,7 @@ const {
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <SiteHeader active={active} year={year} availableYears={availableYears} rest={rest} />
+    <SiteHeader active={active} year={year} availableYears={availableYears} rest={rest} yearHref={yearHref} />
     <slot />
     <SiteFooter
       season={year ?? season}

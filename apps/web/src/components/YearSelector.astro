@@ -2,15 +2,17 @@
 interface Props {
   current: number;
   available: number[];
-  rest: string;
+  rest?: string;
+  hrefFor?: (year: number) => string;
 }
-const { current, available, rest } = Astro.props;
+const { current, available, rest, hrefFor } = Astro.props;
+const href = hrefFor ?? ((year: number) => `/${year}${rest ?? ""}`);
 ---
 
 <nav class="year-selector" aria-label="Season">
   {available.map((year) => (
     <a
-      href={`/${year}${rest}`}
+      href={href(year)}
       class:list={["year-selector__item", { "is-active": year === current }]}
       aria-current={year === current ? "page" : undefined}
     >{year}</a>

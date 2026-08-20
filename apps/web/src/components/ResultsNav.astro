@@ -14,7 +14,7 @@ const tabs = [
 <nav class="results-nav" aria-label="Results">
   {tabs.map(([key, label]) => (
     <a
-      href={`/${year}/results/${key}`}
+      href={`/results/${year}/${key}`}
       class:list={["results-nav__item", { "is-active": key === active }]}
       aria-current={key === active ? "page" : undefined}
     >{label}</a>

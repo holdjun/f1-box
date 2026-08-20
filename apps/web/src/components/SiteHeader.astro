@@ -6,9 +6,10 @@ interface Props {
   year?: number;
   availableYears?: number[];
   rest?: string;
+  yearHref?: (year: number) => string;
 }
 
-const { active = "racing", year, availableYears, rest = "" } = Astro.props;
+const { active = "racing", year, availableYears, rest = "", yearHref } = Astro.props;
 ---
 
 <header class="site-header">
@@ -22,7 +23,7 @@ const { active = "racing", year, availableYears, rest = "" } = Astro.props;
         aria-current={active === "racing" ? "page" : undefined}
       >Racing</a>
       <a
-        href={year ? `/${year}/results/races` : "/"}
+        href={year ? `/results/${year}/races` : "/results"}
         aria-current={active === "results" ? "page" : undefined}
       >Results</a>
       <a
@@ -35,7 +36,7 @@ const { active = "racing", year, availableYears, rest = "" } = Astro.props;
       >Teams</a>
     </nav>
     {year !== undefined && availableYears !== undefined ? (
-      <YearSelector current={year} available={availableYears} rest={rest} />
+      <YearSelector current={year} available={availableYears} rest={rest} hrefFor={yearHref} />
     ) : null}
   </div>
 </header>

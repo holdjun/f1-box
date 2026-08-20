@@ -1637,3 +1637,42 @@ tbody th[scope="row"] {
   font-size: 1rem;
   font-weight: 600;
 }
+
+.vendor-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.vendor-cell__flag {
+  width: 1.25rem;
+  height: 0.875rem;
+  object-fit: contain;
+  flex: none;
+}
+.vendor-cell__monogram {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  flex: none;
+  background: var(--monogram-bg, #84909e);
+  color: var(--paper);
+  font-family: var(--display);
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+.vendor-cell__logo {
+  height: 1.1rem;
+  width: auto;
+  flex: none;
+}
+.vendor-cell small {
+  color: var(--muted);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+}
+/* 小屏车手单元格只显示 monogram + 缩写（验收标准的"小屏缩写"） */
+@media (max-width: 40rem) {
+  .vendor-cell--driver .vendor-cell__name { display: none; }
+}
