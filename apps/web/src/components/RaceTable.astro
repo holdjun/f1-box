@@ -1,0 +1,84 @@
+---
+import type {
+  FastestLapRow, GridRow, PitStopRow, PracticeRow, QualifyingRow,
+  RaceResultRow, RaceTabKey,
+} from "../lib/race-results-repository.js";
+import { colorForYear, logoSrcFor, vendorIndexes } from "../lib/vendor.js";
+import { monogram } from "../lib/tokens.js";
+
+interface Props {
+  tab: RaceTabKey;
+  rows: readonly (RaceResultRow | QualifyingRow | GridRow | FastestLapRow | PitStopRow | PracticeRow)[];
+  year: number;
+}
+const { tab, rows, year } = Astro.props;
+
+const CONFIG: Record<RaceTabKey, { label: string; empty: string }> = {
+  "race-result": { label: "Race classification", empty: "Race results are not available yet." },
+  "fastest-laps": { label: "Fastest laps", empty: "Fastest laps are not available yet." },
+  "pit-stop-summary": { label: "Pit stop summary", empty: "Pit stops are not available yet." },
+  "starting-grid": { label: "Starting grid", empty: "Starting grid is not available yet." },
+  qualifying: { label: "Qualifying classification", empty: "Qualifying results are not available yet." },
+  "practice-1": { label: "Practice 1 classification", empty: "Practice 1 results are not available yet." },
+  "practice-2": { label: "Practice 2 classification", empty: "Practice 2 results are not available yet." },
+  "practice-3": { label: "Practice 3 classification", empty: "Practice 3 results are not available yet." },
+};
+const { label, empty } = CONFIG[tab];
+
+const teamColor = (constructorId: string) =>
+  colorForYear(vendorIndexes, constructorId, year) ?? "#84909e";
+const teamLogo = (constructorId: string) => logoSrcFor(vendorIndexes, constructorId);
+const positionLabel = (position: number | null, positionText: string) =>
+  position === null ? positionText : String(position).padStart(2, "0");
+const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6, "starting-grid": 5, qualifying: 8, "practice-1": 7, "practice-2": 7, "practice-3": 7 }[tab];
+---
+
+<div class="table-scroll" tabindex="0">
+  <table class="result-table" aria-label={label}>
+    {tab === "race-result" ? (
+      <>
+        <thead>
+          <tr>
+            <th scope="col">Pos</th><th scope="col">No.</th><th scope="col">Driver</th>
+            <th scope="col">Team</th><th scope="col">Laps</th>
+            <th scope="col">Time / Retired</th><th scope="col">Pts</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(rows as RaceResultRow[]).length === 0 ? (
+            <tr><td class="empty-cell" colspan={columnCount}>{empty}</td></tr>
+          ) : (
+            (rows as RaceResultRow[]).map((row) => (
+              <tr>
+                <td class="position-cell">{positionLabel(row.position, row.positionText)}</td>
+                <td>{row.driverNumber ?? "—"}</td>
+                <td>
+                  <span class="vendor-cell vendor-cell--driver" style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
+                    <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
+                    <span class="vendor-cell__name">{row.driverName}</span>
+                    <small>{row.driverCode}</small>
+                  </span>
+                </td>
+                <td>
+                  <span class="vendor-cell">
+                    {teamLogo(row.constructorId) ? (
+                      <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
+                    ) : null}
+                    {row.constructorName}
+                  </span>
+                </td>
+                <td>{row.laps ?? "—"}</td>
+                <td>{row.time ?? row.gap ?? row.retiredReason ?? "—"}</td>
+                <td>{row.points ?? "—"}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </>
+    ) : (
+      <tbody>
+        <tr><td class="empty-cell">{empty}</td></tr>
+      </tbody>
+    )}
+  </table>
+</div>

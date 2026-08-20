@@ -83,6 +83,63 @@ describe("createRaceResultsRepository getSeasonYears", () => {
   });
 });
 
+const metaRow = {
+  year: 2026, round: 1, slug: "australia", name: "Australia",
+  official_name: "Formula 1 Qatar Airways Australian Grand Prix 2026",
+  date: "2026-03-08", time: "04:00", laps: 58, course_length: 5.278,
+  circuit_name: "Melbourne", circuit_place: "Melbourne",
+  country_name: "Australia", alpha2_code: "AU",
+  free_practice_1_date: "2026-03-06", free_practice_1_time: "01:30",
+  free_practice_2_date: "2026-03-06", free_practice_2_time: "05:00",
+  free_practice_3_date: "2026-03-07", free_practice_3_time: "01:30",
+  qualifying_date: "2026-03-07", qualifying_time: "05:00",
+  sprint_qualifying_date: null, sprint_qualifying_time: null,
+  sprint_race_date: null, sprint_race_time: null,
+};
+
+describe("createRaceResultsRepository getRacePage", () => {
+  it("maps race meta, sessions and race result rows", async () => {
+    const db = fakeDbBySql({
+      circuit_name: [metaRow],
+      "FROM race_result rr": [
+        { position_number: 1, position_text: "1", driver_number: "63",
+          driver_id: "george-russell", driver_name: "George Russell", driver_code: "RUS",
+          constructor_id: "mercedes", constructor_name: "Mercedes", laps: 58,
+          time: "1:23:06.801", reason_retired: null, gap: null, points: 25 },
+        { position_number: null, position_text: "DNF", driver_number: "44",
+          driver_id: "lewis-hamilton", driver_name: "Lewis Hamilton", driver_code: "HAM",
+          constructor_id: "ferrari", constructor_name: "Ferrari", laps: 30,
+          time: null, reason_retired: "Collision", gap: null, points: 0 },
+      ],
+    });
+    const page = await createRaceResultsRepository(db).getRacePage(2026, "australia");
+    expect(page?.meta.round).toBe(1);
+    expect(page?.meta.sessions).toEqual([
+      { key: "practice-1", label: "Practice 1", startsAtUtc: "2026-03-06T01:30:00Z" },
+      { key: "practice-2", label: "Practice 2", startsAtUtc: "2026-03-06T05:00:00Z" },
+      { key: "practice-3", label: "Practice 3", startsAtUtc: "2026-03-07T01:30:00Z" },
+      { key: "qualifying", label: "Qualifying", startsAtUtc: "2026-03-07T05:00:00Z" },
+      { key: "race", label: "Race", startsAtUtc: "2026-03-08T04:00:00Z" },
+    ]);
+    expect(page?.tabs.raceResult[0].driverName).toBe("George Russell");
+    expect(page?.tabs.raceResult[1].time).toBeNull();
+    expect(page?.tabs.raceResult[1].retiredReason).toBe("Collision");
+  });
+
+  it("returns null for unknown slug", async () => {
+    const db = fakeDbBySql({ circuit_name: [], "FROM race_result rr": [] });
+    expect(await createRaceResultsRepository(db).getRacePage(2026, "nope")).toBeNull();
+  });
+
+  it("DEV fixture serves only australia 2026", async () => {
+    const repository = createRaceResultsRepository();
+    expect(await repository.getRacePage(2026, "monaco")).toBeNull();
+    const page = await repository.getRacePage(2026, "australia");
+    expect(page?.meta.name).toBe("Australia");
+    expect(page?.tabs.raceResult.length).toBeGreaterThan(0);
+  });
+});
+
 describe("formatAvgSpeedKph", () => {
   it("computes km/h from course length and millis", () => {
     expect(formatAvgSpeedKph(5.278, 82091)).toBe("231.460");

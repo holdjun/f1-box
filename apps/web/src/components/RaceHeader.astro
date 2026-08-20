@@ -1,0 +1,35 @@
+---
+import type { RaceMeta } from "../lib/race-results-repository.js";
+import { formatUtcDate, formatUtcDateTime } from "../lib/time.js";
+
+interface Props {
+  meta: RaceMeta;
+}
+const { meta } = Astro.props;
+const round = String(meta.round).padStart(2, "0");
+---
+
+<header class="race-hero page-shell">
+  <div class="race-hero__title">
+    <p class="giant-round" aria-hidden="true">{round}</p>
+    <div>
+      <h1>{meta.name}</h1>
+      <p>{formatUtcDate(meta.date)} · {meta.circuitName}, {meta.circuitPlace} · {meta.countryName}</p>
+      <p class="muted">{meta.officialName}</p>
+    </div>
+  </div>
+  {meta.sessions.length > 0 ? (
+    <ol class="weekend-schedule">
+      {meta.sessions.map((session, index) => (
+        <li>
+          <span class="session-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+          <div>
+            <h3>{session.label}</h3>
+            <time datetime={session.startsAtUtc}>{formatUtcDateTime(session.startsAtUtc)}</time>
+            <span data-local-time data-timestamp={session.startsAtUtc} hidden></span>
+          </div>
+        </li>
+      ))}
+    </ol>
+  ) : null}
+</header>

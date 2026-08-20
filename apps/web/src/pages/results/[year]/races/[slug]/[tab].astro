@@ -1,0 +1,54 @@
+---
+import { env } from "cloudflare:workers";
+
+import RaceHeader from "../../../../../components/RaceHeader.astro";
+import RaceTable from "../../../../../components/RaceTable.astro";
+import RaceTabsNav from "../../../../../components/RaceTabsNav.astro";
+import StatusPage from "../../../../../components/StatusPage.astro";
+import BaseLayout from "../../../../../layouts/BaseLayout.astro";
+import {
+  createD1RaceResultsDatabase,
+  createRaceResultsRepository,
+  RACE_TAB_FIELDS,
+} from "../../../../../lib/race-results-repository.js";
+import { RACE_TAB_LABELS, resolveRaceTab } from "../../../../../lib/routing.js";
+
+const year = Number(Astro.params.year);
+const slug = (Astro.params.slug ?? "").toLowerCase();
+const tab = resolveRaceTab(Astro.params.tab ?? "");
+const repository = import.meta.env.DEV
+  ? createRaceResultsRepository()
+  : createRaceResultsRepository(createD1RaceResultsDatabase(env.F1_DB));
+const [availableYears, page] = await Promise.all([
+  repository.getSeasonYears(),
+  tab ? repository.getRacePage(year, slug) : Promise.resolve(null),
+]);
+if (!tab || !page || !availableYears.includes(year)) Astro.response.status = 404;
+if (page) {
+  Astro.response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
+}
+---
+
+{tab && page ? (
+  <BaseLayout
+    title={`${page.meta.name} ${RACE_TAB_LABELS[tab]}`}
+    active="results"
+    year={year}
+    availableYears={availableYears}
+    yearHref={(y) => `/results/${y}/races/${slug}/${tab}`}
+  >
+    <main id="main-content">
+      <RaceHeader meta={page.meta} />
+      <div class="page-shell">
+        <RaceTabsNav year={year} slug={slug} active={tab} tabs={page.tabs} />
+        <RaceTable tab={tab} rows={page.tabs[RACE_TAB_FIELDS[tab]]} year={year} />
+      </div>
+    </main>
+  </BaseLayout>
+) : (
+  <BaseLayout title="Race not found" year={year} availableYears={availableYears}>
+    <main id="main-content" class="page-shell">
+      <StatusPage code="404" title="Race not found" message="This race is not available yet." />
+    </main>
+  </BaseLayout>
+)}
