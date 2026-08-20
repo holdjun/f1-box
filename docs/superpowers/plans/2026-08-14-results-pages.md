@@ -570,7 +570,8 @@ const repository = import.meta.env.DEV
   ? createRaceResultsRepository()
   : createRaceResultsRepository(createD1RaceResultsDatabase(env.F1_DB));
 const [latest] = await repository.getSeasonYears();
-return Astro.redirect(latest === undefined ? "/" : `/results/${latest}/races`, 301);
+// 目标随最新赛季变化，不能用 301（浏览器会永久缓存过期地址）；默认 302
+return Astro.redirect(latest === undefined ? "/" : `/results/${latest}/races`);
 ---
 ```
 
