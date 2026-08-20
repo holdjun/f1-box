@@ -503,10 +503,6 @@ svg {
   }
 }
 
-.section-block {
-  padding-block: var(--section-space);
-}
-
 .section-heading {
   display: flex;
   align-items: end;
@@ -688,26 +684,6 @@ svg {
 .race-card__results dd {
   margin-top: 0.25rem;
   font-size: 0.78rem;
-}
-
-.section-band {
-  position: relative;
-  padding-block: calc(var(--section-space) + 1.25rem) var(--section-space);
-  background: var(--paper);
-  color: var(--ink);
-  clip-path: polygon(0 2rem, 75% 0, 100% 1rem, 100% 100%, 0 100%);
-}
-
-.section-band .section-heading {
-  border-color: var(--line-light);
-}
-
-.section-band .section-kicker {
-  color: #d43731;
-}
-
-.section-band .text-link:hover {
-  color: #c72f29;
 }
 
 .latest-section__inner {
@@ -962,34 +938,6 @@ tbody th[scope="row"] {
   max-height: none;
 }
 
-.section-band table th,
-.section-band table td {
-  border-color: var(--line-light);
-}
-
-.section-band table tbody th[scope="row"] {
-  color: var(--ink);
-}
-
-.section-band .position-cell,
-.section-band thead,
-.section-band .driver-code,
-.section-band .result-table th[scope="row"] small {
-  color: #626971;
-}
-
-.section-band .points-cell {
-  color: #315010;
-}
-
-.section-band .points-bar {
-  background: var(--line-light);
-}
-
-.section-band .points-bar > span {
-  background: #809e35;
-}
-
 .race-hero {
   position: relative;
   min-height: clamp(34rem, 70vw, 52rem);
@@ -1103,56 +1051,6 @@ tbody th[scope="row"] {
 
 .result-table tbody th[scope="row"] span {
   display: inline-block;
-}
-
-.results-section .table-scroll {
-  border-top: 1px solid var(--line);
-}
-
-.race-navigation {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 1px;
-  margin-bottom: var(--section-space);
-  background: var(--line);
-}
-
-.race-navigation a {
-  display: flex;
-  min-height: 7rem;
-  flex-direction: column;
-  justify-content: center;
-  padding: 1.25rem;
-  background: var(--ink-soft);
-  font-family: var(--display);
-  font-size: 1.65rem;
-  transition: background-color 180ms ease, color 180ms ease;
-}
-
-.race-navigation a:hover {
-  background: var(--paper);
-  color: var(--ink);
-}
-
-.race-navigation a span {
-  margin-bottom: 0.35rem;
-  color: var(--muted);
-  font-family: var(--body);
-  font-size: 0.65rem;
-  font-weight: 650;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.race-navigation__season {
-  align-items: center;
-  min-width: 14rem;
-  text-align: center;
-}
-
-.race-navigation__next {
-  align-items: end;
-  text-align: right;
 }
 
 .status-page {
@@ -1380,11 +1278,6 @@ tbody th[scope="row"] {
     font-size: 2.15rem;
   }
 
-  .section-band {
-    padding-top: calc(var(--section-space) + 1rem);
-    clip-path: polygon(0 1.2rem, 78% 0, 100% 0.7rem, 100% 100%, 0 100%);
-  }
-
   .latest-section__inner {
     grid-template-columns: 1fr;
   }
@@ -1504,26 +1397,6 @@ tbody th[scope="row"] {
     left: 0;
     padding-left: 0.75rem;
     background: var(--ink);
-  }
-
-  .section-band .result-table th:first-child,
-  .section-band .result-table td:first-child {
-    background: var(--paper);
-  }
-
-  .race-navigation {
-    grid-template-columns: 1fr;
-  }
-
-  .race-navigation a,
-  .race-navigation__next {
-    min-height: 6rem;
-    align-items: start;
-    text-align: left;
-  }
-
-  .race-navigation__season {
-    min-width: 0;
   }
 
   .status-page {
