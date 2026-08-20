@@ -71,6 +71,17 @@ export interface PracticeRow {
   time: string | null; gap: string | null; laps: number | null;
 }
 
+export interface DriverStandingRow {
+  position: number | null; positionText: string;
+  driverId: string; driverName: string; driverCode: string;
+  points: number; wins: number;
+}
+export interface TeamStandingRow {
+  position: number | null; positionText: string;
+  teamId: string; teamName: string;
+  points: number; wins: number;
+}
+
 export interface RacePage {
   meta: RaceMeta;
   tabs: {
@@ -228,6 +239,51 @@ JOIN constructor ct ON p.constructor_id = ct.id
 WHERE p.race_id = ${raceIdSubquery}
 ORDER BY p.position_display_order`;
 
+// wins：f1db 积分榜表无该列，从正赛 P1 行按年聚合（race_data (driver_id, type) 索引可用）
+const driverStandingsSql = `SELECT sds.position_number, sds.position_text,
+       d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
+       sds.points,
+       (SELECT COUNT(*) FROM race_result rr JOIN race ra ON ra.id = rr.race_id
+        WHERE rr.driver_id = d.id AND rr.position_number = 1 AND ra.year = sds.year) AS wins
+FROM season_driver_standing sds
+JOIN driver d ON sds.driver_id = d.id
+WHERE sds.year = ?1
+ORDER BY sds.position_display_order`;
+
+const constructorStandingsSql = `SELECT scs.position_number, scs.position_text,
+       ct.id AS team_id, ct.name AS team_name, scs.points,
+       (SELECT COUNT(*) FROM race_result rr JOIN race ra ON ra.id = rr.race_id
+        WHERE rr.constructor_id = ct.id AND rr.position_number = 1 AND ra.year = scs.year) AS wins
+FROM season_constructor_standing scs
+JOIN constructor ct ON scs.constructor_id = ct.id
+WHERE scs.year = ?1
+ORDER BY scs.position_display_order`;
+
+function mapDriverStandingRow(row: unknown): DriverStandingRow {
+  const r = asRecord(row, "driver standing row");
+  return {
+    position: r.position_number === null ? null : asNumber(r.position_number, "standing position"),
+    positionText: asString(r.position_text, "standing position text"),
+    driverId: asString(r.driver_id, "driver id"),
+    driverName: asString(r.driver_name, "driver name"),
+    driverCode: asString(r.driver_code, "driver code"),
+    points: asNumber(r.points, "standing points"),
+    wins: asNumber(r.wins, "standing wins"),
+  };
+}
+
+function mapTeamStandingRow(row: unknown): TeamStandingRow {
+  const r = asRecord(row, "team standing row");
+  return {
+    position: r.position_number === null ? null : asNumber(r.position_number, "standing position"),
+    positionText: asString(r.position_text, "standing position text"),
+    teamId: asString(r.team_id, "team id"),
+    teamName: asString(r.team_name, "team name"),
+    points: asNumber(r.points, "standing points"),
+    wins: asNumber(r.wins, "standing wins"),
+  };
+}
+
 function buildSessions(r: Record<string, unknown>): RaceSession[] {
   const defs: [string, string, string, string][] = [
     ["practice-1", "Practice 1", "free_practice_1_date", "free_practice_1_time"],
@@ -361,6 +417,8 @@ export interface RaceResultsRepository {
   listRaces(year: number): Promise<RaceSummary[]>;
   getSeasonYears(): Promise<number[]>;
   getRacePage(year: number, slug: string): Promise<RacePage | null>;
+  getDriverStandings(year: number): Promise<DriverStandingRow[]>;
+  getConstructorStandings(year: number): Promise<TeamStandingRow[]>;
 }
 
 export function createRaceResultsRepository(db?: RaceResultsDatabase): RaceResultsRepository {
@@ -428,6 +486,26 @@ export function createRaceResultsRepository(db?: RaceResultsDatabase): RaceResul
           practice3: practice3Rows.results.map(mapPracticeRow),
         },
       };
+    },
+
+    async getDriverStandings(year) {
+      if (!db) {
+        if (year !== 2026) return [];
+        const { default: fixture } = await import("./fixtures/standings-2026.json");
+        return (fixture as { drivers: DriverStandingRow[] }).drivers;
+      }
+      const [rows] = await db.batch([{ sql: driverStandingsSql, values: [year] }]);
+      return rows.results.map(mapDriverStandingRow);
+    },
+
+    async getConstructorStandings(year) {
+      if (!db) {
+        if (year !== 2026) return [];
+        const { default: fixture } = await import("./fixtures/standings-2026.json");
+        return (fixture as { teams: TeamStandingRow[] }).teams;
+      }
+      const [rows] = await db.batch([{ sql: constructorStandingsSql, values: [year] }]);
+      return rows.results.map(mapTeamStandingRow);
     },
   };
 }

@@ -215,6 +215,36 @@ describe("createRaceResultsRepository getRacePage", () => {
   });
 });
 
+describe("createRaceResultsRepository standings", () => {
+  it("maps driver standings with aggregated wins", async () => {
+    const db = fakeDbBySql({
+      "FROM season_driver_standing": [{ position_number: 1, position_text: "1",
+        driver_id: "kimi-antonelli", driver_name: "Kimi Antonelli",
+        driver_code: "ANT", points: 219, wins: 6 }],
+    });
+    const rows = await createRaceResultsRepository(db).getDriverStandings(2026);
+    expect(rows).toEqual([{ position: 1, positionText: "1", driverId: "kimi-antonelli",
+      driverName: "Kimi Antonelli", driverCode: "ANT", points: 219, wins: 6 }]);
+  });
+
+  it("maps constructor standings", async () => {
+    const db = fakeDbBySql({
+      "FROM season_constructor_standing": [{ position_number: null, position_text: "-",
+        team_id: "mercedes", team_name: "Mercedes", points: 379, wins: 8 }],
+    });
+    const rows = await createRaceResultsRepository(db).getConstructorStandings(2026);
+    expect(rows[0]).toEqual({ position: null, positionText: "-", teamId: "mercedes",
+      teamName: "Mercedes", points: 379, wins: 8 });
+  });
+
+  it("DEV fixture serves 2026 standings only", async () => {
+    const repository = createRaceResultsRepository();
+    expect(await repository.getDriverStandings(2026)).toHaveLength(22);
+    expect(await repository.getConstructorStandings(2026)).toHaveLength(11);
+    expect(await repository.getDriverStandings(2025)).toEqual([]);
+  });
+});
+
 describe("formatAvgSpeedKph", () => {
   it("computes km/h from course length and millis", () => {
     expect(formatAvgSpeedKph(5.278, 82091)).toBe("231.460");

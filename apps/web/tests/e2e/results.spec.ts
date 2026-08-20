@@ -70,6 +70,24 @@ test.describe("race detail", () => {
   });
 });
 
+test.describe("standings", () => {
+  test("@desktop driver standings table from f1db", async ({ page }) => {
+    await page.goto("/results/2026/drivers");
+    const table = page.getByRole("table", { name: "Driver standings" });
+    await expect(table).toBeVisible();
+    await expect(table.locator("tbody tr")).toHaveCount(22);
+    await expect(table.locator("tbody tr").first()).toContainText("Kimi Antonelli");
+    await expect(table.locator("tbody tr").first()).toContainText("219");
+  });
+
+  test("@desktop constructor standings table from f1db", async ({ page }) => {
+    await page.goto("/results/2026/teams");
+    const table = page.getByRole("table", { name: "Constructor standings" });
+    await expect(table.locator("tbody tr")).toHaveCount(11);
+    await expect(table.locator("tbody tr").first()).toContainText("Mercedes");
+  });
+});
+
 test("@mobile results pages have no page overflow", async ({ page }) => {
   for (const path of ["/results/2026/races", "/results/2026/races/australia/race-result"]) {
     await page.goto(path);

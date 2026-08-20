@@ -1,9 +1,12 @@
 ---
-import type { SeasonPayload } from "@f1-box/contracts/season";
+import type {
+  DriverStandingRow,
+  TeamStandingRow,
+} from "../lib/race-results-repository.js";
 
 interface Props {
   kind: "drivers" | "constructors";
-  rows: SeasonPayload["driverStandings"] | SeasonPayload["constructorStandings"];
+  rows: DriverStandingRow[] | TeamStandingRow[];
   limit?: number;
 }
 
@@ -14,6 +17,8 @@ const label = kind === "drivers" ? "Driver standings" : "Constructor standings";
 const emptyText = kind === "drivers"
   ? "Driver standings are not available yet."
   : "Constructor standings are not available yet.";
+const nameOf = (row: DriverStandingRow | TeamStandingRow) =>
+  "driverName" in row ? row.driverName : row.teamName;
 ---
 
 <div class="table-scroll standings-scroll" tabindex="0">
@@ -29,10 +34,10 @@ const emptyText = kind === "drivers"
     <tbody>
       {visibleRows.length > 0 ? visibleRows.map((row) => (
         <tr>
-          <td class="position-cell">{String(row.position).padStart(2, "0")}</td>
+          <td class="position-cell">{String(row.position ?? row.positionText).padStart(2, "0")}</td>
           <th scope="row">
-            <span class="standing-name">{row.name}</span>
-            {"code" in row && <span class="driver-code">{row.code}</span>}
+            <span class="standing-name">{nameOf(row)}</span>
+            {"driverCode" in row && <span class="driver-code">{row.driverCode}</span>}
             <span class="points-bar" aria-hidden="true">
               <span style={`--bar-size: ${(row.points / maxPoints) * 100}%`}></span>
             </span>
