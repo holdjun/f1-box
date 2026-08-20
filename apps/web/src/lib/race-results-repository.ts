@@ -121,7 +121,9 @@ export function createD1RaceResultsDatabase(d1: D1Database): RaceResultsDatabase
 }
 
 // 一条 SQL 出全年日历：冠军/完赛状态 = 正赛 P1 行，杆位 = 排位 P1 行；
-// 车手名取显示名 d.name（与目录页同口径）
+// 车手名取显示名 d.name（与目录页同口径）。
+// 历史上有三站共享冠军（1951 法国、1956 阿根廷、1957 英国，各两条 P1 行），
+// 冠军 join 取 display_order 最小的一行，避免共享胜利的分站在列表里出现两次
 const seasonCalendarSql = `SELECT ra.round, ra.grand_prix_id AS slug, gp.name,
        gp.full_name AS race_name, c.alpha2_code, c.name AS country_name,
        ra.date, ra.time, ra.laps,
@@ -134,6 +136,10 @@ JOIN grand_prix gp ON ra.grand_prix_id = gp.id
 JOIN country c ON gp.country_id = c.id
 JOIN circuit ci ON ra.circuit_id = ci.id
 LEFT JOIN race_result wrr ON wrr.race_id = ra.id AND wrr.position_number = 1
+  AND wrr.position_display_order = (
+    SELECT MIN(x.position_display_order) FROM race_result x
+    WHERE x.race_id = ra.id AND x.position_number = 1
+  )
 LEFT JOIN driver wd ON wrr.driver_id = wd.id
 LEFT JOIN constructor wct ON wrr.constructor_id = wct.id
 LEFT JOIN qualifying_result qr ON qr.race_id = ra.id AND qr.position_number = 1
@@ -430,7 +436,13 @@ export function createRaceResultsRepository(db?: RaceResultsDatabase): RaceResul
       return (fixture as { races: RaceSummary[] }).races;
     }
     const [rows] = await db.batch([{ sql: seasonCalendarSql, values: [year] }]);
-    return rows.results.map(mapRaceSummary);
+    // SQL 已挑定并列 P1 中的一行；这里按 round 去重兜底，共享冠军只出一条
+    const byRound = new Map<number, RaceSummary>();
+    for (const row of rows.results) {
+      const race = mapRaceSummary(row);
+      if (!byRound.has(race.round)) byRound.set(race.round, race);
+    }
+    return [...byRound.values()];
   };
 
   return {

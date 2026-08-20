@@ -62,6 +62,31 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
     expect(row.poleName).toBeNull();
   });
 
+  it("renders a shared-win race once, keeping the first P1 row", async () => {
+    // 1951 法国站 Fagioli/Fangio 共享冠军：同 round 两条 P1 行，只渲染一条；
+    // SQL 取 display_order 最小的 P1 行，映射层再按 round 去重兜底
+    const sqls: string[] = [];
+    const sharedWinRow = (winner_name: string) => ({
+      round: 4, slug: "france", name: "France", race_name: "French Grand Prix",
+      alpha2_code: "FR", country_name: "France", date: "1951-07-01", time: "14:00",
+      laps: 77, circuit_name: "Reims-Gueux", circuit_place: "Reims",
+      winner_name, winner_code: null, winner_team_id: "alfa-romeo",
+      winner_team_name: "Alfa Romeo", winner_time: null, pole_name: null, pole_code: null,
+    });
+    const db: RaceResultsDatabase = {
+      batch(statements) {
+        sqls.push(...statements.map((statement) => statement.sql));
+        return Promise.resolve([{
+          results: [sharedWinRow("Luigi Fagioli"), sharedWinRow("Juan Manuel Fangio")],
+        }]);
+      },
+    };
+    const rows = await createRaceResultsRepository(db).getSeasonCalendar(1951);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].winnerName).toBe("Luigi Fagioli");
+    expect(sqls[0]).toContain("MIN(x.position_display_order)");
+  });
+
   it("DEV fixture calendar has 22 rounds, list only completed", async () => {
     const repository = createRaceResultsRepository();
     expect(await repository.getSeasonCalendar(2026)).toHaveLength(22);
