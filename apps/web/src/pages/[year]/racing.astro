@@ -2,6 +2,7 @@
 import { env } from "cloudflare:workers";
 
 import RaceCard from "../../components/RaceCard.astro";
+import SeasonFilter from "../../components/SeasonFilter.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import {
   createD1RaceResultsDatabase,
@@ -22,9 +23,17 @@ if (races.length > 0) {
 }
 ---
 
-<BaseLayout title={`${year} Season`} year={year} availableYears={availableYears} rest="/racing">
+<BaseLayout title={`${year} Season`} year={year}>
   <main id="main-content" class="page-shell">
     <h1>{year} Season</h1>
+    <SeasonFilter
+      years={availableYears}
+      mode="link"
+      current={year}
+      hrefFor={(y) => `/${y}/racing`}
+      sticky
+      showAll={false}
+    />
     <div class="race-grid">
       {races.map((race) => (
         <RaceCard race={race} href={`/results/${year}/races/${race.slug}/race-result`} />

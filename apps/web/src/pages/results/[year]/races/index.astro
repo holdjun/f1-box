@@ -2,6 +2,7 @@
 import { env } from "cloudflare:workers";
 
 import ResultsNav from "../../../../components/ResultsNav.astro";
+import SeasonFilter from "../../../../components/SeasonFilter.astro";
 import BaseLayout from "../../../../layouts/BaseLayout.astro";
 import {
   createD1RaceResultsDatabase,
@@ -29,15 +30,17 @@ const winnerColor = (teamId: string | null) =>
   (teamId && colorForYear(vendorIndexes, teamId, year)) ?? "#84909e";
 ---
 
-<BaseLayout
-  title={`${year} Race Results`}
-  active="results"
-  year={year}
-  availableYears={availableYears}
-  yearHref={(y) => `/results/${y}/races`}
->
+<BaseLayout title={`${year} Race Results`} active="results" year={year}>
   <main id="main-content" class="page-shell">
     <h1>{year} Race Results</h1>
+    <SeasonFilter
+      years={availableYears}
+      mode="link"
+      current={year}
+      hrefFor={(y) => `/results/${y}/races`}
+      sticky
+      showAll={false}
+    />
     <ResultsNav year={year} active="races" />
     <div class="table-scroll" tabindex="0">
       <table class="result-table" aria-label={`${year} race results`}>

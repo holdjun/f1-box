@@ -15,9 +15,6 @@ interface Props {
   description?: string;
   active?: "racing" | "results" | "drivers" | "teams";
   year?: number;
-  availableYears?: number[];
-  rest?: string;
-  yearHref?: (year: number) => string;
   season?: number;
   sourceName?: string;
   fetchedAt?: string;
@@ -29,9 +26,6 @@ const {
   description = "Formula 1 season data, race by race.",
   active,
   year,
-  availableYears,
-  rest,
-  yearHref,
   season,
   sourceName,
   fetchedAt,
@@ -51,7 +45,7 @@ const {
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <SiteHeader active={active} year={year} availableYears={availableYears} rest={rest} yearHref={yearHref} />
+    <SiteHeader active={active} year={year} />
     <slot />
     <SiteFooter
       season={year ?? season}

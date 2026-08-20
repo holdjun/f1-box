@@ -1,5 +1,5 @@
 {
-  "years": [2026],
+  "years": [2026, 2025],
   "races": [
     { "round": 1, "slug": "australia", "name": "Australia", "raceName": "Australian Grand Prix", "alpha2Code": "AU", "countryName": "Australia", "date": "2026-03-08", "time": "04:00", "laps": 58, "circuitName": "Melbourne", "circuitPlace": "Melbourne", "winnerName": "George Russell", "winnerCode": "RUS", "winnerTeamId": "mercedes", "winnerTeamName": "Mercedes", "winnerTime": "1:23:06.801", "poleName": "George Russell", "poleCode": "RUS" },
     { "round": 2, "slug": "china", "name": "China", "raceName": "Chinese Grand Prix", "alpha2Code": "CN", "countryName": "China", "date": "2026-03-15", "time": "07:00", "laps": 56, "circuitName": "Shanghai", "circuitPlace": "Shanghai", "winnerName": "Kimi Antonelli", "winnerCode": "ANT", "winnerTeamId": "mercedes", "winnerTeamName": "Mercedes", "winnerTime": "1:33:15.607", "poleName": "Kimi Antonelli", "poleCode": "ANT" },

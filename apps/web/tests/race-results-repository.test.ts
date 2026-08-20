@@ -103,8 +103,8 @@ describe("createRaceResultsRepository getSeasonYears", () => {
     expect(await createRaceResultsRepository(db).getSeasonYears()).toEqual([2026, 1950]);
   });
 
-  it("DEV fixture years are [2026]", async () => {
-    expect(await createRaceResultsRepository().getSeasonYears()).toEqual([2026]);
+  it("DEV fixture years are newest-first [2026, 2025]", async () => {
+    expect(await createRaceResultsRepository().getSeasonYears()).toEqual([2026, 2025]);
   });
 });
 

@@ -1,15 +1,10 @@
 ---
-import YearSelector from "./YearSelector.astro";
-
 interface Props {
   active?: "racing" | "results" | "drivers" | "teams";
   year?: number;
-  availableYears?: number[];
-  rest?: string;
-  yearHref?: (year: number) => string;
 }
 
-const { active = "racing", year, availableYears, rest = "", yearHref } = Astro.props;
+const { active = "racing", year } = Astro.props;
 ---
 
 <header class="site-header">
@@ -35,8 +30,5 @@ const { active = "racing", year, availableYears, rest = "", yearHref } = Astro.p
         aria-current={active === "teams" ? "page" : undefined}
       >Teams</a>
     </nav>
-    {year !== undefined && availableYears !== undefined ? (
-      <YearSelector current={year} available={availableYears} rest={rest} hrefFor={yearHref} />
-    ) : null}
   </div>
 </header>

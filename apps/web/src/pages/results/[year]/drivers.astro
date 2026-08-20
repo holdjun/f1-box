@@ -2,6 +2,7 @@
 import { env } from "cloudflare:workers";
 
 import ResultsNav from "../../../components/ResultsNav.astro";
+import SeasonFilter from "../../../components/SeasonFilter.astro";
 import StandingsTable from "../../../components/StandingsTable.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import {
@@ -23,15 +24,17 @@ if (rows.length > 0) {
 }
 ---
 
-<BaseLayout
-  title={`${year} Driver Standings`}
-  active="results"
-  year={year}
-  availableYears={availableYears}
-  yearHref={(y) => `/results/${y}/drivers`}
->
+<BaseLayout title={`${year} Driver Standings`} active="results" year={year}>
   <main id="main-content" class="page-shell">
     <h1>{year} Driver Standings</h1>
+    <SeasonFilter
+      years={availableYears}
+      mode="link"
+      current={year}
+      hrefFor={(y) => `/results/${y}/drivers`}
+      sticky
+      showAll={false}
+    />
     <ResultsNav year={year} active="drivers" />
     <StandingsTable kind="drivers" rows={rows} />
   </main>

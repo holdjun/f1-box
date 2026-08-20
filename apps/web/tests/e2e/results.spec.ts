@@ -21,6 +21,20 @@ test.describe("results races list", () => {
     await expect(page.locator("main")).toContainText("No race results");
   });
 
+  test("@desktop season selection moved into the page filter", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races");
+    await expect(page.locator(".year-selector")).toHaveCount(0);
+    const filter = page.locator("main .season-filter");
+    await expect(filter).toBeVisible();
+    await expect(filter.locator(".season-filter__summary")).toHaveText("2026");
+    await filter.getByRole("button", { name: "Season" }).click();
+    await expect(
+      page.locator('.season-filter__panel a[href="/results/2025/races"]'),
+    ).toBeVisible();
+  });
+
   test("@desktop results root and year redirect to races", async ({ page }) => {
     await page.goto("/results");
     await page.waitForURL(/\/results\/2026\/races$/);

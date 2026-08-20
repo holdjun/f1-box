@@ -29,7 +29,15 @@ test("@desktop racing calendar links every round to its results page", async ({ 
     "href",
     "/results/2026/races/australia/race-result",
   );
-  await expect(page.getByRole("navigation", { name: "Season" })).toBeVisible();
+  // 年份选择在页面内容区的 SeasonFilter，header 不再有年份 pill
+  const filter = page.locator("main .season-filter");
+  await expect(filter).toBeVisible();
+  await expect(filter.locator(".season-filter__summary")).toHaveText("2026");
+  await filter.getByRole("button", { name: "Season" }).click();
+  await expect(
+    page.locator('.season-filter__panel a[href="/2025/racing"]'),
+  ).toBeVisible();
+  await expect(page.locator(".year-selector")).toHaveCount(0);
 });
 
 test("@desktop unknown race under a valid year returns 404", async ({ page }) => {
