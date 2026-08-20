@@ -1,4 +1,4 @@
 ---
 const year = Astro.params.year;
-return Astro.redirect(`/${year}/results/races`);
+return Astro.redirect(`/results/${year}/races`, 301);
 ---

@@ -1,25 +1,34 @@
 ---
-import RaceCard from "../../components/RaceCard.astro";
-import SeasonError from "../../components/SeasonError.astro";
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import { resolveYearContext } from "../../lib/year-context.js";
+import { env } from "cloudflare:workers";
 
-const ctx = await resolveYearContext(Astro);
-if (ctx.status) Astro.response.status = ctx.status;
-const { year, index, season, rest } = ctx;
+import RaceCard from "../../components/RaceCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  createD1RaceResultsDatabase,
+  createRaceResultsRepository,
+} from "../../lib/race-results-repository.js";
+
+const year = Number(Astro.params.year);
+const repository = import.meta.env.DEV
+  ? createRaceResultsRepository()
+  : createRaceResultsRepository(createD1RaceResultsDatabase(env.F1_DB));
+const [availableYears, races] = await Promise.all([
+  repository.getSeasonYears(),
+  repository.getSeasonCalendar(year),
+]);
+if (!availableYears.includes(year)) Astro.response.status = 404;
+if (races.length > 0) {
+  Astro.response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
+}
 ---
 
-{season ? (
-  <BaseLayout title={`${season.season} Season`} year={year} availableYears={index.availableYears} rest={rest}>
-    <main id="main-content" class="page-shell">
-      <h1>{season.season} Season</h1>
-      <div class="race-grid">
-        {season.events.map((event) => (
-          <RaceCard event={event} season={season.season} density="full" hrefBase={`/${year}/racing`} />
-        ))}
-      </div>
-    </main>
-  </BaseLayout>
-) : (
-  <SeasonError year={year} index={index} rest={rest} status={ctx.status ?? 503} />
-)}
+<BaseLayout title={`${year} Season`} year={year} availableYears={availableYears} rest="/racing">
+  <main id="main-content" class="page-shell">
+    <h1>{year} Season</h1>
+    <div class="race-grid">
+      {races.map((race) => (
+        <RaceCard race={race} href={`/results/${year}/races/${race.slug}/race-result`} />
+      ))}
+    </div>
+  </main>
+</BaseLayout>

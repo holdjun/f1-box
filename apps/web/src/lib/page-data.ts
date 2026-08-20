@@ -8,11 +8,3 @@ export function getIndex() {
     : createSeasonRepository(env.F1_DATA);
   return repository.getIndex();
 }
-
-export function getSeason(year: number) {
-  const repository = import.meta.env.DEV
-    ? createSeasonRepository()
-    : createSeasonRepository(env.F1_DATA);
-
-  return repository.getSeason(year);
-}
