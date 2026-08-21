@@ -196,3 +196,193 @@ export async function constructorSummary(
     pagePath: `/teams/${id}`,
   };
 }
+
+export const seasonCheckSql = "SELECT 1 AS ok FROM season WHERE year = ?1";
+
+export const driverStandingsSql = `
+SELECT sds.position_number, sds.position_text, sds.points, sds.championship_won,
+  d.id AS driver_id, d.name AS driver_name
+FROM season_driver_standing sds
+JOIN driver d ON d.id = sds.driver_id
+WHERE sds.year = ?1
+ORDER BY sds.position_display_order`;
+
+export const constructorStandingsSql = `
+SELECT scs.position_number, scs.position_text, scs.points, scs.championship_won,
+  c.id AS constructor_id, c.name AS constructor_name
+FROM season_constructor_standing scs
+JOIN constructor c ON c.id = scs.constructor_id
+WHERE scs.year = ?1
+ORDER BY scs.position_display_order`;
+
+export const grandPrixRefSql = `
+SELECT id, name FROM grand_prix
+WHERE id = ?1 COLLATE NOCASE OR name = ?1 COLLATE NOCASE
+   OR abbreviation = UPPER(?1) OR full_name = ?1 COLLATE NOCASE
+   OR (instr(lower(name), lower(?1)) > 0 AND length(?1) >= 3)
+ORDER BY (CASE WHEN name = ?1 COLLATE NOCASE THEN 0 ELSE 1 END), name
+LIMIT 6`;
+
+export const raceIdSql = "SELECT id FROM race WHERE year = ?1 AND grand_prix_id = ?2";
+
+export const raceMetaSql = `
+SELECT ra.year, ra.round, ra.date, gp.name AS grand_prix_name
+FROM race ra
+JOIN grand_prix gp ON gp.id = ra.grand_prix_id
+WHERE ra.year = ?1 AND ra.grand_prix_id = ?2`;
+
+export const raceResultRowsSql = `
+SELECT rr.position_number, rr.position_text, rr.time, rr.reason_retired, rr.points,
+  d.id AS driver_id, d.name AS driver_name, ct.id AS constructor_id, ct.name AS constructor_name
+FROM race_result rr
+JOIN driver d ON d.id = rr.driver_id
+JOIN constructor ct ON ct.id = rr.constructor_id
+WHERE rr.race_id = ?1
+ORDER BY rr.position_display_order`;
+
+const missYear = { found: false, message: "没有该年份的赛季数据" } as const;
+
+export async function seasonDriverStandings(
+  db: AskDatabase,
+  year: number,
+): Promise<Record<string, unknown>> {
+  const check = await db.run(seasonCheckSql, [year]);
+  if (check.length === 0) return missYear;
+  const rows = await db.run(driverStandingsSql, [year]);
+  return {
+    year,
+    standings: rows.map((row) => {
+      const record = asRecord(row, "driver standing row");
+      const driverId = asString(record.driver_id, "standing driver id");
+      return {
+        position: record.position_number === null
+          ? null
+          : asNumber(record.position_number, "standing position"),
+        driver: asString(record.driver_name, "standing driver name"),
+        driverId,
+        points: asNumber(record.points, "standing points"),
+        champion: Boolean(record.championship_won),
+        pagePath: `/drivers/${driverId}`,
+      };
+    }),
+  };
+}
+
+// 车队×引擎分行（60 年代）：积分累加、名次取最好、任一夺冠即夺冠——与站内车队页口径一致
+export async function seasonConstructorStandings(
+  db: AskDatabase,
+  year: number,
+): Promise<Record<string, unknown>> {
+  const check = await db.run(seasonCheckSql, [year]);
+  if (check.length === 0) return missYear;
+  const rows = await db.run(constructorStandingsSql, [year]);
+
+  const merged = new Map<
+    string,
+    { position: number | null; team: string; points: number; champion: boolean }
+  >();
+  for (const row of rows) {
+    const record = asRecord(row, "constructor standing row");
+    const teamId = asString(record.constructor_id, "standing constructor id");
+    const position = record.position_number === null
+      ? null
+      : asNumber(record.position_number, "standing position");
+    const points = asNumber(record.points, "standing points");
+    const existing = merged.get(teamId);
+    if (!existing) {
+      merged.set(teamId, {
+        position,
+        team: asString(record.constructor_name, "standing constructor name"),
+        points,
+        champion: Boolean(record.championship_won),
+      });
+      continue;
+    }
+    existing.points += points;
+    existing.champion = existing.champion || Boolean(record.championship_won);
+    if (
+      (existing.position === null && position !== null) ||
+      (existing.position !== null && position !== null && position < existing.position)
+    ) {
+      existing.position = position;
+    }
+  }
+  return {
+    year,
+    standings: [...merged.entries()]
+      .map(([teamId, entry]) => ({
+        position: entry.position,
+        team: entry.team,
+        teamId,
+        points: entry.points,
+        champion: entry.champion,
+        pagePath: `/teams/${teamId}`,
+      }))
+      .sort((a, b) => (a.position ?? 999) - (b.position ?? 999) || b.points - a.points),
+  };
+}
+
+export async function raceResults(
+  db: AskDatabase,
+  year: number,
+  race: string,
+): Promise<Record<string, unknown>> {
+  const trimmed = race.trim();
+  if (trimmed.length === 0) {
+    return { found: false, message: "未找到匹配的大奖赛，可尝试英文名" };
+  }
+  const aliasId = resolveAlias(trimmed, askAliases.grandPrix);
+  const lookup = aliasId ?? trimmed;
+  const gpRows = await db.run(grandPrixRefSql, [lookup]);
+  const gpRefs = mapRefs(gpRows);
+  if (gpRefs.length === 0) {
+    return { found: false, message: "未找到匹配的大奖赛，可尝试英文名" };
+  }
+  if (gpRefs.length > 1) {
+    return {
+      found: false,
+      candidates: gpRefs,
+      message: "匹配到多场大奖赛，请用户确认是哪一场",
+    };
+  }
+  const gp = gpRefs[0];
+
+  const raceIdRows = await db.run(raceIdSql, [year, gp.id]);
+  if (raceIdRows.length === 0) {
+    return { found: false, message: "该年份未举办此大奖赛" };
+  }
+  const raceId = asNumber(
+    asRecord(raceIdRows[0], "race id row").id,
+    "race id",
+  );
+
+  const metaRows = await db.run(raceMetaSql, [year, gp.id]);
+  const meta = asRecord(metaRows[0], "race meta row");
+  const rows = await db.run(raceResultRowsSql, [raceId]);
+
+  return {
+    year,
+    round: asNumber(meta.round, "race round"),
+    grandPrix: asString(meta.grand_prix_name, "race grand prix name"),
+    date: asString(meta.date, "race date"),
+    results: rows.map((row) => {
+      const record = asRecord(row, "race result row");
+      const driverId = asString(record.driver_id, "result driver id");
+      const status =
+        record.time !== null
+          ? asString(record.time, "result time")
+          : `${asString(record.position_text, "result position text")}${record.reason_retired ? `（${asString(record.reason_retired, "result reason")}）` : ""}`;
+      return {
+        position: record.position_number === null
+          ? null
+          : asNumber(record.position_number, "result position"),
+        driver: asString(record.driver_name, "result driver name"),
+        driverId,
+        team: asString(record.constructor_name, "result constructor name"),
+        points: asNumber(record.points, "result points"),
+        status,
+        pagePath: `/drivers/${driverId}`,
+      };
+    }),
+  };
+}

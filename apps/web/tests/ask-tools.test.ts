@@ -8,7 +8,10 @@ import {
   driverIdentitySql,
   driverRefSql,
   driverSummary,
+  raceResults,
   resolveDriver,
+  seasonConstructorStandings,
+  seasonDriverStandings,
 } from "../src/lib/ask/tools.js";
 import { createStaticAskDatabase, type AskDatabase } from "../src/lib/ask/db.js";
 
@@ -159,6 +162,220 @@ describe("constructorSummary", () => {
         bestChampionshipPosition: 1,
       },
       pagePath: "/teams/ferrari",
+    });
+  });
+});
+
+describe("seasonDriverStandings", () => {
+  const yearCheckSql = "SELECT 1 AS ok FROM season WHERE year = ?1";
+  const standingsSql = `
+SELECT sds.position_number, sds.position_text, sds.points, sds.championship_won,
+  d.id AS driver_id, d.name AS driver_name
+FROM season_driver_standing sds
+JOIN driver d ON d.id = sds.driver_id
+WHERE sds.year = ?1
+ORDER BY sds.position_display_order`;
+
+  it("returns full standings with page paths", async () => {
+    const db = createStaticAskDatabase({
+      [yearCheckSql]: [{ ok: 1 }],
+      [standingsSql]: [
+        {
+          position_number: 1,
+          position_text: "1",
+          points: 395.5,
+          championship_won: 1,
+          driver_id: "max-verstappen",
+          driver_name: "Max Verstappen",
+        },
+        {
+          position_number: 2,
+          position_text: "2",
+          points: 394.5,
+          championship_won: 0,
+          driver_id: "lewis-hamilton",
+          driver_name: "Lewis Hamilton",
+        },
+      ],
+    });
+    expect(await seasonDriverStandings(db, 2021)).toEqual({
+      year: 2021,
+      standings: [
+        {
+          position: 1,
+          driver: "Max Verstappen",
+          driverId: "max-verstappen",
+          points: 395.5,
+          champion: true,
+          pagePath: "/drivers/max-verstappen",
+        },
+        {
+          position: 2,
+          driver: "Lewis Hamilton",
+          driverId: "lewis-hamilton",
+          points: 394.5,
+          champion: false,
+          pagePath: "/drivers/lewis-hamilton",
+        },
+      ],
+    });
+  });
+
+  it("returns miss for unknown year", async () => {
+    const db = createStaticAskDatabase({});
+    expect(await seasonDriverStandings(db, 1949)).toEqual({
+      found: false,
+      message: "没有该年份的赛季数据",
+    });
+  });
+});
+
+describe("seasonConstructorStandings", () => {
+  const constructorStandingsSql = `
+SELECT scs.position_number, scs.position_text, scs.points, scs.championship_won,
+  c.id AS constructor_id, c.name AS constructor_name
+FROM season_constructor_standing scs
+JOIN constructor c ON c.id = scs.constructor_id
+WHERE scs.year = ?1
+ORDER BY scs.position_display_order`;
+
+  it("merges engine-variant rows of one constructor", async () => {
+    const db = createStaticAskDatabase({
+      "SELECT 1 AS ok FROM season WHERE year = ?1": [{ ok: 1 }],
+      [constructorStandingsSql]: [
+        {
+          position_number: 1,
+          position_text: "1",
+          points: 48,
+          championship_won: 1,
+          constructor_id: "vanwall",
+          constructor_name: "Vanwall",
+        },
+        {
+          position_number: 5,
+          position_text: "5",
+          points: 8,
+          championship_won: 0,
+          constructor_id: "vanwall",
+          constructor_name: "Vanwall",
+        },
+      ],
+    });
+    expect(await seasonConstructorStandings(db, 1958)).toEqual({
+      year: 1958,
+      standings: [
+        {
+          position: 1,
+          team: "Vanwall",
+          teamId: "vanwall",
+          points: 56,
+          champion: true,
+          pagePath: "/teams/vanwall",
+        },
+      ],
+    });
+  });
+});
+
+describe("raceResults", () => {
+  const gpRefSql = `
+SELECT id, name FROM grand_prix
+WHERE id = ?1 COLLATE NOCASE OR name = ?1 COLLATE NOCASE
+   OR abbreviation = UPPER(?1) OR full_name = ?1 COLLATE NOCASE
+   OR (instr(lower(name), lower(?1)) > 0 AND length(?1) >= 3)
+ORDER BY (CASE WHEN name = ?1 COLLATE NOCASE THEN 0 ELSE 1 END), name
+LIMIT 6`;
+  const raceMetaSql = `
+SELECT ra.year, ra.round, ra.date, gp.name AS grand_prix_name
+FROM race ra
+JOIN grand_prix gp ON gp.id = ra.grand_prix_id
+WHERE ra.year = ?1 AND ra.grand_prix_id = ?2`;
+  const resultRowsSql = `
+SELECT rr.position_number, rr.position_text, rr.time, rr.reason_retired, rr.points,
+  d.id AS driver_id, d.name AS driver_name, ct.id AS constructor_id, ct.name AS constructor_name
+FROM race_result rr
+JOIN driver d ON d.id = rr.driver_id
+JOIN constructor ct ON ct.id = rr.constructor_id
+WHERE rr.race_id = ?1
+ORDER BY rr.position_display_order`;
+
+  it("returns race meta and full result rows", async () => {
+    const db = createStaticAskDatabase({
+      [gpRefSql]: [{ id: "monaco", name: "Monaco" }],
+      [raceMetaSql]: [
+        { year: 2024, round: 8, date: "2024-05-26", grand_prix_name: "Monaco" },
+      ],
+      "SELECT id FROM race WHERE year = ?1 AND grand_prix_id = ?2": [
+        { id: 1108 },
+      ],
+      [resultRowsSql]: [
+        {
+          position_number: 1,
+          position_text: "1",
+          time: "1:44:01.014",
+          reason_retired: null,
+          points: 25,
+          driver_id: "charles-leclerc",
+          driver_name: "Charles Leclerc",
+          constructor_id: "ferrari",
+          constructor_name: "Ferrari",
+        },
+        {
+          position_number: null,
+          position_text: "DNF",
+          time: null,
+          reason_retired: "Collision",
+          points: 0,
+          driver_id: "sergio-perez",
+          driver_name: "Sergio Pérez",
+          constructor_id: "red-bull",
+          constructor_name: "Red Bull",
+        },
+      ],
+    });
+    expect(await raceResults(db, 2024, "摩纳哥")).toEqual({
+      year: 2024,
+      round: 8,
+      grandPrix: "Monaco",
+      date: "2024-05-26",
+      results: [
+        {
+          position: 1,
+          driver: "Charles Leclerc",
+          driverId: "charles-leclerc",
+          team: "Ferrari",
+          points: 25,
+          status: "1:44:01.014",
+          pagePath: "/drivers/charles-leclerc",
+        },
+        {
+          position: null,
+          driver: "Sergio Pérez",
+          driverId: "sergio-perez",
+          team: "Red Bull",
+          points: 0,
+          status: "DNF（Collision）",
+          pagePath: "/drivers/sergio-perez",
+        },
+      ],
+    });
+  });
+
+  it("returns miss when gp unknown", async () => {
+    const db = createStaticAskDatabase({});
+    expect(await raceResults(db, 2024, "无名站")).toEqual({
+      found: false,
+      message: "未找到匹配的大奖赛，可尝试英文名",
+    });
+  });
+
+  it("returns miss when gp not held that year", async () => {
+    const db = createStaticAskDatabase({
+      [gpRefSql]: [{ id: "monaco", name: "Monaco" }],
+    });
+    expect(await raceResults(db, 1958, "monaco")).toEqual({
+      found: false,
+      message: "该年份未举办此大奖赛",
     });
   });
 });
