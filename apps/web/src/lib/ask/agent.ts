@@ -52,6 +52,16 @@ export function decodeFinalChunk(chunk: string): string {
 
 export type RunToolsFn = typeof runWithTools;
 
+// runWithTools 1.0.1 只透传 messages/tools；采样与输出上限经包装 ai 绑定注入每次 ai.run。
+// 参数名（max_tokens / max_completion_tokens）以绑定通道 schema 实测为准，Task 8 冒烟确认。
+function withGenerationParams(ai: Ai): Ai {
+  return {
+    ...ai,
+    run: (model: string, input: Record<string, unknown>) =>
+      ai.run(model, { ...input, temperature: 0.3, max_tokens: 1024 }),
+  } as Ai;
+}
+
 export function runAgent(options: {
   ai: Ai;
   db: AskDatabase;
@@ -72,19 +82,13 @@ export function runAgent(options: {
         const prompt = buildSystemPrompt(matchKnowledge(query, knowledgeEntries));
 
         const tools = buildAskTools(db, () => send("status", { phase: "querying" }));
-        // 采样与输出上限参数；ai-utils 的类型未列出这两个字段，且 1.0.1 运行时并不
-        // 透传给 ai.run（实测死参数）。参数名与去留以绑定通道 schema 实测为准
-        // （Task 8 Step 7 冒烟时确认，若报 schema 错误则换成 max_completion_tokens）
-        const input = {
+        const finalStream = (await runTools(withGenerationParams(ai), ASK_MODEL_ID, {
           messages: [
             { role: "system", content: prompt },
             ...messages.map((m) => ({ role: m.role, content: m.content })),
           ],
           tools,
-          temperature: 0.3,
-          max_tokens: 1024,
-        };
-        const finalStream = (await runTools(ai, ASK_MODEL_ID, input, {
+        }, {
           strictValidation: true,
           streamFinalResponse: true,
           maxRecursiveToolRuns: 2,

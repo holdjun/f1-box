@@ -127,6 +127,31 @@ describe("runAgent", () => {
     });
   });
 
+  it("injects generation params via wrapped ai binding", async () => {
+    const seenInputs: unknown[] = [];
+    const ai = {
+      run: async (_model: string, input: unknown) => {
+        seenInputs.push(input);
+        return {};
+      },
+    } as unknown as Ai;
+    const runTools = async (ai: Ai) => {
+      await ai.run("x", { messages: [] } as never);
+      return textStream(["答案"]);
+    };
+    await collectSse(
+      runAgent({
+        ai,
+        db: createStaticAskDatabase({}),
+        messages: [{ role: "user", content: "x" }],
+        runTools: runTools as unknown as RunToolsFn,
+      }),
+    );
+    expect(seenInputs).toEqual([
+      { messages: [], temperature: 0.3, max_tokens: 1024 },
+    ]);
+  });
+
   it("emits error event when the model call throws", async () => {
     const ai = {} as Ai;
     const runTools = async () => {
