@@ -325,7 +325,7 @@ ORDER BY rr.position_display_order`;
           position_text: "DNF",
           time: null,
           reason_retired: "Collision",
-          points: 0,
+          points: null,
           driver_id: "sergio-perez",
           driver_name: "Sergio Pérez",
           constructor_id: "red-bull",

@@ -379,7 +379,8 @@ export async function raceResults(
         driver: asString(record.driver_name, "result driver name"),
         driverId,
         team: asString(record.constructor_name, "result constructor name"),
-        points: asNumber(record.points, "result points"),
+        // f1db 未得分行的 points 为 NULL（实测 1.9 万行），语义上即 0 分
+        points: record.points === null ? 0 : asNumber(record.points, "result points"),
         status,
         pagePath: `/drivers/${driverId}`,
       };
