@@ -36,7 +36,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "ASTRO_DEV_BACKGROUND=0 pnpm dev --host 127.0.0.1",
+    // AI 绑定在 dev 下默认建 remote proxy session（需 wrangler 登录），本地凭证
+    // 过期与 CI 无凭证都起不来；e2e 全程 mock /api/ask，本地绑定足够
+    command:
+      "CLOUDFLARE_VITE_FORCE_LOCAL=true ASTRO_DEV_BACKGROUND=0 pnpm dev --host 127.0.0.1",
     url: "http://127.0.0.1:4321",
     reuseExistingServer: !process.env.CI,
   },
