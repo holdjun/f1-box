@@ -68,22 +68,22 @@ const winnerColor = (teamId: string | null) =>
                 </th>
                 <td>{formatUtcDate(race.date)}</td>
                 <td>
-                  {race.winnerName ? (
-                    <span class="vendor-cell vendor-cell--driver" style={`--monogram-bg: ${winnerColor(race.winnerTeamId)}`}>
+                  {race.winnerDriverId && race.winnerName ? (
+                    <a class="vendor-cell vendor-cell--driver" href={`/drivers/${race.winnerDriverId}`} style={`--monogram-bg: ${winnerColor(race.winnerTeamId)}`}>
                       <span class="vendor-cell__monogram" aria-hidden="true">{monogram(race.winnerName)}</span>
                       <span class="vendor-cell__name">{race.winnerName}</span>
                       <small>{race.winnerCode}</small>
-                    </span>
+                    </a>
                   ) : "—"}
                 </td>
                 <td>
-                  {race.winnerTeamName ? (
-                    <span class="vendor-cell">
-                      {race.winnerTeamId && logoSrcFor(vendorIndexes, race.winnerTeamId) ? (
+                  {race.winnerTeamId && race.winnerTeamName ? (
+                    <a class="vendor-cell" href={`/teams/${race.winnerTeamId}`}>
+                      {logoSrcFor(vendorIndexes, race.winnerTeamId) ? (
                         <img class="vendor-cell__logo" src={logoSrcFor(vendorIndexes, race.winnerTeamId) ?? ""} alt="" loading="lazy" />
                       ) : null}
                       {race.winnerTeamName}
-                    </span>
+                    </a>
                   ) : "—"}
                 </td>
                 <td>{race.laps}</td>

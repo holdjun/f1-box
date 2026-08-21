@@ -53,19 +53,19 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td class="position-cell">{positionLabel(row.position, row.positionText)}</td>
                 <td>{row.driverNumber ?? "—"}</td>
                 <td>
-                  <span class="vendor-cell vendor-cell--driver" style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
+                  <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`} style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
                     <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
                     <span class="vendor-cell__name">{row.driverName}</span>
                     <small>{row.driverCode}</small>
-                  </span>
+                  </a>
                 </td>
                 <td>
-                  <span class="vendor-cell">
+                  <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
                     {teamLogo(row.constructorId) ? (
                       <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
                     ) : null}
                     {row.constructorName}
-                  </span>
+                  </a>
                 </td>
                 <td>{row.laps ?? "—"}</td>
                 <td>{row.time ?? row.gap ?? row.retiredReason ?? "—"}</td>
@@ -93,19 +93,19 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td class="position-cell">{positionLabel(row.position, row.positionText)}</td>
                 <td>{row.driverNumber ?? "—"}</td>
                 <td>
-                  <span class="vendor-cell vendor-cell--driver" style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
+                  <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`} style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
                     <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
                     <span class="vendor-cell__name">{row.driverName}</span>
                     <small>{row.driverCode}</small>
-                  </span>
+                  </a>
                 </td>
                 <td>
-                  <span class="vendor-cell">
+                  <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
                     {teamLogo(row.constructorId) ? (
                       <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
                     ) : null}
                     {row.constructorName}
-                  </span>
+                  </a>
                 </td>
                 <td>{row.q1 ?? "—"}</td>
                 <td>{row.q2 ?? "—"}</td>
@@ -133,19 +133,19 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td class="position-cell">{positionLabel(row.position, row.positionText)}</td>
                 <td>{row.driverNumber ?? "—"}</td>
                 <td>
-                  <span class="vendor-cell vendor-cell--driver" style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
+                  <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`} style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
                     <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
                     <span class="vendor-cell__name">{row.driverName}</span>
                     <small>{row.driverCode}</small>
-                  </span>
+                  </a>
                 </td>
                 <td>
-                  <span class="vendor-cell">
+                  <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
                     {teamLogo(row.constructorId) ? (
                       <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
                     ) : null}
                     {row.constructorName}
-                  </span>
+                  </a>
                 </td>
                 <td>{row.time ?? "—"}</td>
               </tr>
@@ -171,19 +171,19 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td class="position-cell">{positionLabel(row.position, row.positionText)}</td>
                 <td>{row.driverNumber ?? "—"}</td>
                 <td>
-                  <span class="vendor-cell vendor-cell--driver" style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
+                  <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`} style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
                     <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
                     <span class="vendor-cell__name">{row.driverName}</span>
                     <small>{row.driverCode}</small>
-                  </span>
+                  </a>
                 </td>
                 <td>
-                  <span class="vendor-cell">
+                  <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
                     {teamLogo(row.constructorId) ? (
                       <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
                     ) : null}
                     {row.constructorName}
-                  </span>
+                  </a>
                 </td>
                 <td>{row.lap ?? "—"}</td>
                 <td>{row.time ?? "—"}</td>
@@ -210,19 +210,19 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td class="position-cell">{String(rowIndex + 1).padStart(2, "0")}</td>
                 <td>{row.driverNumber ?? "—"}</td>
                 <td>
-                  <span class="vendor-cell vendor-cell--driver" style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
+                  <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`} style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
                     <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
                     <span class="vendor-cell__name">{row.driverName}</span>
                     <small>{row.driverCode}</small>
-                  </span>
+                  </a>
                 </td>
                 <td>
-                  <span class="vendor-cell">
+                  <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
                     {teamLogo(row.constructorId) ? (
                       <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
                     ) : null}
                     {row.constructorName}
-                  </span>
+                  </a>
                 </td>
                 <td>{row.stops}</td>
                 <td>{row.totalSeconds ?? "—"}</td>
@@ -250,19 +250,19 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td class="position-cell">{positionLabel(row.position, row.positionText)}</td>
                 <td>{row.driverNumber ?? "—"}</td>
                 <td>
-                  <span class="vendor-cell vendor-cell--driver" style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
+                  <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`} style={`--monogram-bg: ${teamColor(row.constructorId)}`}>
                     <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
                     <span class="vendor-cell__name">{row.driverName}</span>
                     <small>{row.driverCode}</small>
-                  </span>
+                  </a>
                 </td>
                 <td>
-                  <span class="vendor-cell">
+                  <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
                     {teamLogo(row.constructorId) ? (
                       <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
                     ) : null}
                     {row.constructorName}
-                  </span>
+                  </a>
                 </td>
                 <td>{row.time ?? "—"}</td>
                 <td>{row.gap ?? "—"}</td>

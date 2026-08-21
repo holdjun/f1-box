@@ -13,6 +13,12 @@ test.describe("results races list", () => {
       "href",
       "/results/2026/races/australia/race-result",
     );
+    await expect(
+      rows.first().locator("td").nth(1).getByRole("link"),
+    ).toHaveAttribute("href", "/drivers/george-russell");
+    await expect(
+      rows.first().locator("td").nth(2).getByRole("link"),
+    ).toHaveAttribute("href", "/teams/mercedes");
     await expect(rows.first()).toContainText("1:23:06.801");
   });
 
@@ -50,6 +56,9 @@ test.describe("race detail", () => {
     const table = page.getByRole("table", { name: "Race classification" });
     await expect(table).toBeVisible();
     await expect(table.locator("tbody tr").first()).toContainText("George Russell");
+    await expect(
+      table.locator("tbody tr").first().locator("td").nth(2).getByRole("link"),
+    ).toHaveAttribute("href", "/drivers/george-russell");
     await expect(table.locator("tbody tr").first()).toContainText("1:23:06.801");
   });
 
@@ -89,21 +98,34 @@ test.describe("standings", () => {
     await page.goto("/results/2026/drivers");
     const table = page.getByRole("table", { name: "Driver standings" });
     await expect(table).toBeVisible();
+    await expect(table).toHaveClass("result-table");
     await expect(table.locator("tbody tr")).toHaveCount(22);
     await expect(table.locator("tbody tr").first()).toContainText("Kimi Antonelli");
+    await expect(
+      table.locator("tbody tr").first().getByRole("link"),
+    ).toHaveAttribute("href", "/drivers/kimi-antonelli");
     await expect(table.locator("tbody tr").first()).toContainText("219");
   });
 
   test("@desktop constructor standings table from f1db", async ({ page }) => {
     await page.goto("/results/2026/teams");
     const table = page.getByRole("table", { name: "Constructor standings" });
+    await expect(table).toHaveClass("result-table");
     await expect(table.locator("tbody tr")).toHaveCount(11);
     await expect(table.locator("tbody tr").first()).toContainText("Mercedes");
+    await expect(
+      table.locator("tbody tr").first().getByRole("link"),
+    ).toHaveAttribute("href", "/teams/mercedes");
   });
 });
 
 test("@mobile results pages have no page overflow", async ({ page }) => {
-  for (const path of ["/results/2026/races", "/results/2026/races/australia/race-result"]) {
+  for (const path of [
+    "/results/2026/races",
+    "/results/2026/races/australia/race-result",
+    "/results/2026/drivers",
+    "/results/2026/teams",
+  ]) {
     await page.goto(path);
     await expect(page.locator("main")).toBeVisible();
     const hasOverflow = await page.evaluate(

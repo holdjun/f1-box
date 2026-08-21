@@ -31,7 +31,7 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
         round: 1, slug: "australia", name: "Australia", race_name: "Australian Grand Prix",
         alpha2_code: "AU", country_name: "Australia", date: "2026-03-08", time: "04:00",
         laps: 58, circuit_name: "Melbourne", circuit_place: "Melbourne",
-        winner_name: "George Russell", winner_code: "RUS",
+        winner_name: "George Russell", winner_code: "RUS", winner_driver_id: "george-russell",
         winner_team_id: "mercedes", winner_team_name: "Mercedes",
         winner_time: "1:23:06.801", pole_name: "George Russell", pole_code: "RUS",
       }],
@@ -41,7 +41,7 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
       round: 1, slug: "australia", name: "Australia", raceName: "Australian Grand Prix",
       alpha2Code: "AU", countryName: "Australia", date: "2026-03-08", time: "04:00",
       laps: 58, circuitName: "Melbourne", circuitPlace: "Melbourne",
-      winnerName: "George Russell", winnerCode: "RUS",
+      winnerName: "George Russell", winnerCode: "RUS", winnerDriverId: "george-russell",
       winnerTeamId: "mercedes", winnerTeamName: "Mercedes",
       winnerTime: "1:23:06.801", poleName: "George Russell", poleCode: "RUS",
     }]);
@@ -53,12 +53,14 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
         round: 12, slug: "netherlands", name: "Netherlands", race_name: "Dutch Grand Prix",
         alpha2_code: "NL", country_name: "Netherlands", date: "2026-08-23", time: "13:00",
         laps: 72, circuit_name: "Zandvoort", circuit_place: "Zandvoort",
-        winner_name: null, winner_code: null, winner_team_id: null,
-        winner_team_name: null, winner_time: null, pole_name: null, pole_code: null,
+        winner_name: null, winner_code: null, winner_driver_id: null,
+        winner_team_id: null, winner_team_name: null, winner_time: null,
+        pole_name: null, pole_code: null,
       }],
     });
     const [row] = await createRaceResultsRepository(db).getSeasonCalendar(2026);
     expect(row.winnerName).toBeNull();
+    expect(row.winnerDriverId).toBeNull();
     expect(row.poleName).toBeNull();
   });
 
@@ -66,24 +68,29 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
     // 1951 法国站 Fagioli/Fangio 共享冠军：同 round 两条 P1 行，只渲染一条；
     // SQL 取 display_order 最小的 P1 行，映射层再按 round 去重兜底
     const sqls: string[] = [];
-    const sharedWinRow = (winner_name: string) => ({
+    const sharedWinRow = (winner_driver_id: string, winner_name: string) => ({
       round: 4, slug: "france", name: "France", race_name: "French Grand Prix",
       alpha2_code: "FR", country_name: "France", date: "1951-07-01", time: "14:00",
       laps: 77, circuit_name: "Reims-Gueux", circuit_place: "Reims",
-      winner_name, winner_code: null, winner_team_id: "alfa-romeo",
+      winner_name, winner_code: null, winner_driver_id,
+      winner_team_id: "alfa-romeo",
       winner_team_name: "Alfa Romeo", winner_time: null, pole_name: null, pole_code: null,
     });
     const db: RaceResultsDatabase = {
       batch(statements) {
         sqls.push(...statements.map((statement) => statement.sql));
         return Promise.resolve([{
-          results: [sharedWinRow("Luigi Fagioli"), sharedWinRow("Juan Manuel Fangio")],
+          results: [
+            sharedWinRow("luigi-fagioli", "Luigi Fagioli"),
+            sharedWinRow("juan-manuel-fangio", "Juan Manuel Fangio"),
+          ],
         }]);
       },
     };
     const rows = await createRaceResultsRepository(db).getSeasonCalendar(1951);
     expect(rows).toHaveLength(1);
     expect(rows[0].winnerName).toBe("Luigi Fagioli");
+    expect(rows[0].winnerDriverId).toBe("luigi-fagioli");
     expect(sqls[0]).toContain("MIN(x.position_display_order)");
   });
 
@@ -93,6 +100,7 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
     const completed = await repository.listRaces(2026);
     expect(completed).toHaveLength(11);
     expect(completed.every((race) => race.winnerName !== null)).toBe(true);
+    expect(completed.every((race) => race.winnerDriverId !== null)).toBe(true);
     expect(await repository.getSeasonCalendar(2025)).toEqual([]);
   });
 });

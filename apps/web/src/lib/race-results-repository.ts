@@ -19,6 +19,7 @@ export interface RaceSummary {
   circuitPlace: string;
   winnerName: string | null;
   winnerCode: string | null;
+  winnerDriverId: string | null;
   winnerTeamId: string | null;
   winnerTeamName: string | null;
   winnerTime: string | null;
@@ -128,7 +129,7 @@ const seasonCalendarSql = `SELECT ra.round, ra.grand_prix_id AS slug, gp.name,
        gp.full_name AS race_name, c.alpha2_code, c.name AS country_name,
        ra.date, ra.time, ra.laps,
        ci.name AS circuit_name, ci.place_name AS circuit_place,
-       wd.name AS winner_name, wd.abbreviation AS winner_code,
+       wd.id AS winner_driver_id, wd.name AS winner_name, wd.abbreviation AS winner_code,
        wct.id AS winner_team_id, wct.name AS winner_team_name, wrr.time AS winner_time,
        pd.name AS pole_name, pd.abbreviation AS pole_code
 FROM race ra
@@ -163,6 +164,7 @@ function mapRaceSummary(row: unknown): RaceSummary {
     circuitPlace: asString(r.circuit_place, "circuit place"),
     winnerName: r.winner_name === null ? null : asString(r.winner_name, "winner name"),
     winnerCode: r.winner_code === null ? null : asString(r.winner_code, "winner code"),
+    winnerDriverId: r.winner_driver_id === null ? null : asString(r.winner_driver_id, "winner driver id"),
     winnerTeamId: r.winner_team_id === null ? null : asString(r.winner_team_id, "winner team id"),
     winnerTeamName: r.winner_team_name === null ? null : asString(r.winner_team_name, "winner team name"),
     winnerTime: r.winner_time === null ? null : asString(r.winner_time, "winner time"),
