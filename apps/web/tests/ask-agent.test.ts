@@ -348,6 +348,41 @@ describe("runAgent", () => {
     expect(out.endsWith("event: done\ndata: {}\n\n")).toBe(true);
   });
 
+  it("recovers with a tool error message when execution throws", async () => {
+    const stream = openaiStream([
+      'data: {"choices":[{"delta":{"content":"查询暂时不可用"}}]}\n\n',
+      "data: [DONE]\n\n",
+    ]);
+    const { ai, calls } = fakeAi([
+      toolCallResponse("call-db", "race_results", { year: 2024, race: "摩纳哥" }),
+      { choices: [{ message: { content: null } }] },
+      stream,
+    ]);
+    const brokenDb = {
+      run: async () => {
+        throw new Error("D1_ERROR: no such column");
+      },
+    };
+    const out = await collectSse(
+      runAgent({
+        ai,
+        db: brokenDb,
+        messages: [{ role: "user", content: "2024 摩纳哥冠军" }],
+      }),
+    );
+
+    expect(out).toContain('event: delta\ndata: {"text":"查询暂时不可用"}');
+    expect(out.endsWith("event: done\ndata: {}\n\n")).toBe(true);
+    expect(out).not.toContain("event: error");
+
+    // 执行失败细节以 tool 消息回告模型自纠，而不是让整次回答失败
+    const finalMessages = calls[2].input.messages as Record<string, any>[];
+    const toolMessage = finalMessages.find((m) => m.role === "tool")!;
+    expect(toolMessage.tool_call_id).toBe("call-db");
+    expect(toolMessage.content).toContain("工具执行失败");
+    expect(toolMessage.content).toContain("D1_ERROR");
+  });
+
   it("stops after three tool rounds and answers from a no-tools stream", async () => {
     const stream = openaiStream([
       'data: {"choices":[{"delta":{"content":"请收窄问题范围"}}]}\n\n',

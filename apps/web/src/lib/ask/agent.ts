@@ -224,7 +224,17 @@ async function runToolCalls(tools: AskTool[], rawCalls: unknown[]): Promise<unkn
       messages.push(reply(`参数无效：${invalid}`));
       continue;
     }
-    messages.push(reply(JSON.stringify(await tool.execute(args))));
+    let result: unknown;
+    try {
+      result = await tool.execute(args);
+    } catch (error) {
+      // 执行失败以 tool 消息回告模型自纠（如 D1 报错），不让整次回答失败
+      const detail = error instanceof Error ? error.message : String(error);
+      console.error(`[ask] tool ${String(name)} error:`, detail);
+      messages.push(reply(`工具执行失败：${detail}`));
+      continue;
+    }
+    messages.push(reply(JSON.stringify(result)));
   }
   return messages;
 }
@@ -330,8 +340,12 @@ export function runAgent(options: {
         const tail = finalDecoder.flush();
         if (tail.length > 0) send("delta", { text: tail });
         send("done", {});
-      } catch {
-        // 不向客户端暴露模型原始错误
+      } catch (error) {
+        // 服务端诊断：仅错误消息（无问题/回答内容）；客户端只见通用文案
+        console.error(
+          "[ask] agent error:",
+          error instanceof Error ? error.message : String(error),
+        );
         send("error", { code: "model_error", message: "回答生成失败，请稍后重试" });
       } finally {
         controller.close();
