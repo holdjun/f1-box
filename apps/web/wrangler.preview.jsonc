@@ -27,6 +27,14 @@
       "id": "785a3e7856964828a15458eefdb7ee7b"
     }
   ],
+  "ai": { "binding": "AI" },
+  "ratelimits": [
+    {
+      "name": "RATE_LIMITER",
+      "namespace_id": "1002",
+      "simple": { "limit": 10, "period": 60 }
+    }
+  ],
   "observability": {
     "enabled": true
   }
