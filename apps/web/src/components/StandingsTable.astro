@@ -1,23 +1,28 @@
 ---
-import type { SeasonPayload } from "@f1-box/contracts/season";
+import type {
+  DriverStandingRow,
+  TeamStandingRow,
+} from "../lib/race-results-repository.js";
+import { logoSrcFor, vendorIndexes } from "../lib/vendor.js";
+import { monogram } from "../lib/tokens.js";
 
 interface Props {
   kind: "drivers" | "constructors";
-  rows: SeasonPayload["driverStandings"] | SeasonPayload["constructorStandings"];
-  limit?: number;
+  rows: DriverStandingRow[] | TeamStandingRow[];
 }
 
-const { kind, rows, limit } = Astro.props;
-const visibleRows = limit ? rows.slice(0, limit) : rows;
-const maxPoints = Math.max(...rows.map((row) => row.points), 1);
+const { kind, rows } = Astro.props;
 const label = kind === "drivers" ? "Driver standings" : "Constructor standings";
 const emptyText = kind === "drivers"
   ? "Driver standings are not available yet."
   : "Constructor standings are not available yet.";
+// 积分榜行没有车队归属，monogram 走 CSS 中性灰回落（--monogram-bg 缺省）
+const positionLabel = (row: DriverStandingRow | TeamStandingRow) =>
+  String(row.position ?? row.positionText).padStart(2, "0");
 ---
 
-<div class="table-scroll standings-scroll" tabindex="0">
-  <table class="standings-table" aria-label={label}>
+<div class="table-scroll" tabindex="0">
+  <table class="result-table" aria-label={label}>
     <thead>
       <tr>
         <th scope="col">Pos</th>
@@ -27,16 +32,27 @@ const emptyText = kind === "drivers"
       </tr>
     </thead>
     <tbody>
-      {visibleRows.length > 0 ? visibleRows.map((row) => (
+      {rows.length > 0 ? rows.map((row) => (
         <tr>
-          <td class="position-cell">{String(row.position).padStart(2, "0")}</td>
-          <th scope="row">
-            <span class="standing-name">{row.name}</span>
-            {"code" in row && <span class="driver-code">{row.code}</span>}
-            <span class="points-bar" aria-hidden="true">
-              <span style={`--bar-size: ${(row.points / maxPoints) * 100}%`}></span>
-            </span>
-          </th>
+          <td class="position-cell">{positionLabel(row)}</td>
+          {"driverId" in row ? (
+            <td>
+              <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`}>
+                <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
+                <span class="vendor-cell__name">{row.driverName}</span>
+                <small>{row.driverCode}</small>
+              </a>
+            </td>
+          ) : (
+            <td>
+              <a class="vendor-cell" href={`/teams/${row.teamId}`}>
+                {logoSrcFor(vendorIndexes, row.teamId) ? (
+                  <img class="vendor-cell__logo" src={logoSrcFor(vendorIndexes, row.teamId) ?? ""} alt="" loading="lazy" />
+                ) : null}
+                {row.teamName}
+              </a>
+            </td>
+          )}
           <td class="points-cell">{row.points}</td>
           <td>{row.wins}</td>
         </tr>

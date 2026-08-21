@@ -1,0 +1,5 @@
+---
+const year = Astro.params.year;
+const slug = (Astro.params.slug ?? "").toLowerCase();
+return Astro.redirect(`/results/${year}/races/${slug}/race-result`, 301);
+---

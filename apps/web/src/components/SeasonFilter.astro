@@ -9,6 +9,8 @@ interface Props {
   label?: string;
   sticky?: boolean;
   initialSelected?: number[] | null;
+  hrefFor?: (year: number) => string;
+  showAll?: boolean;
 }
 
 const {
@@ -19,6 +21,8 @@ const {
   label = "Season",
   sticky = false,
   initialSelected = null,
+  hrefFor,
+  showAll = mode === "link",
 } = Astro.props;
 
 interface DecadeGroup {
@@ -80,28 +84,30 @@ const count =
   </button>
 
   <div class="season-filter__panel" data-season-filter-panel hidden>
-    <div class="season-filter__actions">
-      {mode === "link" ? (
-        <a
-          class:list={[
-            "season-filter__action",
-            { "is-active": current === null },
-          ]}
-          href={baseHref}
-        >All seasons</a>
-      ) : (
-        <button
-          type="button"
-          class="season-filter__action"
-          data-season-filter-all
-        >All</button>
-      )}
-      {mode === "toggle" ? (
-        <span class="season-filter__count" data-season-filter-count
-          >{count}</span
-        >
-      ) : null}
-    </div>
+    {mode === "link" && !showAll ? null : (
+      <div class="season-filter__actions">
+        {mode === "link" ? (
+          <a
+            class:list={[
+              "season-filter__action",
+              { "is-active": current === null },
+            ]}
+            href={baseHref}
+          >All seasons</a>
+        ) : (
+          <button
+            type="button"
+            class="season-filter__action"
+            data-season-filter-all
+          >All</button>
+        )}
+        {mode === "toggle" ? (
+          <span class="season-filter__count" data-season-filter-count
+            >{count}</span
+          >
+        ) : null}
+      </div>
+    )}
 
     <div class="season-filter__groups">
       {decades.map((decade) => (
@@ -123,7 +129,7 @@ const count =
                     "season-filter__year",
                     { "is-active": current === year },
                   ]}
-                  href={`${baseHref}?year=${year}`}
+                  href={hrefFor ? hrefFor(year) : `${baseHref}?year=${year}`}
                   data-season-year={year}
                 >{year}</a>
               ) : (

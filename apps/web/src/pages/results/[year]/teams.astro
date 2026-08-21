@@ -1,43 +1,41 @@
 ---
 import { env } from "cloudflare:workers";
 
-import RaceCard from "../../components/RaceCard.astro";
-import SeasonFilter from "../../components/SeasonFilter.astro";
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import ResultsNav from "../../../components/ResultsNav.astro";
+import SeasonFilter from "../../../components/SeasonFilter.astro";
+import StandingsTable from "../../../components/StandingsTable.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
 import {
   createD1RaceResultsDatabase,
   createRaceResultsRepository,
-} from "../../lib/race-results-repository.js";
+} from "../../../lib/race-results-repository.js";
 
 const year = Number(Astro.params.year);
 const repository = import.meta.env.DEV
   ? createRaceResultsRepository()
   : createRaceResultsRepository(createD1RaceResultsDatabase(env.F1_DB));
-const [availableYears, races] = await Promise.all([
+const [availableYears, rows] = await Promise.all([
   repository.getSeasonYears(),
-  repository.getSeasonCalendar(year),
+  repository.getConstructorStandings(year),
 ]);
 if (!availableYears.includes(year)) Astro.response.status = 404;
-if (races.length > 0) {
+if (rows.length > 0) {
   Astro.response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
 }
 ---
 
-<BaseLayout title={`${year} Season`} year={year}>
+<BaseLayout title={`${year} Constructor Standings`} active="results" year={year}>
   <main id="main-content" class="page-shell">
-    <h1>{year} Season</h1>
+    <h1>{year} Constructor Standings</h1>
     <SeasonFilter
       years={availableYears}
       mode="link"
       current={year}
-      hrefFor={(y) => `/${y}/racing`}
+      hrefFor={(y) => `/results/${y}/teams`}
       sticky
       showAll={false}
     />
-    <div class="race-grid">
-      {races.map((race) => (
-        <RaceCard race={race} href={`/results/${year}/races/${race.slug}/race-result`} />
-      ))}
-    </div>
+    <ResultsNav year={year} active="teams" />
+    <StandingsTable kind="constructors" rows={rows} />
   </main>
 </BaseLayout>

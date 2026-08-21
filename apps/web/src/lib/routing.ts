@@ -1,9 +1,3 @@
-export function splitYearPath(pathname: string): { year: number | null; rest: string } {
-  const match = pathname.match(/^\/(\d{4})(\/.*)?$/);
-  if (!match) return { year: null, rest: pathname };
-  return { year: Number(match[1]), rest: match[2] || "" };
-}
-
 // 解析 ?year=1997 或 ?year=1997,2007 → 年份数组；无效/缺失返回 null（= 全部）
 export function parseYearParam(value: string | null): number[] | null {
   if (value === null || value.trim() === "") return null;
@@ -35,4 +29,26 @@ export function resolveSeasonSelection(
   if (param === null) return null;
   const valid = param.filter((year) => seasonYears.has(year));
   return valid.length > 0 ? valid : null;
+}
+
+export const raceTabKeys = [
+  "race-result", "fastest-laps", "pit-stop-summary", "starting-grid",
+  "qualifying", "practice-1", "practice-2", "practice-3",
+] as const;
+export type RaceTabKey = (typeof raceTabKeys)[number];
+
+// 顺序即分站子导航显示顺序（与 f1.com 一致）
+export const RACE_TAB_LABELS: Record<RaceTabKey, string> = {
+  "race-result": "Race Result",
+  "fastest-laps": "Fastest Laps",
+  "pit-stop-summary": "Pit Stop Summary",
+  "starting-grid": "Starting Grid",
+  qualifying: "Qualifying",
+  "practice-1": "Practice 1",
+  "practice-2": "Practice 2",
+  "practice-3": "Practice 3",
+};
+
+export function resolveRaceTab(value: string): RaceTabKey | null {
+  return (raceTabKeys as readonly string[]).includes(value) ? (value as RaceTabKey) : null;
 }

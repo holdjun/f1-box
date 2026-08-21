@@ -1,0 +1,98 @@
+---
+import { env } from "cloudflare:workers";
+
+import ResultsNav from "../../../../components/ResultsNav.astro";
+import SeasonFilter from "../../../../components/SeasonFilter.astro";
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import {
+  createD1RaceResultsDatabase,
+  createRaceResultsRepository,
+} from "../../../../lib/race-results-repository.js";
+import { formatUtcDate } from "../../../../lib/time.js";
+import { monogram } from "../../../../lib/tokens.js";
+import { colorForYear, logoSrcFor, vendorIndexes } from "../../../../lib/vendor.js";
+
+const year = Number(Astro.params.year);
+const repository = import.meta.env.DEV
+  ? createRaceResultsRepository()
+  : createRaceResultsRepository(createD1RaceResultsDatabase(env.F1_DB));
+const [availableYears, races] = await Promise.all([
+  repository.getSeasonYears(),
+  repository.listRaces(year),
+]);
+if (!availableYears.includes(year)) Astro.response.status = 404;
+if (races.length > 0) {
+  Astro.response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
+}
+
+// Winner monogram 底色用其当年车队配色，缺色回落中性灰（与 drivers 目录同口径）
+const winnerColor = (teamId: string | null) =>
+  (teamId && colorForYear(vendorIndexes, teamId, year)) ?? "#84909e";
+---
+
+<BaseLayout title={`${year} Race Results`} active="results" year={year}>
+  <main id="main-content" class="page-shell">
+    <h1>{year} Race Results</h1>
+    <SeasonFilter
+      years={availableYears}
+      mode="link"
+      current={year}
+      hrefFor={(y) => `/results/${y}/races`}
+      sticky
+      showAll={false}
+    />
+    <ResultsNav year={year} active="races" />
+    <div class="table-scroll" tabindex="0">
+      <table class="result-table" aria-label={`${year} race results`}>
+        <thead>
+          <tr>
+            <th scope="col">Grand Prix</th>
+            <th scope="col">Date</th>
+            <th scope="col">Winner</th>
+            <th scope="col">Team</th>
+            <th scope="col">Laps</th>
+            <th scope="col">Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {races.length === 0 ? (
+            <tr><td class="empty-cell" colspan="6">No race results yet.</td></tr>
+          ) : (
+            races.map((race) => (
+              <tr>
+                <th scope="row">
+                  <a class="vendor-cell" href={`/results/${year}/races/${race.slug}/race-result`}>
+                    <img class="vendor-cell__flag" src={`/vendor/country-flags/${race.alpha2Code.toLowerCase()}.svg`} alt="" loading="lazy" />
+                    {race.name}
+                  </a>
+                </th>
+                <td>{formatUtcDate(race.date)}</td>
+                <td>
+                  {race.winnerDriverId && race.winnerName ? (
+                    <a class="vendor-cell vendor-cell--driver" href={`/drivers/${race.winnerDriverId}`} style={`--monogram-bg: ${winnerColor(race.winnerTeamId)}`}>
+                      <span class="vendor-cell__monogram" aria-hidden="true">{monogram(race.winnerName)}</span>
+                      <span class="vendor-cell__name">{race.winnerName}</span>
+                      <small>{race.winnerCode}</small>
+                    </a>
+                  ) : "—"}
+                </td>
+                <td>
+                  {race.winnerTeamId && race.winnerTeamName ? (
+                    <a class="vendor-cell" href={`/teams/${race.winnerTeamId}`}>
+                      {logoSrcFor(vendorIndexes, race.winnerTeamId) ? (
+                        <img class="vendor-cell__logo" src={logoSrcFor(vendorIndexes, race.winnerTeamId) ?? ""} alt="" loading="lazy" />
+                      ) : null}
+                      {race.winnerTeamName}
+                    </a>
+                  ) : "—"}
+                </td>
+                <td>{race.laps}</td>
+                <td>{race.winnerTime ?? "—"}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  </main>
+</BaseLayout>
