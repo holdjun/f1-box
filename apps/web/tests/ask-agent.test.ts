@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   ASK_MODEL_ID,
   buildSystemPrompt,
-  decodeFinalChunk,
+  createFinalChunkDecoder,
   runAgent,
   type RunToolsFn,
 } from "../src/lib/ask/agent.js";
@@ -28,19 +28,39 @@ describe("buildSystemPrompt", () => {
   });
 });
 
-describe("decodeFinalChunk", () => {
-  it("extracts raw text chunks", () => {
-    expect(decodeFinalChunk("刘易斯")).toBe("刘易斯");
+describe("createFinalChunkDecoder", () => {
+  it("holds a raw text chunk until flush", () => {
+    const decoder = createFinalChunkDecoder();
+    expect(decoder.push("刘易斯")).toBe("");
+    expect(decoder.flush()).toBe("刘易斯");
   });
 
   it("extracts text from sse data lines", () => {
-    const chunk = 'data: {"response":"汉密尔顿"}\n\n';
-    expect(decodeFinalChunk(chunk)).toBe("汉密尔顿");
+    const decoder = createFinalChunkDecoder();
+    expect(decoder.push('data: {"response":"汉密尔顿"}\n\n')).toBe("汉密尔顿");
   });
 
   it("ignores done markers and empty data", () => {
-    expect(decodeFinalChunk("data: [DONE]\n\n")).toBe("");
-    expect(decodeFinalChunk("data: {}\n\n")).toBe("");
+    expect(createFinalChunkDecoder().push("data: [DONE]\n\n")).toBe("");
+    expect(createFinalChunkDecoder().push("data: {}\n\n")).toBe("");
+  });
+
+  it("reassembles a data line split across pushes", () => {
+    const decoder = createFinalChunkDecoder();
+    expect(decoder.push('data: {"resp')).toBe("");
+    expect(decoder.push('onse":"汉"}\n')).toBe("汉");
+  });
+
+  it("keeps raw text containing a data: substring", () => {
+    const decoder = createFinalChunkDecoder();
+    expect(decoder.push("详见 data: 字段说明\n")).toBe("详见 data: 字段说明\n");
+  });
+
+  it("returns the pending line without newline from flush", () => {
+    const decoder = createFinalChunkDecoder();
+    expect(decoder.push("第一行\n")).toBe("第一行\n");
+    expect(decoder.push("尾行")).toBe("");
+    expect(decoder.flush()).toBe("尾行");
   });
 });
 
@@ -68,7 +88,8 @@ async function collectSse(stream: ReadableStream<Uint8Array>): Promise<string> {
 describe("runAgent", () => {
   it("pipes final text as delta events and ends with done", async () => {
     const ai = {} as Ai;
-    const runTools = async () => textStream(["汉密尔顿", "七冠"]);
+    // 完整行随 push 出 delta，无换行残行由 flush 补发
+    const runTools = async () => textStream(["汉密尔顿\n", "七冠"]);
     const stream = runAgent({
       ai,
       db: createStaticAskDatabase({}),
@@ -76,7 +97,7 @@ describe("runAgent", () => {
       runTools: runTools as unknown as RunToolsFn,
     });
     const out = await collectSse(stream);
-    expect(out).toContain('event: delta\ndata: {"text":"汉密尔顿"}');
+    expect(out).toContain('event: delta\ndata: {"text":"汉密尔顿\\n"}');
     expect(out).toContain('event: delta\ndata: {"text":"七冠"}');
     expect(out.endsWith("event: done\ndata: {}\n\n")).toBe(true);
   });

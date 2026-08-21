@@ -1,4 +1,4 @@
-import { runWithTools } from "@cloudflare/ai-utils";
+import { runWithTools, type AiTextGenerationToolInputWithFunction } from "@cloudflare/ai-utils";
 import { encodeSseEvent } from "./sse.js";
 import { knowledgeEntries, matchKnowledge, type KnowledgeEntry } from "./knowledge.js";
 import type { AskMessage } from "./request.js";
@@ -31,23 +31,49 @@ export function buildSystemPrompt(entries: KnowledgeEntry[]): string {
   return `${PROMPT_RULES}\n\n参考知识（仅当与问题相关时使用）：\n${lines}`;
 }
 
-// runWithTools 的最终流可能给裸文本块或 SSE data 行，两种都解出增量文本
-export function decodeFinalChunk(chunk: string): string {
-  if (!chunk.includes("data:")) return chunk;
-  let out = "";
-  for (const line of chunk.split("\n")) {
-    if (!line.startsWith("data: ")) continue;
-    const payload = line.slice(6);
-    if (payload === "[DONE]") continue;
-    try {
-      const parsed = JSON.parse(payload) as { response?: unknown };
-      if (typeof parsed.response === "string") out += parsed.response;
-    } catch {
-      // 非 JSON 的 data 行按原文保留
-      out += payload;
+// runWithTools 的最终流可能给裸文本块或 SSE data 行，data 行还会被 chunk 边界切开；
+// 有状态地按行缓冲解码，两种形态都解出增量文本
+export function createFinalChunkDecoder(): {
+  push(chunk: string): string;
+  flush(): string;
+} {
+  let buffer = "";
+
+  // data 行解出 response 文本；空行是 SSE 事件分隔符，丢弃；其余按正文透传，
+  // keepNewline 为真时补回切行时吃掉的行尾换行（flush 的残行本来就没有换行）
+  const decodeLine = (line: string, keepNewline: boolean): string => {
+    if (line.startsWith("data: ")) {
+      const payload = line.slice(6);
+      if (payload === "[DONE]") return "";
+      try {
+        const parsed = JSON.parse(payload) as { response?: unknown };
+        return typeof parsed.response === "string" ? parsed.response : "";
+      } catch {
+        return "";
+      }
     }
-  }
-  return out;
+    if (line.length === 0) return "";
+    return keepNewline ? `${line}\n` : line;
+  };
+
+  return {
+    push(chunk: string): string {
+      buffer += chunk;
+      let out = "";
+      let newline = buffer.indexOf("\n");
+      while (newline !== -1) {
+        out += decodeLine(buffer.slice(0, newline), true);
+        buffer = buffer.slice(newline + 1);
+        newline = buffer.indexOf("\n");
+      }
+      return out;
+    },
+    flush(): string {
+      const rest = buffer;
+      buffer = "";
+      return decodeLine(rest, false);
+    },
+  };
 }
 
 export type RunToolsFn = typeof runWithTools;
@@ -96,12 +122,15 @@ export function runAgent(options: {
 
         const reader = finalStream.getReader();
         const decoder = new TextDecoder();
+        const finalDecoder = createFinalChunkDecoder();
         for (;;) {
           const { done, value } = await reader.read();
           if (done) break;
-          const text = decodeFinalChunk(decoder.decode(value, { stream: true }));
+          const text = finalDecoder.push(decoder.decode(value, { stream: true }));
           if (text.length > 0) send("delta", { text });
         }
+        const tail = finalDecoder.flush();
+        if (tail.length > 0) send("delta", { text: tail });
         send("done", {});
       } catch {
         // 不向客户端暴露模型原始错误
@@ -113,7 +142,9 @@ export function runAgent(options: {
   });
 }
 
-// 工具执行前触发 onQuery（写 status 事件）；返回 JSON 字符串供模型消费
+// 工具执行前触发 onQuery（写 status 事件）
+// 工具函数直接返回对象：runWithTools 会自行 JSON.stringify 工具结果（1.0.1），
+// 这里先 stringify 会双重编码；其类型签名却要求返回 string，与运行时不符，故整体断言
 function buildAskTools(db: AskDatabase, onQuery: () => void) {
   return [
     {
@@ -128,7 +159,7 @@ function buildAskTools(db: AskDatabase, onQuery: () => void) {
       },
       function: async ({ query }: { query: string }) => {
         onQuery();
-        return JSON.stringify(await driverSummary(db, query));
+        return driverSummary(db, query);
       },
     },
     {
@@ -143,7 +174,7 @@ function buildAskTools(db: AskDatabase, onQuery: () => void) {
       },
       function: async ({ query }: { query: string }) => {
         onQuery();
-        return JSON.stringify(await constructorSummary(db, query));
+        return constructorSummary(db, query);
       },
     },
     {
@@ -158,7 +189,7 @@ function buildAskTools(db: AskDatabase, onQuery: () => void) {
       },
       function: async ({ year }: { year: number }) => {
         onQuery();
-        return JSON.stringify(await seasonDriverStandings(db, year));
+        return seasonDriverStandings(db, year);
       },
     },
     {
@@ -173,7 +204,7 @@ function buildAskTools(db: AskDatabase, onQuery: () => void) {
       },
       function: async ({ year }: { year: number }) => {
         onQuery();
-        return JSON.stringify(await seasonConstructorStandings(db, year));
+        return seasonConstructorStandings(db, year);
       },
     },
     {
@@ -189,8 +220,8 @@ function buildAskTools(db: AskDatabase, onQuery: () => void) {
       },
       function: async ({ year, race }: { year: number; race: string }) => {
         onQuery();
-        return JSON.stringify(await raceResults(db, year, race));
+        return raceResults(db, year, race);
       },
     },
-  ];
+  ] as unknown as AiTextGenerationToolInputWithFunction[];
 }

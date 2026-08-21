@@ -89,7 +89,8 @@ export function setupAskPanel(): void {
 
   async function ask(text: string): Promise<void> {
     conversation.push({ role: "user", content: text });
-    appendBubble("user").textContent = text;
+    const userBubble = appendBubble("user");
+    userBubble.textContent = text;
     error.hidden = true;
     status.hidden = false;
     send.disabled = true;
@@ -103,6 +104,7 @@ export function setupAskPanel(): void {
     // 否则数组里残留 user 结尾，下次发送会被服务端交替校验拒绝
     const rollback = () => {
       conversation.pop();
+      userBubble.remove();
       input.value = text;
     };
 
