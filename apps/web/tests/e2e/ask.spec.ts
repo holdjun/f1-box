@@ -1,4 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
+import http from "node:http";
+import type { AddressInfo } from "node:net";
 
 const SSE_OK = [
   'event: delta\ndata: {"text":"刘易斯·汉密尔顿 "}\n\n',
@@ -271,5 +273,136 @@ test.describe("ask panel", () => {
     await expect(page.locator(".ask__close")).toBeFocused();
     await page.keyboard.press("Shift+Tab");
     await expect(page.locator(".ask__send")).toBeFocused();
+  });
+
+  test("@desktop tab cycles through enabled controls while streaming", async ({
+    page,
+  }) => {
+    let slow = false;
+    await page.route("**/api/ask", async (route) => {
+      if (slow) await new Promise((resolve) => setTimeout(resolve, 1000));
+      await route.fulfill({
+        status: 200,
+        contentType: "text/event-stream; charset=utf-8",
+        body: SSE_OK,
+      });
+    });
+    await page.goto("/");
+    await page.locator(".ask__trigger").click();
+    await page.locator(".ask__input").fill("第一问");
+    await page.locator(".ask__send").click();
+    await expect(page.locator(".ask__clear")).toBeVisible();
+    slow = true;
+    await page.locator(".ask__input").fill("第二问");
+    await page.locator(".ask__send").click();
+    await expect(page.locator(".ask__stop")).toBeVisible();
+    // 此刻启用中的控件：关闭、输入框、停止（发送/清空禁用）
+    await page.locator(".ask__stop").focus();
+    await page.keyboard.press("Tab");
+    await expect(page.locator(".ask__close")).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(page.locator(".ask__stop")).toBeFocused();
+  });
+
+  test("@desktop whitespace-only answer rolls back like an empty one", async ({
+    page,
+  }) => {
+    await page.route("**/api/ask", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "text/event-stream; charset=utf-8",
+        body: 'event: delta\ndata: {"text":"  \\n"}\n\nevent: done\ndata: {}\n\n',
+      }),
+    );
+    await page.goto("/");
+    await page.locator(".ask__trigger").click();
+    await page.locator(".ask__input").fill("测试问题");
+    await page.locator(".ask__send").click();
+    await expect(page.locator(".ask__bubble--assistant")).toHaveCount(0);
+    await expect(page.locator(".ask__input")).toHaveValue("测试问题");
+  });
+
+  test("@desktop stop keeps a partial answer and shows clear", async ({
+    page,
+  }) => {
+    // route.fulfill 会缓冲完整流，无法模拟挂起的 SSE；起一个真实流式服务，
+    // 先写一段部分回答再不结束响应
+    const server = http.createServer((_req, res) => {
+      res.writeHead(200, {
+        "content-type": "text/event-stream; charset=utf-8",
+      });
+      res.write('event: delta\ndata: {"text":"部分回答"}\n\n');
+      res.on("error", () => {});
+    });
+    await new Promise<void>((resolve) =>
+      server.listen(0, "127.0.0.1", resolve),
+    );
+    const port = (server.address() as AddressInfo).port;
+    try {
+      await page.route("**/api/ask", (route) =>
+        route.continue({ url: `http://127.0.0.1:${port}/ask` }),
+      );
+      await page.goto("/");
+      await page.locator(".ask__trigger").click();
+      await page.locator(".ask__input").fill("长问题");
+      await page.locator(".ask__send").click();
+      await expect(page.locator(".ask__bubble--assistant")).toContainText(
+        "部分回答",
+      );
+      await page.locator(".ask__stop").click();
+      await expect(page.locator(".ask__stop")).toBeHidden();
+      await expect(page.locator(".ask__clear")).toBeVisible();
+    } finally {
+      server.closeAllConnections();
+      server.close();
+    }
+  });
+
+  test("@desktop failed request does not clobber the next draft", async ({
+    page,
+  }) => {
+    await page.route("**/api/ask", async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      await route.fulfill({
+        status: 429,
+        contentType: "application/json",
+        body: JSON.stringify({
+          error: { code: "rate_limited", message: "请求太频繁" },
+        }),
+      });
+    });
+    await page.goto("/");
+    await page.locator(".ask__trigger").click();
+    await page.locator(".ask__input").fill("第一问");
+    await page.locator(".ask__send").click();
+    await page.locator(".ask__input").fill("第二问草稿");
+    await expect(page.locator(".ask__error")).toBeVisible();
+    await expect(page.locator(".ask__input")).toHaveValue("第二问草稿");
+  });
+
+  test("@desktop mid-stream error keeps the answer and restores the question", async ({
+    page,
+  }) => {
+    await page.route("**/api/ask", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "text/event-stream; charset=utf-8",
+        body:
+          'event: delta\ndata: {"text":"部分内容"}\n\n' +
+          'event: error\ndata: {"code":"model_error","message":"回答生成失败，请稍后重试"}\n\n',
+      }),
+    );
+    await page.goto("/");
+    await page.locator(".ask__trigger").click();
+    await page.locator(".ask__input").fill("难题");
+    await page.locator(".ask__send").click();
+    await expect(page.locator(".ask__bubble--assistant")).toContainText(
+      "部分内容",
+    );
+    // 错误文案以服务端为准，问题回到空输入框可直接重试
+    await expect(page.locator(".ask__error")).toContainText(
+      "回答生成失败，请稍后重试",
+    );
+    await expect(page.locator(".ask__input")).toHaveValue("难题");
   });
 });

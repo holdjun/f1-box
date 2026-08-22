@@ -1,11 +1,8 @@
-import {
-  capStoredAnswer,
-  windowForSend,
-  type AskTurn,
-} from "../lib/ask/history.js";
+import { capStoredAnswer, windowForSend } from "../lib/ask/history.js";
+import type { AskMessage } from "../lib/ask/request.js";
 import { createSseAccumulator } from "../lib/ask/sse.js";
 
-const conversation: AskTurn[] = [];
+const conversation: AskMessage[] = [];
 let controller: AbortController | null = null;
 
 // transition:persist 保住 DOM；astro:page-load 首次加载与每次客户端导航后触发，
@@ -103,12 +100,12 @@ export function setupAskPanel(): void {
     let answer = "";
     controller = new AbortController();
 
-    // 失败时回滚这轮 user 消息并把问题放回输入框（保留问题、允许重试），
-    // 否则数组里残留 user 结尾，下次发送会被服务端交替校验拒绝
+    // 失败时回滚这轮 user 消息；仅在输入框为空时把问题放回去，
+    // 避免覆盖请求期间用户已键入的下一个问题
     const rollback = () => {
       conversation.pop();
       userBubble.remove();
-      input.value = text;
+      if (input.value.trim().length === 0) input.value = text;
     };
 
     try {
@@ -131,6 +128,7 @@ export function setupAskPanel(): void {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       const accumulator = createSseAccumulator();
+      let hadError = false;
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -141,21 +139,30 @@ export function setupAskPanel(): void {
             bubble.textContent = answer;
             if (stick) messages.scrollTop = messages.scrollHeight;
           } else if (event.event === "error") {
-            showError("回答生成失败，请重试");
+            hadError = true;
+            // 文案以服务端为准（已脱敏）；解析失败退回通用提示
+            const message = (JSON.parse(event.data) as { message?: string }).message;
+            showError(message && message.length > 0 ? message : "回答生成失败，请重试");
           }
         }
       }
-      if (answer.length > 0) {
-        conversation.push({ role: "assistant", content: capStoredAnswer(answer) });
+      // 入库前 trim 再截断：服务端按 trim 后长度校验，纯空白轮次会让后续请求全部 400
+      const stored = capStoredAnswer(answer.trim());
+      if (stored.length > 0) {
+        conversation.push({ role: "assistant", content: stored });
         clear.hidden = false;
+        // 流出部分内容后失败：保留已有回答，把问题放回空输入框供重试
+        if (hadError && input.value.trim().length === 0) input.value = text;
       } else {
         bubble.remove();
         rollback();
       }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
-        if (answer.length > 0) {
-          conversation.push({ role: "assistant", content: capStoredAnswer(answer) });
+        const stored = capStoredAnswer(answer.trim());
+        if (stored.length > 0) {
+          conversation.push({ role: "assistant", content: stored });
+          clear.hidden = false;
         } else {
           bubble.remove();
           rollback();
@@ -178,9 +185,9 @@ export function setupAskPanel(): void {
 }
 
 function trapFocus(event: KeyboardEvent, panel: HTMLElement): void {
-  // hidden 元素不可聚焦，计入它们会让 first/last 永远不等于 activeElement，焦点陷阱失效
+  // hidden/disabled 元素不可聚焦，计入它们会让 first/last 永远不等于 activeElement，焦点陷阱失效
   const focusable = panel.querySelectorAll<HTMLElement>(
-    "button:not([hidden]), textarea, [href], input, select",
+    "button:not([hidden]):not(:disabled), textarea, [href], input, select",
   );
   if (focusable.length === 0) return;
   const first = focusable[0];

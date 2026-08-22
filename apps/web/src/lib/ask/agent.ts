@@ -161,7 +161,9 @@ interface ChatMessage {
 function messageOf(response: Record<string, unknown>): ChatMessage | undefined {
   const choices = response.choices;
   if (!Array.isArray(choices) || choices.length === 0) return undefined;
-  return (choices[0] as { message?: ChatMessage }).message;
+  const first = choices[0];
+  if (first === null || typeof first !== "object") return undefined;
+  return (first as { message?: ChatMessage }).message;
 }
 
 function toolCallsOf(message: ChatMessage | undefined): unknown[] | null {
@@ -175,6 +177,14 @@ async function runToolCalls(tools: AskTool[], rawCalls: unknown[]): Promise<unkn
   const byName = new Map(tools.map((tool) => [tool.name, tool]));
   const messages: unknown[] = [];
   for (const raw of rawCalls) {
+    if (raw === null || typeof raw !== "object") {
+      messages.push({
+        role: "tool",
+        tool_call_id: "",
+        content: "工具调用格式无效，请重新发起调用",
+      });
+      continue;
+    }
     const call = raw as { id?: unknown; function?: { name?: unknown; arguments?: unknown } };
     const toolCallId = typeof call.id === "string" ? call.id : "";
     const reply = (content: string) => ({ role: "tool", tool_call_id: toolCallId, content });
@@ -320,7 +330,7 @@ export function runAgent(options: {
         if (rounds === 0) {
           // 纯知识问题：首轮响应没有工具请求，content 即答案，省一次流式调用
           const content = message?.content;
-          if (typeof content === "string" && content.length > 0) {
+          if (typeof content === "string" && content.trim().length > 0) {
             delta(content);
           }
         } else {
@@ -335,7 +345,11 @@ export function runAgent(options: {
           for (;;) {
             const { done, value } = await reader.read();
             if (done) break;
-            throwIfAborted();
+            if (signal?.aborted) {
+              // 停止即截断上游模型流，不等 workerd 把剩余输出推完
+              await reader.cancel();
+              throw new Error("request aborted");
+            }
             const text = finalDecoder.push(decoder.decode(value, { stream: true }));
             if (text.length > 0) delta(text);
           }

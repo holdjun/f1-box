@@ -7,7 +7,6 @@ import {
   driverIdentitySql,
   driverRefSql,
   grandPrixRefSql,
-  raceIdSql,
   raceMetaSql,
   raceResultRowsSql,
   seasonCheckSql,
@@ -34,7 +33,6 @@ export async function createDevAskDatabase(): Promise<AskDatabase> {
         poles: 104,
         fastest_laps: 68,
         points: 4900.5,
-        championships: 7,
         best_position: 1,
       },
     ],
@@ -59,7 +57,6 @@ export async function createDevAskDatabase(): Promise<AskDatabase> {
         poles: 250,
         fastest_laps: 260,
         points: 9000,
-        championships: 16,
         best_position: 1,
       },
     ],
@@ -92,9 +89,14 @@ export async function createDevAskDatabase(): Promise<AskDatabase> {
       },
     ],
     [grandPrixRefSql]: [{ id: "monaco", name: "Monaco" }],
-    [raceIdSql]: [{ id: 1108 }],
     [raceMetaSql]: [
-      { year: 2024, round: 8, date: "2024-05-26", grand_prix_name: "Monaco" },
+      {
+        race_id: 1108,
+        year: 2024,
+        round: 8,
+        date: "2024-05-26",
+        grand_prix_name: "Monaco",
+      },
     ],
     [raceResultRowsSql]: [
       {

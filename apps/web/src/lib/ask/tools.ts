@@ -33,8 +33,7 @@ SELECT d.id, d.name, d.full_name, co.name AS country_name,
   d.total_race_entries AS entries, d.total_race_starts AS starts,
   d.total_race_wins AS wins, d.total_podiums AS podiums,
   d.total_pole_positions AS poles, d.total_fastest_laps AS fastest_laps,
-  d.total_points AS points, d.total_championship_wins AS championships,
-  d.best_championship_position AS best_position
+  d.total_points AS points, d.best_championship_position AS best_position
 FROM driver d
 JOIN country co ON co.id = d.nationality_country_id
 WHERE d.id = ?1`;
@@ -49,7 +48,6 @@ SELECT c.id, c.name, c.full_name, co.name AS country_name,
   c.total_race_entries AS entries, c.total_race_wins AS wins,
   c.total_podiums AS podiums, c.total_pole_positions AS poles,
   c.total_fastest_laps AS fastest_laps, c.total_points AS points,
-  c.total_championship_wins AS championships,
   c.best_championship_position AS best_position
 FROM constructor c
 JOIN country co ON co.id = c.country_id
@@ -83,9 +81,12 @@ async function resolveEntity(
   const rows = await db.run(refSql, [lookup]);
   const refs = mapRefs(rows);
 
-  // 别名已解析到唯一 id：SQL 行即精确行；否则按名称全等判精确
-  const exact = refs.filter(
-    (ref) => aliasId !== null || ref.name.toLowerCase() === lookup.toLowerCase(),
+  // 别名解析到 id 时按 id 全等取（子串匹配会撞名，如 williams 撞三支车队）；
+  // 未走别名时按名称全等判精确
+  const exact = refs.filter((ref) =>
+    aliasId !== null
+      ? ref.id.toLowerCase() === aliasId.toLowerCase()
+      : ref.name.toLowerCase() === lookup.toLowerCase(),
   );
   if (exact.length === 1) return { status: "unique", ref: exact[0] };
   if (exact.length > 1) return { status: "ambiguous", candidates: exact };
@@ -223,10 +224,9 @@ WHERE id = ?1 COLLATE NOCASE OR name = ?1 COLLATE NOCASE
 ORDER BY (CASE WHEN name = ?1 COLLATE NOCASE THEN 0 ELSE 1 END), name
 LIMIT 6`;
 
-export const raceIdSql = "SELECT id FROM race WHERE year = ?1 AND grand_prix_id = ?2";
-
+// meta 顺带返回 race_id，省一次独立的 id 查询
 export const raceMetaSql = `
-SELECT ra.year, ra.round, ra.date, gp.name AS grand_prix_name
+SELECT ra.id AS race_id, ra.year, ra.round, ra.date, gp.name AS grand_prix_name
 FROM race ra
 JOIN grand_prix gp ON gp.id = ra.grand_prix_id
 WHERE ra.year = ?1 AND ra.grand_prix_id = ?2`;
@@ -334,18 +334,14 @@ export async function raceResults(
   }
   const gp = gpRefs[0];
 
-  const raceIdRows = await db.run(raceIdSql, [year, gp.id]);
-  if (raceIdRows.length === 0) {
+  const metaRows = await db.run(raceMetaSql, [year, gp.id]);
+  if (metaRows.length === 0) {
     return { found: false, message: "该年份未举办此大奖赛" };
   }
-  const raceId = asNumber(
-    asRecord(raceIdRows[0], "race id row").id,
-    "race id",
-  );
-
-  const metaRows = await db.run(raceMetaSql, [year, gp.id]);
   const meta = asRecord(metaRows[0], "race meta row");
-  const rows = await db.run(raceResultRowsSql, [raceId]);
+  const rows = await db.run(raceResultRowsSql, [
+    asNumber(meta.race_id, "race id"),
+  ]);
 
   return {
     year,

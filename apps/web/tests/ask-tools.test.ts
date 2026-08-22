@@ -30,7 +30,6 @@ const hamiltonRows = [
     fastest_laps: 68,
     points: 4900.5,
     sprint_wins: 1,
-    championships: 7,
     best_position: 1,
   },
 ];
@@ -138,7 +137,6 @@ describe("constructorSummary", () => {
           poles: 250,
           fastest_laps: 260,
           points: 9000,
-          championships: 16,
           best_position: 1,
         },
       ],
@@ -162,6 +160,42 @@ describe("constructorSummary", () => {
         bestChampionshipPosition: 1,
       },
       pagePath: "/teams/ferrari",
+    });
+  });
+
+  it("resolves an alias to its id row among substring matches", async () => {
+    // "威廉姆斯"→williams；ref 查询按子串还会命中另外两支含 williams 的车队
+    const db = createStaticAskDatabase({
+      [constructorRefSql]: [
+        { id: "frank-williams-racing-cars", name: "Frank Williams Racing Cars" },
+        { id: "williams", name: "Williams" },
+        { id: "wolf-williams", name: "Wolf-Williams" },
+      ],
+      [constructorIdentitySql]: [
+        {
+          id: "williams",
+          name: "Williams",
+          full_name: "Williams Grand Prix Engineering",
+          country_name: "United Kingdom",
+          entries: 800,
+          wins: 114,
+          podiums: 300,
+          poles: 128,
+          fastest_laps: 133,
+          points: 3000,
+          best_position: 1,
+        },
+      ],
+      [constructorChampionshipYearsSql]: [{ year: 1980 }],
+    });
+    const result = await constructorSummary(db, "威廉姆斯");
+    expect(result).toMatchObject({
+      found: true,
+      constructor: {
+        id: "williams",
+        name: "Williams",
+        championshipYears: [1980],
+      },
     });
   });
 });
@@ -284,7 +318,7 @@ WHERE id = ?1 COLLATE NOCASE OR name = ?1 COLLATE NOCASE
 ORDER BY (CASE WHEN name = ?1 COLLATE NOCASE THEN 0 ELSE 1 END), name
 LIMIT 6`;
   const raceMetaSql = `
-SELECT ra.year, ra.round, ra.date, gp.name AS grand_prix_name
+SELECT ra.id AS race_id, ra.year, ra.round, ra.date, gp.name AS grand_prix_name
 FROM race ra
 JOIN grand_prix gp ON gp.id = ra.grand_prix_id
 WHERE ra.year = ?1 AND ra.grand_prix_id = ?2`;
@@ -301,10 +335,13 @@ ORDER BY rr.position_display_order`;
     const db = createStaticAskDatabase({
       [gpRefSql]: [{ id: "monaco", name: "Monaco" }],
       [raceMetaSql]: [
-        { year: 2024, round: 8, date: "2024-05-26", grand_prix_name: "Monaco" },
-      ],
-      "SELECT id FROM race WHERE year = ?1 AND grand_prix_id = ?2": [
-        { id: 1108 },
+        {
+          race_id: 1108,
+          year: 2024,
+          round: 8,
+          date: "2024-05-26",
+          grand_prix_name: "Monaco",
+        },
       ],
       [resultRowsSql]: [
         {

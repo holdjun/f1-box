@@ -30,7 +30,6 @@ const hamiltonIdentity = [
     poles: 104,
     fastest_laps: 68,
     points: 4900.5,
-    championships: 7,
     best_position: 1,
   },
 ];
@@ -507,5 +506,91 @@ describe("runAgent", () => {
     expect(callCount).toBe(1);
     // 用户主动停止：静默关流，不发 done/error
     expect(out).toBe("");
+  });
+
+  it("cancels the upstream model stream when aborted mid-stream", async () => {
+    const controller = new AbortController();
+    let cancelled = false;
+    const stream = new ReadableStream<Uint8Array>({
+      start(c) {
+        const encoder = new TextEncoder();
+        c.enqueue(encoder.encode('data: {"choices":[{"delta":{"content":"半"}}]}\n\n'));
+        c.enqueue(encoder.encode("data: [DONE]\n\n"));
+        c.close();
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    const ai = {
+      run: async (_model: string, input: Record<string, unknown>) => {
+        if (input.stream === true) {
+          controller.abort();
+          return stream;
+        }
+        return toolCallResponse("call-1", "driver_summary", {
+          query: "Lewis Hamilton",
+        });
+      },
+    } as unknown as Ai;
+    const out = await collectSse(
+      runAgent({
+        ai,
+        db: hamiltonDb(),
+        messages: [{ role: "user", content: "汉密尔顿几个冠军" }],
+        signal: controller.signal,
+      }),
+    );
+    expect(cancelled).toBe(true);
+    expect(out).toBe("");
+  });
+
+  it("feeds malformed tool call entries back to the model", async () => {
+    const stream = openaiStream([
+      'data: {"choices":[{"delta":{"content":"照常回答"}}]}\n\n',
+      "data: [DONE]\n\n",
+    ]);
+    const { ai, calls } = fakeAi([
+      { choices: [{ message: { content: null, tool_calls: [null] } }] },
+      { choices: [{ message: { content: "中间稿" } }] },
+      stream,
+    ]);
+    const out = await collectSse(
+      runAgent({
+        ai,
+        db: hamiltonDb(),
+        messages: [{ role: "user", content: "汉密尔顿几个冠军" }],
+      }),
+    );
+    const retryMessages = calls[1].input.messages as Record<string, any>[];
+    const toolMessage = retryMessages.find((m) => m.role === "tool")!;
+    expect(toolMessage.content).toContain("格式");
+    expect(out).toContain('event: delta\ndata: {"text":"照常回答"}');
+  });
+
+  it("treats a null choice entry as an empty answer instead of crashing", async () => {
+    const { ai } = fakeAi([{ choices: [null] }]);
+    const out = await collectSse(
+      runAgent({
+        ai,
+        db: createStaticAskDatabase({}),
+        messages: [{ role: "user", content: "x" }],
+      }),
+    );
+    expect(out).toContain('event: error\ndata: {"code":"empty_response"');
+    expect(out).not.toContain("model_error");
+  });
+
+  it("treats whitespace-only first-round content as empty", async () => {
+    const { ai } = fakeAi([{ choices: [{ message: { content: " \n " } }] }]);
+    const out = await collectSse(
+      runAgent({
+        ai,
+        db: createStaticAskDatabase({}),
+        messages: [{ role: "user", content: "x" }],
+      }),
+    );
+    expect(out).toContain('event: error\ndata: {"code":"empty_response"');
+    expect(out).not.toContain("event: delta");
   });
 });

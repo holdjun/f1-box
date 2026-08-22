@@ -41,30 +41,32 @@ export function createAskHandler(deps: {
     if (!sameOrigin) {
       return errorJson(403, "forbidden", "仅限同源请求");
     }
-    const declaredLength = Number(request.headers.get("content-length") ?? "0");
-    if (declaredLength > MAX_BODY_BYTES) {
-      return errorJson(400, "invalid_request", "请求体过大");
-    }
-    let parsed: unknown;
-    try {
-      const raw = await request.text();
-      if (raw.length > MAX_BODY_BYTES) {
-        return errorJson(400, "invalid_request", "请求体过大");
-      }
-      parsed = JSON.parse(raw);
-    } catch {
-      return errorJson(400, "invalid_request", "请求体不是合法 JSON");
-    }
-    const validated = validateAskBody(parsed);
-    if (!validated.ok) {
-      return errorJson(400, "invalid_request", validated.message);
-    }
+    // 限流先于读体：被限流的请求不承担解析大请求体的开销
     if (deps.limiter) {
       const key = request.headers.get("cf-connecting-ip") ?? "unknown";
       const outcome = await deps.limiter.limit({ key });
       if (!outcome.success) {
         return errorJson(429, "rate_limited", "请求太频繁，请稍后再试");
       }
+    }
+    const declaredLength = Number(request.headers.get("content-length") ?? "0");
+    if (declaredLength > MAX_BODY_BYTES) {
+      return errorJson(400, "invalid_request", "请求体过大");
+    }
+    let parsed: unknown;
+    try {
+      const buffer = await request.arrayBuffer();
+      // content-length 可缺失或撒谎，读后按字节复核一次
+      if (buffer.byteLength > MAX_BODY_BYTES) {
+        return errorJson(400, "invalid_request", "请求体过大");
+      }
+      parsed = JSON.parse(new TextDecoder().decode(buffer));
+    } catch {
+      return errorJson(400, "invalid_request", "请求体不是合法 JSON");
+    }
+    const validated = validateAskBody(parsed);
+    if (!validated.ok) {
+      return errorJson(400, "invalid_request", validated.message);
     }
     try {
       const stream = agent({

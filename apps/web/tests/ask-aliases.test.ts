@@ -16,6 +16,13 @@ describe("resolveAlias", () => {
   it("returns null for unknown alias", () => {
     expect(resolveAlias("无名车手", askAliases.drivers)).toBeNull();
   });
+
+  it("returns null for Object.prototype keys instead of inherited members", () => {
+    const table: Record<string, string> = { 汉密尔顿: "lewis-hamilton" };
+    expect(resolveAlias("constructor", table)).toBeNull();
+    expect(resolveAlias("toString", table)).toBeNull();
+    expect(resolveAlias("__proto__", table)).toBeNull();
+  });
 });
 
 describe("askAliases seed", () => {

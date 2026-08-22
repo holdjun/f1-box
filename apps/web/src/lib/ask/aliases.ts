@@ -17,5 +17,7 @@ export function resolveAlias(
   raw: string,
   table: Record<string, string>,
 ): string | null {
-  return table[normalizeAlias(raw)] ?? null;
+  const key = normalizeAlias(raw);
+  // hasOwn 防护：constructor/__proto__ 等原型键直接索引会返回继承成员
+  return Object.hasOwn(table, key) ? table[key] : null;
 }

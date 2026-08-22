@@ -163,4 +163,29 @@ describe("ask handler", () => {
     expect(response.status).toBe(200);
     expect(received).toBeInstanceOf(AbortSignal);
   });
+
+  it("rate limits before reading the request body", async () => {
+    let limitCalls = 0;
+    const limited = handler({
+      limiter: {
+        limit: async () => {
+          limitCalls++;
+          return { success: false };
+        },
+      },
+    });
+    const response = await limited(
+      new Request("https://f1-box.com/api/ask", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "https://f1-box.com",
+          "content-length": "999999",
+        },
+        body: "x",
+      }),
+    );
+    expect(limitCalls).toBe(1);
+    expect(response.status).toBe(429);
+  });
 });
