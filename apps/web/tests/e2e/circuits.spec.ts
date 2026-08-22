@@ -21,15 +21,18 @@ test("@desktop catalog year filter narrows to circuits used that season", async 
   await expect(page.locator(".circuit-card")).toContainText("Silverstone");
 });
 
-test("@desktop circuit detail shows stats and layout map", async ({ page }) => {
+test("@desktop circuit detail shows stats and annotated layout map", async ({
+  page,
+}) => {
   await page.goto("/circuits/shanghai");
   await expect(page.locator("main h1")).toHaveText(
     "Shanghai International Circuit",
   );
-  await expect(page.locator(".circuit-hero__map img")).toHaveAttribute(
-    "src",
-    "/vendor/circuits/shanghai-1.svg",
-  );
+  const map = page.locator(".circuit-hero__map svg.circuit-map");
+  await expect(map).toBeVisible();
+  // 注解图：16 个弯角标记 + 3 段 sector 着色
+  await expect(map.locator(".circuit-map__corner")).toHaveCount(16);
+  await expect(map.locator(".circuit-map__sector")).toHaveCount(3);
   const stats = page.locator(".circuit-stats");
   await expect(page.locator(".circuit-hero__length")).toContainText("5.451");
   await expect(stats).toContainText("2004");

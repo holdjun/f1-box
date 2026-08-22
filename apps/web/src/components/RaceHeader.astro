@@ -1,5 +1,6 @@
 ---
 import type { RaceMeta } from "../lib/race-results-repository.js";
+import CircuitMap from "./CircuitMap.astro";
 import { formatUtcDate, formatUtcDateTime } from "../lib/time.js";
 
 interface Props {
@@ -11,7 +12,11 @@ const round = String(meta.round).padStart(2, "0");
 
 <header class="race-hero page-shell">
   <a class="race-hero__map" href={`/circuits/${meta.circuitId}`} aria-label={`View ${meta.circuitName} circuit details`}>
-    <img src={`/vendor/circuits/${meta.circuitLayoutId}.svg`} alt={`${meta.circuitName} layout map`} />
+    <CircuitMap
+      layoutId={meta.circuitLayoutId}
+      fallbackSrc={`/vendor/circuits/${meta.circuitLayoutId}.svg`}
+      alt={`${meta.circuitName} layout map`}
+    />
   </a>
   <div class="race-hero__title">
     <p class="giant-round" aria-hidden="true">{round}</p>

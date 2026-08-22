@@ -2,6 +2,7 @@
 import { env } from "cloudflare:workers";
 
 import StatusPage from "../../components/StatusPage.astro";
+import CircuitMap from "../../components/CircuitMap.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import {
   createCircuitRepository,
@@ -25,8 +26,9 @@ else {
       <div class="circuit-hero">
         <div class="circuit-hero__map">
           {circuit.layoutId ? (
-            <img
-              src={`/vendor/circuits/${circuit.layoutId}.svg`}
+            <CircuitMap
+              layoutId={circuit.layoutId}
+              fallbackSrc={`/vendor/circuits/${circuit.layoutId}.svg`}
               alt={`${circuit.fullName} layout map`}
             />
           ) : (
@@ -91,7 +93,7 @@ else {
     align-items: center;
     padding-block: 2rem;
   }
-  .circuit-hero__map img {
+  .circuit-hero__map :is(img, svg) {
     display: block;
     width: min(100%, 30rem);
     height: auto;

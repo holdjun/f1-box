@@ -75,10 +75,7 @@ test.describe("race detail", () => {
     await page.goto("/results/2026/races/australia/race-result");
     const map = page.locator(".race-hero__map");
     await expect(map).toHaveAttribute("href", "/circuits/melbourne");
-    await expect(map.locator("img")).toHaveAttribute(
-      "src",
-      "/vendor/circuits/melbourne-2.svg",
-    );
+    await expect(map.locator("svg.circuit-map")).toBeVisible();
   });
 
   test("@desktop bare slug redirects to race-result", async ({ page }) => {

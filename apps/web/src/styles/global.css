@@ -969,7 +969,7 @@ tbody th[scope="row"] {
   opacity: 0.85;
 }
 
-.race-hero__map img {
+.race-hero__map :is(img, svg) {
   display: block;
   width: 100%;
   height: auto;

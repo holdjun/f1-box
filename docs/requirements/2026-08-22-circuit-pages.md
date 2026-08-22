@@ -16,6 +16,7 @@ racing 日历路由 `/:year/racing` 与 results 的 `/results/:year` 模式不�
 - 分站详情页 hero 的赛道名变为链接，指向该赛道详情页。
 - 分站详情页 hero 右上空区显示该场赛事布局的轮廓图（移动端居中置于顶部），整图链接到赛道详情页。
 - 布局口径：目录与详情均显示该赛道最近一场比赛所用的 layout（SVG 与 laps/distance 同口径）。
+- 详情页与 race hero 的赛道图优先渲染注解版（遥测中心线 + 三段 sector 官方配色 + 弯角编号圈 + DRS 激活点，数据由 `scripts/generate-circuit-maps.py` 离线用 fastf1 生成入库）；无注解数据的历史赛道回落 f1db 轮廓 SVG。目录缩略图沿用 f1db 轮廓。
 
 ## 验收标准
 
@@ -27,5 +28,6 @@ racing 日历路由 `/:year/racing` 与 results 的 `/results/:year` 模式不�
 ## 范围外
 
 - 历史布局切换（?layout= / 按年查看旧布局图）。
-- sector 配色、DRS 区、弯角编号等注解图（f1db 无此数据，SVG 为纯轮廓）。
+- DRS detection 点与 speed trap 位置标注（无可靠数据源；DRS activation 以遥测 DRS channel 推导，部分年份官方数据缺失该 channel 时不画）。
+- 历史赛道（约 2018 前无遥测）的弯角/sector 注解，回落纯轮廓。
 - racing 日历卡片的赛道链接（卡片整体已是链接，嵌套 anchor 不合法）。
