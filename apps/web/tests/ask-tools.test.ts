@@ -396,6 +396,40 @@ ORDER BY rr.position_display_order`;
     });
   });
 
+  it("resolves a race alias to its id row among substring matches", async () => {
+    // "摩纳哥"→monaco；子串查询同时命中其他含 monaco 的 GP 行
+    const db = createStaticAskDatabase({
+      [gpRefSql]: [
+        { id: "monaco", name: "Monaco" },
+        { id: "port-monaco", name: "Port Monaco" },
+      ],
+      [raceMetaSql]: [
+        {
+          race_id: 1108,
+          year: 2024,
+          round: 8,
+          date: "2024-05-26",
+          grand_prix_name: "Monaco",
+        },
+      ],
+      [resultRowsSql]: [
+        {
+          position_number: 1,
+          position_text: "1",
+          time: "1:44:01.014",
+          reason_retired: null,
+          points: 25,
+          driver_id: "charles-leclerc",
+          driver_name: "Charles Leclerc",
+          constructor_id: "ferrari",
+          constructor_name: "Ferrari",
+        },
+      ],
+    });
+    const result = await raceResults(db, 2024, "摩纳哥");
+    expect(result).toMatchObject({ year: 2024, grandPrix: "Monaco" });
+  });
+
   it("returns miss when gp unknown", async () => {
     const db = createStaticAskDatabase({});
     expect(await raceResults(db, 2024, "无名站")).toEqual({

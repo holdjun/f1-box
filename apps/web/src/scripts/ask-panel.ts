@@ -134,15 +134,27 @@ export function setupAskPanel(): void {
         if (done) break;
         for (const event of accumulator.push(decoder.decode(value, { stream: true }))) {
           if (event.event === "delta") {
-            answer += (JSON.parse(event.data) as { text: string }).text;
+            let text = "";
+            try {
+              text = (JSON.parse(event.data) as { text: string }).text;
+            } catch {
+              // 单条数据损坏跳过，不打断后续事件
+              continue;
+            }
+            answer += text;
             const stick = nearBottom();
             bubble.textContent = answer;
             if (stick) messages.scrollTop = messages.scrollHeight;
           } else if (event.event === "error") {
             hadError = true;
             // 文案以服务端为准（已脱敏）；解析失败退回通用提示
-            const message = (JSON.parse(event.data) as { message?: string }).message;
-            showError(message && message.length > 0 ? message : "回答生成失败，请重试");
+            let message = "";
+            try {
+              message = (JSON.parse(event.data) as { message?: string }).message ?? "";
+            } catch {
+              // 退回通用文案
+            }
+            showError(message.length > 0 ? message : "回答生成失败，请重试");
           }
         }
       }

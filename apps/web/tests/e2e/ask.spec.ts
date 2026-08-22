@@ -275,6 +275,32 @@ test.describe("ask panel", () => {
     await expect(page.locator(".ask__send")).toBeFocused();
   });
 
+  test("@desktop malformed error payload falls back to the generic message", async ({
+    page,
+  }) => {
+    await page.route("**/api/ask", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "text/event-stream; charset=utf-8",
+        body:
+          'event: delta\ndata: {"text":"部分内容"}\n\n' +
+          "event: error\ndata: {bad json}\n\n",
+      }),
+    );
+    await page.goto("/");
+    await page.locator(".ask__trigger").click();
+    await page.locator(".ask__input").fill("难题");
+    await page.locator(".ask__send").click();
+    // 已流出的部分回答保留，错误退回通用文案，问题可重试
+    await expect(page.locator(".ask__bubble--assistant")).toContainText(
+      "部分内容",
+    );
+    await expect(page.locator(".ask__error")).toContainText(
+      "回答生成失败，请重试",
+    );
+    await expect(page.locator(".ask__input")).toHaveValue("难题");
+  });
+
   test("@desktop tab cycles through enabled controls while streaming", async ({
     page,
   }) => {

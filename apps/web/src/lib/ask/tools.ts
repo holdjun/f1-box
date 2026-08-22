@@ -321,7 +321,14 @@ export async function raceResults(
   const aliasId = resolveAlias(trimmed, askAliases.grandPrix);
   const lookup = aliasId ?? trimmed;
   const gpRows = await db.run(grandPrixRefSql, [lookup]);
-  const gpRefs = mapRefs(gpRows);
+  let gpRefs = mapRefs(gpRows);
+  // 别名解析到 id 后按 id 全等过滤，防止子串匹配撞名误报歧义（与 resolveEntity 同规则）
+  if (aliasId !== null) {
+    const exact = gpRefs.filter(
+      (ref) => ref.id.toLowerCase() === aliasId.toLowerCase(),
+    );
+    if (exact.length > 0) gpRefs = exact;
+  }
   if (gpRefs.length === 0) {
     return { found: false, message: "未找到匹配的大奖赛，可尝试英文名" };
   }
