@@ -1,6 +1,6 @@
 import { asNumber, asRecord, asString } from "../db-parse.js";
-import { resolveAlias } from "./aliases.js";
-import { askAliases } from "./aliases.js";
+import { mergeStanding, type StandingTotal } from "../standings-merge.js";
+import { askAliases, resolveAlias } from "./aliases.js";
 import type { AskDatabase } from "./db.js";
 
 export interface EntityRef {
@@ -208,7 +208,7 @@ WHERE sds.year = ?1
 ORDER BY sds.position_display_order`;
 
 export const constructorStandingsSql = `
-SELECT scs.position_number, scs.position_text, scs.points, scs.championship_won,
+SELECT scs.position_text, scs.points, scs.championship_won,
   c.id AS constructor_id, c.name AS constructor_name
 FROM season_constructor_standing scs
 JOIN constructor c ON c.id = scs.constructor_id
@@ -268,7 +268,7 @@ export async function seasonDriverStandings(
   };
 }
 
-// 车队×引擎分行（60 年代）：积分累加、名次取最好、任一夺冠即夺冠——与站内车队页口径一致
+// 车队×引擎分行（60 年代）的合并规则与站内车队页共用 standings-merge.ts，口径单一出处
 export async function seasonConstructorStandings(
   db: AskDatabase,
   year: number,
@@ -277,47 +277,34 @@ export async function seasonConstructorStandings(
   if (check.length === 0) return missYear;
   const rows = await db.run(constructorStandingsSql, [year]);
 
-  const merged = new Map<
-    string,
-    { position: number | null; team: string; points: number; champion: boolean }
-  >();
+  const merged = new Map<string, StandingTotal & { team: string }>();
   for (const row of rows) {
     const record = asRecord(row, "constructor standing row");
     const teamId = asString(record.constructor_id, "standing constructor id");
-    const position = record.position_number === null
-      ? null
-      : asNumber(record.position_number, "standing position");
-    const points = asNumber(record.points, "standing points");
-    const existing = merged.get(teamId);
-    if (!existing) {
-      merged.set(teamId, {
-        position,
-        team: asString(record.constructor_name, "standing constructor name"),
-        points,
-        champion: Boolean(record.championship_won),
-      });
-      continue;
-    }
-    existing.points += points;
-    existing.champion = existing.champion || Boolean(record.championship_won);
-    if (
-      (existing.position === null && position !== null) ||
-      (existing.position !== null && position !== null && position < existing.position)
-    ) {
-      existing.position = position;
-    }
+    const total = mergeStanding(merged.get(teamId), {
+      points: asNumber(record.points, "standing points"),
+      positionText: asString(record.position_text, "standing position text"),
+      championshipWon: Boolean(record.championship_won),
+    });
+    merged.set(teamId, {
+      ...total,
+      team: asString(record.constructor_name, "standing constructor name"),
+    });
   }
   return {
     year,
     standings: [...merged.entries()]
-      .map(([teamId, entry]) => ({
-        position: entry.position,
-        team: entry.team,
-        teamId,
-        points: entry.points,
-        champion: entry.champion,
-        pagePath: `/teams/${teamId}`,
-      }))
+      .map(([teamId, entry]) => {
+        const positionNumber = Number(entry.positionText);
+        return {
+          position: Number.isInteger(positionNumber) ? positionNumber : null,
+          team: entry.team,
+          teamId,
+          points: entry.points,
+          champion: entry.championshipWon,
+          pagePath: `/teams/${teamId}`,
+        };
+      })
       .sort((a, b) => (a.position ?? 999) - (b.position ?? 999) || b.points - a.points),
   };
 }

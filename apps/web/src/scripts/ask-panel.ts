@@ -1,11 +1,11 @@
+import {
+  capStoredAnswer,
+  windowForSend,
+  type AskTurn,
+} from "../lib/ask/history.js";
 import { createSseAccumulator } from "../lib/ask/sse.js";
 
-interface Turn {
-  role: "user" | "assistant";
-  content: string;
-}
-
-const conversation: Turn[] = [];
+const conversation: AskTurn[] = [];
 let controller: AbortController | null = null;
 
 // transition:persist 保住 DOM；astro:page-load 首次加载与每次客户端导航后触发，
@@ -42,7 +42,8 @@ export function setupAskPanel(): void {
     if (event.key === "Tab") trapFocus(event, panel);
   });
   input.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
+    // 输入法组词期的回车只确认候选词，否则拼音选词会直接把半成品文本发出去
+    if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
       event.preventDefault();
       form.requestSubmit();
     }
@@ -95,6 +96,8 @@ export function setupAskPanel(): void {
     status.hidden = false;
     send.disabled = true;
     stop.hidden = false;
+    // 请求进行中禁止清空：否则流式回答会落进空会话，角色交替被服务端永久拒绝
+    clear.disabled = true;
     messages.setAttribute("aria-busy", "true");
     const bubble = appendBubble("assistant");
     let answer = "";
@@ -112,7 +115,7 @@ export function setupAskPanel(): void {
       const response = await fetch("/api/ask", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: conversation.slice(-9) }),
+        body: JSON.stringify({ messages: windowForSend(conversation) }),
         signal: controller.signal,
       });
       if (!response.ok || !response.body) {
@@ -132,9 +135,7 @@ export function setupAskPanel(): void {
         const { done, value } = await reader.read();
         if (done) break;
         for (const event of accumulator.push(decoder.decode(value, { stream: true }))) {
-          if (event.event === "status") {
-            status.hidden = false;
-          } else if (event.event === "delta") {
+          if (event.event === "delta") {
             answer += (JSON.parse(event.data) as { text: string }).text;
             const stick = nearBottom();
             bubble.textContent = answer;
@@ -145,7 +146,7 @@ export function setupAskPanel(): void {
         }
       }
       if (answer.length > 0) {
-        conversation.push({ role: "assistant", content: answer });
+        conversation.push({ role: "assistant", content: capStoredAnswer(answer) });
         clear.hidden = false;
       } else {
         bubble.remove();
@@ -154,7 +155,7 @@ export function setupAskPanel(): void {
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         if (answer.length > 0) {
-          conversation.push({ role: "assistant", content: answer });
+          conversation.push({ role: "assistant", content: capStoredAnswer(answer) });
         } else {
           bubble.remove();
           rollback();
@@ -168,6 +169,7 @@ export function setupAskPanel(): void {
       controller = null;
       status.hidden = true;
       send.disabled = false;
+      clear.disabled = false;
       stop.hidden = true;
       messages.setAttribute("aria-busy", "false");
       input.focus();
@@ -176,8 +178,9 @@ export function setupAskPanel(): void {
 }
 
 function trapFocus(event: KeyboardEvent, panel: HTMLElement): void {
+  // hidden 元素不可聚焦，计入它们会让 first/last 永远不等于 activeElement，焦点陷阱失效
   const focusable = panel.querySelectorAll<HTMLElement>(
-    "button, textarea, [href], input, select",
+    "button:not([hidden]), textarea, [href], input, select",
   );
   if (focusable.length === 0) return;
   const first = focusable[0];

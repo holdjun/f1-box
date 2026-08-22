@@ -1,4 +1,5 @@
 import { asNumber, asRecord, asString } from "./db-parse.js";
+import { mergeStanding } from "./standings-merge.js";
 import {
   deriveSeasonYears,
   mapSeasonYearRows,
@@ -203,7 +204,7 @@ FROM race ra
 JOIN sprint_race_result srr ON srr.race_id = ra.id
 WHERE srr.constructor_id = ?1 AND srr.position_number IS NOT NULL`;
 
-// 积分榜按 车队×引擎供应商 分行（60 年代多引擎车队一年有多行），这里逐年取回，合并见 mergeStandings
+// 积分榜按 车队×引擎供应商 分行（60 年代多引擎车队一年有多行），这里逐年取回，合并规则见 standings-merge.ts
 const standingsSql = `
 SELECT year, position_text, points, championship_won
 FROM season_constructor_standing
@@ -644,13 +645,13 @@ function mergeSeasons(
       ),
     });
   }
-  mergeStandings(seasons, standingRows);
+  applyStandingRows(seasons, standingRows);
 
   return [...seasons.values()].sort((a, b) => b.year - a.year);
 }
 
-// 同一年多个引擎供应商变体行：积分累加、名次取最好、任一夺冠即夺冠
-function mergeStandings(
+// 同一年多个引擎供应商变体行合并进对应赛季，规则由 standings-merge.ts 统一提供
+function applyStandingRows(
   seasons: Map<number, TeamSeason>,
   standingRows: unknown[],
 ): void {
@@ -658,17 +659,21 @@ function mergeStandings(
     const record = asRecord(row, "standing row");
     const season = seasons.get(asNumber(record.year, "standing row year"));
     if (!season) continue;
-    season.points = (season.points ?? 0) + asNumber(record.points, "standing points");
-    const position = asString(record.position_text, "standing position");
-    if (
-      season.position === null ||
-      (Number.isInteger(Number(position)) &&
-        (!Number.isInteger(Number(season.position)) ||
-          Number(position) < Number(season.position)))
-    ) {
-      season.position = position;
-    }
-    season.championshipWon = season.championshipWon || Boolean(record.championship_won);
+    const merged = mergeStanding(
+      {
+        points: season.points ?? 0,
+        positionText: season.position,
+        championshipWon: season.championshipWon,
+      },
+      {
+        points: asNumber(record.points, "standing points"),
+        positionText: asString(record.position_text, "standing position"),
+        championshipWon: Boolean(record.championship_won),
+      },
+    );
+    season.points = merged.points;
+    season.position = merged.positionText;
+    season.championshipWon = merged.championshipWon;
   }
 }
 

@@ -242,11 +242,8 @@ describe("runAgent", () => {
       }),
     );
 
-    const statusAt = out.indexOf('event: status\ndata: {"phase":"querying"}');
-    const deltaAt = out.indexOf("event: delta");
-    expect(statusAt).toBeGreaterThanOrEqual(0);
-    expect(statusAt).toBeLessThan(deltaAt);
-
+    // status 事件已移除：查询提示由客户端在请求期间静态显示
+    expect(out).not.toContain("event: status");
     expect(out).toContain('event: delta\ndata: {"text":"刘易斯·汉密尔顿"}');
     expect(out).toContain('event: delta\ndata: {"text":"，共七冠"}');
     expect(out).not.toContain("思考中");
@@ -435,5 +432,80 @@ describe("runAgent", () => {
     expect(out).toContain('event: error\ndata: {"code":"model_error"');
     expect(out).not.toContain("upstream exploded");
     expect(out).not.toContain("event: done");
+  });
+
+  it("emits an error instead of a silent done when the answer is empty", async () => {
+    const { ai } = fakeAi([{ choices: [{ message: { content: null } }] }]);
+    const out = await collectSse(
+      runAgent({
+        ai,
+        db: createStaticAskDatabase({}),
+        messages: [{ role: "user", content: "x" }],
+      }),
+    );
+    expect(out).toContain("event: error");
+    expect(out).not.toContain("event: delta");
+    expect(out).not.toContain("event: done");
+  });
+
+  it("emits an error instead of a silent done when the final stream carries no content", async () => {
+    const stream = openaiStream(["data: [DONE]\n\n"]);
+    const { ai } = fakeAi([
+      toolCallResponse("call-1", "driver_summary", {
+        query: "Lewis Hamilton",
+      }),
+      { choices: [{ message: { content: "中间稿" } }] },
+      stream,
+    ]);
+    const out = await collectSse(
+      runAgent({
+        ai,
+        db: hamiltonDb(),
+        messages: [{ role: "user", content: "汉密尔顿几个冠军" }],
+      }),
+    );
+    expect(out).toContain("event: error");
+    expect(out).not.toContain("event: done");
+  });
+
+  it("makes no model calls and closes quietly when the signal is already aborted", async () => {
+    const { ai, calls } = fakeAi([
+      { choices: [{ message: { content: "不该出现" } }] },
+    ]);
+    const out = await collectSse(
+      runAgent({
+        ai,
+        db: createStaticAskDatabase({}),
+        messages: [{ role: "user", content: "x" }],
+        signal: AbortSignal.abort(),
+      }),
+    );
+    expect(out).toBe("");
+    expect(calls).toHaveLength(0);
+  });
+
+  it("stops before tool execution and further model calls once aborted", async () => {
+    const controller = new AbortController();
+    let callCount = 0;
+    const ai = {
+      run: async () => {
+        callCount++;
+        controller.abort();
+        return toolCallResponse("call-1", "driver_summary", {
+          query: "Lewis Hamilton",
+        });
+      },
+    } as unknown as Ai;
+    const out = await collectSse(
+      runAgent({
+        ai,
+        db: hamiltonDb(),
+        messages: [{ role: "user", content: "汉密尔顿几个冠军" }],
+        signal: controller.signal,
+      }),
+    );
+    expect(callCount).toBe(1);
+    // 用户主动停止：静默关流，不发 done/error
+    expect(out).toBe("");
   });
 });

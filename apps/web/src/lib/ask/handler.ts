@@ -71,6 +71,7 @@ export function createAskHandler(deps: {
         ai: deps.ai,
         db: deps.db,
         messages: validated.messages,
+        signal: request.signal,
       });
       return new Response(stream, {
         headers: {

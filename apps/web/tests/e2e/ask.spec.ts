@@ -1,7 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const SSE_OK = [
-  'event: status\ndata: {"phase":"querying"}\n\n',
   'event: delta\ndata: {"text":"刘易斯·汉密尔顿 "}\n\n',
   'event: delta\ndata: {"text":"共七次夺冠"}\n\n',
   "event: done\ndata: {}\n\n",
@@ -149,5 +148,128 @@ test.describe("ask panel", () => {
     await page.locator(".ask__input").fill("移动端问题");
     await page.locator(".ask__send").click();
     await expect(page.locator(".ask__messages")).toContainText("刘易斯·汉密尔顿");
+  });
+
+  test("@desktop answer bubbles keep their styles when created client-side", async ({
+    page,
+  }) => {
+    mockAsk(page);
+    await page.goto("/");
+    await page.locator(".ask__trigger").click();
+    await page.locator(".ask__input").fill("汉密尔顿哪几年夺冠？");
+    await page.locator(".ask__send").click();
+    const bubble = page.locator(".ask__bubble--assistant");
+    await expect(bubble).toBeVisible();
+    // 动态创建的气泡拿不到 Astro 作用域属性，样式必须全局可见才生效
+    const styles = await bubble.evaluate((el) => {
+      const computed = getComputedStyle(el);
+      return {
+        padding: computed.padding,
+        whiteSpace: computed.whiteSpace,
+        background: computed.backgroundColor,
+      };
+    });
+    expect(styles.padding).toBe("10px 12px");
+    expect(styles.whiteSpace).toBe("pre-wrap");
+    expect(styles.background).not.toBe("rgba(0, 0, 0, 0)");
+  });
+
+  test("@desktop stored answers are truncated to the server message cap", async ({
+    page,
+  }) => {
+    const longAnswer = "答案".repeat(1500); // 3000 字符，超过单条 2000 上限
+    const bodies: { role: string; content: string }[][] = [];
+    await page.route("**/api/ask", async (route) => {
+      bodies.push(route.request().postDataJSON().messages);
+      await route.fulfill({
+        status: 200,
+        contentType: "text/event-stream; charset=utf-8",
+        body: `event: delta\ndata: ${JSON.stringify({ text: longAnswer })}\n\nevent: done\ndata: {}\n\n`,
+      });
+    });
+    await page.goto("/");
+    await page.locator(".ask__trigger").click();
+    await page.locator(".ask__input").fill("第一问");
+    await page.locator(".ask__send").click();
+    await expect(page.locator(".ask__messages")).toContainText("答案");
+    await page.locator(".ask__input").fill("第二问");
+    await page.locator(".ask__send").click();
+    await expect.poll(() => bodies.length).toBe(2);
+    expect(bodies[1][1].role).toBe("assistant");
+    expect(bodies[1][1].content).toHaveLength(2000);
+  });
+
+  test("@desktop composition enter does not send", async ({ page }) => {
+    let askRequests = 0;
+    await page.route("**/api/ask", (route) => {
+      askRequests++;
+      return route.fulfill({
+        status: 200,
+        contentType: "text/event-stream; charset=utf-8",
+        body: SSE_OK,
+      });
+    });
+    await page.goto("/");
+    await page.locator(".ask__trigger").click();
+    await page.locator(".ask__input").fill("汉密尔");
+    // 输入法组词期的回车只确认候选词，不得触发表单提交
+    await page
+      .locator(".ask__input")
+      .dispatchEvent("keydown", { key: "Enter", isComposing: true });
+    await page.waitForTimeout(250);
+    expect(askRequests).toBe(0);
+    await expect(page.locator(".ask__input")).toHaveValue("汉密尔");
+  });
+
+  test("@desktop clear is disabled while an answer streams in", async ({
+    page,
+  }) => {
+    const bodies: { role: string; content: string }[][] = [];
+    let slow = false;
+    await page.route("**/api/ask", async (route) => {
+      bodies.push(route.request().postDataJSON().messages);
+      if (slow) await new Promise((resolve) => setTimeout(resolve, 1000));
+      await route.fulfill({
+        status: 200,
+        contentType: "text/event-stream; charset=utf-8",
+        body: SSE_OK,
+      });
+    });
+    await page.goto("/");
+    await page.locator(".ask__trigger").click();
+    await page.locator(".ask__input").fill("第一问");
+    await page.locator(".ask__send").click();
+    await expect(page.locator(".ask__messages")).toContainText("共七次夺冠");
+    await expect(page.locator(".ask__clear")).toBeVisible();
+    slow = true;
+    await page.locator(".ask__input").fill("第二问");
+    await page.locator(".ask__send").click();
+    await expect(page.locator(".ask__stop")).toBeVisible();
+    await expect(page.locator(".ask__clear")).toBeDisabled();
+    // 脚本强行 click 也清不掉：禁用按钮不响应，会话保持完整
+    await page
+      .locator(".ask__clear")
+      .evaluate((el) => (el as HTMLButtonElement).click());
+    await expect(page.locator(".ask__messages")).toContainText("第一问");
+    await expect(page.locator(".ask__stop")).toBeHidden();
+    slow = false;
+    await page.locator(".ask__input").fill("第三问");
+    await page.locator(".ask__send").click();
+    await expect.poll(() => bodies.length).toBe(3);
+    expect(bodies[2][0]).toEqual({ role: "user", content: "第一问" });
+  });
+
+  test("@desktop tab cycles through visible panel controls only", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.locator(".ask__trigger").click();
+    await expect(page.locator(".ask__panel")).toBeVisible();
+    // 打开时可见可聚焦：关闭、输入框、发送（清空/停止隐藏）
+    await page.locator(".ask__send").focus();
+    await page.keyboard.press("Tab");
+    await expect(page.locator(".ask__close")).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(page.locator(".ask__send")).toBeFocused();
   });
 });

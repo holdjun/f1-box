@@ -20,10 +20,10 @@ describe("createSseAccumulator", () => {
   it("parses multiple events in one chunk", () => {
     const acc = createSseAccumulator();
     const events = acc.push(
-      'event: status\ndata: {"phase":"querying"}\n\nevent: done\ndata: {}\n\n',
+      'event: delta\ndata: {"text":"刘易斯"}\n\nevent: done\ndata: {}\n\n',
     );
     expect(events).toEqual([
-      { event: "status", data: '{"phase":"querying"}' },
+      { event: "delta", data: '{"text":"刘易斯"}' },
       { event: "done", data: "{}" },
     ]);
   });

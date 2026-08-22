@@ -75,7 +75,6 @@ export function createFinalChunkDecoder(): {
   };
 }
 
-// 工具执行前触发 onQuery（写 status 事件）
 interface AskTool {
   name: string;
   description: string;
@@ -87,7 +86,7 @@ interface AskTool {
   execute: (args: Record<string, unknown>) => Promise<Record<string, unknown>>;
 }
 
-function askTools(db: AskDatabase, onQuery: () => void): AskTool[] {
+function askTools(db: AskDatabase): AskTool[] {
   return [
     {
       name: "driver_summary",
@@ -99,10 +98,7 @@ function askTools(db: AskDatabase, onQuery: () => void): AskTool[] {
         },
         required: ["query"],
       },
-      execute: (args) => {
-        onQuery();
-        return driverSummary(db, args.query as string);
-      },
+      execute: (args) => driverSummary(db, args.query as string),
     },
     {
       name: "constructor_summary",
@@ -114,10 +110,7 @@ function askTools(db: AskDatabase, onQuery: () => void): AskTool[] {
         },
         required: ["query"],
       },
-      execute: (args) => {
-        onQuery();
-        return constructorSummary(db, args.query as string);
-      },
+      execute: (args) => constructorSummary(db, args.query as string),
     },
     {
       name: "season_driver_standings",
@@ -129,10 +122,7 @@ function askTools(db: AskDatabase, onQuery: () => void): AskTool[] {
         },
         required: ["year"],
       },
-      execute: (args) => {
-        onQuery();
-        return seasonDriverStandings(db, args.year as number);
-      },
+      execute: (args) => seasonDriverStandings(db, args.year as number),
     },
     {
       name: "season_constructor_standings",
@@ -144,10 +134,7 @@ function askTools(db: AskDatabase, onQuery: () => void): AskTool[] {
         },
         required: ["year"],
       },
-      execute: (args) => {
-        onQuery();
-        return seasonConstructorStandings(db, args.year as number);
-      },
+      execute: (args) => seasonConstructorStandings(db, args.year as number),
     },
     {
       name: "race_results",
@@ -160,10 +147,7 @@ function askTools(db: AskDatabase, onQuery: () => void): AskTool[] {
         },
         required: ["year", "race"],
       },
-      execute: (args) => {
-        onQuery();
-        return raceResults(db, args.year as number, args.race as string);
-      },
+      execute: (args) => raceResults(db, args.year as number, args.race as string),
     },
   ];
 }
@@ -260,16 +244,27 @@ export function runAgent(options: {
   ai: Ai;
   db: AskDatabase;
   messages: AskMessage[];
+  // 调用方请求的信号：用户点"停止"或断开连接后中止，避免继续消耗模型调用
+  signal?: AbortSignal;
 }): ReadableStream<Uint8Array> {
-  const { ai, db, messages } = options;
+  const { ai, db, messages, signal } = options;
   const encoder = new TextEncoder();
 
   return new ReadableStream<Uint8Array>({
     async start(controller) {
       const send = (event: string, data: unknown) => {
-        controller.enqueue(encoder.encode(encodeSseEvent(event, data)));
+        if (signal?.aborted) return;
+        try {
+          controller.enqueue(encoder.encode(encodeSseEvent(event, data)));
+        } catch {
+          // 消费端已取消流（断开连接），无需再写入
+        }
+      };
+      const throwIfAborted = () => {
+        if (signal?.aborted) throw new Error("request aborted");
       };
       try {
+        throwIfAborted();
         const query = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
         const prompt = buildSystemPrompt(matchKnowledge(query, knowledgeEntries));
         const conversation: unknown[] = [
@@ -277,7 +272,7 @@ export function runAgent(options: {
           ...messages.map((m) => ({ role: m.role, content: m.content })),
         ];
 
-        const tools = askTools(db, () => send("status", { phase: "querying" }));
+        const tools = askTools(db);
         // 工具线上格式（探针实测可用）：[{type:"function", function:{name, description, parameters}}]
         const wireTools = tools.map((tool) => ({
           type: "function",
@@ -300,6 +295,7 @@ export function runAgent(options: {
         );
         let toolCalls = toolCallsOf(message);
         while (toolCalls !== null && rounds < MAX_TOOL_ROUNDS) {
+          throwIfAborted();
           conversation.push({
             role: "assistant",
             content: typeof message?.content === "string" ? message.content : null,
@@ -308,39 +304,50 @@ export function runAgent(options: {
           conversation.push(...(await runToolCalls(tools, toolCalls)));
           rounds++;
           if (rounds === MAX_TOOL_ROUNDS) break;
+          throwIfAborted();
           message = messageOf(
             await runModel({ messages: conversation, tools: wireTools, stream: false }),
           );
           toolCalls = toolCallsOf(message);
         }
 
+        let sentDelta = false;
+        const delta = (text: string) => {
+          sentDelta = true;
+          send("delta", { text });
+        };
+
         if (rounds === 0) {
           // 纯知识问题：首轮响应没有工具请求，content 即答案，省一次流式调用
           const content = message?.content;
           if (typeof content === "string" && content.length > 0) {
-            send("delta", { text: content });
+            delta(content);
           }
-          send("done", {});
-          return;
+        } else {
+          throwIfAborted();
+          const finalStream = (await runModel({
+            messages: conversation,
+            stream: true,
+          })) as unknown as ReadableStream<Uint8Array>;
+          const reader = finalStream.getReader();
+          const decoder = new TextDecoder();
+          const finalDecoder = createFinalChunkDecoder();
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            throwIfAborted();
+            const text = finalDecoder.push(decoder.decode(value, { stream: true }));
+            if (text.length > 0) delta(text);
+          }
+          const tail = finalDecoder.flush();
+          if (tail.length > 0) delta(tail);
         }
-
-        const finalStream = (await runModel({
-          messages: conversation,
-          stream: true,
-        })) as unknown as ReadableStream<Uint8Array>;
-        const reader = finalStream.getReader();
-        const decoder = new TextDecoder();
-        const finalDecoder = createFinalChunkDecoder();
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const text = finalDecoder.push(decoder.decode(value, { stream: true }));
-          if (text.length > 0) send("delta", { text });
-        }
-        const tail = finalDecoder.flush();
-        if (tail.length > 0) send("delta", { text: tail });
-        send("done", {});
+        // 无任何内容可展示时明确报错，客户端得以回滚问题提示重试，而非静默空回答
+        if (sentDelta) send("done", {});
+        else send("error", { code: "empty_response", message: "未能生成回答，请重试" });
       } catch (error) {
+        // 用户主动停止：静默关流，不产生错误事件与服务端日志噪音
+        if (signal?.aborted) return;
         // 服务端诊断：仅错误消息（无问题/回答内容）；客户端只见通用文案
         console.error(
           "[ask] agent error:",
@@ -348,7 +355,11 @@ export function runAgent(options: {
         );
         send("error", { code: "model_error", message: "回答生成失败，请稍后重试" });
       } finally {
-        controller.close();
+        try {
+          controller.close();
+        } catch {
+          // 流已被消费端关闭或取消
+        }
       }
     },
   });

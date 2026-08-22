@@ -114,26 +114,6 @@
     flex-direction: column;
     gap: 10px;
   }
-  .ask__bubble {
-    max-width: 86%;
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid var(--line);
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    line-height: 1.55;
-  }
-  .ask__bubble--user {
-    align-self: flex-end;
-    background: var(--coral);
-    border-color: var(--coral);
-    color: var(--ink);
-  }
-  .ask__bubble--assistant {
-    align-self: flex-start;
-    background: var(--ink);
-    color: var(--paper);
-  }
   .ask__status,
   .ask__error {
     margin: 0;
@@ -196,5 +176,29 @@
     .ask__stop {
       transition: none;
     }
+  }
+</style>
+
+<!-- 气泡由脚本动态创建，拿不到 Astro 作用域属性，样式必须全局声明 -->
+<style is:global>
+  .ask__bubble {
+    max-width: 86%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.55;
+  }
+  .ask__bubble--user {
+    align-self: flex-end;
+    background: var(--coral);
+    border-color: var(--coral);
+    color: var(--ink);
+  }
+  .ask__bubble--assistant {
+    align-self: flex-start;
+    background: var(--ink);
+    color: var(--paper);
   }
 </style>

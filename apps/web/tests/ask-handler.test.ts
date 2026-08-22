@@ -149,4 +149,18 @@ describe("ask handler", () => {
     );
     expect(big.status).toBe(400);
   });
+
+  it("passes the request signal to the agent so stops end server work", async () => {
+    let received: AbortSignal | undefined;
+    const response = await ask(
+      handler({
+        runAgent: ((options: { signal?: AbortSignal }) => {
+          received = options.signal;
+          return sseStream();
+        }) as unknown as AskHandlerDeps["runAgent"],
+      }),
+    );
+    expect(response.status).toBe(200);
+    expect(received).toBeInstanceOf(AbortSignal);
+  });
 });

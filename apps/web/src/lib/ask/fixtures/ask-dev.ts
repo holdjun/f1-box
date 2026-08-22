@@ -84,7 +84,6 @@ export async function createDevAskDatabase(): Promise<AskDatabase> {
     ],
     [constructorStandingsSql]: [
       {
-        position_number: 1,
         position_text: "1",
         points: 613.5,
         championship_won: 1,

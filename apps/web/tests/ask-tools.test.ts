@@ -232,7 +232,7 @@ ORDER BY sds.position_display_order`;
 
 describe("seasonConstructorStandings", () => {
   const constructorStandingsSql = `
-SELECT scs.position_number, scs.position_text, scs.points, scs.championship_won,
+SELECT scs.position_text, scs.points, scs.championship_won,
   c.id AS constructor_id, c.name AS constructor_name
 FROM season_constructor_standing scs
 JOIN constructor c ON c.id = scs.constructor_id
@@ -244,7 +244,6 @@ ORDER BY scs.position_display_order`;
       "SELECT 1 AS ok FROM season WHERE year = ?1": [{ ok: 1 }],
       [constructorStandingsSql]: [
         {
-          position_number: 1,
           position_text: "1",
           points: 48,
           championship_won: 1,
@@ -252,7 +251,6 @@ ORDER BY scs.position_display_order`;
           constructor_name: "Vanwall",
         },
         {
-          position_number: 5,
           position_text: "5",
           points: 8,
           championship_won: 0,
