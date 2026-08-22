@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "types": "wrangler types",
-    "dev": "wrangler types && astro dev",
+    "dev": "wrangler types && CLOUDFLARE_VITE_FORCE_LOCAL=true astro dev",
     "check": "wrangler types && astro check",
     "test": "wrangler types && vitest run",
     "build": "wrangler types && astro build",

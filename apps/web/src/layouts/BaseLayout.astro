@@ -7,6 +7,7 @@ import "@fontsource/barlow-condensed/700.css";
 import "@fontsource-variable/space-grotesk";
 import "../styles/global.css";
 
+import AskPanel from "../components/AskPanel.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 
@@ -47,6 +48,7 @@ const {
     <a class="skip-link" href="#main-content">Skip to content</a>
     <SiteHeader active={active} year={year} />
     <slot />
+    <AskPanel />
     <SiteFooter
       season={year ?? season}
       sourceName={sourceName}

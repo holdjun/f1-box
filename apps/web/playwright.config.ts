@@ -36,6 +36,7 @@ export default defineConfig({
     },
   ],
   webServer: {
+    // dev 脚本已让 AI 绑定走本地模拟器（无需 wrangler 登录）；e2e 全程 mock /api/ask
     command: "ASTRO_DEV_BACKGROUND=0 pnpm dev --host 127.0.0.1",
     url: "http://127.0.0.1:4321",
     reuseExistingServer: !process.env.CI,
