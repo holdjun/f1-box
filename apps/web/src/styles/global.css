@@ -949,6 +949,17 @@ tbody th[scope="row"] {
   margin-top: 0.3rem;
 }
 
+.race-hero__circuit-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+
+.race-hero__circuit-link:hover {
+  text-decoration-color: currentColor;
+}
+
 .weekend-schedule {
   padding: 0;
   border-top: 1px solid var(--line);

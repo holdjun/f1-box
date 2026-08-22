@@ -30,7 +30,7 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
       circuit_place: [{
         round: 1, slug: "australia", name: "Australia", race_name: "Australian Grand Prix",
         alpha2_code: "AU", country_name: "Australia", date: "2026-03-08", time: "04:00",
-        laps: 58, circuit_name: "Melbourne", circuit_place: "Melbourne",
+        laps: 58, circuit_id: "melbourne", circuit_name: "Melbourne", circuit_place: "Melbourne",
         winner_name: "George Russell", winner_code: "RUS", winner_driver_id: "george-russell",
         winner_team_id: "mercedes", winner_team_name: "Mercedes",
         winner_time: "1:23:06.801", pole_name: "George Russell", pole_code: "RUS",
@@ -40,7 +40,7 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
     expect(rows).toEqual([{
       round: 1, slug: "australia", name: "Australia", raceName: "Australian Grand Prix",
       alpha2Code: "AU", countryName: "Australia", date: "2026-03-08", time: "04:00",
-      laps: 58, circuitName: "Melbourne", circuitPlace: "Melbourne",
+      laps: 58, circuitId: "melbourne", circuitName: "Melbourne", circuitPlace: "Melbourne",
       winnerName: "George Russell", winnerCode: "RUS", winnerDriverId: "george-russell",
       winnerTeamId: "mercedes", winnerTeamName: "Mercedes",
       winnerTime: "1:23:06.801", poleName: "George Russell", poleCode: "RUS",
@@ -52,7 +52,7 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
       circuit_place: [{
         round: 12, slug: "netherlands", name: "Netherlands", race_name: "Dutch Grand Prix",
         alpha2_code: "NL", country_name: "Netherlands", date: "2026-08-23", time: "13:00",
-        laps: 72, circuit_name: "Zandvoort", circuit_place: "Zandvoort",
+        laps: 72, circuit_id: "zandvoort", circuit_name: "Zandvoort", circuit_place: "Zandvoort",
         winner_name: null, winner_code: null, winner_driver_id: null,
         winner_team_id: null, winner_team_name: null, winner_time: null,
         pole_name: null, pole_code: null,
@@ -71,7 +71,7 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
     const sharedWinRow = (winner_driver_id: string, winner_name: string) => ({
       round: 4, slug: "france", name: "France", race_name: "French Grand Prix",
       alpha2_code: "FR", country_name: "France", date: "1951-07-01", time: "14:00",
-      laps: 77, circuit_name: "Reims-Gueux", circuit_place: "Reims",
+      laps: 77, circuit_id: "reims", circuit_name: "Reims-Gueux", circuit_place: "Reims",
       winner_name, winner_code: null, winner_driver_id,
       winner_team_id: "alfa-romeo",
       winner_team_name: "Alfa Romeo", winner_time: null, pole_name: null, pole_code: null,
@@ -120,6 +120,7 @@ const metaRow = {
   year: 2026, round: 1, slug: "australia", name: "Australia",
   official_name: "Formula 1 Qatar Airways Australian Grand Prix 2026",
   date: "2026-03-08", time: "04:00", laps: 58, course_length: 5.278,
+  circuit_id: "melbourne",
   circuit_name: "Melbourne", circuit_place: "Melbourne",
   country_name: "Australia", alpha2_code: "AU",
   free_practice_1_date: "2026-03-06", free_practice_1_time: "01:30",

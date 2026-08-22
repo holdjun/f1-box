@@ -32,6 +32,8 @@ Jolpica → Python 采集 → 共享 Schema 校验 → R2 不可变 payload + la
 
 发布规则：先写不可变对象 `v1/seasons/{year}/{checksum}.json`，最后更新 `latest.json`；失败不覆盖最后有效版本。访客请求不直接访问上游数据源。
 
+历史赛季数据（结果、车手、车队、赛道）来自 [f1db](https://github.com/f1db/f1db)（CC-BY-4.0）：`scripts/f1db-d1-dump.sh` 生成导入 SQL，data-sync 每周把 SQLite 全量导入 D1；赛道轮廓 SVG 用 `scripts/f1db-circuit-svg-sync.sh` 从 f1db 仓库同步到 `apps/web/public/vendor/circuits/`，新增布局时手动跑。
+
 设计细节见 `docs/superpowers/specs/2026-07-21-v1-season-hub-design.md`。
 
 ## 开发与发布流程

@@ -1,6 +1,6 @@
 ---
 interface Props {
-  active?: "racing" | "results" | "drivers" | "teams";
+  active?: "racing" | "results" | "circuits" | "drivers" | "teams";
   year?: number;
 }
 
@@ -14,13 +14,17 @@ const { active = "racing", year } = Astro.props;
     </a>
     <nav aria-label="Primary navigation">
       <a
-        href={year ? `/${year}/racing` : "/"}
+        href={year ? `/racing/${year}` : "/"}
         aria-current={active === "racing" ? "page" : undefined}
       >Racing</a>
       <a
         href={year ? `/results/${year}/races` : "/results"}
         aria-current={active === "results" ? "page" : undefined}
       >Results</a>
+      <a
+        href="/circuits"
+        aria-current={active === "circuits" ? "page" : undefined}
+      >Circuits</a>
       <a
         href="/drivers"
         aria-current={active === "drivers" ? "page" : undefined}

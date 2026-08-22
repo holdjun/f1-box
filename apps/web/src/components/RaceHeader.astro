@@ -14,7 +14,7 @@ const round = String(meta.round).padStart(2, "0");
     <p class="giant-round" aria-hidden="true">{round}</p>
     <div>
       <h1>{meta.name}</h1>
-      <p>{formatUtcDate(meta.date)} · {meta.circuitName}, {meta.circuitPlace} · {meta.countryName}</p>
+      <p>{formatUtcDate(meta.date)} · <a class="race-hero__circuit-link" href={`/circuits/${meta.circuitId}`}>{meta.circuitName}</a>, {meta.circuitPlace} · {meta.countryName}</p>
       <p class="muted">{meta.officialName}</p>
     </div>
   </div>

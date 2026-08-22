@@ -1,0 +1,121 @@
+---
+import { env } from "cloudflare:workers";
+
+import SeasonFilter from "../../components/SeasonFilter.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  createCircuitRepository,
+  createD1CircuitDatabase,
+} from "../../lib/circuit-repository.js";
+import { resolveCatalogYear } from "../../lib/routing.js";
+
+const repository = import.meta.env.DEV
+  ? createCircuitRepository()
+  : createCircuitRepository(createD1CircuitDatabase(env.F1_DB));
+
+const years = await repository.getSeasonYears();
+const year = resolveCatalogYear(Astro.url.searchParams.get("year"), years);
+const circuits =
+  year === null
+    ? await repository.getCircuits()
+    : await repository.getCircuitsByYear(year);
+
+// 目录查询含全表开窗，边缘短暂缓存吸收重复请求
+Astro.response.headers.set(
+  "Cache-Control",
+  "public, s-maxage=300, stale-while-revalidate=600",
+);
+---
+
+<BaseLayout title="Circuits" active="circuits">
+  <main id="main-content" class="page-shell">
+    <h1>Circuits</h1>
+    <SeasonFilter
+      years={years}
+      mode="link"
+      baseHref="/circuits"
+      current={year}
+      label="Filter by season"
+      sticky
+    />
+    <div class="circuit-grid">
+      {circuits.map((circuit) => (
+        <a class="circuit-card" href={`/circuits/${circuit.id}`}>
+          <span class="circuit-card__map">
+            {circuit.layoutId ? (
+              <img
+                src={`/vendor/circuits/${circuit.layoutId}.svg`}
+                alt=""
+                loading="lazy"
+              />
+            ) : (
+              <span class="circuit-card__no-map" aria-hidden="true">—</span>
+            )}
+          </span>
+          <span class="circuit-card__name">{circuit.name}</span>
+          <span class="circuit-card__meta">
+            {circuit.placeName}, {circuit.countryName}
+          </span>
+          <span class="circuit-card__meta">
+            {circuit.length.toFixed(3)} km · {circuit.totalRacesHeld} races
+          </span>
+        </a>
+      ))}
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin: 0 0 0.5rem;
+  }
+  .circuit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 1rem;
+  }
+  .circuit-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 1.25rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--ink-soft);
+    color: var(--paper);
+    text-decoration: none;
+    /* 卡片一次下发，视口外的卡跳过布局与绘制 */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 13rem;
+  }
+  .circuit-card:hover {
+    border-color: var(--paper);
+  }
+  .circuit-card__map {
+    display: grid;
+    place-items: center;
+    width: 6.5rem;
+    height: 6.5rem;
+    flex: none;
+  }
+  .circuit-card__map img {
+    width: 100%;
+    height: 100%;
+  }
+  .circuit-card__no-map {
+    color: var(--muted-light);
+    font-size: 1.5rem;
+  }
+  .circuit-card__name {
+    margin-top: 0.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  .circuit-card__meta {
+    font-size: 0.78rem;
+    color: var(--muted-light);
+    text-align: center;
+  }
+</style>
