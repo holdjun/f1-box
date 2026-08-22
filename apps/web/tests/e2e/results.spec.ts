@@ -69,6 +69,18 @@ test.describe("race detail", () => {
     await expect(schedule).toContainText("Qualifying");
   });
 
+  test("@desktop hero shows the circuit map linking to its circuit page", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races/australia/race-result");
+    const map = page.locator(".race-hero__map");
+    await expect(map).toHaveAttribute("href", "/circuits/melbourne");
+    await expect(map.locator("img")).toHaveAttribute(
+      "src",
+      "/vendor/circuits/melbourne-2.svg",
+    );
+  });
+
   test("@desktop bare slug redirects to race-result", async ({ page }) => {
     await page.goto("/results/2026/races/australia");
     await page.waitForURL(/\/results\/2026\/races\/australia\/race-result$/);

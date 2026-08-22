@@ -14,6 +14,7 @@ racing 日历路由 `/:year/racing` 与 results 的 `/results/:year` 模式不�
 - `/circuits` 目录页：赛季过滤器 + 卡片网格（轮廓缩略图、名称、地点、长度、办赛场数），按办赛场数降序。
 - `/circuits/:id` 详情页：当前布局轮廓 SVG + Circuit Length / First Grand Prix / Number of Laps / Race Distance / Fastest Lap（含车手与年份）/ Races Held。
 - 分站详情页 hero 的赛道名变为链接，指向该赛道详情页。
+- 分站详情页 hero 右上空区显示该场赛事布局的轮廓图（移动端居中置于顶部），整图链接到赛道详情页。
 - 布局口径：目录与详情均显示该赛道最近一场比赛所用的 layout（SVG 与 laps/distance 同口径）。
 
 ## 验收标准

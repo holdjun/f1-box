@@ -33,7 +33,7 @@ export interface RaceSession { key: string; label: string; startsAtUtc: string; 
 export interface RaceMeta {
   year: number; round: number; slug: string; name: string; officialName: string;
   date: string; laps: number; courseLength: number;
-  circuitId: string; circuitName: string; circuitPlace: string; countryName: string; alpha2Code: string;
+  circuitId: string; circuitLayoutId: string; circuitName: string; circuitPlace: string; countryName: string; alpha2Code: string;
   sessions: RaceSession[];
 }
 
@@ -180,7 +180,7 @@ const raceIdSubquery = `(SELECT id FROM race WHERE year = ?1 AND grand_prix_id =
 
 const raceMetaSql = `SELECT ra.year, ra.round, ra.grand_prix_id AS slug, gp.name,
        ra.official_name, ra.date, ra.time, ra.laps, ra.course_length,
-       ra.circuit_id, ci.name AS circuit_name, ci.place_name AS circuit_place,
+       ra.circuit_id, ra.circuit_layout_id, ci.name AS circuit_name, ci.place_name AS circuit_place,
        cc.name AS country_name, cc.alpha2_code
 FROM race ra
 JOIN grand_prix gp ON ra.grand_prix_id = gp.id
@@ -326,6 +326,7 @@ function mapRaceMeta(row: unknown): RaceMeta {
     laps: asNumber(r.laps, "race laps"),
     courseLength: asNumber(r.course_length, "course length"),
     circuitId: asString(r.circuit_id, "circuit id"),
+    circuitLayoutId: asString(r.circuit_layout_id, "circuit layout"),
     circuitName: asString(r.circuit_name, "circuit name"),
     circuitPlace: asString(r.circuit_place, "circuit place"),
     countryName: asString(r.country_name, "country name"),

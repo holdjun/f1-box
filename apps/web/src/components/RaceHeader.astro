@@ -10,6 +10,9 @@ const round = String(meta.round).padStart(2, "0");
 ---
 
 <header class="race-hero page-shell">
+  <a class="race-hero__map" href={`/circuits/${meta.circuitId}`} aria-label={`View ${meta.circuitName} circuit details`}>
+    <img src={`/vendor/circuits/${meta.circuitLayoutId}.svg`} alt={`${meta.circuitName} layout map`} />
+  </a>
   <div class="race-hero__title">
     <p class="giant-round" aria-hidden="true">{round}</p>
     <div>

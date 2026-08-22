@@ -121,6 +121,7 @@ const metaRow = {
   official_name: "Formula 1 Qatar Airways Australian Grand Prix 2026",
   date: "2026-03-08", time: "04:00", laps: 58, course_length: 5.278,
   circuit_id: "melbourne",
+  circuit_layout_id: "melbourne-2",
   circuit_name: "Melbourne", circuit_place: "Melbourne",
   country_name: "Australia", alpha2_code: "AU",
   free_practice_1_date: "2026-03-06", free_practice_1_time: "01:30",
