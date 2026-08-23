@@ -1,5 +1,5 @@
 ---
 import { getIndex } from "../lib/page-data.js";
 const index = await getIndex();
-return Astro.redirect(`/${index.activeSeason}/racing`);
+return Astro.redirect(`/racing/${index.activeSeason}`);
 ---

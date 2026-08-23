@@ -1,0 +1,97 @@
+---
+import rawMaps from "../data/circuit-maps.json";
+
+interface CircuitMapData {
+  circuitId: string;
+  source: string;
+  sectors: [number, number][][];
+  corners: { x: number; y: number; n: number; letter: string }[];
+  drs: [number, number][];
+}
+
+interface Props {
+  layoutId: string | null;
+  // 无注解数据时回落 f1db 轮廓 SVG
+  fallbackSrc?: string | null;
+  alt: string;
+}
+
+const { layoutId, fallbackSrc = null, alt } = Astro.props;
+const map = layoutId
+  ? (rawMaps as unknown as Record<string, CircuitMapData>)[layoutId]
+  : undefined;
+
+// F1 官方 sector 配色
+const SECTOR_COLORS = ["#ec008c", "#ffd400", "#00a3e0"];
+const pointsAttr = (pts: [number, number][]) =>
+  pts.map(([x, y]) => `${x},${y}`).join(" ");
+---
+
+{map ? (
+  <svg class="circuit-map" viewBox="0 0 500 500" role="img" aria-label={alt}>
+    {map.sectors.map((pts) => (
+      <polyline class="circuit-map__outline" points={pointsAttr(pts)} />
+    ))}
+    {map.sectors.map((pts) => (
+      <polyline class="circuit-map__track" points={pointsAttr(pts)} />
+    ))}
+    {map.sectors.map((pts, i) => (
+      <polyline
+        class="circuit-map__sector"
+        stroke={SECTOR_COLORS[i]}
+        points={pointsAttr(pts)}
+      />
+    ))}
+    {map.drs.map(([x, y]) => (
+      <circle class="circuit-map__drs" cx={x} cy={y} r="5" />
+    ))}
+    {map.corners.map((corner) => (
+      <g class="circuit-map__corner" transform={`translate(${corner.x} ${corner.y})`}>
+        <circle r="9.5" />
+        <text>{corner.n}{corner.letter}</text>
+      </g>
+    ))}
+  </svg>
+) : fallbackSrc ? (
+  <img class="circuit-map" src={fallbackSrc} alt={alt} />
+) : null}
+
+<style>
+  .circuit-map {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .circuit-map__outline,
+  .circuit-map__track,
+  .circuit-map__sector {
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .circuit-map__outline {
+    stroke: var(--paper);
+    stroke-width: 13;
+  }
+  .circuit-map__track {
+    stroke: #0b0d10;
+    stroke-width: 9;
+  }
+  .circuit-map__sector {
+    stroke-width: 3.5;
+  }
+  .circuit-map__drs {
+    fill: #35d07f;
+  }
+  .circuit-map__corner circle {
+    fill: var(--paper);
+  }
+  .circuit-map__corner text {
+    fill: #0b0d10;
+    font-family: var(--body);
+    font-size: 10px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+</style>

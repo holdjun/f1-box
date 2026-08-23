@@ -15,6 +15,7 @@ export interface RaceSummary {
   date: string;
   time: string | null;
   laps: number;
+  circuitId: string;
   circuitName: string;
   circuitPlace: string;
   winnerName: string | null;
@@ -32,7 +33,7 @@ export interface RaceSession { key: string; label: string; startsAtUtc: string; 
 export interface RaceMeta {
   year: number; round: number; slug: string; name: string; officialName: string;
   date: string; laps: number; courseLength: number;
-  circuitName: string; circuitPlace: string; countryName: string; alpha2Code: string;
+  circuitId: string; circuitLayoutId: string; circuitName: string; circuitPlace: string; countryName: string; alpha2Code: string;
   sessions: RaceSession[];
 }
 
@@ -128,7 +129,7 @@ export function createD1RaceResultsDatabase(d1: D1Database): RaceResultsDatabase
 const seasonCalendarSql = `SELECT ra.round, ra.grand_prix_id AS slug, gp.name,
        gp.full_name AS race_name, c.alpha2_code, c.name AS country_name,
        ra.date, ra.time, ra.laps,
-       ci.name AS circuit_name, ci.place_name AS circuit_place,
+       ci.id AS circuit_id, ci.name AS circuit_name, ci.place_name AS circuit_place,
        wd.id AS winner_driver_id, wd.name AS winner_name, wd.abbreviation AS winner_code,
        wct.id AS winner_team_id, wct.name AS winner_team_name, wrr.time AS winner_time,
        pd.name AS pole_name, pd.abbreviation AS pole_code
@@ -160,6 +161,7 @@ function mapRaceSummary(row: unknown): RaceSummary {
     date: asString(r.date, "race date"),
     time: r.time === null ? null : asString(r.time, "race time"),
     laps: asNumber(r.laps, "laps"),
+    circuitId: asString(r.circuit_id, "circuit id"),
     circuitName: asString(r.circuit_name, "circuit name"),
     circuitPlace: asString(r.circuit_place, "circuit place"),
     winnerName: r.winner_name === null ? null : asString(r.winner_name, "winner name"),
@@ -178,7 +180,7 @@ const raceIdSubquery = `(SELECT id FROM race WHERE year = ?1 AND grand_prix_id =
 
 const raceMetaSql = `SELECT ra.year, ra.round, ra.grand_prix_id AS slug, gp.name,
        ra.official_name, ra.date, ra.time, ra.laps, ra.course_length,
-       ci.name AS circuit_name, ci.place_name AS circuit_place,
+       ra.circuit_id, ra.circuit_layout_id, ci.name AS circuit_name, ci.place_name AS circuit_place,
        cc.name AS country_name, cc.alpha2_code
 FROM race ra
 JOIN grand_prix gp ON ra.grand_prix_id = gp.id
@@ -323,6 +325,8 @@ function mapRaceMeta(row: unknown): RaceMeta {
     date: asString(r.date, "race date"),
     laps: asNumber(r.laps, "race laps"),
     courseLength: asNumber(r.course_length, "course length"),
+    circuitId: asString(r.circuit_id, "circuit id"),
+    circuitLayoutId: asString(r.circuit_layout_id, "circuit layout"),
     circuitName: asString(r.circuit_name, "circuit name"),
     circuitPlace: asString(r.circuit_place, "circuit place"),
     countryName: asString(r.country_name, "country name"),

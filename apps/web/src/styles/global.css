@@ -949,6 +949,36 @@ tbody th[scope="row"] {
   margin-top: 0.3rem;
 }
 
+.race-hero__circuit-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+
+.race-hero__circuit-link:hover {
+  text-decoration-color: currentColor;
+}
+
+/* 赛程表占左列、标题沉底，右上空区放赛道轮廓；整图链到赛道页 */
+.race-hero__map {
+  position: absolute;
+  top: 2rem;
+  right: 0;
+  width: clamp(14rem, 24vw, 22rem);
+  opacity: 0.85;
+}
+
+.race-hero__map :is(img, svg) {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.race-hero__map:hover {
+  opacity: 1;
+}
+
 .weekend-schedule {
   padding: 0;
   border-top: 1px solid var(--line);
@@ -1307,6 +1337,13 @@ tbody th[scope="row"] {
 
   .race-hero h1 {
     font-size: clamp(4.8rem, 20vw, 6rem);
+  }
+
+  .race-hero__map {
+    position: static;
+    width: min(60%, 13rem);
+    margin: 0 auto 1.5rem;
+    opacity: 1;
   }
 
   .weekend-schedule li {

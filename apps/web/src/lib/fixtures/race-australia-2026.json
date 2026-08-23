@@ -8,6 +8,8 @@
     "date": "2026-03-08",
     "laps": 58,
     "courseLength": 5.278,
+    "circuitId": "melbourne",
+    "circuitLayoutId": "melbourne-2",
     "circuitName": "Melbourne",
     "circuitPlace": "Melbourne",
     "countryName": "Australia",
