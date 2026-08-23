@@ -5,7 +5,10 @@ import "@fontsource/barlow-condensed/500.css";
 import "@fontsource/barlow-condensed/600.css";
 import "@fontsource/barlow-condensed/700.css";
 import "@fontsource-variable/space-grotesk";
-import "../styles/global.css";
+import "../styles/theme.css";
+import "../styles/base.css";
+import "../styles/components.css";
+import "../styles/global.css"; // 迁移期临时保留，任务 5 删除
 
 import AskPanel from "../components/AskPanel.astro";
 import SiteFooter from "../components/SiteFooter.astro";
@@ -40,7 +43,22 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#0B0D10" />
+    <meta name="theme-color" content="#0b0d10" />
+    <script is:inline>
+      // 首次渲染前定主题，避免闪烁：本地偏好 > 系统偏好 > 深色
+      (() => {
+        let theme = "dark";
+        try {
+          const stored = localStorage.getItem("f1-theme");
+          if (stored === "light" || stored === "dark") theme = stored;
+          else if (matchMedia("(prefers-color-scheme: light)").matches) theme = "light";
+        } catch {}
+        document.documentElement.dataset.theme = theme;
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute("content", theme === "light" ? "#f3f0e9" : "#0b0d10");
+      })();
+    </script>
     <title>{title} · F1 Box</title>
     <ClientRouter />
   </head>

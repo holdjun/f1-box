@@ -5,34 +5,50 @@ interface Props {
 }
 
 const { active = "racing", year } = Astro.props;
+
+const links = [
+  { key: "racing", label: "Racing", href: year ? `/racing/${year}` : "/" },
+  { key: "results", label: "Results", href: year ? `/results/${year}/races` : "/results" },
+  { key: "circuits", label: "Circuits", href: "/circuits" },
+  { key: "drivers", label: "Drivers", href: "/drivers" },
+  { key: "teams", label: "Teams", href: "/teams" },
+] as const;
 ---
 
-<header class="site-header">
-  <div class="site-header__inner page-shell">
-    <a class="wordmark" href="/" aria-label="F1 Box home">
-      <span>F1</span> Box
+<header class="sticky top-0 z-10 border-b border-line bg-surface/90 backdrop-blur-sm">
+  <div class="shell flex min-h-16 items-center justify-between gap-4 lg:min-h-18">
+    <a
+      class="flex min-h-11 shrink-0 items-center gap-1.5 font-display text-[1.35rem] font-semibold tracking-[0.02em] uppercase lg:text-[1.65rem]"
+      href="/"
+      aria-label="F1 Box home"
+    >
+      <span class="text-accent">F1</span> Box
     </a>
-    <nav aria-label="Primary navigation">
-      <a
-        href={year ? `/racing/${year}` : "/"}
-        aria-current={active === "racing" ? "page" : undefined}
-      >Racing</a>
-      <a
-        href={year ? `/results/${year}/races` : "/results"}
-        aria-current={active === "results" ? "page" : undefined}
-      >Results</a>
-      <a
-        href="/circuits"
-        aria-current={active === "circuits" ? "page" : undefined}
-      >Circuits</a>
-      <a
-        href="/drivers"
-        aria-current={active === "drivers" ? "page" : undefined}
-      >Drivers</a>
-      <a
-        href="/teams"
-        aria-current={active === "teams" ? "page" : undefined}
-      >Teams</a>
-    </nav>
+    <div class="flex min-w-0 items-center gap-3 lg:gap-6">
+      <nav aria-label="Primary navigation" class="flex min-w-0 items-center gap-3 overflow-x-auto lg:gap-10">
+        {links.map((link) => (
+          <a
+            href={link.href}
+            aria-current={active === link.key ? "page" : undefined}
+            class="relative inline-flex min-h-11 shrink-0 items-center text-[0.64rem] font-semibold tracking-[0.07em] uppercase text-ink-strong transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:origin-left after:scale-x-0 after:bg-accent after:transition-transform after:duration-200 hover:text-ink hover:after:scale-x-100 aria-[current=page]:text-ink aria-[current=page]:after:scale-x-100 lg:text-[0.78rem] lg:tracking-[0.11em]"
+          >{link.label}</a>
+        ))}
+      </nav>
+      <button
+        type="button"
+        data-theme-toggle
+        aria-pressed="false"
+        aria-label="Switch to light theme"
+        class="grid size-10 shrink-0 place-items-center rounded-md border border-line text-ink-strong transition-colors hover:border-ink-muted hover:text-ink"
+      >
+        <svg class="icon-to-light size-4.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <circle cx="8" cy="8" r="3.25" />
+          <path d="M8 1.5v1.75M8 12.75v1.75M1.5 8h1.75M12.75 8h1.75M3.4 3.4l1.25 1.25M11.35 11.35l1.25 1.25M12.6 3.4l-1.25 1.25M4.65 11.35l-1.25 1.25" />
+        </svg>
+        <svg class="icon-to-dark size-4.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7Z" />
+        </svg>
+      </button>
+    </div>
   </div>
 </header>

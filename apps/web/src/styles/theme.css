@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+/* 原始令牌：静态定义，两主题共用；组件不直接使用这里的颜色 */
+@theme {
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-sans: "Space Grotesk Variable", "Space Grotesk", sans-serif;
+
+  /* 只保留两个断点：对齐现有 640/980 语义，移动优先 */
+  --breakpoint-sm: initial;
+  --breakpoint-md: 40rem;
+  --breakpoint-lg: 61.25rem;
+  --breakpoint-xl: initial;
+  --breakpoint-2xl: initial;
+
+  /* 展示字号（流体），行高随字号定义 */
+  --text-display-sm: clamp(2.3rem, 3.5vw, 3.75rem);
+  --text-display-sm--line-height: 0.96;
+  --text-display-md: clamp(3.25rem, 6vw, 5.5rem);
+  --text-display-md--line-height: 0.96;
+  --text-display-lg: clamp(4.5rem, 9vw, 8.5rem);
+  --text-display-lg--line-height: 0.92;
+  --text-display-xl: clamp(5rem, 10vw, 10.5rem);
+  --text-display-xl--line-height: 0.9;
+
+  /* 区块级留白 */
+  --spacing-section: clamp(4.75rem, 9vw, 9rem);
+
+  --ease-hero: cubic-bezier(0.2, 0.75, 0.25, 1);
+  --shadow-panel: 0 1px 2px rgb(20 23 28 / 0.05), 0 10px 28px rgb(20 23 28 / 0.08);
+}
+
+/* 语义令牌：深色为默认值，[data-theme="light"] 整套翻转 */
+:root {
+  color-scheme: dark;
+  --surface: #0b0d10;
+  --surface-raised: #11151a;
+  --surface-overlay: #191e24;
+  --surface-sunken: #080a0c;
+  --grid-line: rgb(137 145 154 / 0.055);
+  --ink: #f3f0e9;
+  --ink-strong: #b9bec4;
+  --ink-muted: #89919a;
+  --line: #2a3037;
+  --accent: #ff5148;
+  --on-accent: #0b0d10;
+  --highlight: #c7f45b;
+  --on-highlight: #0b0d10;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --surface: #f3f0e9;
+  --surface-raised: #fbfaf5;
+  --surface-overlay: #e9e5da;
+  --surface-sunken: #e4dfd2;
+  --grid-line: rgb(20 23 28 / 0.05);
+  --ink: #14171c;
+  --ink-strong: #3c434c;
+  --ink-muted: #5d646e;
+  --line: #d0cbbe;
+  --accent: #c33329;
+  --on-accent: #fdf9f3;
+  --highlight: #4d5d10;
+  --on-highlight: #f7f5ee;
+}
+
+/* 桥接：让语义变量生成工具类（bg-surface / text-ink-muted / border-line ...） */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-ink: var(--ink);
+  --color-ink-strong: var(--ink-strong);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-highlight: var(--highlight);
+  --color-on-highlight: var(--on-highlight);
+}
+
+/* 少数无法靠变量翻转覆盖的场景（阴影、图片明暗）用 light: 变体 */
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
