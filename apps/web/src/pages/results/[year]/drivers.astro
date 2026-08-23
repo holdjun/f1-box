@@ -25,8 +25,9 @@ if (rows.length > 0) {
 ---
 
 <BaseLayout title={`${year} Driver Standings`} active="results" year={year}>
-  <main id="main-content" class="page-shell">
-    <h1>{year} Driver Standings</h1>
+  <main id="main-content" class="shell pt-12 pb-section">
+    <h1 class="title-page">{year} Drivers</h1>
+    <ResultsNav year={year} active="drivers" />
     <SeasonFilter
       years={availableYears}
       mode="link"
@@ -35,7 +36,6 @@ if (rows.length > 0) {
       sticky
       showAll={false}
     />
-    <ResultsNav year={year} active="drivers" />
     <StandingsTable kind="drivers" rows={rows} />
   </main>
 </BaseLayout>

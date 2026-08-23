@@ -10,31 +10,54 @@ const { meta } = Astro.props;
 const round = String(meta.round).padStart(2, "0");
 ---
 
-<header class="race-hero page-shell">
-  <a class="race-hero__map" href={`/circuits/${meta.circuitId}`} aria-label={`View ${meta.circuitName} circuit details`}>
+<!-- isolate：让 -z-1 的描边数字压到正文之下，又不至于沉到 body 背景后面 -->
+<header class="shell relative isolate min-h-[clamp(34rem,70vw,52rem)] overflow-hidden pb-20 pt-6 md:pt-8">
+  <a
+    class="race-hero__map absolute right-0 top-8 w-[clamp(14rem,24vw,22rem)] opacity-85 transition-opacity hover:opacity-100 max-md:static max-md:mx-auto max-md:mb-6 max-md:w-[min(60%,13rem)] max-md:opacity-100"
+    href={`/circuits/${meta.circuitId}`}
+    aria-label={`View ${meta.circuitName} circuit details`}
+  >
     <CircuitMap
       layoutId={meta.circuitLayoutId}
       fallbackSrc={`/vendor/circuits/${meta.circuitLayoutId}.svg`}
       alt={`${meta.circuitName} layout map`}
     />
   </a>
-  <div class="race-hero__title">
-    <p class="giant-round" aria-hidden="true">{round}</p>
+  <!-- 描边巨型回合号：-z-1 沉到文字下方（旧 z-index:-1 布局的等价表达） -->
+  <p
+    class="absolute -top-8 -left-[0.05em] -z-1 font-display text-[clamp(13rem,29vw,17rem)] leading-[0.7] font-bold text-transparent [-webkit-text-stroke:1px_var(--line)] max-md:text-[17rem]"
+    aria-hidden="true"
+  >{round}</p>
+  <div class="grid grid-cols-1 items-end gap-8 lg:grid-cols-[3fr_7fr]">
     <div>
-      <h1>{meta.name}</h1>
-      <p>{formatUtcDate(meta.date)} · <a class="race-hero__circuit-link" href={`/circuits/${meta.circuitId}`}>{meta.circuitName}</a>, {meta.circuitPlace} · {meta.countryName}</p>
-      <p class="muted">{meta.officialName}</p>
+      <h1 class="max-w-[10ch] text-display-xl">{meta.name}</h1>
+      <p class="mt-6 text-[1.1rem]">
+        {formatUtcDate(meta.date)} · <a
+          class="race-hero__circuit-link underline decoration-line underline-offset-3 hover:decoration-current"
+          href={`/circuits/${meta.circuitId}`}>{meta.circuitName}</a
+        >, {meta.circuitPlace} · {meta.countryName}
+      </p>
+      <p class="mt-1 text-ink-muted">{meta.officialName}</p>
     </div>
   </div>
   {meta.sessions.length > 0 ? (
-    <ol class="weekend-schedule">
+    <ol class="weekend-schedule mt-12 list-none border-t border-line p-0">
       {meta.sessions.map((session, index) => (
-        <li>
-          <span class="session-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+        <li class="grid min-h-28 grid-cols-[3rem_1fr] items-center gap-3 border-b border-line py-4 md:grid-cols-[6rem_1fr_auto] md:gap-6">
+          <span class="font-display text-2xl text-ink-muted md:text-[2.6rem]" aria-hidden="true"
+            >{String(index + 1).padStart(2, "0")}</span
+          >
           <div>
-            <h3>{session.label}</h3>
-            <time datetime={session.startsAtUtc}>{formatUtcDateTime(session.startsAtUtc)}</time>
-            <span data-local-time data-timestamp={session.startsAtUtc} hidden></span>
+            <h3 class="mb-1.5 text-[1.75rem]">{session.label}</h3>
+            <time class="block text-[0.76rem] text-ink-strong" datetime={session.startsAtUtc}
+              >{formatUtcDateTime(session.startsAtUtc)}</time
+            >
+            <span
+              class="mt-0.5 block text-[0.76rem] text-ink-muted"
+              data-local-time
+              data-timestamp={session.startsAtUtc}
+              hidden
+            ></span>
           </div>
         </li>
       ))}

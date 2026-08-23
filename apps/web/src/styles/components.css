@@ -125,6 +125,12 @@
     font-weight: 560;
   }
 
+  /* 成绩表保底宽度，在 .table-scroll 内横滚；e2e 断言完整类名，不再叠加其他类 */
+  .result-table { min-width: 52rem; }
+  @media (min-width: 40rem) {
+    .result-table { min-width: 55rem; }
+  }
+
   .empty-cell {
     height: 8rem;
     color: var(--ink-muted);
