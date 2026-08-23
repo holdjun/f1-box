@@ -13,31 +13,39 @@ const complete = race.winnerName !== null;
 const startsAt = `${race.date}T${race.time ?? "00:00"}:00Z`;
 ---
 
-<article class:list={["race-card", `race-card--${complete ? "complete" : "upcoming"}`]}>
-  <a href={href} aria-label={`Round ${round}: ${race.raceName}`}>
-    <div class="race-card__topline">
-      <span class="race-card__round" aria-hidden="true">{round}</span>
+<!-- 完成/未完顶部色条放在 a 上：article 的 inset 阴影会被不透明的 a 背景盖住 -->
+<article class="race-card min-w-0 bg-surface scroll-snap-start">
+  <a
+    href={href}
+    aria-label={`Round ${round}: ${race.raceName}`}
+    class:list={[
+      "group relative flex min-h-64 flex-col justify-between overflow-hidden rounded-md bg-surface-raised p-5 transition-[background-color,transform] duration-200 before:absolute before:top-0 before:right-0 before:size-6.5 before:bg-surface before:[clip-path:polygon(100%_0,100%_100%,0_0)] hover:-translate-y-1 hover:bg-surface-overlay hover:z-1 focus-visible:z-1 focus-visible:bg-surface-overlay md:min-h-68",
+      complete ? "[box-shadow:inset_0_3px_var(--highlight)]" : "[box-shadow:inset_0_3px_var(--ink-muted)]",
+    ]}
+  >
+    <div class="flex items-start justify-between">
+      <span class="font-display text-[4.75rem] leading-[0.75] font-medium text-ink-muted" aria-hidden="true">{round}</span>
       <span class="status-label">{complete ? "COMPLETE" : "UPCOMING"}</span>
     </div>
-    <div class="race-card__body">
-      <h3>{race.raceName}</h3>
-      <time datetime={startsAt}>{formatUtcDateTime(startsAt)}</time>
-      <p>{race.circuitPlace}, {race.countryName}</p>
-      <p class="race-card__circuit">{race.circuitName}</p>
+    <div class="pr-6">
+      <h3 class="mb-3 text-2xl">{race.raceName}</h3>
+      <time class="text-[0.76rem] text-ink" datetime={startsAt}>{formatUtcDateTime(startsAt)}</time>
+      <p class="mt-1.5 text-[0.78rem] text-ink-muted">{race.circuitPlace}, {race.countryName}</p>
+      <p class="min-h-[2.4em] text-[0.78rem] text-ink-muted">{race.circuitName}</p>
+      {complete && (
+        <dl class="mt-5 grid grid-cols-2 gap-4 border-t border-line pt-4">
+          <div>
+            <dt class="text-[0.65rem] tracking-[0.08em] uppercase text-ink-muted">Pole</dt>
+            <dd class="mt-1 text-[0.78rem]">{race.poleName ?? "—"}</dd>
+          </div>
+          <div>
+            <dt class="text-[0.65rem] tracking-[0.08em] uppercase text-ink-muted">Winner</dt>
+            <dd class="mt-1 text-[0.78rem]">{race.winnerName}</dd>
+          </div>
+        </dl>
+      )}
     </div>
-    {complete && (
-      <dl class="race-card__results">
-        <div>
-          <dt>Pole</dt>
-          <dd>{race.poleName ?? "—"}</dd>
-        </div>
-        <div>
-          <dt>Winner</dt>
-          <dd>{race.winnerName}</dd>
-        </div>
-      </dl>
-    )}
-    <svg class="race-card__arrow" viewBox="0 0 28 16" aria-hidden="true">
+    <svg class="absolute right-5 bottom-6 w-7 text-accent" viewBox="0 0 28 16" fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="1.5" aria-hidden="true">
       <path d="M1 8h24M18 1l7 7-7 7" />
     </svg>
   </a>

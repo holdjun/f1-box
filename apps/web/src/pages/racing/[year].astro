@@ -24,8 +24,8 @@ if (races.length > 0) {
 ---
 
 <BaseLayout title={`${year} Season`} year={year}>
-  <main id="main-content" class="page-shell">
-    <h1>{year} Season</h1>
+  <main id="main-content" class="shell pt-12 pb-section md:pt-16">
+    <h1 class="title-page">{year} Season</h1>
     <SeasonFilter
       years={availableYears}
       mode="link"
@@ -34,7 +34,7 @@ if (races.length > 0) {
       sticky
       showAll={false}
     />
-    <div class="race-grid">
+    <div class="grid grid-cols-1 gap-px rounded-md bg-line md:grid-cols-2">
       {races.map((race) => (
         <RaceCard race={race} href={`/results/${year}/races/${race.slug}/race-result`} />
       ))}

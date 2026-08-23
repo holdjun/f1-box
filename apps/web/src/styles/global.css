@@ -32,122 +32,6 @@
   -webkit-text-stroke: 1px rgba(137, 145, 154, 0.13);
 }
 
-.race-card {
-  min-width: 0;
-  background: var(--surface);
-  scroll-snap-align: start;
-}
-
-.race-card a {
-  position: relative;
-  display: flex;
-  min-height: 16rem;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
-  padding: 1.35rem;
-  background: var(--surface-raised);
-  transition: background-color 180ms ease, transform 180ms ease;
-}
-
-.race-card a::before {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 26px;
-  height: 26px;
-  background: var(--surface);
-  clip-path: polygon(100% 0, 100% 100%, 0 0);
-  content: "";
-}
-
-.race-card a:hover,
-.race-card a:focus-visible {
-  z-index: 1;
-  background: var(--surface-overlay);
-  transform: translateY(-4px);
-}
-
-.race-card--complete a {
-  box-shadow: inset 0 3px var(--highlight);
-}
-
-.race-card--upcoming a {
-  box-shadow: inset 0 3px var(--ink-muted);
-}
-
-.race-card__topline {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-}
-
-.race-card__round {
-  color: var(--ink-muted);
-  font-family: var(--font-display);
-  font-size: 4.75rem;
-  font-weight: 500;
-  line-height: 0.75;
-}
-
-.race-card__body {
-  padding-right: 1.5rem;
-}
-
-.race-card__body h3 {
-  margin-bottom: 0.75rem;
-  font-size: 2rem;
-}
-
-.race-card__body time {
-  color: var(--ink);
-  font-size: 0.76rem;
-}
-
-.race-card__body p {
-  margin-top: 0.35rem;
-  color: var(--ink-muted);
-  font-size: 0.78rem;
-}
-
-.race-card__circuit {
-  min-height: 2.4em;
-}
-
-.race-card__arrow {
-  width: 28px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: square;
-  stroke-linejoin: miter;
-  stroke-width: 1.5;
-  position: absolute;
-  right: 1.3rem;
-  bottom: 1.45rem;
-  color: var(--accent);
-}
-
-.race-card__results {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-top: 1.25rem;
-  border-top: 1px solid var(--line);
-  padding-top: 1rem;
-}
-
-.race-card__results dt {
-  color: var(--ink-muted);
-  font-size: 0.65rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.race-card__results dd {
-  margin-top: 0.25rem;
-  font-size: 0.78rem;
-}
-
 .position-cell {
   width: 3.5rem;
   color: var(--ink-muted);
@@ -158,13 +42,6 @@
 .points-cell {
   color: var(--highlight);
   font-weight: 650;
-}
-
-.race-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
-  background: var(--line);
 }
 
 .race-hero {
@@ -303,18 +180,6 @@
 }
 
 @media (max-width: 640px) {
-  .race-card a {
-    min-height: 17rem;
-  }
-
-  .race-card__body h3 {
-    font-size: 2.15rem;
-  }
-
-  .race-grid {
-    grid-template-columns: 1fr;
-  }
-
   .race-hero {
     min-height: 39rem;
     padding-top: 1.5rem;
