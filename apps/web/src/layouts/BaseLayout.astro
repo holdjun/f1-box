@@ -44,18 +44,25 @@ const {
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0b0d10" />
     <script is:inline>
-      // 首次渲染前定主题，避免闪烁：本地偏好 > 系统偏好 > 深色
+      // 首次渲染前定主题，避免闪烁：本地偏好 > 系统偏好 > 深色。
+      // ClientRouter 客户端导航会把 <html> 属性同步成新文档的（服务端产物没有
+      // data-theme），is:inline 脚本又不会随导航重跑，所以在 after-swap 重新应用；
+      // 监听挂在 document 上，跨导航存活。
       (() => {
-        let theme = "dark";
-        try {
-          const stored = localStorage.getItem("f1-theme");
-          if (stored === "light" || stored === "dark") theme = stored;
-          else if (matchMedia("(prefers-color-scheme: light)").matches) theme = "light";
-        } catch {}
-        document.documentElement.dataset.theme = theme;
-        document
-          .querySelector('meta[name="theme-color"]')
-          ?.setAttribute("content", theme === "light" ? "#f3f0e9" : "#0b0d10");
+        const applyTheme = () => {
+          let theme = "dark";
+          try {
+            const stored = localStorage.getItem("f1-theme");
+            if (stored === "light" || stored === "dark") theme = stored;
+            else if (matchMedia("(prefers-color-scheme: light)").matches) theme = "light";
+          } catch {}
+          document.documentElement.dataset.theme = theme;
+          document
+            .querySelector('meta[name="theme-color"]')
+            ?.setAttribute("content", theme === "light" ? "#f3f0e9" : "#0b0d10");
+        };
+        applyTheme();
+        document.addEventListener("astro:after-swap", applyTheme);
       })();
     </script>
     <title>{title} · F1 Box</title>
