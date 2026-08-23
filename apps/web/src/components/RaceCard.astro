@@ -24,8 +24,12 @@ const labels = { complete: "COMPLETE", next: "NEXT", upcoming: "UPCOMING" };
     href={href}
     aria-label={`Round ${round}: ${race.raceName}, ${race.countryName}`}
     class:list={[
-      "group relative flex h-full flex-col overflow-hidden rounded-md border border-line bg-surface-raised p-5 transition-[background-color,transform,border-color] duration-200 hover:z-1 hover:-translate-y-1 hover:bg-surface-overlay focus-visible:z-1 light:shadow-panel",
-      status === "next" && "border-accent [box-shadow:inset_0_3px_var(--accent)]",
+      "group relative flex h-full flex-col overflow-hidden rounded-md border bg-surface-raised p-5 transition-[background-color,transform,border-color] duration-200 hover:z-1 hover:-translate-y-1 hover:bg-surface-overlay focus-visible:z-1",
+      // border-line 与 border-accent 互斥：并列时编译顺序会让 border-line 覆盖 accent；
+      // 同理 light:shadow-panel 会盖掉 next 的 inset 顶栏，只给非 next 卡
+      status === "next"
+        ? "border-accent [box-shadow:inset_0_3px_var(--accent)]"
+        : "border-line light:shadow-panel",
     ]}
   >
     <div class="flex items-center gap-2.5">

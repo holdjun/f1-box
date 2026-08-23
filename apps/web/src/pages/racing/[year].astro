@@ -27,7 +27,9 @@ if (races.length > 0) {
 const completed = races.filter((race) => race.winnerName !== null);
 const upcoming = races.filter((race) => race.winnerName === null);
 const next = upcoming[0];
-const nextAt = next ? `${next.date}T${next.time ?? "00:00"}:00Z` : null;
+const nextLine = next
+  ? `${formatUtcDateTime(`${next.date}T${next.time ?? "00:00"}:00Z`)} · ${next.circuitPlace}`
+  : null;
 // 荧光只给下一站：焦点唯一，避免整页色条噪音
 const statusOf = (race: RaceSummary): "complete" | "next" | "upcoming" =>
   race.winnerName !== null ? "complete" : race === next ? "next" : "upcoming";
@@ -62,7 +64,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
               alt=""
               class="vendor-cell__flag"
             />
-            {formatUtcDateTime(nextAt!)} · {next.circuitPlace}
+            {nextLine}
           </p>
           <a class="button button--text mt-5" href={cardHref(next)}>View weekend</a>
         </aside>
