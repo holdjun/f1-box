@@ -131,6 +131,18 @@
     .result-table { min-width: 55rem; }
   }
 
+  /* 窄屏表格横滚时首列粘滞：嵌套选择器 + 背景覆盖无法用工具类自然表达 */
+  @media (width < 40rem) {
+    .result-table th:first-child,
+    .result-table td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      padding-left: 0.75rem;
+      background: var(--surface);
+    }
+  }
+
   .empty-cell {
     height: 8rem;
     color: var(--ink-muted);
