@@ -81,7 +81,10 @@ def build_map(year: int, round_no: int, circuit_id: str, layout_id: str):
     lap = session.laps.pick_fastest()
     pos = lap.get_pos_data()
     corners = info.corners
-    to_xy = lambda df: df[["X", "Y"]].to_numpy()
+
+    def to_xy(df):
+        return df[["X", "Y"]].to_numpy()
+
     apply = transform(to_xy(pos), to_xy(corners), info.rotation)
 
     # sector 分界：遥测 Time 相对单圈起点，用累计 sector 时长定位采样点
