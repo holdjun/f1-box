@@ -10,10 +10,10 @@ import {
 import {
   logoSrcFor,
   logoVariantFor,
-  latestColor,
   vendorIndexes,
 } from "../../lib/vendor.js";
 import { resolveCatalogYear } from "../../lib/routing.js";
+import { gridFillers } from "../../lib/layout.js";
 
 const repository = import.meta.env.DEV
   ? createTeamRepository()
@@ -31,11 +31,18 @@ Astro.response.headers.set(
   "Cache-Control",
   "public, s-maxage=300, stale-while-revalidate=600",
 );
+
+const cardClasses =
+  "team-card group relative flex flex-col items-center gap-3 rounded-md bg-surface-raised p-5 transition-[background-color,transform] duration-200 hover:-translate-y-1 hover:bg-surface-overlay hover:z-1";
+// 深色稿 logo 需白底托，白色稿 logo 亮色下需墨底托，保证双主题对比度
+const onLightChip = "logo-on-light box-border rounded-[0.4rem] bg-white/[0.94] px-[0.55rem] py-[0.3rem]";
+const onDarkChip =
+  "light:box-border light:rounded-[0.4rem] light:bg-ink light:px-[0.55rem] light:py-[0.3rem]";
 ---
 
 <BaseLayout title="Teams" active="teams">
-  <main id="main-content" class="page-shell">
-    <h1>Teams</h1>
+  <main id="main-content" class="shell pt-12 pb-section">
+    <h1 class="title-page">Teams</h1>
     <SeasonFilter
       years={years}
       mode="link"
@@ -44,100 +51,33 @@ Astro.response.headers.set(
       label="Filter by season"
       sticky
     />
-    <div class="team-grid">
+    <div class="grid grid-cols-1 gap-px rounded-md bg-line light:shadow-panel md:grid-cols-2 lg:grid-cols-3">
       {constructors.map((team) => (
-        <a
-          class="team-card"
-          href={`/teams/${team.id}`}
-          style={`--team-color: ${latestColor(vendorIndexes, team.id) ?? "#84909e"}`}
-        >
-          <span class="card-logo-frame">
+        <a class={cardClasses} href={`/teams/${team.id}`}>
+          <span class="card-logo-frame grid h-12 w-32 flex-none place-items-center">
             {logoSrcFor(vendorIndexes, team.id) ? (
               <img
                 class:list={[
-                  "card-logo",
-                  { "logo-on-light": logoVariantFor(vendorIndexes, team.id) !== "white" },
+                  "card-logo block size-full min-w-0 min-h-0 object-contain",
+                  logoVariantFor(vendorIndexes, team.id) !== "white"
+                    ? onLightChip
+                    : onDarkChip,
                 ]}
                 src={logoSrcFor(vendorIndexes, team.id)}
                 alt=""
               />
             ) : (
-              <span class="card-monogram" aria-hidden="true">
+              <span class="card-monogram grid size-12 place-items-center rounded-[10px] bg-line font-display text-[1.2rem] font-bold text-ink-strong" aria-hidden="true">
                 {team.name.slice(0, 2).toUpperCase()}
               </span>
             )}
           </span>
-          <span class="card-name">{team.name}</span>
+          <span class="card-name text-center text-[0.9rem] font-semibold">{team.name}</span>
         </a>
+      ))}
+      {gridFillers(constructors.length).map((classes) => (
+        <div class={`${classes} bg-surface`} aria-hidden="true" />
       ))}
     </div>
   </main>
 </BaseLayout>
-
-<style>
-  h1 {
-    margin: 0 0 0.5rem;
-  }
-  .team-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-    gap: 1rem;
-  }
-  .team-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1.5rem 1rem;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background:
-      linear-gradient(
-        160deg,
-        color-mix(in srgb, var(--team-color) 22%, transparent),
-        transparent 60%
-      ),
-      var(--ink-soft);
-    color: var(--paper);
-    text-decoration: none;
-  }
-  .team-card:hover {
-    border-color: var(--team-color);
-  }
-  .card-logo-frame {
-    display: grid;
-    place-items: center;
-    width: 8rem;
-    height: 3rem;
-    flex: none;
-  }
-  .card-logo {
-    display: block;
-    min-width: 0;
-    min-height: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-  .logo-on-light {
-    box-sizing: border-box;
-    padding: 0.3rem 0.55rem;
-    border-radius: 0.4rem;
-    background: rgba(255, 255, 255, 0.94);
-  }
-  .card-monogram {
-    display: grid;
-    place-items: center;
-    height: 3rem;
-    width: 3rem;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--team-color) 45%, transparent);
-    font-family: var(--display);
-    font-size: 1.2rem;
-    font-weight: 700;
-  }
-  .card-name {
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-</style>

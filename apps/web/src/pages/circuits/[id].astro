@@ -22,9 +22,24 @@ else {
 
 {circuit ? (
   <BaseLayout title={circuit.name} active="circuits">
-    <main id="main-content" class="page-shell">
-      <div class="circuit-hero">
-        <div class="circuit-hero__map">
+    <main id="main-content" class="shell pt-12 pb-section">
+      <div class="circuit-hero grid grid-cols-1 items-end gap-8 lg:grid-cols-[3fr_2fr]">
+        <div>
+          <!-- 赛道全名常含长词（International），小屏降到 display-md 防整词溢出 -->
+          <h1 class="max-w-[10ch] text-display-lg uppercase max-md:text-display-md">
+            {circuit.fullName}
+          </h1>
+          <p class="mt-4 text-ink-muted">
+            {circuit.placeName}, {circuit.countryName} · {circuit.direction} · {circuit.turns} turns
+          </p>
+          <p class="circuit-hero__length mt-8 font-display text-[clamp(3rem,6vw,4.5rem)] font-bold leading-none">
+            {circuit.length.toFixed(3)}<span class="ml-1 text-[0.4em]">km</span>
+          </p>
+          <p class="circuit-hero__length-label mt-2 text-[0.8rem] uppercase tracking-[0.08em] text-ink-strong">
+            Circuit Length
+          </p>
+        </div>
+        <div class="circuit-hero__map mx-auto w-[min(100%,30rem)] max-w-full">
           {circuit.layoutId ? (
             <CircuitMap
               layoutId={circuit.layoutId}
@@ -35,38 +50,35 @@ else {
             <p class="text-ink-muted">No layout map available.</p>
           )}
         </div>
-        <div class="circuit-hero__stats">
-          <h1>{circuit.fullName}</h1>
-          <p class="text-ink-muted">
-            {circuit.placeName}, {circuit.countryName} · {circuit.direction} · {circuit.turns} turns
-          </p>
-          <p class="circuit-hero__length">
-            {circuit.length.toFixed(3)}<span>km</span>
-          </p>
-          <p class="circuit-hero__length-label">Circuit Length</p>
-          <dl class="circuit-stats">
+      </div>
+
+      <section class="info-panels">
+        <div class="info-panel">
+          <dl class="circuit-stats grid grid-cols-2 gap-x-8 gap-y-6">
             <div>
-              <dt>First Grand Prix</dt>
-              <dd>{circuit.firstGrandPrix ?? "—"}</dd>
+              <dt class="text-[0.8rem] uppercase tracking-[0.08em]">First Grand Prix</dt>
+              <dd class="mt-1.5 font-display text-[1.6rem] font-semibold">{circuit.firstGrandPrix ?? "—"}</dd>
             </div>
             <div>
-              <dt>Number of Laps</dt>
-              <dd>{circuit.laps ?? "—"}</dd>
+              <dt class="text-[0.8rem] uppercase tracking-[0.08em]">Number of Laps</dt>
+              <dd class="mt-1.5 font-display text-[1.6rem] font-semibold">{circuit.laps ?? "—"}</dd>
             </div>
             <div>
-              <dt>Race Distance</dt>
-              <dd>{circuit.distance === null ? "—" : `${circuit.distance.toFixed(3)}km`}</dd>
+              <dt class="text-[0.8rem] uppercase tracking-[0.08em]">Race Distance</dt>
+              <dd class="mt-1.5 font-display text-[1.6rem] font-semibold">
+                {circuit.distance === null ? "—" : `${circuit.distance.toFixed(3)}km`}
+              </dd>
             </div>
             <div>
-              <dt>Races Held</dt>
-              <dd>{circuit.totalRacesHeld}</dd>
+              <dt class="text-[0.8rem] uppercase tracking-[0.08em]">Races Held</dt>
+              <dd class="mt-1.5 font-display text-[1.6rem] font-semibold">{circuit.totalRacesHeld}</dd>
             </div>
-            <div class="circuit-stats__wide">
-              <dt>Fastest Lap</dt>
-              <dd>
+            <div class="circuit-stats__wide col-span-full">
+              <dt class="text-[0.8rem] uppercase tracking-[0.08em]">Fastest Lap</dt>
+              <dd class="mt-1.5 font-display text-[1.6rem] font-semibold">
                 {circuit.recordLap ? circuit.recordLap.time : "—"}
                 {circuit.recordLap && (
-                  <span class="text-ink-muted">
+                  <span class="ml-2 font-sans text-[0.9rem] text-ink-muted">
                     {circuit.recordLap.driverName} ({circuit.recordLap.year})
                   </span>
                 )}
@@ -74,85 +86,11 @@ else {
             </div>
           </dl>
         </div>
-      </div>
+      </section>
     </main>
   </BaseLayout>
 ) : (
   <BaseLayout title="Circuit not found" active="circuits">
-    <main id="main-content" class="page-shell">
-      <StatusPage code="404" title="Circuit not found" message="This circuit is not available yet." />
-    </main>
+    <StatusPage code="404" title="Circuit not found" message="This circuit is not available yet." />
   </BaseLayout>
 )}
-
-<style>
-  .circuit-hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 2.5rem;
-    align-items: center;
-    padding-block: 2rem;
-  }
-  .circuit-hero__map :is(img, svg) {
-    display: block;
-    width: min(100%, 30rem);
-    height: auto;
-    margin-inline: auto;
-  }
-  .circuit-hero h1 {
-    margin: 0;
-    font-family: var(--display);
-    text-transform: uppercase;
-  }
-  .circuit-hero__length {
-    margin: 2rem 0 0;
-    font-family: var(--display);
-    font-size: clamp(3rem, 6vw, 4.5rem);
-    font-weight: 700;
-    line-height: 1;
-  }
-  .circuit-hero__length span {
-    margin-left: 0.25rem;
-    font-size: 0.4em;
-  }
-  .circuit-hero__length-label {
-    margin: 0.5rem 0 0;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.8rem;
-  }
-  .circuit-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem 2rem;
-    margin: 2rem 0 0;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--line);
-  }
-  .circuit-stats dt {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted-light);
-  }
-  .circuit-stats dd {
-    margin: 0.35rem 0 0;
-    font-family: var(--display);
-    font-size: 1.6rem;
-    font-weight: 600;
-  }
-  .circuit-stats dd .text-ink-muted {
-    margin-left: 0.5rem;
-    font-family: var(--body);
-    font-size: 0.9rem;
-  }
-  .circuit-stats__wide {
-    grid-column: 1 / -1;
-  }
-  @media (max-width: 800px) {
-    .circuit-hero {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-  }
-</style>

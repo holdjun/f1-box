@@ -52,6 +52,10 @@ const filterYears = [...new Set(seasons.map((season) => season.year))];
 // 有初始筛选时，未选中的赛季块不渲染显式（hidden 由客户端同步）
 const isBlockHidden = (year: number) =>
   initialSelected !== null && !initialSelected.includes(year);
+
+const keyClasses = "key inline-flex items-center gap-1.5";
+const cellClasses =
+  "rounded-[5px] border-b-0 bg-ink-muted/9 px-2 py-1.5 text-center group-hover/row:bg-ink-muted/16";
 ---
 
 <SeasonFilter
@@ -61,230 +65,191 @@ const isBlockHidden = (year: number) =>
   sticky
   initialSelected={initialSelected}
 />
-<p class="legend" aria-label="Table legend">
-  <span class="key"><i class="result-win"></i>Win</span>
-  <span class="key"><i class="result-podium"></i>Podium</span>
-  <span class="key"><i class="result-points"></i>Points</span>
-  <span class="key"><sup class="sup-p">P</sup>pole position</span>
-  <span class="key"><sup class="sup-f">F</sup>fastest lap</span>
-  <span class="key"><sup class="sup-sprint">n</sup>sprint race position</span>
-  <span class="key"><span class="dagger">†</span>retired but classified</span>
+<p class="legend mb-5 flex flex-wrap gap-x-[1.1rem] gap-y-2 text-[0.72rem] text-ink-muted" aria-label="Table legend">
+  <span class={keyClasses}><i class="result-win size-[0.72rem] rounded-[4px]"></i>Win</span>
+  <span class={keyClasses}><i class="result-podium size-[0.72rem] rounded-[4px]"></i>Podium</span>
+  <span class={keyClasses}><i class="result-points size-[0.72rem] rounded-[4px]"></i>Points</span>
+  <span class={keyClasses}><sup class="sup-p text-[0.55rem] font-bold text-highlight">P</sup>pole position</span>
+  <span class={keyClasses}><sup class="sup-f text-[0.55rem] font-bold text-accent">F</sup>fastest lap</span>
+  <span class={keyClasses}><sup class="sup-sprint text-[0.55rem] font-bold text-ink-strong">n</sup>sprint race position</span>
+  <span class={keyClasses}><span class="dagger text-[0.7rem]">†</span>retired but classified</span>
   {showChampionKey ? (
-    <span class="key driver-champion">driver champion</span>
+    <span class:list={[keyClasses, "driver-champion text-highlight"]}>driver champion</span>
   ) : null}
 </p>
-{seasons.map((season, index) => {
-  const prev = seasons[index - 1];
-  const gap = prev ? seasonGap(prev.year, season.year) : null;
-  return (
-    <>
-      {season.split ? (
-        <div
-          class="team-split"
-          data-season-block={season.year}
-          role="separator"
-          hidden={isBlockHidden(season.year)}
-          aria-label="Mid-season team change"
-        >
-          Mid-season team change
-        </div>
-      ) : gap ? (
-        <div
-          class="season-gap"
-          data-season-block={season.year}
-          role="separator"
-          hidden={isBlockHidden(season.year)}
-          aria-label={`${gap.seasons} seasons without entries, ${gap.from} to ${gap.to}`}
-        >
-          <span class="season-gap__label">
-            {gap.from}–{gap.to} · {gap.seasons}{" "}
-            {gap.seasons === 1 ? "season" : "seasons"} without entries
-          </span>
-        </div>
-      ) : null}
-      <section
-        class:list={[
-          "season-block",
-          { champion: season.championshipWon, current: season.current },
-        ]}
-        data-season-block={season.year}
-        hidden={isBlockHidden(season.year)}
-      >
-        <h3>
-          <span class="season-year">{season.year}</span>
-          {season.metaLinks.length > 0 ? (
-            season.metaLinks.map((link, index) => (
-              <>
-                {index > 0 ? (
-                  <span class="season-meta" aria-hidden="true">/</span>
-                ) : null}
-                <a
-                  class="season-meta season-meta--link"
-                  href={link.href}
-                  style={link.color ? `--meta-color: ${link.color}` : undefined}
-                >{link.name}</a>
-              </>
-            ))
-          ) : (
-            <span class="season-meta">{season.metaText}</span>
-          )}
-          {season.tyres?.map((tyre) => (
-            <span class={`tyre-badge tyre-${tyre}`} title={`Tyres: ${tyre}`}>
-              {tyre}
+<div class="flex flex-col gap-6">
+  {seasons.map((season, index) => {
+    const prev = seasons[index - 1];
+    const gap = prev ? seasonGap(prev.year, season.year) : null;
+    return (
+      <>
+        {season.split ? (
+          <div
+            class="team-split flex items-center gap-3 text-[0.68rem] uppercase tracking-[0.09em] text-ink-muted"
+            data-season-block={season.year}
+            role="separator"
+            hidden={isBlockHidden(season.year)}
+            aria-label="Mid-season team change"
+          >
+            Mid-season team change
+          </div>
+        ) : gap ? (
+          <div
+            class="season-gap flex items-center border-l-2 border-dashed border-line py-2 pl-3"
+            data-season-block={season.year}
+            role="separator"
+            hidden={isBlockHidden(season.year)}
+            aria-label={`${gap.seasons} seasons without entries, ${gap.from} to ${gap.to}`}
+          >
+            <span class="season-gap__label text-[0.7rem] uppercase tracking-[0.08em] text-ink-muted">
+              {gap.from}–{gap.to} · {gap.seasons}{" "}
+              {gap.seasons === 1 ? "season" : "seasons"} without entries
             </span>
-          ))}
-          {season.points !== null ? (
-            <span class="season-pts">
-              {season.points} pts · {formatPosition(season.position)}
-            </span>
-          ) : null}
-        </h3>
-        <div class="table-scroll" tabindex="0">
-          <table aria-label={`${season.year} race results`}>
-            <thead>
-              <tr>
-                <th scope="col" class="driver-col">{rowLabel}</th>
-                {season.rounds.map((round) => (
-                  <th scope="col" title={round.name}>
-                    <a class="round-link" href={`/circuits/${round.circuitId}`}>
-                      {round.code}
-                    </a>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {season.rows.length === 0 ? (
+          </div>
+        ) : null}
+        <section
+          class:list={[
+            "season-block rounded-md border border-line border-l-2 bg-surface-raised p-5 light:shadow-panel [content-visibility:auto] [contain-intrinsic-size:auto_14rem]",
+            { champion: season.championshipWon, current: season.current },
+            // 当前赛季用 accent 描边，夺冠赛季用 highlight（同为当前赛季时 current 优先，与旧层叠一致）
+            season.current
+              ? "border-l-accent"
+              : season.championshipWon
+                ? "border-l-highlight"
+                : null,
+          ]}
+          data-season-block={season.year}
+          hidden={isBlockHidden(season.year)}
+        >
+          <h3 class="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span
+              class:list={[
+                "season-year font-display text-[1.45rem] font-bold tracking-[0.02em]",
+                { "text-highlight": season.championshipWon },
+              ]}
+            >{season.year}</span>
+            {season.metaLinks.length > 0 ? (
+              season.metaLinks.map((link, index) => (
+                <>
+                  {index > 0 ? (
+                    <span class="season-meta text-[0.78rem] text-ink-muted" aria-hidden="true">/</span>
+                  ) : null}
+                  <a
+                    class="season-meta season-meta--link text-[0.78rem] text-ink-muted hover:underline"
+                    href={link.href}
+                    style={link.color ? `color: ${link.color}` : undefined}
+                  >{link.name}</a>
+                </>
+              ))
+            ) : (
+              <span class="season-meta text-[0.78rem] text-ink-muted">{season.metaText}</span>
+            )}
+            {season.tyres?.map((tyre) => (
+              <span class={`tyre-badge tyre-${tyre}`} title={`Tyres: ${tyre}`}>
+                {tyre}
+              </span>
+            ))}
+            {season.points !== null ? (
+              <span class="season-pts ml-auto text-[0.85rem] font-semibold tabular-nums text-highlight">
+                {season.points} pts · {formatPosition(season.position)}
+              </span>
+            ) : null}
+          </h3>
+          <div class="table-scroll" tabindex="0">
+            <table class="border-separate [border-spacing:3px_4px]" aria-label={`${season.year} race results`}>
+              <thead>
                 <tr>
-                  <td class="empty-cell" colspan={season.rounds.length + 1}>
-                    No race entries recorded.
-                  </td>
-                </tr>
-              ) : (
-                season.rows.map((row) => (
-                  <tr>
-                    <th scope="row" class="driver-cell">
-                      {row.flagCode ? (
-                        <span class="flag-emoji" aria-hidden="true">
-                          {alpha2Flag(row.flagCode)}
-                        </span>
-                      ) : null}
-                      {row.href ? (
-                        <a
-                          class:list={[
-                            "driver-link",
-                            { "driver-champion": row.highlight, "is-muted": row.muted },
-                          ]}
-                          href={row.href}
-                          title={row.highlight ? "Drivers' champion" : undefined}
-                        >
-                          {row.name}
-                        </a>
-                      ) : (
-                        <span class:list={["driver-link", { "is-muted": row.muted }]}>
-                          {row.name}
-                        </span>
-                      )}
+                  <th scope="col" class="driver-col min-w-44 rounded-[5px] border-b-0 px-2 py-1.5">{rowLabel}</th>
+                  {season.rounds.map((round) => (
+                    <th scope="col" class="rounded-[5px] border-b-0 px-[0.45rem] py-1.5 text-[0.6rem]" title={round.name}>
+                      <a class="round-link hover:text-accent" href={`/circuits/${round.circuitId}`}>
+                        {round.code}
+                      </a>
                     </th>
-                    {row.results.map((cell) =>
-                      cell ? (
-                        <td class={resultClass(cell.text)}>
-                          {cell.text}
-                          {cell.classified ? <span class="dagger">†</span> : null}
-                          {cell.pole ? <sup class="sup-p">P</sup> : null}
-                          {cell.fastest ? <sup class="sup-f">F</sup> : null}
-                          {cell.sprintRank !== null ? (
-                            <sup class="sup-sprint">{cell.sprintRank}</sup>
-                          ) : null}
-                        </td>
-                      ) : (
-                        <td class="result-none"></td>
-                      ),
-                    )}
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {season.rows.length === 0 ? (
+                  <tr>
+                    <td class="empty-cell" colspan={season.rounds.length + 1}>
+                      No race entries recorded.
+                    </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </>
-  );
-})}
+                ) : (
+                  season.rows.map((row) => (
+                    <tr class="group/row">
+                      <th scope="row" class="driver-cell min-w-44 rounded-[5px] border-b-0 px-2 py-1.5">
+                        {row.flagCode ? (
+                          <span class="flag-emoji mr-1.5" aria-hidden="true">
+                            {alpha2Flag(row.flagCode)}
+                          </span>
+                        ) : null}
+                        {row.href ? (
+                          <a
+                            class:list={[
+                              "driver-link hover:text-ink hover:underline",
+                              {
+                                "driver-champion text-highlight hover:text-highlight": row.highlight,
+                                "is-muted text-ink-muted": row.muted,
+                              },
+                            ]}
+                            href={row.href}
+                            title={row.highlight ? "Drivers' champion" : undefined}
+                          >
+                            {row.name}
+                          </a>
+                        ) : (
+                          <span class:list={["driver-link", { "is-muted text-ink-muted": row.muted }]}>
+                            {row.name}
+                          </span>
+                        )}
+                      </th>
+                      {row.results.map((cell) =>
+                        cell ? (
+                          <td class:list={[resultClass(cell.text), cellClasses]}>
+                            {cell.text}
+                            {cell.classified ? <span class="dagger text-[0.7rem]">†</span> : null}
+                            {cell.pole ? <sup class="sup-p text-[0.55rem] font-bold text-highlight">P</sup> : null}
+                            {cell.fastest ? <sup class="sup-f text-[0.55rem] font-bold text-accent">F</sup> : null}
+                            {cell.sprintRank !== null ? (
+                              <sup class="sup-sprint text-[0.55rem] font-bold text-ink-strong">{cell.sprintRank}</sup>
+                            ) : null}
+                          </td>
+                        ) : (
+                          <td class:list={["result-none", cellClasses]}></td>
+                        ),
+                      )}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </>
+    );
+  })}
+</div>
 
 <style>
-  .season-gap {
-    display: flex;
-    align-items: center;
-    margin-top: 1rem;
-    padding: 0.6rem 0 0.6rem 0.9rem;
-    border-left: 2px dashed color-mix(in srgb, var(--muted) 45%, transparent);
+  /* 中途换队分隔线：渐变竖线 + 虚线横线为伪元素装饰，无法工具类化 */
+  .team-split::before {
+    content: "";
+    flex: none;
+    width: 2px;
+    height: 2.6rem;
+    background: linear-gradient(to bottom, transparent, color-mix(in oklab, var(--accent) 65%, var(--line)));
   }
-  .season-gap + .season-block {
-    margin-top: 1rem;
+  .team-split::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: repeating-linear-gradient(to right, var(--line) 0 5px, transparent 5px 9px);
   }
-  .season-gap__label {
-    font-size: 0.7rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .season-block {
-    margin-top: 2rem;
-    padding-left: 0.9rem;
-    border-left: 2px solid var(--line);
-    content-visibility: auto;
-    contain-intrinsic-size: auto 14rem;
-  }
-  .season-block.champion {
-    border-left-color: #ffc72c;
-  }
-  .season-block.current {
-    border-left-color: var(--coral);
-  }
-  .season-block h3 {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.75rem;
-    margin: 0 0 0.5rem;
-  }
-  .season-year {
-    font-family: var(--display);
-    font-size: 1.45rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-  }
-  .season-meta {
-    font-size: 0.78rem;
-    color: var(--muted);
-    text-decoration: none;
-  }
-  a.season-meta--link {
-    color: var(--meta-color, var(--muted));
-  }
-  a.season-meta--link:hover {
-    text-decoration: underline;
-  }
-  .season-pts {
-    margin-left: auto;
-    font-size: 0.85rem;
-    font-weight: 600;
-  }
-  .season-block.champion h3 {
-    color: #ffc72c;
-  }
-  .tyre-badge {
-    display: inline-grid;
-    place-items: center;
-    width: 1.15rem;
-    height: 1.15rem;
-    border-radius: 4px;
-    background: #5a6470;
-    color: #fff;
-    font-size: 0.7rem;
-    font-weight: 700;
-  }
+
+  /* 轮胎供应商品牌色（P/B/M/G/D/F/A/C/E）：数据语义色，不参与主题翻转 */
+  .tyre-badge { display: inline-grid; place-items: center; width: 1.15rem; height: 1.15rem; border-radius: 4px; background: #5a6470; color: #fff; font-size: 0.7rem; font-weight: 700; }
   .tyre-P { background: #ffd12e; color: #c00000; }
   .tyre-B { background: #cc0000; }
   .tyre-M { background: #1f6bb5; }
@@ -294,162 +259,14 @@ const isBlockHidden = (year: number) =>
   .tyre-A { background: #95a5a6; }
   .tyre-C { background: #e67e22; }
   .tyre-E { background: #34495e; }
-  .sup-p,
-  .sup-f,
-  .sup-sprint {
-    font-size: 0.55rem;
-    font-weight: 700;
-  }
-  .sup-p { color: #ffc72c; }
-  .sup-f { color: #b06ef7; }
-  .sup-sprint { color: #ff8c42; }
-  .dagger {
-    font-size: 0.7rem;
-  }
-  .legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1.1rem;
-    margin: 0;
-    font-size: 0.72rem;
-    color: var(--muted);
-  }
-  .key {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
-  .key i {
-    width: 0.72rem;
-    height: 0.72rem;
-    border-radius: 4px;
-  }
-  .driver-link {
-    color: inherit;
-    text-decoration: none;
-  }
-  a.driver-link:hover {
-    color: var(--paper);
-    text-decoration: underline;
-  }
-  .driver-link.is-muted {
-    color: var(--muted);
-  }
-  .team-split {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    margin: 1.2rem 0 0 0.9rem;
-    color: var(--muted);
-    font-size: 0.68rem;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-  }
-  .team-split::before {
-    content: "";
-    flex: none;
-    width: 2px;
-    height: 2.6rem;
-    background: linear-gradient(
-      to bottom,
-      transparent,
-      color-mix(in srgb, var(--coral) 65%, var(--line))
-    );
-  }
-  .team-split::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: repeating-linear-gradient(
-      to right,
-      var(--line) 0 5px,
-      transparent 5px 9px
-    );
-  }
-  .team-split + .season-block {
-    margin-top: 1rem;
-  }
-  .driver-champion {
-    color: #ffc72c;
-  }
-  .driver-champion:hover {
-    color: #ffc72c;
-  }
-  .round-link {
-    color: inherit;
-    text-decoration: none;
-  }
-  .round-link:hover {
-    color: var(--coral);
-  }
-  .driver-col {
-    min-width: 11rem;
-  }
-  .driver-cell {
-    min-width: 11rem;
-  }
-  .flag-emoji {
-    margin-right: 0.35rem;
-  }
-  .season-block table {
-    border-collapse: separate;
-    border-spacing: 3px 4px;
-  }
-  .season-block th,
-  .season-block td {
-    border-bottom: 0;
-    padding: 0.38rem 0.5rem;
-    border-radius: 5px;
-  }
-  .season-block tbody td {
-    background: rgba(137, 145, 154, 0.08);
-  }
-  .season-block tbody tr:hover td {
-    background: rgba(137, 145, 154, 0.14);
-  }
-  table th[scope="col"]:not(.driver-col) {
-    padding-inline: 0.45rem;
-    font-size: 0.6rem;
-  }
-  table td {
-    padding-inline: 0.45rem;
-    text-align: center;
-  }
-  table td sup {
-    font-size: 0.55rem;
-  }
-  .result-win {
-    background: rgba(247, 201, 72, 0.32) !important;
-    color: #ffe9a8;
-  }
-  .result-podium {
-    background: rgba(126, 212, 145, 0.25) !important;
-    color: #c8f2d3;
-  }
-  .result-points {
-    background: rgba(167, 166, 243, 0.22) !important;
-    color: #d9d8fb;
-  }
-  .result-finish {
-    color: var(--muted-light);
-  }
-  .result-ret {
-    background: rgba(224, 143, 213, 0.22) !important;
-    color: #f0cdea;
-  }
-  .result-dsq {
-    background: rgba(220, 80, 80, 0.3) !important;
-    color: #ffd7d7;
-  }
-  .result-dnq {
-    background: rgba(240, 150, 120, 0.22) !important;
-    color: #f8d9cc;
-  }
-  .result-other {
-    color: var(--muted);
-  }
-  .empty-cell {
-    text-align: left !important;
-    color: var(--muted);
-  }
+
+  /* 成绩格语义色：名次越高 highlight 浓度越高，异常状态走 accent；图例色板共用。
+     选择器带 .season-block/.legend 前缀以压过单元格通用背景工具类 */
+  .season-block td.result-win, .legend i.result-win { background: color-mix(in oklab, var(--highlight) 34%, transparent); font-weight: 700; }
+  .season-block td.result-podium, .legend i.result-podium { background: color-mix(in oklab, var(--highlight) 20%, transparent); }
+  .season-block td.result-points, .legend i.result-points { background: color-mix(in oklab, var(--highlight) 12%, transparent); color: var(--highlight); font-weight: 600; }
+  .season-block td.result-ret, .legend i.result-ret { background: color-mix(in oklab, var(--accent) 18%, transparent); }
+  .season-block td.result-dsq, .legend i.result-dsq { background: color-mix(in oklab, var(--accent) 34%, transparent); }
+  .season-block td.result-dnq, .legend i.result-dnq { background: color-mix(in oklab, var(--accent) 10%, transparent); }
+  .season-block td.result-finish, .season-block td.result-other { color: var(--ink-muted); }
 </style>

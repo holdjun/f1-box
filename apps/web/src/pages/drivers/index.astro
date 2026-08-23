@@ -7,9 +7,9 @@ import {
   createD1DriverDatabase,
   createDriverRepository,
 } from "../../lib/driver-repository.js";
-import { latestColor, vendorIndexes } from "../../lib/vendor.js";
 import { monogram } from "../../lib/tokens.js";
 import { resolveCatalogYear } from "../../lib/routing.js";
+import { gridFillers } from "../../lib/layout.js";
 
 const repository = import.meta.env.DEV
   ? createDriverRepository()
@@ -27,11 +27,14 @@ Astro.response.headers.set(
   "Cache-Control",
   "public, s-maxage=300, stale-while-revalidate=600",
 );
+
+const cardClasses =
+  "driver-card group relative flex flex-col items-center gap-3 rounded-md bg-surface-raised p-5 transition-[background-color,transform] duration-200 [content-visibility:auto] [contain-intrinsic-size:auto_11rem] hover:-translate-y-1 hover:bg-surface-overlay hover:z-1";
 ---
 
 <BaseLayout title="Drivers" active="drivers">
-  <main id="main-content" class="page-shell">
-    <h1>Drivers</h1>
+  <main id="main-content" class="shell pt-12 pb-section">
+    <h1 class="title-page">Drivers</h1>
     <SeasonFilter
       years={years}
       mode="link"
@@ -40,29 +43,29 @@ Astro.response.headers.set(
       label="Filter by season"
       sticky
     />
-    <div class="driver-grid">
+    <div class="grid grid-cols-1 gap-px rounded-md bg-line light:shadow-panel md:grid-cols-2 lg:grid-cols-3">
       {drivers.map((driver) => (
-        <a
-          class="driver-card"
-          href={`/drivers/${driver.id}`}
-          style={`--team-color: ${(driver.teamId &&
-            latestColor(vendorIndexes, driver.teamId)) ?? "#84909e"}`}
-        >
-          <span class="card-logo-frame">
+        <a class={cardClasses} href={`/drivers/${driver.id}`}>
+          <span class="card-logo-frame grid h-12 w-32 flex-none place-items-center">
             {driver.number !== null ? (
-              <span class="card-number">{driver.number}</span>
+              <span class="card-number font-display text-[2.8rem] leading-none font-bold italic tracking-[0.02em] text-ink-muted">
+                {driver.number}
+              </span>
             ) : (
-              <span class="card-monogram" aria-hidden="true">
+              <span
+                class="card-monogram grid size-12 place-items-center rounded-[10px] bg-line font-display text-[1.2rem] font-bold text-ink-strong"
+                aria-hidden="true"
+              >
                 {monogram(driver.name)}
               </span>
             )}
           </span>
-          <span class="card-name">{driver.name}</span>
-          <span class="card-meta">
+          <span class="card-name text-center text-base font-semibold">{driver.name}</span>
+          <span class="card-meta flex items-center gap-1.5 text-[0.78rem] text-ink-muted">
             <span class="card-team">{driver.teamName ?? "—"}</span>
             {driver.flagCode ? (
               <img
-                class="card-flag"
+                class="card-flag h-[0.8rem] w-auto rounded-[2px]"
                 src={`/vendor/country-flags/${driver.flagCode}.svg`}
                 alt=""
               />
@@ -70,86 +73,9 @@ Astro.response.headers.set(
           </span>
         </a>
       ))}
+      {gridFillers(drivers.length).map((classes) => (
+        <div class={`${classes} bg-surface`} aria-hidden="true" />
+      ))}
     </div>
   </main>
 </BaseLayout>
-
-<style>
-  h1 {
-    margin: 0 0 0.5rem;
-  }
-  .driver-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-    gap: 1rem;
-  }
-  .driver-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 1.25rem 1rem;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background:
-      linear-gradient(
-        160deg,
-        color-mix(in srgb, var(--team-color) 22%, transparent),
-        transparent 60%
-      ),
-      var(--ink-soft);
-    color: var(--paper);
-    text-decoration: none;
-    /* 917 卡一次下发，视口外的卡跳过布局与绘制 */
-    content-visibility: auto;
-    contain-intrinsic-size: auto 11rem;
-  }
-  .driver-card:hover {
-    border-color: var(--team-color);
-  }
-  .card-logo-frame {
-    display: grid;
-    place-items: center;
-    width: 8rem;
-    height: 3rem;
-    flex: none;
-  }
-  /* 无照片版权可用：放大车号作标识 */
-  .card-number {
-    font-family: var(--display);
-    font-size: 2.8rem;
-    font-weight: 700;
-    font-style: italic;
-    line-height: 1;
-    letter-spacing: 0.02em;
-    color: color-mix(in srgb, var(--team-color) 55%, var(--paper));
-  }
-  .card-monogram {
-    display: grid;
-    place-items: center;
-    height: 3rem;
-    width: 3rem;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--team-color) 45%, transparent);
-    font-family: var(--display);
-    font-size: 1.2rem;
-    font-weight: 700;
-  }
-  .card-name {
-    font-size: 1rem;
-    font-weight: 600;
-    text-align: center;
-  }
-  .card-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.78rem;
-    color: var(--muted-light);
-  }
-  .card-flag {
-    height: 0.8rem;
-    width: auto;
-    border-radius: 2px;
-  }
-</style>
