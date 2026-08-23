@@ -4,10 +4,12 @@ import { env } from "cloudflare:workers";
 import RaceCard from "../../components/RaceCard.astro";
 import SeasonFilter from "../../components/SeasonFilter.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import type { RaceSummary } from "../../lib/race-results-repository.js";
 import {
   createD1RaceResultsDatabase,
   createRaceResultsRepository,
 } from "../../lib/race-results-repository.js";
+import { formatUtcDateTime } from "../../lib/time.js";
 
 const year = Number(Astro.params.year);
 const repository = import.meta.env.DEV
@@ -21,11 +23,54 @@ if (!availableYears.includes(year)) Astro.response.status = 404;
 if (races.length > 0) {
   Astro.response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
 }
+
+const completed = races.filter((race) => race.winnerName !== null);
+const upcoming = races.filter((race) => race.winnerName === null);
+const next = upcoming[0];
+const nextAt = next ? `${next.date}T${next.time ?? "00:00"}:00Z` : null;
+// 荧光只给下一站：焦点唯一，避免整页色条噪音
+const statusOf = (race: RaceSummary): "complete" | "next" | "upcoming" =>
+  race.winnerName !== null ? "complete" : race === next ? "next" : "upcoming";
+const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/race-result`;
 ---
 
 <BaseLayout title={`${year} Season`} year={year}>
-  <main id="main-content" class="shell pt-12 pb-section md:pt-16">
-    <h1 class="title-page">{year} Season</h1>
+  <section class="relative overflow-hidden border-b border-line">
+    <p
+      class="pointer-events-none absolute -top-4 right-0 font-display text-[clamp(8rem,22vw,19rem)] leading-[0.8] font-bold text-transparent select-none [-webkit-text-stroke:1px_var(--line)]"
+      aria-hidden="true"
+    >{year}</p>
+    <div class="shell relative grid gap-10 py-12 md:py-16 lg:grid-cols-[7fr_5fr] lg:items-end">
+      <div>
+        <p class="status-label">Formula 1 calendar</p>
+        <h1 class="mt-3 text-display-lg uppercase">{year} Season</h1>
+        <p class="mt-4 text-[0.85rem] text-ink-strong">
+          {races.length} rounds · {completed.length} completed
+        </p>
+      </div>
+      {next && (
+        <aside class="rounded-md border border-line bg-surface-raised p-6 light:shadow-panel">
+          <p class="status-label status-label--accent">
+            Next · Round {String(next.round).padStart(2, "0")}
+          </p>
+          <p class="mt-3 font-display text-[2rem] leading-[1.02] font-semibold uppercase">
+            {next.raceName}
+          </p>
+          <p class="mt-2 flex items-center gap-2 text-[0.8rem] text-ink-strong">
+            <img
+              src={`/vendor/country-flags/${next.alpha2Code.toLowerCase()}.svg`}
+              alt=""
+              class="vendor-cell__flag"
+            />
+            {formatUtcDateTime(nextAt!)} · {next.circuitPlace}
+          </p>
+          <a class="button button--text mt-5" href={cardHref(next)}>View weekend</a>
+        </aside>
+      )}
+    </div>
+  </section>
+
+  <main id="main-content" class="shell pt-10 pb-section">
     <SeasonFilter
       years={availableYears}
       mode="link"
@@ -34,10 +79,43 @@ if (races.length > 0) {
       sticky
       showAll={false}
     />
-    <div class="grid grid-cols-1 gap-px rounded-md bg-line md:grid-cols-2">
-      {races.map((race) => (
-        <RaceCard race={race} href={`/results/${year}/races/${race.slug}/race-result`} />
-      ))}
-    </div>
+
+    {races.length === 0 ? (
+      <div class="mt-10 rounded-md border border-line bg-surface-raised px-6 py-16 text-center light:shadow-panel">
+        <p class="font-display text-[2rem] font-semibold uppercase">No rounds yet</p>
+        <p class="mt-3 text-ink-muted">
+          Race data for the {year} season has not been published yet. Check back soon.
+        </p>
+      </div>
+    ) : (
+      <>
+        {completed.length > 0 && (
+          <section aria-label="Completed races" class="mt-10">
+            <div class="flex items-baseline gap-3">
+              <h2 class="font-display text-[2rem] leading-none font-semibold uppercase">Completed</h2>
+              <span class="font-display text-[1.3rem] text-ink-muted">{completed.length}</span>
+            </div>
+            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+              {completed.map((race) => (
+                <RaceCard race={race} href={cardHref(race)} status={statusOf(race)} />
+              ))}
+            </div>
+          </section>
+        )}
+        {upcoming.length > 0 && (
+          <section aria-label="Upcoming races" class="mt-12">
+            <div class="flex items-baseline gap-3">
+              <h2 class="font-display text-[2rem] leading-none font-semibold uppercase">Upcoming</h2>
+              <span class="font-display text-[1.3rem] text-ink-muted">{upcoming.length}</span>
+            </div>
+            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+              {upcoming.map((race) => (
+                <RaceCard race={race} href={cardHref(race)} status={statusOf(race)} />
+              ))}
+            </div>
+          </section>
+        )}
+      </>
+    )}
   </main>
 </BaseLayout>

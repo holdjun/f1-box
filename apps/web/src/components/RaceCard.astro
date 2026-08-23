@@ -5,34 +5,50 @@ import { formatUtcDateTime } from "../lib/time.js";
 interface Props {
   race: RaceSummary;
   href: string;
+  status: "complete" | "next" | "upcoming";
 }
 
-const { race, href } = Astro.props;
+const { race, href, status } = Astro.props;
 const round = String(race.round).padStart(2, "0");
-const complete = race.winnerName !== null;
 const startsAt = `${race.date}T${race.time ?? "00:00"}:00Z`;
+// 部分赛道与地点字段同值（Suzuka/Suzuka），去重后只展示一次
+const placeLine =
+  race.circuitName && race.circuitName !== race.circuitPlace
+    ? `${race.circuitPlace} · ${race.circuitName}`
+    : race.circuitPlace;
+const labels = { complete: "COMPLETE", next: "NEXT", upcoming: "UPCOMING" };
 ---
 
-<!-- 完成/未完顶部色条放在 a 上：article 的 inset 阴影会被不透明的 a 背景盖住 -->
-<article class="race-card min-w-0 bg-surface scroll-snap-start">
+<article class="race-card min-w-0">
   <a
     href={href}
-    aria-label={`Round ${round}: ${race.raceName}`}
+    aria-label={`Round ${round}: ${race.raceName}, ${race.countryName}`}
     class:list={[
-      "group relative flex min-h-64 flex-col justify-between overflow-hidden rounded-md bg-surface-raised p-5 transition-[background-color,transform] duration-200 before:absolute before:top-0 before:right-0 before:size-6.5 before:bg-surface before:[clip-path:polygon(100%_0,100%_100%,0_0)] hover:-translate-y-1 hover:bg-surface-overlay hover:z-1 focus-visible:z-1 focus-visible:bg-surface-overlay md:min-h-68",
-      complete ? "[box-shadow:inset_0_3px_var(--highlight)]" : "[box-shadow:inset_0_3px_var(--ink-muted)]",
+      "group relative flex h-full flex-col overflow-hidden rounded-md border border-line bg-surface-raised p-5 transition-[background-color,transform,border-color] duration-200 hover:z-1 hover:-translate-y-1 hover:bg-surface-overlay focus-visible:z-1 light:shadow-panel",
+      status === "next" && "border-accent [box-shadow:inset_0_3px_var(--accent)]",
     ]}
   >
-    <div class="flex items-start justify-between">
-      <span class="font-display text-[4.75rem] leading-[0.75] font-medium text-ink-muted" aria-hidden="true">{round}</span>
-      <span class="status-label">{complete ? "COMPLETE" : "UPCOMING"}</span>
+    <div class="flex items-center gap-2.5">
+      <span
+        class="font-display text-[2.6rem] leading-none font-semibold text-transparent [-webkit-text-stroke:1px_var(--ink-muted)]"
+        aria-hidden="true">{round}</span>
+      <img
+        src={`/vendor/country-flags/${race.alpha2Code.toLowerCase()}.svg`}
+        alt=""
+        class="vendor-cell__flag"
+        loading="lazy"
+      />
+      <span class:list={["status-label ml-auto", status === "next" && "status-label--accent"]}>
+        {labels[status]}
+      </span>
     </div>
-    <div class="pr-6">
-      <h3 class="mb-3 text-2xl">{race.raceName}</h3>
-      <time class="text-[0.76rem] text-ink" datetime={startsAt}>{formatUtcDateTime(startsAt)}</time>
-      <p class="mt-1.5 text-[0.78rem] text-ink-muted">{race.circuitPlace}, {race.countryName}</p>
-      <p class="min-h-[2.4em] text-[0.78rem] text-ink-muted">{race.circuitName}</p>
-      {complete && (
+    <div class="mt-4 pr-8">
+      <h3 class="font-display text-[1.9rem] leading-[1.02] font-semibold uppercase">{race.raceName}</h3>
+      <time class="mt-2.5 block text-[0.76rem] text-ink-strong" datetime={startsAt}>
+        {formatUtcDateTime(startsAt)}
+      </time>
+      <p class="mt-1 text-[0.78rem] text-ink-muted">{placeLine}</p>
+      {status === "complete" && (
         <dl class="mt-5 grid grid-cols-2 gap-4 border-t border-line pt-4">
           <div>
             <dt class="text-[0.65rem] tracking-[0.08em] uppercase text-ink-muted">Pole</dt>
@@ -45,7 +61,15 @@ const startsAt = `${race.date}T${race.time ?? "00:00"}:00Z`;
         </dl>
       )}
     </div>
-    <svg class="absolute right-5 bottom-6 w-7 text-accent" viewBox="0 0 28 16" fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="1.5" aria-hidden="true">
+    <svg
+      class="absolute right-5 bottom-5 w-7 text-ink-muted transition-colors group-hover:text-accent"
+      viewBox="0 0 28 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="square"
+      stroke-width="1.5"
+      aria-hidden="true"
+    >
       <path d="M1 8h24M18 1l7 7-7 7" />
     </svg>
   </a>
