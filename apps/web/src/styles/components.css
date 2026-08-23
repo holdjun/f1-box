@@ -215,8 +215,9 @@
     height: 1.75rem;
     border-radius: 50%;
     flex: none;
+    /* 默认中性灰底配纯黑（6.4:1）；有队色时 --monogram-fg 按亮度给黑/白 */
     background: var(--monogram-bg, #84909e);
-    color: var(--surface);
+    color: var(--monogram-fg, #000);
     font-family: var(--font-display);
     font-size: 0.6rem;
     font-weight: 700;

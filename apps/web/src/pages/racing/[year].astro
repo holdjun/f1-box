@@ -37,7 +37,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
 ---
 
 <BaseLayout title={`${year} Season`} year={year}>
-  <section class="relative overflow-hidden border-b border-line">
+  <section aria-label={`${year} season overview`} class="relative overflow-hidden border-b border-line">
     <p
       class="pointer-events-none absolute -top-4 right-0 font-display text-[clamp(8rem,22vw,19rem)] leading-[0.8] font-bold text-transparent select-none [-webkit-text-stroke:1px_var(--line)]"
       aria-hidden="true"
@@ -51,7 +51,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
         </p>
       </div>
       {next && (
-        <aside class="rounded-md border border-line bg-surface-raised p-6 light:shadow-panel">
+        <div class="rounded-md border border-line bg-surface-raised p-6 light:shadow-panel">
           <p class="status-label status-label--accent">
             Next · Round {String(next.round).padStart(2, "0")}
           </p>
@@ -67,7 +67,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
             {nextLine}
           </p>
           <a class="button button--text mt-5" href={cardHref(next)}>View weekend</a>
-        </aside>
+        </div>
       )}
     </div>
   </section>

@@ -9,7 +9,7 @@ import {
   createRaceResultsRepository,
 } from "../../../../lib/race-results-repository.js";
 import { formatUtcDate } from "../../../../lib/time.js";
-import { monogram } from "../../../../lib/tokens.js";
+import { monogram, monogramStyle as monogramStyleFor } from "../../../../lib/tokens.js";
 import { colorForYear, logoSrcFor, logoVariantFor, vendorIndexes } from "../../../../lib/vendor.js";
 
 const year = Number(Astro.params.year);
@@ -26,10 +26,8 @@ if (races.length > 0) {
 }
 
 // Winner monogram 底色用其当年车队配色，缺色不设变量，回落 components.css 的中性灰默认值
-const winnerStyle = (teamId: string | null) => {
-  const color = teamId ? colorForYear(vendorIndexes, teamId, year) : null;
-  return color ? `--monogram-bg: ${color}` : undefined;
-};
+const winnerStyle = (teamId: string | null) =>
+  monogramStyleFor(teamId ? colorForYear(vendorIndexes, teamId, year) : null);
 ---
 
 <BaseLayout title={`${year} Race Results`} active="results" year={year}>

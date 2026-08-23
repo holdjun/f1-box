@@ -135,10 +135,15 @@ const cellClasses =
                     <span class="season-meta text-[0.78rem] text-ink-muted" aria-hidden="true">/</span>
                   ) : null}
                   <a
-                    class="season-meta season-meta--link text-[0.78rem] text-ink-muted hover:underline"
+                    class="season-meta season-meta--link inline-flex items-center gap-1.5 text-[0.78rem] text-ink-strong hover:underline"
                     href={link.href}
-                    style={link.color ? `color: ${link.color}` : undefined}
-                  >{link.name}</a>
+                  >
+                    {link.color ? (
+                      // 队色只作装饰色点（图形、aria-hidden），文本走主题中性色保对比度
+                      <i aria-hidden="true" class="inline-block size-2 rounded-[2px]" style={`background: ${link.color}`}></i>
+                    ) : null}
+                    {link.name}</a
+                  >
                 </>
               ))
             ) : (
