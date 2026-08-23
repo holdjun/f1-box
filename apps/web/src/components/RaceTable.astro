@@ -3,7 +3,7 @@ import type {
   FastestLapRow, GridRow, PitStopRow, PracticeRow, QualifyingRow,
   RaceResultRow, RaceTabKey,
 } from "../lib/race-results-repository.js";
-import { colorForYear, logoSrcFor, vendorIndexes } from "../lib/vendor.js";
+import { colorForYear, logoSrcFor, logoVariantFor, vendorIndexes } from "../lib/vendor.js";
 import { monogram } from "../lib/tokens.js";
 
 interface Props {
@@ -31,6 +31,10 @@ const monogramStyle = (constructorId: string) => {
   return color ? `--monogram-bg: ${color}` : undefined;
 };
 const teamLogo = (constructorId: string) => logoSrcFor(vendorIndexes, constructorId);
+const teamLogoClass = (constructorId: string) =>
+  logoVariantFor(vendorIndexes, constructorId) === "white"
+    ? "vendor-cell__logo vendor-cell__logo--chip"
+    : "vendor-cell__logo";
 const positionLabel = (position: number | null, positionText: string) =>
   position === null ? positionText : String(position).padStart(2, "0");
 const positionClasses = "w-14 font-display text-[1.35rem] text-ink-muted";
@@ -66,7 +70,7 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td>
                   <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
                     {teamLogo(row.constructorId) ? (
-                      <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
+                      <img class={teamLogoClass(row.constructorId)} src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
                     ) : null}
                     {row.constructorName}
                   </a>
@@ -106,7 +110,7 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td>
                   <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
                     {teamLogo(row.constructorId) ? (
-                      <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
+                      <img class={teamLogoClass(row.constructorId)} src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
                     ) : null}
                     {row.constructorName}
                   </a>
@@ -146,7 +150,7 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td>
                   <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
                     {teamLogo(row.constructorId) ? (
-                      <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
+                      <img class={teamLogoClass(row.constructorId)} src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
                     ) : null}
                     {row.constructorName}
                   </a>
@@ -184,7 +188,7 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td>
                   <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
                     {teamLogo(row.constructorId) ? (
-                      <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
+                      <img class={teamLogoClass(row.constructorId)} src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
                     ) : null}
                     {row.constructorName}
                   </a>
@@ -223,7 +227,7 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td>
                   <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
                     {teamLogo(row.constructorId) ? (
-                      <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
+                      <img class={teamLogoClass(row.constructorId)} src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
                     ) : null}
                     {row.constructorName}
                   </a>
@@ -263,7 +267,7 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td>
                   <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
                     {teamLogo(row.constructorId) ? (
-                      <img class="vendor-cell__logo" src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
+                      <img class={teamLogoClass(row.constructorId)} src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
                     ) : null}
                     {row.constructorName}
                   </a>

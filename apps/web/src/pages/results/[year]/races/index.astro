@@ -10,7 +10,7 @@ import {
 } from "../../../../lib/race-results-repository.js";
 import { formatUtcDate } from "../../../../lib/time.js";
 import { monogram } from "../../../../lib/tokens.js";
-import { colorForYear, logoSrcFor, vendorIndexes } from "../../../../lib/vendor.js";
+import { colorForYear, logoSrcFor, logoVariantFor, vendorIndexes } from "../../../../lib/vendor.js";
 
 const year = Number(Astro.params.year);
 const repository = import.meta.env.DEV
@@ -82,7 +82,13 @@ const winnerStyle = (teamId: string | null) => {
                   {race.winnerTeamId && race.winnerTeamName ? (
                     <a class="vendor-cell" href={`/teams/${race.winnerTeamId}`}>
                       {logoSrcFor(vendorIndexes, race.winnerTeamId) ? (
-                        <img class="vendor-cell__logo" src={logoSrcFor(vendorIndexes, race.winnerTeamId) ?? ""} alt="" loading="lazy" />
+                        <img
+                          class:list={[
+                            "vendor-cell__logo",
+                            logoVariantFor(vendorIndexes, race.winnerTeamId) === "white" && "vendor-cell__logo--chip",
+                          ]}
+                          src={logoSrcFor(vendorIndexes, race.winnerTeamId) ?? ""} alt="" loading="lazy"
+                        />
                       ) : null}
                       {race.winnerTeamName}
                     </a>

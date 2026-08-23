@@ -3,7 +3,7 @@ import type {
   DriverStandingRow,
   TeamStandingRow,
 } from "../lib/race-results-repository.js";
-import { logoSrcFor, vendorIndexes } from "../lib/vendor.js";
+import { logoSrcFor, logoVariantFor, vendorIndexes } from "../lib/vendor.js";
 import { monogram } from "../lib/tokens.js";
 
 interface Props {
@@ -47,7 +47,13 @@ const positionLabel = (row: DriverStandingRow | TeamStandingRow) =>
             <td>
               <a class="vendor-cell transition-colors hover:text-accent" href={`/teams/${row.teamId}`}>
                 {logoSrcFor(vendorIndexes, row.teamId) ? (
-                  <img class="vendor-cell__logo" src={logoSrcFor(vendorIndexes, row.teamId) ?? ""} alt="" loading="lazy" />
+                  <img
+                    class:list={[
+                      "vendor-cell__logo",
+                      logoVariantFor(vendorIndexes, row.teamId) === "white" && "vendor-cell__logo--chip",
+                    ]}
+                    src={logoSrcFor(vendorIndexes, row.teamId) ?? ""} alt="" loading="lazy"
+                  />
                 ) : null}
                 {row.teamName}
               </a>

@@ -222,6 +222,13 @@
     font-weight: 700;
   }
   .vendor-cell__logo { height: 1.1rem; width: auto; flex: none; }
+  /* 白色稿 logo 亮色下与背景同色不可见：套墨底托保对比，手法同目录页 card-logo */
+  [data-theme="light"] .vendor-cell__logo--chip {
+    box-sizing: border-box;
+    padding: 0.15rem 0.35rem;
+    border-radius: 0.25rem;
+    background: var(--ink);
+  }
   .vendor-cell small {
     color: var(--ink-muted);
     font-size: 0.65rem;

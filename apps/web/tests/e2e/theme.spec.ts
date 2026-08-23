@@ -32,3 +32,37 @@ test("@mobile theme toggle is reachable at 375px", async ({ page }) => {
   await toggle.click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 });
+
+// 全套件默认深色跑，这里专门覆盖亮色令牌与白色稿 logo 底托
+test.describe("light theme rendering", () => {
+  test.use({ colorScheme: "light" });
+
+  test("@desktop light surfaces and white-variant logo backplate", async ({ page }) => {
+    await page.goto("/racing/2026");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+
+    // body 背景 = --surface 亮色值
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(243, 240, 233)");
+
+    // 头部 wordmark 继承 --ink 亮色值
+    await expect(page.locator('header a[aria-label="F1 Box home"]')).toHaveCSS(
+      "color",
+      "rgb(20, 23, 28)",
+    );
+
+    // race-card 表面 = --surface-raised 亮色值
+    await expect(page.locator(".race-card > a").first()).toHaveCSS(
+      "background-color",
+      "rgb(251, 250, 245)",
+    );
+
+    // 白色稿车队 logo 亮色下靠墨底托保持可见
+    await page.goto("/results/2026/races/australia/race-result");
+    const logo = page
+      .getByRole("table", { name: "Race classification" })
+      .locator("tbody tr")
+      .first()
+      .locator(".vendor-cell__logo");
+    await expect(logo).toHaveCSS("background-color", "rgb(20, 23, 28)");
+  });
+});
