@@ -12,7 +12,7 @@ import {
   createRaceResultsRepository,
   RACE_TAB_FIELDS,
 } from "../../../../../lib/race-results-repository.js";
-import { RACE_TAB_LABELS, resolveRaceTab } from "../../../../../lib/routing.js";
+import { RACE_TAB_LABELS, raceTabKeys, resolveRaceTab } from "../../../../../lib/routing.js";
 
 const year = Number(Astro.params.year);
 const slug = (Astro.params.slug ?? "").toLowerCase();
@@ -30,6 +30,12 @@ if (!found) Astro.response.status = 404;
 else {
   Astro.response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
 }
+// getRacePage 本就一次性取回所有 tab 的数据；全量渲染成面板后
+// 客户端可就地切换，不再为每个 tab 走一次路由
+const visibleTabs =
+  tab && page
+    ? raceTabKeys.filter((key) => page.tabs[RACE_TAB_FIELDS[key]].length > 0)
+    : [];
 ---
 
 {tab && page ? (
@@ -49,8 +55,12 @@ else {
           sticky
           showAll={false}
         />
-        <RaceTabsNav year={year} slug={slug} active={tab} tabs={page.tabs} />
-        <RaceTable tab={tab} rows={page.tabs[RACE_TAB_FIELDS[tab]]} year={year} />
+        <RaceTabsNav year={year} slug={slug} active={tab} visibleTabs={visibleTabs} />
+        {visibleTabs.map((key) => (
+          <div data-race-tab-panel={key} hidden={key !== tab ? true : undefined}>
+            <RaceTable tab={key} rows={page.tabs[RACE_TAB_FIELDS[key]]} year={year} />
+          </div>
+        ))}
       </div>
     </main>
   </BaseLayout>

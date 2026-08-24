@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test.describe("results races list", () => {
   test("@desktop lists completed races with winners", async ({ page }) => {
@@ -162,48 +162,52 @@ test("@mobile results pages have no page overflow", async ({ page }) => {
   }
 });
 
-// 切 tab 后视图过渡会把视口带回页首；恢复完成后 tab 栏须回到视口内，
-// 且不被 sticky 赛季筛选条遮挡（被盖住时整行都点不了）
-async function expectTabsSettled(page: Page): Promise<void> {
-  await expect
-    .poll(
-      () =>
-        page.evaluate(() => {
-          const el = document.querySelector("[data-tab-anchor]");
-          if (!el) return false;
-          const rect = el.getBoundingClientRect();
-          if (rect.top < -50 || rect.top >= 300) return false;
-          const hit = document.elementFromPoint(
-            rect.left + rect.width / 2,
-            rect.top + rect.height / 2,
-          );
-          return !!hit?.closest("[data-tab-anchor]");
-        }),
-      { timeout: 3000 },
-    )
-    .toBe(true);
-}
-
-test("@desktop tab switch returns viewport to tabs instead of page top", async ({
+// 比赛详情页各 tab 的表格在 SSR 时已全部渲染；点击 tab 应就地切换面板，
+// 不发生视图过渡换页：点击前的面板节点仍在文档中（仅 hidden），
+// 地址栏由 replaceState 同步。ClientRouter 换页会丢弃旧节点且重置滚动
+test("@desktop race tab switch swaps panels in place without reload", async ({
   page,
 }) => {
   await page.goto("/results/2026/races/australia/race-result");
-  const tabs = page.locator("nav[data-tab-anchor]");
-  await tabs.scrollIntoViewIfNeeded();
-  await tabs.getByRole("link", { name: "Fastest Laps" }).click();
-  await page.waitForURL(/\/fastest-laps$/);
-  await expectTabsSettled(page);
+  await page.evaluate(() => {
+    const panel = document.querySelector('[data-race-tab-panel="race-result"]');
+    (window as { __panel?: Element | null }).__panel = panel;
+  });
+  const nav = page.getByRole("navigation", { name: "Race result types" });
+  await nav.scrollIntoViewIfNeeded();
+  const beforeScroll = await page.evaluate(() => window.scrollY);
+  expect(beforeScroll).toBeGreaterThan(0);
+  await nav.getByRole("link", { name: "Qualifying" }).click();
+  await page.waitForURL(/\/qualifying$/);
+  expect(
+    await page.evaluate(() =>
+      document.contains(
+        (window as { __panel?: Element | null }).__panel ?? null,
+      ),
+    ),
+  ).toBe(true);
+  await expect(
+    page.getByRole("table", { name: "Qualifying classification" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("table", { name: "Race classification" }),
+  ).toBeHidden();
+  // 视口保持点击前的位置，不再回页首
+  expect(await page.evaluate(() => window.scrollY)).toBe(beforeScroll);
 });
 
-test("@mobile race tab switch keeps tabs reachable below sticky season filter", async ({
-  page,
-}) => {
+test("@mobile race tab switch also swaps panels in place", async ({ page }) => {
   await page.goto("/results/2026/races/australia/race-result");
-  const tabs = page.locator("nav[data-tab-anchor]");
-  await tabs.scrollIntoViewIfNeeded();
-  await tabs.getByRole("link", { name: "Fastest Laps" }).click();
+  await page.evaluate(() => {
+    (window as { __probe?: number }).__probe = 1;
+  });
+  const nav = page.getByRole("navigation", { name: "Race result types" });
+  await nav.getByRole("link", { name: "Fastest Laps" }).click();
   await page.waitForURL(/\/fastest-laps$/);
-  await expectTabsSettled(page);
+  expect(
+    await page.evaluate(() => (window as { __probe?: number }).__probe),
+  ).toBe(1);
+  await expect(page.getByRole("table", { name: "Fastest laps" })).toBeVisible();
 });
 
 test("@desktop direct tab url still opens at page top", async ({ page }) => {

@@ -273,47 +273,54 @@ function enhanceThemeToggles(root: ParentNode = document): void {
     });
 }
 
-// 点击结果页 tab 后视图过渡会回到页首，体验差；
-// 记录被点击 tab 的地址，page-load 后把视口滚回 tab 锚点。
-// 地址对不上（导航被取消、用户改道）或直接访问 URL 时不滚动
-let tabScrollBound = false;
+// 比赛详情页各 tab 的表格已在服务端全部渲染；JS 可用时点击 tab 就地切换
+// 面板并同步地址栏，省掉视图过渡与回页首。必须在捕获阶段拦截，
+// 否则 ClientRouter 会先行接管链接做换页。无对应面板（如年份页的 tab）
+// 或无 JS 时退化为正常导航
+let raceTabsBound = false;
 
-function enhanceTabScroll(): void {
-  if (tabScrollBound) return;
-  tabScrollBound = true;
+function enhanceRaceTabs(): void {
+  if (raceTabsBound) return;
+  raceTabsBound = true;
 
-  document.addEventListener("click", (event) => {
-    const target = event.target;
-    if (!(target instanceof Element)) return;
-    const link = target.closest<HTMLAnchorElement>("[data-tab-anchor] a");
-    if (!link) return;
-    try {
-      sessionStorage.setItem("f1-tab-nav", link.href);
-    } catch {
-      // 隐私模式等写不进 sessionStorage 时放弃滚动恢复
-    }
-  });
-
-  document.addEventListener("astro:page-load", () => {
-    let expected = "";
-    try {
-      expected = sessionStorage.getItem("f1-tab-nav") ?? "";
-      sessionStorage.removeItem("f1-tab-nav");
-    } catch {
-      return;
-    }
-    if (expected !== location.href) return;
-    document
-      .querySelector("[data-tab-anchor]")
-      ?.scrollIntoView({ behavior: "instant", block: "start" });
-  });
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+        return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const link = target.closest<HTMLAnchorElement>("[data-tab-anchor] a");
+      if (!link) return;
+      const key = link.pathname.split("/").pop() ?? "";
+      const panel = document.querySelector<HTMLElement>(
+        `[data-race-tab-panel="${key}"]`,
+      );
+      if (!panel) return;
+      event.preventDefault();
+      // 已完全接管这次点击，阻断 ClientRouter 等后续监听者
+      event.stopPropagation();
+      for (const el of document.querySelectorAll<HTMLElement>(
+        "[data-race-tab-panel]",
+      )) {
+        el.hidden = el !== panel;
+      }
+      for (const el of document.querySelectorAll("[data-tab-anchor] a")) {
+        if (el === link) el.setAttribute("aria-current", "page");
+        else el.removeAttribute("aria-current");
+      }
+      history.replaceState(null, "", link.href);
+    },
+    true,
+  );
 }
 
 function enhancePage(): void {
   enhanceThemeToggles();
   enhanceLocalTimes();
   enhanceSeasonFilters();
-  enhanceTabScroll();
+  enhanceRaceTabs();
 }
 
 enhancePage();
