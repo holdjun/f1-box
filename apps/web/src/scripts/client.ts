@@ -236,43 +236,6 @@ function enhanceSeasonFilters(root: ParentNode = document): void {
   });
 }
 
-const THEME_COLORS = { dark: "#0b0d10", light: "#f3f0e9" } as const;
-
-function enhanceThemeToggles(root: ParentNode = document): void {
-  root
-    .querySelectorAll<HTMLButtonElement>("[data-theme-toggle]")
-    .forEach((button) => {
-      if (button.dataset.enhanced === "true") return;
-      button.dataset.enhanced = "true";
-
-      const sync = () => {
-        const isLight = document.documentElement.dataset.theme === "light";
-        button.setAttribute("aria-pressed", String(isLight));
-        button.setAttribute(
-          "aria-label",
-          isLight ? "Switch to dark theme" : "Switch to light theme",
-        );
-      };
-
-      button.addEventListener("click", () => {
-        const next =
-          document.documentElement.dataset.theme === "light" ? "dark" : "light";
-        document.documentElement.dataset.theme = next;
-        try {
-          localStorage.setItem("f1-theme", next);
-        } catch {
-          // 隐私模式等场景写不进，主题仍在当次会话生效
-        }
-        document
-          .querySelector('meta[name="theme-color"]')
-          ?.setAttribute("content", THEME_COLORS[next]);
-        sync();
-      });
-
-      sync();
-    });
-}
-
 // 比赛详情页各 tab 的表格已在服务端全部渲染；JS 可用时点击 tab 就地切换
 // 面板并同步地址栏，省掉视图过渡与回页首。必须在捕获阶段拦截，
 // 否则 ClientRouter 会先行接管链接做换页。无对应面板（如年份页的 tab）
@@ -317,7 +280,6 @@ function enhanceRaceTabs(): void {
 }
 
 function enhancePage(): void {
-  enhanceThemeToggles();
   enhanceLocalTimes();
   enhanceSeasonFilters();
   enhanceRaceTabs();
