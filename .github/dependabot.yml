@@ -1,0 +1,7 @@
+version: 2
+updates:
+  # 只管 action 版本跟进；npm 依赖由 pnpm minimumReleaseAge 供应链策略约束，不进 dependabot
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

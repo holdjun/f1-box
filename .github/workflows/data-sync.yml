@@ -9,6 +9,15 @@ on:
     - cron: "23 */2 * * 1,2"
     - cron: "23 4 * * 3-6"
 
+permissions:
+  contents: read
+
+# 定时与手动触发可能重叠；排队而非取消，避免打断进行中的 D1 全量重导，
+# 后到者过 tag 门禁后自然空转
+concurrency:
+  group: data-sync
+  cancel-in-progress: false
+
 # 仅在上游 release tag 变化时刷新：D1 整库重导（重导期间 /teams/* 短暂
 # 不可用，故用 tag 门禁收敛）。门禁状态存 D1 sync_state 表（R2 随 ingest
 # 下线退役）；状态行最后一步才写入：D1 导入失败则不记录 tag，下次运行自动重试。
