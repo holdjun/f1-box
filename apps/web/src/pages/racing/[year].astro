@@ -1,27 +1,20 @@
 ---
-import { env } from "cloudflare:workers";
-
 import RaceCard from "../../components/RaceCard.astro";
 import SeasonFilter from "../../components/SeasonFilter.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import type { RaceSummary } from "../../lib/race-results-repository.js";
-import {
-  createD1RaceResultsDatabase,
-  createRaceResultsRepository,
-} from "../../lib/race-results-repository.js";
 import { formatUtcDateTime } from "../../lib/time.js";
 
 const year = Number(Astro.params.year);
-const repository = import.meta.env.DEV
-  ? createRaceResultsRepository()
-  : createRaceResultsRepository(createD1RaceResultsDatabase(env.F1_DB));
+const { raceResults } = Astro.locals.app.repositories;
 const [availableYears, races] = await Promise.all([
-  repository.getSeasonYears(),
-  repository.getSeasonCalendar(year),
+  raceResults.getSeasonYears(),
+  raceResults.getSeasonCalendar(year),
 ]);
 if (!availableYears.includes(year)) Astro.response.status = 404;
-if (races.length > 0) {
-  Astro.response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
+// 日历空时显式 no-store，避免 data-sync 更新被边缘缓存延迟
+if (races.length === 0) {
+  Astro.response.headers.set("Cache-Control", "no-store");
 }
 
 const completed = races.filter((race) => race.winnerName !== null);

@@ -1,33 +1,17 @@
 ---
-import { env } from "cloudflare:workers";
 import CurrentSeasonPanel from "../../components/CurrentSeasonPanel.astro";
 import HistoryEnd from "../../components/HistoryEnd.astro";
 import SeasonMatrix from "../../components/SeasonMatrix.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import {
-  createD1DriverDatabase,
-  createDriverRepository,
-} from "../../lib/driver-repository.js";
 import { resolveSeasonSelection } from "../../lib/routing.js";
 import { formatUtcLongDate } from "../../lib/time.js";
 import { monogram } from "../../lib/tokens.js";
 import { colorForYear, latestColor, vendorIndexes } from "../../lib/vendor.js";
 
+const { driver: driverRepository } = Astro.locals.app.repositories;
 const slug = (Astro.params.id ?? "").toLowerCase();
-const repository = import.meta.env.DEV
-  ? createDriverRepository()
-  : createDriverRepository(createD1DriverDatabase(env.F1_DB));
-
-const driver = await repository.getDriver(slug);
+const driver = await driverRepository.getDriver(slug);
 if (!driver) Astro.response.status = 404;
-
-// 上游数据最快 30 分钟更新一次，边缘短暂缓存可吸收重复请求
-if (driver) {
-  Astro.response.headers.set(
-    "Cache-Control",
-    "public, s-maxage=300, stale-while-revalidate=600",
-  );
-}
 
 const currentYear = driver?.activeSeason ?? null;
 const flagSrc = driver

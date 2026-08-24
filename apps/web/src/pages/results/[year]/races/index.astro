@@ -1,28 +1,21 @@
 ---
-import { env } from "cloudflare:workers";
-
 import ResultsNav from "../../../../components/ResultsNav.astro";
 import SeasonFilter from "../../../../components/SeasonFilter.astro";
 import BaseLayout from "../../../../layouts/BaseLayout.astro";
-import {
-  createD1RaceResultsDatabase,
-  createRaceResultsRepository,
-} from "../../../../lib/race-results-repository.js";
 import { formatUtcDate } from "../../../../lib/time.js";
 import { monogram, monogramStyle as monogramStyleFor } from "../../../../lib/tokens.js";
 import { colorForYear, logoSrcFor, logoVariantFor, vendorIndexes } from "../../../../lib/vendor.js";
 
 const year = Number(Astro.params.year);
-const repository = import.meta.env.DEV
-  ? createRaceResultsRepository()
-  : createRaceResultsRepository(createD1RaceResultsDatabase(env.F1_DB));
+const { raceResults } = Astro.locals.app.repositories;
 const [availableYears, races] = await Promise.all([
-  repository.getSeasonYears(),
-  repository.listRaces(year),
+  raceResults.getSeasonYears(),
+  raceResults.listRaces(year),
 ]);
 if (!availableYears.includes(year)) Astro.response.status = 404;
-if (races.length > 0) {
-  Astro.response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
+// 空赛历显式 no-store，避免 data-sync 更新被边缘缓存延迟
+if (races.length === 0) {
+  Astro.response.headers.set("Cache-Control", "no-store");
 }
 
 // Winner monogram 底色用其当年车队配色，缺色不设变量，回落 components.css 的中性灰默认值

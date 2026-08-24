@@ -1,35 +1,24 @@
 ---
-import { env } from "cloudflare:workers";
-
 import RaceHeader from "../../../../../components/RaceHeader.astro";
 import RaceTable from "../../../../../components/RaceTable.astro";
 import RaceTabsNav from "../../../../../components/RaceTabsNav.astro";
 import SeasonFilter from "../../../../../components/SeasonFilter.astro";
 import StatusPage from "../../../../../components/StatusPage.astro";
 import BaseLayout from "../../../../../layouts/BaseLayout.astro";
-import {
-  createD1RaceResultsDatabase,
-  createRaceResultsRepository,
-  RACE_TAB_FIELDS,
-} from "../../../../../lib/race-results-repository.js";
+import { RACE_TAB_FIELDS } from "../../../../../lib/race-results-repository.js";
 import { RACE_TAB_LABELS, raceTabKeys, resolveRaceTab } from "../../../../../lib/routing.js";
 
 const year = Number(Astro.params.year);
 const slug = (Astro.params.slug ?? "").toLowerCase();
 const tab = resolveRaceTab(Astro.params.tab ?? "");
-const repository = import.meta.env.DEV
-  ? createRaceResultsRepository()
-  : createRaceResultsRepository(createD1RaceResultsDatabase(env.F1_DB));
+const { raceResults } = Astro.locals.app.repositories;
 const [availableYears, page] = await Promise.all([
-  repository.getSeasonYears(),
-  tab ? repository.getRacePage(year, slug) : Promise.resolve(null),
+  raceResults.getSeasonYears(),
+  tab ? raceResults.getRacePage(year, slug) : Promise.resolve(null),
 ]);
 // 数据异常（year 不在已知年份）时按 404 渲染，不缓存
 const found = tab !== null && page !== null && availableYears.includes(year);
 if (!found) Astro.response.status = 404;
-else {
-  Astro.response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
-}
 // getRacePage 本就一次性取回所有 tab 的数据；全量渲染成面板后
 // 客户端可就地切换，不再为每个 tab 走一次路由
 const visibleTabs =

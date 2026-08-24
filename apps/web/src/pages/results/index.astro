@@ -1,14 +1,5 @@
 ---
-import { env } from "cloudflare:workers";
-
-import {
-  createD1RaceResultsDatabase,
-  createRaceResultsRepository,
-} from "../../lib/race-results-repository.js";
-
-const repository = import.meta.env.DEV
-  ? createRaceResultsRepository()
-  : createRaceResultsRepository(createD1RaceResultsDatabase(env.F1_DB));
-const [latest] = await repository.getSeasonYears();
+const { raceResults } = Astro.locals.app.repositories;
+const [latest] = await raceResults.getSeasonYears();
 return Astro.redirect(latest === undefined ? "/" : `/results/${latest}/races`);
 ---

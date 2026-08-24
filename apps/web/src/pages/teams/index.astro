@@ -1,35 +1,21 @@
 ---
-import { env } from "cloudflare:workers";
 import SeasonFilter from "../../components/SeasonFilter.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { gridFillers } from "../../lib/layout.js";
 import { resolveCatalogYear } from "../../lib/routing.js";
-import {
-  createD1TeamDatabase,
-  createTeamRepository,
-} from "../../lib/team-repository.js";
 import {
   logoSrcFor,
   logoVariantFor,
   vendorIndexes,
 } from "../../lib/vendor.js";
 
-const repository = import.meta.env.DEV
-  ? createTeamRepository()
-  : createTeamRepository(createD1TeamDatabase(env.F1_DB));
-
-const years = await repository.getSeasonYears();
+const { team: teamRepository } = Astro.locals.app.repositories;
+const years = await teamRepository.getSeasonYears();
 const year = resolveCatalogYear(Astro.url.searchParams.get("year"), years);
 const constructors =
   year === null
-    ? await repository.getConstructors()
-    : await repository.getConstructorsByYear(year);
-
-// 目录是全量聚合，边缘短暂缓存吸收重复请求
-Astro.response.headers.set(
-  "Cache-Control",
-  "public, s-maxage=300, stale-while-revalidate=600",
-);
+    ? await teamRepository.getConstructors()
+    : await teamRepository.getConstructorsByYear(year);
 
 const cardClasses =
   "team-card group relative flex flex-col items-center gap-3 rounded-md bg-surface-raised p-5 transition-[background-color,transform] duration-200 hover:-translate-y-1 hover:bg-surface-overlay hover:z-1";

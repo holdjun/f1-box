@@ -1,15 +1,8 @@
-import { env } from "cloudflare:workers";
+import type { APIContext } from "astro";
 
-import {
-  createD1RaceResultsDatabase,
-  createRaceResultsRepository,
-} from "../../lib/race-results-repository.js";
-
-export async function GET(): Promise<Response> {
-  const repository = import.meta.env.DEV
-    ? createRaceResultsRepository()
-    : createRaceResultsRepository(createD1RaceResultsDatabase(env.F1_DB));
-  const years = await repository.getSeasonYears();
+export async function GET({ locals }: APIContext): Promise<Response> {
+  const { raceResults } = locals.app.repositories;
+  const years = await raceResults.getSeasonYears();
   return Response.json({
     status: "ok",
     // D1 为唯一数据源后，health 报赛季覆盖范围而非 R2 manifest 存在性

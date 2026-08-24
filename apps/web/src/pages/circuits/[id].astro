@@ -1,23 +1,13 @@
 ---
-import { env } from "cloudflare:workers";
 import CircuitMap from "../../components/CircuitMap.astro";
 import StatusPage from "../../components/StatusPage.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import {
-  createCircuitRepository,
-  createD1CircuitDatabase,
-} from "../../lib/circuit-repository.js";
 
+const { circuit: circuitRepository } = Astro.locals.app.repositories;
 const id = (Astro.params.id ?? "").toLowerCase();
-const repository = import.meta.env.DEV
-  ? createCircuitRepository()
-  : createCircuitRepository(createD1CircuitDatabase(env.F1_DB));
-const circuit = await repository.getCircuit(id);
+const circuit = await circuitRepository.getCircuit(id);
 // 赛道全名常含长词 (International), 小屏降到 display-md 防整词溢出
 if (!circuit) Astro.response.status = 404;
-else {
-  Astro.response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
-}
 ---
 
 {circuit ? (
