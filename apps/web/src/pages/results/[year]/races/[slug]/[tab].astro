@@ -43,6 +43,7 @@ const visibleTabs =
           hrefPattern={`/results/{year}/races/${slug}/${tab}`}
           sticky
           showAll={false}
+          client:load
         />
         <RaceTabsNav year={year} slug={slug} active={tab} visibleTabs={visibleTabs} />
         {visibleTabs.map((key) => (

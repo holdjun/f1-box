@@ -9,7 +9,7 @@ import "../styles/theme.css";
 import "../styles/base.css";
 import "../styles/components.css";
 
-import AskPanel from "../components/AskPanel.astro";
+import AskPanel from "../components/AskPanel.svelte";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 
@@ -66,7 +66,7 @@ const {
     <a class="skip-link" href="#main-content">Skip to content</a>
     <SiteHeader active={active} year={year} />
     <slot />
-    <AskPanel />
+    <AskPanel client:load />
     <SiteFooter season={year ?? season} />
     <script>
       import "../scripts/client.ts";

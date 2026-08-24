@@ -34,6 +34,7 @@ const winnerStyle = (teamId: string | null) =>
       hrefPattern="/results/{year}/races"
       sticky
       showAll={false}
+      client:load
     />
     <!-- biome-ignore lint/a11y/noNoninteractiveTabindex: 横滚表容器需要 tabindex，键盘用户才能滚动查看溢出列 -->
     <section class="table-scroll" aria-label={`${year} race results, scrollable`} tabindex="0">

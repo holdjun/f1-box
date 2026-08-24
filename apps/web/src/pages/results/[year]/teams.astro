@@ -28,6 +28,7 @@ if (rows.length === 0) {
       hrefPattern="/results/{year}/teams"
       sticky
       showAll={false}
+      client:load
     />
     <StandingsTable kind="constructors" rows={rows} />
   </main>
