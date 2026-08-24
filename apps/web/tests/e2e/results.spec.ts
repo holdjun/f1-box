@@ -55,11 +55,15 @@ test.describe("race detail", () => {
     await expect(page.locator("main h1")).toHaveText("Australia");
     const table = page.getByRole("table", { name: "Race classification" });
     await expect(table).toBeVisible();
-    await expect(table.locator("tbody tr").first()).toContainText("George Russell");
+    await expect(table.locator("tbody tr").first()).toContainText(
+      "George Russell",
+    );
     await expect(
       table.locator("tbody tr").first().locator("td").nth(2).getByRole("link"),
     ).toHaveAttribute("href", "/drivers/george-russell");
-    await expect(table.locator("tbody tr").first()).toContainText("1:23:06.801");
+    await expect(table.locator("tbody tr").first()).toContainText(
+      "1:23:06.801",
+    );
   });
 
   test("@desktop hero lists the weekend sessions", async ({ page }) => {
@@ -84,8 +88,12 @@ test.describe("race detail", () => {
   });
 
   test("@desktop unknown slug and unknown tab are 404", async ({ page }) => {
-    expect((await page.goto("/results/2026/races/nope/race-result"))?.status()).toBe(404);
-    expect((await page.goto("/results/2026/races/australia/sprint"))?.status()).toBe(404);
+    expect(
+      (await page.goto("/results/2026/races/nope/race-result"))?.status(),
+    ).toBe(404);
+    expect(
+      (await page.goto("/results/2026/races/australia/sprint"))?.status(),
+    ).toBe(404);
   });
 
   test("@desktop tab nav switches between result types", async ({ page }) => {
@@ -93,12 +101,18 @@ test.describe("race detail", () => {
     const nav = page.getByRole("navigation", { name: "Race result types" });
     await nav.getByRole("link", { name: "Qualifying" }).click();
     await page.waitForURL(/\/results\/2026\/races\/australia\/qualifying$/);
-    await expect(page.getByRole("table", { name: "Qualifying classification" })).toBeVisible();
+    await expect(
+      page.getByRole("table", { name: "Qualifying classification" }),
+    ).toBeVisible();
     await nav.getByRole("link", { name: "Fastest Laps" }).click();
     await page.waitForURL(/\/results\/2026\/races\/australia\/fastest-laps$/);
-    await expect(page.getByRole("table", { name: "Fastest laps" })).toBeVisible();
+    await expect(
+      page.getByRole("table", { name: "Fastest laps" }),
+    ).toBeVisible();
     await nav.getByRole("link", { name: "Pit Stop Summary" }).click();
-    await expect(page.getByRole("table", { name: "Pit stop summary" })).toBeVisible();
+    await expect(
+      page.getByRole("table", { name: "Pit stop summary" }),
+    ).toBeVisible();
   });
 });
 
@@ -109,7 +123,9 @@ test.describe("standings", () => {
     await expect(table).toBeVisible();
     await expect(table).toHaveClass("result-table");
     await expect(table.locator("tbody tr")).toHaveCount(22);
-    await expect(table.locator("tbody tr").first()).toContainText("Kimi Antonelli");
+    await expect(table.locator("tbody tr").first()).toContainText(
+      "Kimi Antonelli",
+    );
     await expect(
       table.locator("tbody tr").first().getByRole("link"),
     ).toHaveAttribute("href", "/drivers/kimi-antonelli");
@@ -138,7 +154,9 @@ test("@mobile results pages have no page overflow", async ({ page }) => {
     await page.goto(path);
     await expect(page.locator("main")).toBeVisible();
     const hasOverflow = await page.evaluate(
-      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth,
     );
     expect(hasOverflow, path).toBe(false);
   }
@@ -157,6 +175,8 @@ test.describe("legacy results redirects", () => {
   });
 
   test("@desktop old race detail path is gone", async ({ page }) => {
-    expect((await page.goto("/2026/racing/10-belgian-grand-prix"))?.status()).toBe(404);
+    expect(
+      (await page.goto("/2026/racing/10-belgian-grand-prix"))?.status(),
+    ).toBe(404);
   });
 });

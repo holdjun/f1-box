@@ -1,6 +1,6 @@
 import { runAgent } from "./agent.js";
-import { MAX_BODY_BYTES, validateAskBody } from "./request.js";
 import type { AskDatabase } from "./db.js";
+import { MAX_BODY_BYTES, validateAskBody } from "./request.js";
 
 export interface AskLimiter {
   limit(options: { key: string }): Promise<{ success: boolean }>;
@@ -26,7 +26,11 @@ export function createAskHandler(deps: {
     }
     const contentType = request.headers.get("content-type") ?? "";
     if (!contentType.startsWith("application/json")) {
-      return errorJson(400, "invalid_request", "content-type 必须是 application/json");
+      return errorJson(
+        400,
+        "invalid_request",
+        "content-type 必须是 application/json",
+      );
     }
     const origin = request.headers.get("origin");
     const host = new URL(request.url).host;

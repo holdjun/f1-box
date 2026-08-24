@@ -1,8 +1,8 @@
 import {
+  type AskMessage,
   MAX_CONTENT_CHARS,
   MAX_MESSAGES,
   MAX_TOTAL_CHARS,
-  type AskMessage,
 } from "./request.js";
 
 // 服务端对每条消息与对话总长都有硬校验（见 request.ts）：回答原样入库会让一次

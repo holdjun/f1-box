@@ -1,8 +1,9 @@
 ---
 import { env } from "cloudflare:workers";
-
-import BaseLayout from "../../layouts/BaseLayout.astro";
 import SeasonFilter from "../../components/SeasonFilter.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { gridFillers } from "../../lib/layout.js";
+import { resolveCatalogYear } from "../../lib/routing.js";
 import {
   createD1TeamDatabase,
   createTeamRepository,
@@ -12,8 +13,6 @@ import {
   logoVariantFor,
   vendorIndexes,
 } from "../../lib/vendor.js";
-import { resolveCatalogYear } from "../../lib/routing.js";
-import { gridFillers } from "../../lib/layout.js";
 
 const repository = import.meta.env.DEV
   ? createTeamRepository()

@@ -1,15 +1,14 @@
 ---
 import { env } from "cloudflare:workers";
-
-import BaseLayout from "../../layouts/BaseLayout.astro";
 import SeasonFilter from "../../components/SeasonFilter.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
 import {
   createD1DriverDatabase,
   createDriverRepository,
 } from "../../lib/driver-repository.js";
-import { monogram } from "../../lib/tokens.js";
-import { resolveCatalogYear } from "../../lib/routing.js";
 import { gridFillers } from "../../lib/layout.js";
+import { resolveCatalogYear } from "../../lib/routing.js";
+import { monogram } from "../../lib/tokens.js";
 
 const repository = import.meta.env.DEV
   ? createDriverRepository()

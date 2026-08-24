@@ -5,10 +5,14 @@
     margin-inline: auto;
   }
   @media (min-width: 40rem) {
-    .shell { width: min(100% - 3rem, 1440px); }
+    .shell {
+      width: min(100% - 3rem, 1440px);
+    }
   }
   @media (min-width: 61.25rem) {
-    .shell { width: min(100% - 6rem, 1440px); }
+    .shell {
+      width: min(100% - 6rem, 1440px);
+    }
   }
 
   /* 页面级大标题：所有列表/枢纽页的 h1 统一用 */
@@ -30,7 +34,10 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    transition: color 180ms ease, background-color 180ms ease, transform 180ms ease;
+    transition:
+      color 180ms ease,
+      background-color 180ms ease,
+      transform 180ms ease;
   }
   .button svg {
     width: 28px;
@@ -54,7 +61,10 @@
     border-bottom: 1px solid var(--ink-muted);
     color: var(--ink);
   }
-  .button--text:hover { border-color: var(--highlight); color: var(--highlight); }
+  .button--text:hover {
+    border-color: var(--highlight);
+    color: var(--highlight);
+  }
 
   .status-label {
     display: inline-flex;
@@ -65,7 +75,9 @@
     letter-spacing: 0.13em;
     text-transform: uppercase;
   }
-  .status-label--accent { color: var(--accent); }
+  .status-label--accent {
+    color: var(--accent);
+  }
 
   .table-scroll {
     max-width: 100%;
@@ -86,16 +98,28 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
-  th, td {
+  th,
+  td {
     padding: 0.95rem 0.75rem;
     border-bottom: 1px solid var(--line);
     font-weight: 450;
     white-space: nowrap;
   }
-  th:first-child, td:first-child { padding-left: 0; }
-  th:last-child, td:last-child { padding-right: 0; text-align: right; }
-  tbody tr { transition: background-color 160ms ease; }
-  tbody tr:hover { background: color-mix(in oklab, var(--ink-muted) 8%, transparent); }
+  th:first-child,
+  td:first-child {
+    padding-left: 0;
+  }
+  th:last-child,
+  td:last-child {
+    padding-right: 0;
+    text-align: right;
+  }
+  tbody tr {
+    transition: background-color 160ms ease;
+  }
+  tbody tr:hover {
+    background: color-mix(in oklab, var(--ink-muted) 8%, transparent);
+  }
   tbody th[scope="row"] {
     position: relative;
     min-width: 12rem;
@@ -104,9 +128,13 @@
   }
 
   /* 成绩表保底宽度，在 .table-scroll 内横滚；e2e 断言完整类名，不再叠加其他类 */
-  .result-table { min-width: 52rem; }
+  .result-table {
+    min-width: 52rem;
+  }
   @media (min-width: 40rem) {
-    .result-table { min-width: 55rem; }
+    .result-table {
+      min-width: 55rem;
+    }
   }
 
   /* 窄屏表格横滚时首列粘滞：嵌套选择器 + 背景覆盖无法用工具类自然表达 */
@@ -121,10 +149,12 @@
     }
   }
 
-  .empty-cell {
+  /* 选择器特异性压过 th/td:last-child 的右对齐，免用 !important */
+  th.empty-cell,
+  td.empty-cell {
     height: 8rem;
     color: var(--ink-muted);
-    text-align: center !important;
+    text-align: center;
     white-space: normal;
   }
 
@@ -170,8 +200,15 @@
     gap: 0.7rem 1rem;
     margin: 0;
   }
-  .info-panel dt { font-size: 0.68rem; color: var(--ink-muted); }
-  .info-panel dd { margin: 0; font-size: 1rem; font-weight: 600; }
+  .info-panel dt {
+    font-size: 0.68rem;
+    color: var(--ink-muted);
+  }
+  .info-panel dd {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
 
   /* 厂商/车手单元格：旗帜、logo、monogram 组合 */
   .vendor-cell {
@@ -179,7 +216,9 @@
     align-items: center;
     gap: 0.5rem;
   }
-  a.vendor-cell:hover { color: var(--accent); }
+  a.vendor-cell:hover {
+    color: var(--accent);
+  }
   .vendor-cell__flag {
     width: 1.25rem;
     height: 0.875rem;
@@ -200,7 +239,11 @@
     font-size: 0.6rem;
     font-weight: 700;
   }
-  .vendor-cell__logo { height: 1.1rem; width: auto; flex: none; }
+  .vendor-cell__logo {
+    height: 1.1rem;
+    width: auto;
+    flex: none;
+  }
   /* 白色稿 logo 亮色下与背景同色不可见：套墨底托保对比，手法同目录页 card-logo */
   [data-theme="light"] .vendor-cell__logo--chip {
     box-sizing: border-box;
@@ -214,6 +257,8 @@
     letter-spacing: 0.08em;
   }
   @media (width < 40rem) {
-    .vendor-cell--driver .vendor-cell__name { display: none; }
+    .vendor-cell--driver .vendor-cell__name {
+      display: none;
+    }
   }
 }

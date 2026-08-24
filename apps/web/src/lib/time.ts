@@ -1,9 +1,6 @@
 type Timestamp = string | Date;
 
-export function formatUtcDateTime(
-  value: Timestamp,
-  locale = "en-GB",
-): string {
+export function formatUtcDateTime(value: Timestamp, locale = "en-GB"): string {
   return formatDateTime(value, locale, "UTC");
 }
 

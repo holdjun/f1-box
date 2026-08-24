@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   createDriverRepository,
-  mergeNumberStints,
-  mergeTeamStints,
   type DriverDatabase,
   type DriverSeason,
+  mergeNumberStints,
+  mergeTeamStints,
 } from "../src/lib/driver-repository.js";
 
 // 键序即匹配优先级：与 driver-repository 的 11 条 SQL 特征子串对应
@@ -100,7 +100,9 @@ describe("mergeTeamStints", () => {
         season(2012, [["mclaren", "McLaren"]]),
         season(2011, [["mclaren", "McLaren"]]),
       ]),
-    ).toEqual([{ id: "mclaren", name: "McLaren", yearFrom: 2011, yearTo: 2013 }]);
+    ).toEqual([
+      { id: "mclaren", name: "McLaren", yearFrom: 2011, yearTo: 2013 },
+    ]);
   });
 
   it("splits on a team change and on a return", () => {
@@ -162,10 +164,34 @@ describe("createDriverRepository with database", () => {
     [LAST_NUMBER]: [{ driver_number: "7" }],
     [NUMBERS]: [{ year: 2017, driver_number: "7" }],
     [ROUNDS]: [
-      { year: 2017, round: 1, code: "AUS", name: "Australia", circuit_id: "melbourne" },
-      { year: 2017, round: 2, code: "CHN", name: "China", circuit_id: "shanghai" },
-      { year: 2017, round: 3, code: "BHR", name: "Bahrain", circuit_id: "sakhir" },
-      { year: 2017, round: 4, code: "RUS", name: "Russia", circuit_id: "sochi" },
+      {
+        year: 2017,
+        round: 1,
+        code: "AUS",
+        name: "Australia",
+        circuit_id: "melbourne",
+      },
+      {
+        year: 2017,
+        round: 2,
+        code: "CHN",
+        name: "China",
+        circuit_id: "shanghai",
+      },
+      {
+        year: 2017,
+        round: 3,
+        code: "BHR",
+        name: "Bahrain",
+        circuit_id: "sakhir",
+      },
+      {
+        year: 2017,
+        round: 4,
+        code: "RUS",
+        name: "Russia",
+        circuit_id: "sochi",
+      },
     ],
     [TEAMS]: [
       // SQL 已按 last_round 降序返回：换队后的 Renault 在前
@@ -173,16 +199,100 @@ describe("createDriverRepository with database", () => {
       { year: 2017, id: "toro-rosso", name: "Toro Rosso", last_round: 2 },
     ],
     [TEAMMATE_RESULTS]: [
-      { year: 2017, round: 1, driver_id: "teammate-a", name: "Teammate A", alpha2_code: "FR", constructor_id: "toro-rosso", position_text: "5", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 5 },
-      { year: 2017, round: 2, driver_id: "teammate-a", name: "Teammate A", alpha2_code: "FR", constructor_id: "toro-rosso", position_text: "6", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 6 },
-      { year: 2017, round: 3, driver_id: "teammate-b", name: "Teammate B", alpha2_code: "DE", constructor_id: "renault", position_text: "8", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 8 },
-      { year: 2017, round: 4, driver_id: "teammate-b", name: "Teammate B", alpha2_code: "DE", constructor_id: "renault", position_text: "11", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 11 },
+      {
+        year: 2017,
+        round: 1,
+        driver_id: "teammate-a",
+        name: "Teammate A",
+        alpha2_code: "FR",
+        constructor_id: "toro-rosso",
+        position_text: "5",
+        pole_position: 0,
+        fastest_lap: 0,
+        reason_retired: null,
+        position_number: 5,
+      },
+      {
+        year: 2017,
+        round: 2,
+        driver_id: "teammate-a",
+        name: "Teammate A",
+        alpha2_code: "FR",
+        constructor_id: "toro-rosso",
+        position_text: "6",
+        pole_position: 0,
+        fastest_lap: 0,
+        reason_retired: null,
+        position_number: 6,
+      },
+      {
+        year: 2017,
+        round: 3,
+        driver_id: "teammate-b",
+        name: "Teammate B",
+        alpha2_code: "DE",
+        constructor_id: "renault",
+        position_text: "8",
+        pole_position: 0,
+        fastest_lap: 0,
+        reason_retired: null,
+        position_number: 8,
+      },
+      {
+        year: 2017,
+        round: 4,
+        driver_id: "teammate-b",
+        name: "Teammate B",
+        alpha2_code: "DE",
+        constructor_id: "renault",
+        position_text: "11",
+        pole_position: 0,
+        fastest_lap: 0,
+        reason_retired: null,
+        position_number: 11,
+      },
     ],
     [RESULTS]: [
-      { year: 2017, round: 1, constructor_id: "toro-rosso", position_text: "9", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 9 },
-      { year: 2017, round: 2, constructor_id: "toro-rosso", position_text: "10", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 10 },
-      { year: 2017, round: 3, constructor_id: "renault", position_text: "7", pole_position: 1, fastest_lap: 0, reason_retired: null, position_number: 7 },
-      { year: 2017, round: 4, constructor_id: "renault", position_text: "DNF", pole_position: 0, fastest_lap: 1, reason_retired: "Engine", position_number: null },
+      {
+        year: 2017,
+        round: 1,
+        constructor_id: "toro-rosso",
+        position_text: "9",
+        pole_position: 0,
+        fastest_lap: 0,
+        reason_retired: null,
+        position_number: 9,
+      },
+      {
+        year: 2017,
+        round: 2,
+        constructor_id: "toro-rosso",
+        position_text: "10",
+        pole_position: 0,
+        fastest_lap: 0,
+        reason_retired: null,
+        position_number: 10,
+      },
+      {
+        year: 2017,
+        round: 3,
+        constructor_id: "renault",
+        position_text: "7",
+        pole_position: 1,
+        fastest_lap: 0,
+        reason_retired: null,
+        position_number: 7,
+      },
+      {
+        year: 2017,
+        round: 4,
+        constructor_id: "renault",
+        position_text: "DNF",
+        pole_position: 0,
+        fastest_lap: 1,
+        reason_retired: "Engine",
+        position_number: null,
+      },
     ],
     [TEAMMATE_SPRINT]: [],
     [SPRINT_RANK]: [],
@@ -196,7 +306,9 @@ describe("createDriverRepository with database", () => {
   };
 
   it("maps identity, totals and bio fields", async () => {
-    const driver = await createDriverRepository(fakeDb(base)).getDriver("test-driver");
+    const driver = await createDriverRepository(fakeDb(base)).getDriver(
+      "test-driver",
+    );
     expect(driver).toMatchObject({
       id: "test-driver",
       fullName: "Test A. Driver",
@@ -260,7 +372,9 @@ describe("createDriverRepository with database", () => {
 
     await createDriverRepository(db).getDriver("test-driver");
     // 正式阵容行缺失的替补（如 Bearman 2024）也要有队友：门槛改用实际参赛 stint
-    const teammates = captured.find((sql) => sql.includes("rr.driver_id <> ?1"));
+    const teammates = captured.find((sql) =>
+      sql.includes("rr.driver_id <> ?1"),
+    );
     expect(teammates).not.toContain("season_entrant_driver");
     expect(teammates).toContain("WITH stint");
     const sprint = captured.find((sql) => sql.includes("srr.driver_id <> ?1"));
@@ -269,7 +383,9 @@ describe("createDriverRepository with database", () => {
   });
 
   it("splits a mid-season transfer into two team rows with aligned cells", async () => {
-    const driver = await createDriverRepository(fakeDb(base)).getDriver("test-driver");
+    const driver = await createDriverRepository(fakeDb(base)).getDriver(
+      "test-driver",
+    );
     const season = driver?.seasons[0];
     expect(season?.year).toBe(2017);
     // 车队块按最后参赛轮次降序：换队后的 Renault 在 Toro Rosso 之上
@@ -296,7 +412,9 @@ describe("createDriverRepository with database", () => {
   });
 
   it("groups teammates under each team", async () => {
-    const driver = await createDriverRepository(fakeDb(base)).getDriver("test-driver");
+    const driver = await createDriverRepository(fakeDb(base)).getDriver(
+      "test-driver",
+    );
     const season = driver?.seasons[0];
     expect(season?.teams.map((t) => t.teammates.map((m) => m.name))).toEqual([
       ["Teammate B"],
@@ -316,21 +434,25 @@ describe("createDriverRepository with database", () => {
   });
 
   it("exposes retired gating data (latest season older than active season)", async () => {
-    const driver = await createDriverRepository(fakeDb(base)).getDriver("test-driver");
+    const driver = await createDriverRepository(fakeDb(base)).getDriver(
+      "test-driver",
+    );
     expect(driver?.currentSeason?.year).toBe(2017);
     expect(driver?.activeSeason).toBe(2026);
   });
 
   it("returns null for an unknown driver", async () => {
     const db = fakeDb({ ...base, [IDENTITY]: [] });
-    await expect(createDriverRepository(db).getDriver("nobody")).resolves.toBeNull();
+    await expect(
+      createDriverRepository(db).getDriver("nobody"),
+    ).resolves.toBeNull();
   });
 
   it("rejects a malformed identity row", async () => {
     const db = fakeDb({ ...base, [IDENTITY]: [{ id: "x", name: 42 }] });
-    await expect(
-      createDriverRepository(db).getDriver("x"),
-    ).rejects.toThrow(/Invalid row data/);
+    await expect(createDriverRepository(db).getDriver("x")).rejects.toThrow(
+      /Invalid row data/,
+    );
   });
 
   it("derives number stints only from the fixed-number era, in round order", async () => {
@@ -343,8 +465,8 @@ describe("createDriverRepository with database", () => {
       },
     };
     await createDriverRepository(db).getDriver("any");
-    const numbers = captured.find(
-      (sql) => sql.includes("GROUP BY ra.year, rd.driver_number"),
+    const numbers = captured.find((sql) =>
+      sql.includes("GROUP BY ra.year, rd.driver_number"),
     );
     expect(numbers).toContain("ra.year >= 1974");
     expect(numbers).toContain("MIN(ra.round)");

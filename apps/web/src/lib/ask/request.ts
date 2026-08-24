@@ -37,7 +37,7 @@ export function validateAskBody(parsed: unknown): AskBodyResult {
         message: `第 ${index + 1} 条消息必须是 ${expectedRole} 角色且 content 为字符串`,
       };
     }
-    const content = ((entry as { content: string }).content).trim();
+    const content = (entry as { content: string }).content.trim();
     if (content.length < 1 || content.length > MAX_CONTENT_CHARS) {
       return {
         ok: false,
@@ -50,7 +50,8 @@ export function validateAskBody(parsed: unknown): AskBodyResult {
     }
     messages.push({ role: expectedRole, content });
   }
-  if (messages.at(-1)!.role !== "user") {
+  const lastMessage = messages.at(-1);
+  if (lastMessage?.role !== "user") {
     return { ok: false, message: "最后一条消息必须是 user" };
   }
   return { ok: true, messages };

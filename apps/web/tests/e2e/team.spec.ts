@@ -120,7 +120,9 @@ test("ferrari detail filters season blocks @desktop", async ({ page }) => {
   const panel = page.locator(".season-filter__panel");
   await panel.getByRole("button", { name: "1997", exact: true }).click();
   await expect(page.locator(".season-block:visible")).toHaveCount(1);
-  await expect(page.locator(".season-block:visible .season-year")).toHaveText("1997");
+  await expect(page.locator(".season-block:visible .season-year")).toHaveText(
+    "1997",
+  );
   await panel.getByRole("button", { name: "All", exact: true }).click();
   await expect(page.locator(".season-block:visible")).toHaveCount(77);
 });
@@ -130,7 +132,9 @@ test("ferrari detail filters multiple seasons via URL @desktop", async ({
 }) => {
   await page.goto("/teams/ferrari?year=1997,2007");
   await expect(page.locator(".season-block:visible")).toHaveCount(2);
-  await expect(page.locator(".season-filter__summary")).toHaveText("1997, 2007");
+  await expect(page.locator(".season-filter__summary")).toHaveText(
+    "1997, 2007",
+  );
 });
 
 test("team logos render inside a stable contain frame @desktop", async ({
@@ -160,7 +164,9 @@ test("team logos render inside a stable contain frame @desktop", async ({
   expect(cardBounds.imageHeight).toBeLessThanOrEqual(cardBounds.frameHeight);
 
   // 无独立 logo 的车队回落为 monogram，不出现失效图片
-  await expect(page.locator('a[href="/teams/adams"] .card-monogram')).toBeVisible();
+  await expect(
+    page.locator('a[href="/teams/adams"] .card-monogram'),
+  ).toBeVisible();
   await expect(page.locator('a[href="/teams/adams"] img')).toHaveCount(0);
 
   await page.goto("/teams/ferrari");

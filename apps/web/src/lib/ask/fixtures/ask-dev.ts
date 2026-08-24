@@ -1,17 +1,17 @@
-import { createStaticAskDatabase, type AskDatabase } from "../db.js";
+import { type AskDatabase, createStaticAskDatabase } from "../db.js";
 import {
   constructorChampionshipYearsSql,
   constructorIdentitySql,
   constructorRefSql,
+  constructorStandingsSql,
   driverChampionshipYearsSql,
   driverIdentitySql,
   driverRefSql,
+  driverStandingsSql,
   grandPrixRefSql,
   raceMetaSql,
   raceResultRowsSql,
   seasonCheckSql,
-  driverStandingsSql,
-  constructorStandingsSql,
 } from "../tools.js";
 
 // DEV 手动联调用：实体解析经 ref SQL 命中固定行（车手→Hamilton、车队→Ferrari），再走 identity/年份行（e2e 全程 mock /api/ask，不依赖这里）

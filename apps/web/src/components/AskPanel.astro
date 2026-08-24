@@ -23,7 +23,7 @@
       <circle cx="12" cy="16.4" r="1" fill="currentColor" />
     </svg>
   </button>
-  <!-- 375px 视口下面板铺满全屏（e2e 断言），md 起收回右下角浮层 -->
+  <!-- 375px 视口下面板铺满全屏 (e2e 断言), md 起收回右下角浮层 -->
   <section
     class="ask__panel fixed inset-0 z-40 flex flex-col bg-surface-raised md:inset-auto md:right-4 md:bottom-20 md:h-[35rem] md:max-h-[70svh] md:w-96 md:rounded-md md:border md:border-line md:shadow-panel md:light:shadow-panel"
     id="ask-panel"
@@ -87,7 +87,7 @@
   import "../scripts/ask-panel.ts";
 </script>
 
-<!-- 气泡由脚本动态创建，拿不到 Astro 作用域属性，工具类必须在全局生效 -->
+<!-- 气泡由脚本动态创建, 拿不到 Astro 作用域属性, 工具类必须在全局生效 -->
 <style is:global>
   @reference "../styles/theme.css";
 

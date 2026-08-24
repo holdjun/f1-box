@@ -77,9 +77,7 @@ describe("validateAskBody", () => {
     ).toBe(false);
     expect(
       validateAskBody({
-        messages: [
-          { role: "user", content: `  ${"汉".repeat(2000)}  ` },
-        ],
+        messages: [{ role: "user", content: `  ${"汉".repeat(2000)}  ` }],
       }),
     ).toEqual(ok([{ role: "user", content: "汉".repeat(2000) }]));
   });

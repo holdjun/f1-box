@@ -3,8 +3,8 @@ import type {
   DriverStandingRow,
   TeamStandingRow,
 } from "../lib/race-results-repository.js";
-import { logoSrcFor, logoVariantFor, vendorIndexes } from "../lib/vendor.js";
 import { monogram } from "../lib/tokens.js";
+import { logoSrcFor, logoVariantFor, vendorIndexes } from "../lib/vendor.js";
 
 interface Props {
   kind: "drivers" | "constructors";
@@ -21,7 +21,8 @@ const positionLabel = (row: DriverStandingRow | TeamStandingRow) =>
   String(row.position ?? row.positionText).padStart(2, "0");
 ---
 
-<div class="table-scroll" tabindex="0">
+<!-- biome-ignore lint/a11y/noNoninteractiveTabindex: 横滚表容器需要 tabindex，键盘用户才能滚动查看溢出列 -->
+<section class="table-scroll" aria-label={`${label}, scrollable`} tabindex="0">
   <table class="result-table" aria-label={label}>
     <thead>
       <tr>
@@ -69,4 +70,4 @@ const positionLabel = (row: DriverStandingRow | TeamStandingRow) =>
       )}
     </tbody>
   </table>
-</div>
+</section>

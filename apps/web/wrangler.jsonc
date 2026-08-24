@@ -8,9 +8,7 @@
     "binding": "ASSETS",
     "directory": "./dist"
   },
-  "routes": [
-    { "pattern": "f1-box.com", "custom_domain": true }
-  ],
+  "routes": [{ "pattern": "f1-box.com", "custom_domain": true }],
   "d1_databases": [
     {
       "binding": "F1_DB",

@@ -3,12 +3,8 @@ import { askAliases, resolveAlias } from "../src/lib/ask/aliases.js";
 
 describe("resolveAlias", () => {
   it("resolves exact alias after normalization", () => {
-    expect(resolveAlias("汉密尔顿", askAliases.drivers)).toBe(
-      "lewis-hamilton",
-    );
-    expect(resolveAlias("  乐扣 ", askAliases.drivers)).toBe(
-      "charles-leclerc",
-    );
+    expect(resolveAlias("汉密尔顿", askAliases.drivers)).toBe("lewis-hamilton");
+    expect(resolveAlias("  乐扣 ", askAliases.drivers)).toBe("charles-leclerc");
     expect(resolveAlias("Kimi", askAliases.drivers)).toBe("kimi-raikkonen");
     expect(resolveAlias("奔驰", askAliases.constructors)).toBe("mercedes");
   });

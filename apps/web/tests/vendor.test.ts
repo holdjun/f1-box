@@ -9,11 +9,13 @@ import {
   latestColor,
   logoSrcFor,
   logoVariantFor,
-  vendorIndexes,
   type VendorIndexes,
+  vendorIndexes,
 } from "../src/lib/vendor.js";
 
-const logoDir = fileURLToPath(new URL("../public/vendor/team-logos", import.meta.url));
+const logoDir = fileURLToPath(
+  new URL("../public/vendor/team-logos", import.meta.url),
+);
 
 describe("curated vendor data", () => {
   it("serves the curated Ferrari branding from repo data", () => {
@@ -47,15 +49,23 @@ describe("logo and color selection", () => {
     },
     logos: [
       { file: "team-logos/ferrari@1990.png", yearFrom: 1990, variant: "color" },
-      { file: "team-logos/ferrari@2026.webp", yearFrom: 2026, variant: "white" },
+      {
+        file: "team-logos/ferrari@2026.webp",
+        yearFrom: 2026,
+        variant: "white",
+      },
       { file: "team-logos/arrows@1978.png", yearFrom: 1978, variant: "color" },
     ],
   };
 
   it("picks the newest logo for a team", () => {
-    expect(logoSrcFor(indexes, "ferrari")).toBe("/vendor/team-logos/ferrari@2026.webp");
+    expect(logoSrcFor(indexes, "ferrari")).toBe(
+      "/vendor/team-logos/ferrari@2026.webp",
+    );
     expect(logoVariantFor(indexes, "ferrari")).toBe("white");
-    expect(logoSrcFor(indexes, "arrows")).toBe("/vendor/team-logos/arrows@1978.png");
+    expect(logoSrcFor(indexes, "arrows")).toBe(
+      "/vendor/team-logos/arrows@1978.png",
+    );
     expect(logoSrcFor(indexes, "unknown")).toBeNull();
   });
 
@@ -85,7 +95,10 @@ describe("repo asset integrity", () => {
       const name = entry.file.replace(/^team-logos\//, "");
       const path = `${logoDir}/${name}`;
       expect(files.has(name), `missing logo asset: ${entry.file}`).toBe(true);
-      expect(statSync(path).size, `empty logo asset: ${entry.file}`).toBeGreaterThan(0);
+      expect(
+        statSync(path).size,
+        `empty logo asset: ${entry.file}`,
+      ).toBeGreaterThan(0);
       files.delete(name);
     }
     expect([...files], "logo assets missing from logos.json").toEqual([]);
@@ -111,7 +124,9 @@ describe("repo asset integrity", () => {
   });
 
   it("has a flag asset for every curated alpha-2 code shape", () => {
-    const flagDir = fileURLToPath(new URL("../public/vendor/country-flags", import.meta.url));
+    const flagDir = fileURLToPath(
+      new URL("../public/vendor/country-flags", import.meta.url),
+    );
     expect(existsSync(`${flagDir}/it.svg`)).toBe(true);
     expect(existsSync(`${flagDir}/gb.svg`)).toBe(true);
   });

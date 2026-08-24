@@ -11,9 +11,7 @@ test("drivers catalog renders the full fixture field @desktop", async ({
   ).toBeVisible();
 });
 
-test("russell card shows number, team and flag @desktop", async ({
-  page,
-}) => {
+test("russell card shows number, team and flag @desktop", async ({ page }) => {
   await page.goto("/drivers");
   const card = page.locator('a[href="/drivers/george-russell"]');
   await expect(card.locator(".card-number")).toHaveText("63");
@@ -110,15 +108,17 @@ test("russell detail shows hero, bio and current season @desktop", async ({
   await expect(chips.nth(1)).toHaveAttribute("href", "/teams/mercedes");
   await expect(chips.nth(3)).toHaveAttribute("href", "/teams/mercedes");
   // chip 用该 stint 结束年份的队色：2019 Williams（#ffffff）与 2020–2021（#005aff）不同
-  const williamsChips = teams.locator(".team-chip").filter({ hasText: "Williams" });
+  const williamsChips = teams
+    .locator(".team-chip")
+    .filter({ hasText: "Williams" });
   await expect(williamsChips).toHaveCount(2);
   await expect(williamsChips.nth(0)).toHaveCSS("color", "rgb(255, 255, 255)");
   await expect(williamsChips.nth(1)).toHaveCSS("color", "rgb(0, 90, 255)");
   // 生涯矩阵：首行车手自己（白色），队友行灰色且可链接
   const current = page.locator(".season-block.current");
-  await expect(
-    current.locator(".driver-cell .driver-link").first(),
-  ).toHaveText("George Russell");
+  await expect(current.locator(".driver-cell .driver-link").first()).toHaveText(
+    "George Russell",
+  );
   const antonelli = current.locator(
     ".driver-cell a[href='/drivers/kimi-antonelli']",
   );
@@ -187,7 +187,9 @@ test("russell detail renders on mobile @mobile", async ({ page }) => {
 test("drivers catalog filters to a season @desktop", async ({ page }) => {
   await page.goto("/drivers?year=1997");
   await expect(page.locator(".driver-card")).toHaveCount(2);
-  await expect(page.locator('a[href="/drivers/michael-schumacher"]')).toBeVisible();
+  await expect(
+    page.locator('a[href="/drivers/michael-schumacher"]'),
+  ).toBeVisible();
   await expect(page.locator('a[href="/drivers/mika-hakkinen"]')).toBeVisible();
   await expect(page.locator(".season-filter__summary")).toHaveText("1997");
   // 按该年积分排序：schumacher 78 分在 hakkinen 前，且显示该年号码与该年车队
@@ -208,7 +210,9 @@ test("drivers detail filters season blocks @desktop", async ({ page }) => {
   const panel = page.locator(".season-filter__panel");
   await panel.getByRole("button", { name: "2021", exact: true }).click();
   await expect(page.locator(".season-block:visible")).toHaveCount(1);
-  await expect(page.locator(".season-block:visible .season-year")).toHaveText("2021");
+  await expect(page.locator(".season-block:visible .season-year")).toHaveText(
+    "2021",
+  );
   // 转队分隔线属于 2020，隐藏年份时不应残留
   await expect(page.locator(".team-split:visible")).toHaveCount(0);
   await expect(page.locator(".season-gap:visible")).toHaveCount(0);
@@ -247,6 +251,8 @@ test("drivers detail closes the filter panel on Escape @desktop", async ({
 test("drivers detail filters via URL @desktop", async ({ page }) => {
   await page.goto("/drivers/george-russell?year=2021");
   await expect(page.locator(".season-block:visible")).toHaveCount(1);
-  await expect(page.locator(".season-block:visible .season-year")).toHaveText("2021");
+  await expect(page.locator(".season-block:visible .season-year")).toHaveText(
+    "2021",
+  );
   await expect(page.locator(".season-filter__summary")).toHaveText("2021");
 });

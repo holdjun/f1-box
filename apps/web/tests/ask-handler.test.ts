@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { createAskHandler } from "../src/lib/ask/handler.js";
 import { createStaticAskDatabase } from "../src/lib/ask/db.js";
+import { createAskHandler } from "../src/lib/ask/handler.js";
 import { driverIdentitySql } from "../src/lib/ask/tools.js";
 
 function sseStream() {
   return new ReadableStream<Uint8Array>({
     start(controller) {
       const encoder = new TextEncoder();
-      controller.enqueue(encoder.encode('event: delta\ndata: {"text":"七冠"}\n\n'));
+      controller.enqueue(
+        encoder.encode('event: delta\ndata: {"text":"七冠"}\n\n'),
+      );
       controller.enqueue(encoder.encode("event: done\ndata: {}\n\n"));
       controller.close();
     },
@@ -115,10 +117,9 @@ describe("ask handler", () => {
       spy.calls.push([o.key]);
       return { success: true };
     };
-    const response = await ask(
-      handler({ limiter: { limit: tracked } }),
-      { headers: { "cf-connecting-ip": "203.0.113.9" } },
-    );
+    const response = await ask(handler({ limiter: { limit: tracked } }), {
+      headers: { "cf-connecting-ip": "203.0.113.9" },
+    });
     expect(response.status).toBe(200);
     expect(spy.calls).toEqual([["203.0.113.9"]]);
   });

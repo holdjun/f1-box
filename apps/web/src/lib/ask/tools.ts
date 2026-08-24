@@ -95,11 +95,17 @@ async function resolveEntity(
   return { status: "miss" };
 }
 
-export function resolveDriver(db: AskDatabase, query: string): Promise<Resolution> {
+export function resolveDriver(
+  db: AskDatabase,
+  query: string,
+): Promise<Resolution> {
   return resolveEntity(db, query, driverRefSql, askAliases.drivers);
 }
 
-export function resolveConstructor(db: AskDatabase, query: string): Promise<Resolution> {
+export function resolveConstructor(
+  db: AskDatabase,
+  query: string,
+): Promise<Resolution> {
   return resolveEntity(db, query, constructorRefSql, askAliases.constructors);
 }
 
@@ -124,14 +130,23 @@ export async function driverSummary(
   const resolution = await resolveDriver(db, query);
   if (resolution.status === "miss") return missDriver;
   if (resolution.status === "ambiguous") {
-    return { found: false, candidates: resolution.candidates, message: candidateMessage("车手") };
+    return {
+      found: false,
+      candidates: resolution.candidates,
+      message: candidateMessage("车手"),
+    };
   }
   const identityRows = await db.run(driverIdentitySql, [resolution.ref.id]);
   if (identityRows.length === 0) return missDriver;
   const record = asRecord(identityRows[0], "driver identity row");
-  const yearRows = await db.run(driverChampionshipYearsSql, [resolution.ref.id]);
+  const yearRows = await db.run(driverChampionshipYearsSql, [
+    resolution.ref.id,
+  ]);
   const championshipYears = yearRows.map((row) =>
-    asNumber(asRecord(row, "driver championship row").year, "championship year"),
+    asNumber(
+      asRecord(row, "driver championship row").year,
+      "championship year",
+    ),
   );
   const id = asString(record.id, "driver id");
   return {
@@ -165,14 +180,25 @@ export async function constructorSummary(
   const resolution = await resolveConstructor(db, query);
   if (resolution.status === "miss") return missConstructor;
   if (resolution.status === "ambiguous") {
-    return { found: false, candidates: resolution.candidates, message: candidateMessage("车队") };
+    return {
+      found: false,
+      candidates: resolution.candidates,
+      message: candidateMessage("车队"),
+    };
   }
-  const identityRows = await db.run(constructorIdentitySql, [resolution.ref.id]);
+  const identityRows = await db.run(constructorIdentitySql, [
+    resolution.ref.id,
+  ]);
   if (identityRows.length === 0) return missConstructor;
   const record = asRecord(identityRows[0], "constructor identity row");
-  const yearRows = await db.run(constructorChampionshipYearsSql, [resolution.ref.id]);
+  const yearRows = await db.run(constructorChampionshipYearsSql, [
+    resolution.ref.id,
+  ]);
   const championshipYears = yearRows.map((row) =>
-    asNumber(asRecord(row, "constructor championship row").year, "championship year"),
+    asNumber(
+      asRecord(row, "constructor championship row").year,
+      "championship year",
+    ),
   );
   const id = asString(record.id, "constructor id");
   return {
@@ -255,9 +281,10 @@ export async function seasonDriverStandings(
       const record = asRecord(row, "driver standing row");
       const driverId = asString(record.driver_id, "standing driver id");
       return {
-        position: record.position_number === null
-          ? null
-          : asNumber(record.position_number, "standing position"),
+        position:
+          record.position_number === null
+            ? null
+            : asNumber(record.position_number, "standing position"),
         driver: asString(record.driver_name, "standing driver name"),
         driverId,
         points: asNumber(record.points, "standing points"),
@@ -305,7 +332,10 @@ export async function seasonConstructorStandings(
           pagePath: `/teams/${teamId}`,
         };
       })
-      .sort((a, b) => (a.position ?? 999) - (b.position ?? 999) || b.points - a.points),
+      .sort(
+        (a, b) =>
+          (a.position ?? 999) - (b.position ?? 999) || b.points - a.points,
+      ),
   };
 }
 
@@ -363,14 +393,16 @@ export async function raceResults(
           ? asString(record.time, "result time")
           : `${asString(record.position_text, "result position text")}${record.reason_retired ? `（${asString(record.reason_retired, "result reason")}）` : ""}`;
       return {
-        position: record.position_number === null
-          ? null
-          : asNumber(record.position_number, "result position"),
+        position:
+          record.position_number === null
+            ? null
+            : asNumber(record.position_number, "result position"),
         driver: asString(record.driver_name, "result driver name"),
         driverId,
         team: asString(record.constructor_name, "result constructor name"),
         // f1db 未得分行的 points 为 NULL（实测 1.9 万行），语义上即 0 分
-        points: record.points === null ? 0 : asNumber(record.points, "result points"),
+        points:
+          record.points === null ? 0 : asNumber(record.points, "result points"),
         status,
         pagePath: `/drivers/${driverId}`,
       };

@@ -101,7 +101,9 @@ WHERE ra.circuit_id = ?1 AND fl.time_millis IS NOT NULL
 ORDER BY fl.time_millis
 LIMIT 1`;
 
-export function createCircuitRepository(db?: CircuitDatabase): CircuitRepository {
+export function createCircuitRepository(
+  db?: CircuitDatabase,
+): CircuitRepository {
   return {
     async getCircuits() {
       if (!db) {
@@ -116,19 +118,23 @@ export function createCircuitRepository(db?: CircuitDatabase): CircuitRepository
     async getCircuitsByYear(year) {
       if (!db) {
         const fixture = await loadFixture();
-        return fixture.filter((circuit) => circuit.years.includes(year)).map(toSummary);
+        return fixture
+          .filter((circuit) => circuit.years.includes(year))
+          .map(toSummary);
       }
 
-      const [rows] = await db.batch([{ sql: circuitsByYearSql, values: [year] }]);
+      const [rows] = await db.batch([
+        { sql: circuitsByYearSql, values: [year] },
+      ]);
       return rows.results.map(mapSummaryRow);
     },
 
     async getSeasonYears() {
       if (!db) {
         const fixture = await loadFixture();
-        return [
-          ...new Set(fixture.flatMap((circuit) => circuit.years)),
-        ].sort((a, b) => b - a);
+        return [...new Set(fixture.flatMap((circuit) => circuit.years))].sort(
+          (a, b) => b - a,
+        );
       }
 
       const [rows] = await db.batch([{ sql: seasonYearsSql, values: [] }]);
@@ -153,10 +159,15 @@ export function createCircuitRepository(db?: CircuitDatabase): CircuitRepository
         fullName: asString(record.full_name, "circuit full name"),
         direction: titleCase(asString(record.direction, "circuit direction")),
         firstGrandPrix:
-          record.first_gp == null ? null : asNumber(record.first_gp, "circuit first gp"),
-        laps: record.laps == null ? null : asNumber(record.laps, "circuit laps"),
+          record.first_gp == null
+            ? null
+            : asNumber(record.first_gp, "circuit first gp"),
+        laps:
+          record.laps == null ? null : asNumber(record.laps, "circuit laps"),
         distance:
-          record.distance == null ? null : asNumber(record.distance, "circuit distance"),
+          record.distance == null
+            ? null
+            : asNumber(record.distance, "circuit distance"),
         recordLap:
           recordLapRows.results.length === 0
             ? null

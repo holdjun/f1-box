@@ -59,8 +59,14 @@ describe("resolveSeasonSelection", () => {
 describe("resolveRaceTab", () => {
   it("exposes the eight supported tabs in display order", () => {
     expect(raceTabKeys).toEqual([
-      "race-result", "fastest-laps", "pit-stop-summary", "starting-grid",
-      "qualifying", "practice-1", "practice-2", "practice-3",
+      "race-result",
+      "fastest-laps",
+      "pit-stop-summary",
+      "starting-grid",
+      "qualifying",
+      "practice-1",
+      "practice-2",
+      "practice-3",
     ]);
   });
 

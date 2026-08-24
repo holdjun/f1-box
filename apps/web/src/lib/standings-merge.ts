@@ -31,7 +31,10 @@ export function mergeStanding(
 }
 
 // 仅数字名次参与比较且越小越好；NC、EX 等非数字标签不顶替已有名次，只在尚无名次时收录
-function betterPositionText(current: string | null, candidate: string): string | null {
+function betterPositionText(
+  current: string | null,
+  candidate: string,
+): string | null {
   if (current === null) return candidate;
   const candidateNumber = Number(candidate);
   if (!Number.isInteger(candidateNumber)) return current;

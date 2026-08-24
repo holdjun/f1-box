@@ -1,10 +1,10 @@
 import { env } from "cloudflare:workers";
 import type { APIRoute } from "astro";
+import { type AskDatabase, createD1AskDatabase } from "../../lib/ask/db.js";
 import { createAskHandler } from "../../lib/ask/handler.js";
-import { createD1AskDatabase } from "../../lib/ask/db.js";
 
 export const POST: APIRoute = async ({ request }) => {
-  let db;
+  let db: AskDatabase;
   if (import.meta.env.DEV) {
     const { createDevAskDatabase } = await import(
       "../../lib/ask/fixtures/ask-dev.js"

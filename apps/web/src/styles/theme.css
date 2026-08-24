@@ -26,7 +26,8 @@
   --spacing-section: clamp(4.75rem, 9vw, 9rem);
 
   --ease-hero: cubic-bezier(0.2, 0.75, 0.25, 1);
-  --shadow-panel: 0 1px 2px rgb(20 23 28 / 0.05), 0 10px 28px rgb(20 23 28 / 0.08);
+  --shadow-panel:
+    0 1px 2px rgb(20 23 28 / 0.05), 0 10px 28px rgb(20 23 28 / 0.08);
 }
 
 /* 语义令牌：深色为默认值，[data-theme="light"] 整套翻转 */
