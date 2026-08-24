@@ -94,10 +94,10 @@
     }
     render();
     // 恢复会话中打开的面板：manual popover 的程序式显示不要求用户激活，
-    // 直接把 popover 打回打开态，保持开合语义与其他交互一致
+    // 直接把 popover 打回打开态。不在此处抢焦点——导航后键盘焦点应留在
+    // 导航链接上，与旧实现一致（只有用户主动开合时才管理焦点）
     if (openState && panelEl && !panelEl.matches(":popover-open")) {
       panelEl.showPopover();
-      inputEl?.focus();
     }
     panelEl?.addEventListener("toggle", onToggle);
   });
@@ -107,12 +107,13 @@
     if (messages.length > 0) persistState();
   });
 
-  function scrollToBottomIfNear(): void {
-    if (!messagesEl) return;
-    const nearBottom =
+  // 用户是否贴底（更新前几何快照；旧实现"先测 stick → 写 DOM → 再滚"语义）
+  function nearBottom(): boolean {
+    if (!messagesEl) return false;
+    return (
       messagesEl.scrollTop + messagesEl.clientHeight >=
-      messagesEl.scrollHeight - 48;
-    if (nearBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
+      messagesEl.scrollHeight - 48
+    );
   }
 
   function showError(message: string): void {
@@ -173,11 +174,14 @@
               // 单条数据损坏跳过，不打断后续事件
               continue;
             }
+            // 判定用更新前的贴底快照，更新后直接滚到底：单个大 delta 也不会
+            // 因增量超阈值而永久脱贴（与旧实现的"先测后写"语义严格等价）
+            const stick = nearBottom();
             streamingText = answer;
-            // Svelte DOM 更新是异步 flush：先等 tick 再把几何写入，
-            // 与前实现"先测 stick → 写 DOM → 再滚"的贴底跟随语义等价
             await tick();
-            scrollToBottomIfNear();
+            if (stick && messagesEl) {
+              messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
           } else if (event.event === "error") {
             hadError = true;
             // 文案以服务端为准（已脱敏）；解析失败退回通用提示
