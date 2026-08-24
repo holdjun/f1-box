@@ -24,7 +24,7 @@ pnpm --filter @f1-box/web test:e2e    # Playwright e2e（桌面 / 375px / reduce
 
 ## 数据流
 
-f1db（CC-BY-4.0）→ `data-sync.yml` 每周全量导入 D1 → Astro Worker 读 D1；赛道轮廓 SVG、车队 logo、国旗存仓库 `public/vendor/`；本地开发读 fixture。访客请求不直接访问上游数据源。
+f1db（CC-BY-4.0）→ `data-sync.yml` 每 6 小时轮询上游 release tag，有变化时全量导入 D1 → Astro Worker 读 D1；赛道轮廓 SVG、车队 logo、国旗存仓库 `public/vendor/`；本地开发读 fixture。访客请求不直接访问上游数据源。
 
 实时与遥测数据后续以 FastF1 另立采集服务（静态 f1db + 动态 FastF1 双源架构，见 `docs/requirements/2026-08-24-remove-jolpica-r2.md`）。
 
@@ -45,7 +45,7 @@ f1db（CC-BY-4.0）→ `data-sync.yml` 每周全量导入 D1 → Astro Worker �
 2. agent 建分支开发，开 PR；CI 自动验证（类型、测试、e2e、Python），preview worker 自动部署。
 3. 用户在 preview 页面验收后合并到 main。
 4. 合并到 main 后 deploy 工作流自动发布到 f1-box.com（预览验收已在合并前完成）。
-5. data-sync 工作流每周把 f1db 全量导入 D1，也可手动触发。
+5. data-sync 工作流每 6 小时轮询 f1db release tag，有变化时全量导入 D1，也可手动触发。
 
 回滚：数据问题重跑 data-sync 或恢复旧 D1 导入；代码问题重新部署旧提交。
 

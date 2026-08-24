@@ -24,5 +24,14 @@
 ## 范围外
 
 - 不引入 FastF1 采集服务（另立需求）。
-- 不删 Cloudflare 上的 R2 bucket 与其中对象。
-- D1 四个 repository、dev fixture、data-sync 工作流不动。
+- 不删 Cloudflare 上的 R2 bucket 与其中对象（合并部署后由用户确认执行 `wrangler r2 bucket delete f1-box-data --remote`）。
+- D1 四个 repository、dev fixture 不动。
+
+## 追加范围（2026-08-24 补充）
+
+data-sync 工作流原本把门禁状态（release.json）与 zip 归档存在 R2，是 bucket 的最后消费者，一并迁移：
+
+- 门禁状态改存 D1 `sync_state` 单行表（导入失败不记录 tag，下次自动重试的语义保持）。
+- 删除 R2 归档上传（zip 可随时从上游重下，无消费者）。
+- 轮询频率每天一次改每 6 小时（tag 门禁下无变化为零成本空转），把上游发布后的滞后从 ≤24h 收敛到 ≤6h。
+- `npm install -g wrangler` 改走仓库本地 wrangler（pnpm install 后脚本自动选用），消除未钉版全局安装。
