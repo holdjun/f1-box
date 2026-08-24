@@ -90,6 +90,9 @@ const initialSelected = resolveSeasonSelection(
   Astro.url.searchParams.get("year"),
   new Set((driver?.seasons ?? []).map((s) => s.year)),
 );
+
+const stintLabel = "number-label mr-1.5 text-[0.68rem] uppercase tracking-[0.1em] text-ink-muted";
+const stintYears = "number-years text-[0.68rem] text-ink-muted";
 ---
 
 {driver ? (
@@ -98,24 +101,27 @@ const initialSelected = resolveSeasonSelection(
     description={`${driver.fullName} — career statistics and complete race-by-race history.`}
     active="drivers"
   >
-    <main id="main-content" class="page-shell">
-      <header class="driver-hero" style={`--team-color: ${teamColor}`}>
-        <span class="driver-number-frame">
+    <main id="main-content" class="shell pt-12 pb-section">
+      <header class="flex flex-col gap-6 md:flex-row md:items-center" style={`--team-color: ${teamColor}`}>
+        <span class="driver-number-frame grid h-16 w-24 flex-none place-items-center">
           {driverNumber !== null ? (
-            <span class="driver-number">{driverNumber}</span>
+            /* 车号混入 --team-color（数据语义色）：深色下提亮、亮色下加深，两主题都可读 */
+            <span class="driver-number font-display text-[3.2rem] leading-none font-bold italic tracking-[0.02em] [color:color-mix(in_srgb,var(--team-color)_45%,var(--ink))]">
+              {driverNumber}
+            </span>
           ) : (
-            <span class="driver-monogram" aria-hidden="true">
+            <span class="driver-monogram grid size-16 place-items-center rounded-[12px] bg-line font-display text-[1.6rem] font-bold text-ink-strong" aria-hidden="true">
               {monogram(driver.name)}
             </span>
           )}
         </span>
         <div>
-          <h1>{driver.fullName}</h1>
-          <p class="driver-country">
-            {flagSrc ? <img class="flag" src={flagSrc} alt="" /> : null}
+          <h1 class="max-w-[12ch] text-display-lg uppercase">{driver.fullName}</h1>
+          <p class="driver-country mt-3 flex items-center gap-1.5 text-[0.85rem] uppercase tracking-[0.06em] text-ink-strong">
+            {flagSrc ? <img class="flag h-[0.95rem] w-auto" src={flagSrc} alt="" /> : null}
             {driver.countryName}
           </p>
-          <p class="driver-bio">
+          <p class="driver-bio mt-2 flex max-w-[46rem] flex-wrap items-center gap-x-2 gap-y-1 text-[0.95rem] leading-relaxed text-ink-strong">
             <span>Born {formatUtcLongDate(driver.dateOfBirth)}</span>
             <span aria-hidden="true">·</span>
             <span>{driver.placeOfBirth}</span>
@@ -130,14 +136,14 @@ const initialSelected = resolveSeasonSelection(
       </header>
 
       {driver.numberStints.length > 1 ? (
-        <div class="number-history" aria-label="Car number history">
-          <span class="number-label">Car number</span>
+        <div class="mt-6 flex flex-wrap items-center gap-1.5 text-[0.78rem]" aria-label="Car number history">
+          <span class={stintLabel}>Car number</span>
           {driver.numberStints.map((stint, index) => (
-            <span class="number-item">
-              {index > 0 ? <span class="number-arrow">→</span> : null}
-              <span class="number-chip">
+            <span class="number-item inline-flex items-center gap-1.5">
+              {index > 0 ? <span class="number-arrow text-ink-muted">→</span> : null}
+              <span class="number-chip inline-flex items-baseline gap-1.5 rounded-full border border-line px-2.5 py-0.5 text-ink-strong">
                 #{stint.number}
-                <span class="number-years">
+                <span class={stintYears}>
                   {stint.yearFrom === stint.yearTo
                     ? stint.yearFrom
                     : `${stint.yearFrom}–${stint.yearTo}`}
@@ -149,18 +155,18 @@ const initialSelected = resolveSeasonSelection(
       ) : null}
 
       {driver.teamStints.length > 0 ? (
-        <div class="number-history" aria-label="Teams driven for">
-          <span class="number-label">Teams</span>
+        <div class="mt-3 flex flex-wrap items-center gap-1.5 text-[0.78rem]" aria-label="Teams driven for">
+          <span class={stintLabel}>Teams</span>
           {driver.teamStints.map((stint, index) => (
-            <span class="number-item">
-              {index > 0 ? <span class="number-arrow">→</span> : null}
+            <span class="number-item inline-flex items-center gap-1.5">
+              {index > 0 ? <span class="number-arrow text-ink-muted">→</span> : null}
               <a
-                class="team-chip"
+                class="team-chip inline-flex items-baseline gap-1.5 rounded-full border px-2.5 py-0.5 transition-colors hover:underline"
                 href={`/teams/${stint.id}`}
                 style={`--stint-color: ${colorForYear(vendorIndexes, stint.id, stint.yearTo) ?? "#84909e"}`}
               >
                 {stint.name}
-                <span class="number-years">
+                <span class={stintYears}>
                   {stint.yearFrom === stint.yearTo
                     ? stint.yearFrom
                     : `${stint.yearFrom}–${stint.yearTo}`}
@@ -195,8 +201,8 @@ const initialSelected = resolveSeasonSelection(
         </div>
       </section>
 
-      <section aria-labelledby="history-title">
-        <h2 id="history-title">Season results</h2>
+      <section class="mt-12" aria-labelledby="history-title">
+        <h2 id="history-title" class="mb-2 text-2xl">Season results</h2>
         <SeasonMatrix
           seasons={matrixSeasons}
           rowLabel="Constructor"
@@ -212,122 +218,22 @@ const initialSelected = resolveSeasonSelection(
   </BaseLayout>
 ) : (
   <BaseLayout title="Driver not found">
-    <main id="main-content" class="page-shell">
-      <h1>Driver not found</h1>
-      <p>No driver with this identifier exists in the database.</p>
+    <main id="main-content" class="shell pt-12 pb-section">
+      <h1 class="title-page">Driver not found</h1>
+      <p class="mt-4 text-ink-strong">No driver with this identifier exists in the database.</p>
     </main>
   </BaseLayout>
 )}
 
 <style>
-  .driver-hero {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    padding: 2rem 2.25rem;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 14px;
-    color: #fff;
-    background:
-      radial-gradient(120% 170% at 88% -30%, rgba(255, 255, 255, 0.25), transparent 55%),
-      linear-gradient(135deg, color-mix(in srgb, var(--team-color) 72%, black), var(--team-color));
-    box-shadow: 0 20px 44px -24px color-mix(in srgb, var(--team-color) 65%, transparent);
-  }
-  .driver-number-frame {
-    display: grid;
-    place-items: center;
-    width: 6rem;
-    height: 4rem;
-    flex: none;
-  }
-  .driver-number {
-    font-family: var(--display);
-    font-size: 3.2rem;
-    font-weight: 700;
-    font-style: italic;
-    line-height: 1;
-    letter-spacing: 0.02em;
-    color: color-mix(in srgb, var(--team-color) 40%, white);
-  }
-  .driver-monogram {
-    display: grid;
-    place-items: center;
-    height: 4rem;
-    width: 4rem;
-    border-radius: 12px;
-    background: rgba(0, 0, 0, 0.3);
-    font-family: var(--display);
-    font-size: 1.6rem;
-    font-weight: 700;
-  }
-  .driver-hero h1 {
-    margin: 0;
-    font-size: clamp(1.9rem, 4vw, 2.7rem);
-    letter-spacing: 0.01em;
-  }
-  .driver-country {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    margin: 0.3rem 0 0;
-    font-size: 0.85rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    opacity: 0.85;
-  }
-  .flag {
-    height: 0.95rem;
-    width: auto;
-  }
-  .driver-bio {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4rem;
-    margin: 0.4rem 0 0;
-    font-size: 0.8rem;
-    opacity: 0.8;
-  }
-  .number-history {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4rem;
-    margin: 1rem 0 0;
-    font-size: 0.78rem;
-  }
-  .number-label {
-    margin-right: 0.3rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    font-size: 0.68rem;
-  }
-  .number-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  .number-arrow {
-    color: var(--muted);
-  }
-  .number-chip,
-  .team-chip {
-    /* 车队名用该 stint 结束年份的队色，时间交叉时取新年份的配色 */
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.4rem;
-    padding: 0.15rem 0.6rem;
-    border: 1px solid color-mix(in srgb, var(--stint-color) 45%, transparent);
-    border-radius: 999px;
+  /* 车队 chip 用该 stint 结束年份的队色（--stint-color 行内下发，数据语义色例外） */
+  a.team-chip {
+    border-color: color-mix(in srgb, var(--stint-color) 45%, transparent);
     color: var(--stint-color);
-    text-decoration: none;
   }
-  a.team-chip:hover {
-    text-decoration: underline;
-  }
-  .number-years {
-    color: var(--muted);
-    font-size: 0.68rem;
+  /* 队色可能是白等浅色：亮色主题混入 ink 保住对比度 */
+  :global([data-theme="light"]) a.team-chip {
+    border-color: color-mix(in srgb, var(--stint-color) 45%, var(--line));
+    color: color-mix(in srgb, var(--stint-color) 55%, var(--ink));
   }
 </style>

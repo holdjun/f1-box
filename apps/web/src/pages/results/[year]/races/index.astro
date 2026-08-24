@@ -9,8 +9,8 @@ import {
   createRaceResultsRepository,
 } from "../../../../lib/race-results-repository.js";
 import { formatUtcDate } from "../../../../lib/time.js";
-import { monogram } from "../../../../lib/tokens.js";
-import { colorForYear, logoSrcFor, vendorIndexes } from "../../../../lib/vendor.js";
+import { monogram, monogramStyle as monogramStyleFor } from "../../../../lib/tokens.js";
+import { colorForYear, logoSrcFor, logoVariantFor, vendorIndexes } from "../../../../lib/vendor.js";
 
 const year = Number(Astro.params.year);
 const repository = import.meta.env.DEV
@@ -25,14 +25,15 @@ if (races.length > 0) {
   Astro.response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
 }
 
-// Winner monogram 底色用其当年车队配色，缺色回落中性灰（与 drivers 目录同口径）
-const winnerColor = (teamId: string | null) =>
-  (teamId && colorForYear(vendorIndexes, teamId, year)) ?? "#84909e";
+// Winner monogram 底色用其当年车队配色，缺色不设变量，回落 components.css 的中性灰默认值
+const winnerStyle = (teamId: string | null) =>
+  monogramStyleFor(teamId ? colorForYear(vendorIndexes, teamId, year) : null);
 ---
 
 <BaseLayout title={`${year} Race Results`} active="results" year={year}>
-  <main id="main-content" class="page-shell">
-    <h1>{year} Race Results</h1>
+  <main id="main-content" class="shell pt-12 pb-section">
+    <h1 class="title-page">{year} Race Results</h1>
+    <ResultsNav year={year} active="races" />
     <SeasonFilter
       years={availableYears}
       mode="link"
@@ -41,7 +42,6 @@ const winnerColor = (teamId: string | null) =>
       sticky
       showAll={false}
     />
-    <ResultsNav year={year} active="races" />
     <div class="table-scroll" tabindex="0">
       <table class="result-table" aria-label={`${year} race results`}>
         <thead>
@@ -69,7 +69,7 @@ const winnerColor = (teamId: string | null) =>
                 <td>{formatUtcDate(race.date)}</td>
                 <td>
                   {race.winnerDriverId && race.winnerName ? (
-                    <a class="vendor-cell vendor-cell--driver" href={`/drivers/${race.winnerDriverId}`} style={`--monogram-bg: ${winnerColor(race.winnerTeamId)}`}>
+                    <a class="vendor-cell vendor-cell--driver" href={`/drivers/${race.winnerDriverId}`} style={winnerStyle(race.winnerTeamId)}>
                       <span class="vendor-cell__monogram" aria-hidden="true">{monogram(race.winnerName)}</span>
                       <span class="vendor-cell__name">{race.winnerName}</span>
                       <small>{race.winnerCode}</small>
@@ -80,7 +80,13 @@ const winnerColor = (teamId: string | null) =>
                   {race.winnerTeamId && race.winnerTeamName ? (
                     <a class="vendor-cell" href={`/teams/${race.winnerTeamId}`}>
                       {logoSrcFor(vendorIndexes, race.winnerTeamId) ? (
-                        <img class="vendor-cell__logo" src={logoSrcFor(vendorIndexes, race.winnerTeamId) ?? ""} alt="" loading="lazy" />
+                        <img
+                          class:list={[
+                            "vendor-cell__logo",
+                            logoVariantFor(vendorIndexes, race.winnerTeamId) === "white" && "vendor-cell__logo--chip",
+                          ]}
+                          src={logoSrcFor(vendorIndexes, race.winnerTeamId) ?? ""} alt="" loading="lazy"
+                        />
                       ) : null}
                       {race.winnerTeamName}
                     </a>

@@ -9,6 +9,8 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:4321",
     trace: "retain-on-failure",
+    // 站点品牌主体验为深色；theme.spec 用 emulateMedia 单独覆盖两方向
+    colorScheme: "dark",
   },
   projects: [
     {

@@ -3,7 +3,7 @@ import type {
   DriverStandingRow,
   TeamStandingRow,
 } from "../lib/race-results-repository.js";
-import { logoSrcFor, vendorIndexes } from "../lib/vendor.js";
+import { logoSrcFor, logoVariantFor, vendorIndexes } from "../lib/vendor.js";
 import { monogram } from "../lib/tokens.js";
 
 interface Props {
@@ -34,10 +34,10 @@ const positionLabel = (row: DriverStandingRow | TeamStandingRow) =>
     <tbody>
       {rows.length > 0 ? rows.map((row) => (
         <tr>
-          <td class="position-cell">{positionLabel(row)}</td>
+          <td class="w-14 font-display text-[1.35rem] text-ink-muted">{positionLabel(row)}</td>
           {"driverId" in row ? (
             <td>
-              <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`}>
+              <a class="vendor-cell vendor-cell--driver transition-colors hover:text-accent" href={`/drivers/${row.driverId}`}>
                 <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
                 <span class="vendor-cell__name">{row.driverName}</span>
                 <small>{row.driverCode}</small>
@@ -45,15 +45,21 @@ const positionLabel = (row: DriverStandingRow | TeamStandingRow) =>
             </td>
           ) : (
             <td>
-              <a class="vendor-cell" href={`/teams/${row.teamId}`}>
+              <a class="vendor-cell transition-colors hover:text-accent" href={`/teams/${row.teamId}`}>
                 {logoSrcFor(vendorIndexes, row.teamId) ? (
-                  <img class="vendor-cell__logo" src={logoSrcFor(vendorIndexes, row.teamId) ?? ""} alt="" loading="lazy" />
+                  <img
+                    class:list={[
+                      "vendor-cell__logo",
+                      logoVariantFor(vendorIndexes, row.teamId) === "white" && "vendor-cell__logo--chip",
+                    ]}
+                    src={logoSrcFor(vendorIndexes, row.teamId) ?? ""} alt="" loading="lazy"
+                  />
                 ) : null}
                 {row.teamName}
               </a>
             </td>
           )}
-          <td class="points-cell">{row.points}</td>
+          <td class="font-semibold text-highlight">{row.points}</td>
           <td>{row.wins}</td>
         </tr>
       )) : (

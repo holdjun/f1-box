@@ -7,45 +7,12 @@ interface Props {
 const { summary, backHref, backLabel } = Astro.props;
 ---
 
-<footer class="history-end">
-  <p class="history-end__summary">{summary}</p>
-  <a class="history-end__back" href={backHref}>{backLabel}</a>
+<footer class="mt-14 grid justify-items-center gap-2.5 text-center before:block before:w-36 before:border-t before:border-line before:content-['']">
+  <p class="history-end__summary text-[0.72rem] font-bold uppercase tracking-[0.1em] text-ink-muted">
+    {summary}
+  </p>
+  <a
+    class="history-end__back border-b border-ink-muted pb-0.5 text-[0.72rem] font-bold uppercase tracking-[0.08em] transition-colors hover:border-highlight hover:text-highlight"
+    href={backHref}
+  >{backLabel}</a>
 </footer>
-
-<style>
-  .history-end {
-    display: grid;
-    justify-items: center;
-    gap: 0.6rem;
-    margin-top: 3.5rem;
-    text-align: center;
-  }
-  .history-end::before {
-    content: "";
-    width: 9rem;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      var(--line) 30%,
-      var(--line) 70%,
-      transparent
-    );
-  }
-  .history-end__summary {
-    margin: 0.4rem 0 0;
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .history-end__back {
-    font-size: 0.85rem;
-    color: var(--muted-light);
-    text-decoration: none;
-  }
-  .history-end__back:hover {
-    color: var(--coral);
-    text-decoration: underline;
-  }
-</style>

@@ -1,0 +1,103 @@
+/* 元素级基础样式：放 @layer base，保证工具类可以覆盖 */
+@layer base {
+  html {
+    min-width: 320px;
+    background: var(--surface);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-width: 320px;
+    overflow-x: hidden;
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+      var(--surface);
+    background-size: 48px 48px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (width < 40rem) {
+    body { background-size: 32px 32px; }
+  }
+
+  /* 斜向珊瑚扫描线：品牌装饰，两主题通用 */
+  body::before {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      115deg,
+      transparent 0 69%,
+      color-mix(in oklab, var(--accent) 3%, transparent) 69% 70%,
+      transparent 70%
+    );
+    content: "";
+    pointer-events: none;
+  }
+
+  h1, h2, h3, p, ol, dl, dd { margin: 0; }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 0.96;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  a:focus-visible,
+  button:focus-visible,
+  textarea:focus-visible,
+  [tabindex="0"]:focus-visible {
+    outline: 3px solid var(--highlight);
+    outline-offset: 4px;
+  }
+
+  svg { display: block; }
+  [hidden] { display: none !important; }
+
+  ::selection { background: var(--highlight); color: var(--on-highlight); }
+
+  .skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 100;
+    padding: 0.75rem 1rem;
+    transform: translateY(-160%);
+    background: var(--highlight);
+    color: var(--on-highlight);
+    font-weight: 700;
+  }
+  .skip-link:focus { transform: translateY(0); }
+}
+
+/* 主题切换按钮图标：深色下显示"去亮色"图标，反之亦然 */
+[data-theme-toggle] .icon-to-light { display: block; }
+[data-theme-toggle] .icon-to-dark { display: none; }
+[data-theme="light"] [data-theme-toggle] .icon-to-light { display: none; }
+[data-theme="light"] [data-theme-toggle] .icon-to-dark { display: block; }
+
+/* 视图过渡与减少动效：保持现有行为 */
+::view-transition-old(root) { animation: page-out 160ms ease both; }
+::view-transition-new(root) { animation: page-in 240ms ease both; }
+
+@keyframes page-out { to { opacity: 0; transform: translateX(-8px); } }
+@keyframes page-in { from { opacity: 0; transform: translateX(8px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+  ::view-transition-old(root), ::view-transition-new(root) {
+    animation-name: none !important;
+  }
+}

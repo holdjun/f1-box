@@ -8,6 +8,7 @@ import {
   createD1CircuitDatabase,
 } from "../../lib/circuit-repository.js";
 import { resolveCatalogYear } from "../../lib/routing.js";
+import { gridFillers } from "../../lib/layout.js";
 
 const repository = import.meta.env.DEV
   ? createCircuitRepository()
@@ -25,11 +26,14 @@ Astro.response.headers.set(
   "Cache-Control",
   "public, s-maxage=300, stale-while-revalidate=600",
 );
+
+const cardClasses =
+  "circuit-card group relative flex flex-col items-center gap-1.5 rounded-md bg-surface-raised p-5 px-4 transition-[background-color,transform] duration-200 [content-visibility:auto] [contain-intrinsic-size:auto_13rem] hover:-translate-y-1 hover:bg-surface-overlay hover:z-1";
 ---
 
 <BaseLayout title="Circuits" active="circuits">
-  <main id="main-content" class="page-shell">
-    <h1>Circuits</h1>
+  <main id="main-content" class="shell pt-12 pb-section">
+    <h1 class="title-page">Circuits</h1>
     <SeasonFilter
       years={years}
       mode="link"
@@ -38,84 +42,34 @@ Astro.response.headers.set(
       label="Filter by season"
       sticky
     />
-    <div class="circuit-grid">
+    <div class="grid grid-cols-1 gap-px rounded-md bg-line light:shadow-panel md:grid-cols-2 lg:grid-cols-3">
       {circuits.map((circuit) => (
-        <a class="circuit-card" href={`/circuits/${circuit.id}`}>
-          <span class="circuit-card__map">
+        <a class={cardClasses} href={`/circuits/${circuit.id}`}>
+          <span class="circuit-card__map grid size-[6.5rem] flex-none place-items-center">
             {circuit.layoutId ? (
+              /* f1db 轮廓 SVG 描边固定白色，亮色主题反相成深色 */
               <img
+                class="size-full light:invert"
                 src={`/vendor/circuits/${circuit.layoutId}.svg`}
                 alt=""
                 loading="lazy"
               />
             ) : (
-              <span class="circuit-card__no-map" aria-hidden="true">—</span>
+              <span class="circuit-card__no-map text-[1.5rem] text-ink-muted" aria-hidden="true">—</span>
             )}
           </span>
-          <span class="circuit-card__name">{circuit.name}</span>
-          <span class="circuit-card__meta">
+          <span class="circuit-card__name mt-1 text-center text-base font-semibold">{circuit.name}</span>
+          <span class="circuit-card__meta text-center text-[0.78rem] text-ink-muted">
             {circuit.placeName}, {circuit.countryName}
           </span>
-          <span class="circuit-card__meta">
+          <span class="circuit-card__meta text-center text-[0.78rem] text-ink-muted">
             {circuit.length.toFixed(3)} km · {circuit.totalRacesHeld} races
           </span>
         </a>
       ))}
+      {gridFillers(circuits.length).map((classes) => (
+        <div class={`${classes} bg-surface`} aria-hidden="true" />
+      ))}
     </div>
   </main>
 </BaseLayout>
-
-<style>
-  h1 {
-    margin: 0 0 0.5rem;
-  }
-  .circuit-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-    gap: 1rem;
-  }
-  .circuit-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 1.25rem 1rem;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: var(--ink-soft);
-    color: var(--paper);
-    text-decoration: none;
-    /* 卡片一次下发，视口外的卡跳过布局与绘制 */
-    content-visibility: auto;
-    contain-intrinsic-size: auto 13rem;
-  }
-  .circuit-card:hover {
-    border-color: var(--paper);
-  }
-  .circuit-card__map {
-    display: grid;
-    place-items: center;
-    width: 6.5rem;
-    height: 6.5rem;
-    flex: none;
-  }
-  .circuit-card__map img {
-    width: 100%;
-    height: 100%;
-  }
-  .circuit-card__no-map {
-    color: var(--muted-light);
-    font-size: 1.5rem;
-  }
-  .circuit-card__name {
-    margin-top: 0.25rem;
-    font-size: 1rem;
-    font-weight: 600;
-    text-align: center;
-  }
-  .circuit-card__meta {
-    font-size: 0.78rem;
-    color: var(--muted-light);
-    text-align: center;
-  }
-</style>

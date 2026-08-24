@@ -5,18 +5,21 @@ interface Props {
   season: CurrentSeason;
 }
 const { season } = Astro.props;
+
+const headStatLabel = "block text-[0.68rem] text-ink-muted";
+const headStatValue = "font-display text-[1.9rem] leading-[1.1]";
 ---
 
 <div class="info-panel" aria-label={`${season.year} season`}>
   <h2>{season.year} Season</h2>
-  <div class="season-head">
+  <div class="flex gap-10">
     <div>
-      <span>Season Position</span>
-      <strong>{season.position ?? "—"}</strong>
+      <span class={headStatLabel}>Season Position</span>
+      <strong class={headStatValue}>{season.position ?? "—"}</strong>
     </div>
     <div>
-      <span>Season Points</span>
-      <strong>{season.points ?? "—"}</strong>
+      <span class={headStatLabel}>Season Points</span>
+      <strong class={headStatValue}>{season.points ?? "—"}</strong>
     </div>
   </div>
   <h3>Grand Prix</h3>
@@ -44,20 +47,3 @@ const { season } = Astro.props;
     </>
   ) : null}
 </div>
-
-<style>
-  .season-head {
-    display: flex;
-    gap: 2.5rem;
-  }
-  .season-head span {
-    display: block;
-    font-size: 0.68rem;
-    color: var(--muted);
-  }
-  .season-head strong {
-    font-family: var(--display);
-    font-size: 1.9rem;
-    line-height: 1.1;
-  }
-</style>

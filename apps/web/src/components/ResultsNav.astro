@@ -9,20 +9,17 @@ const tabs = [
   ["drivers", "Drivers"],
   ["teams", "Teams"],
 ] as const;
+// overflow-x-auto 容器内的标签禁止收缩，窄屏才能横向滚动而非折行
+const itemClasses =
+  "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap px-4 text-[0.72rem] font-semibold tracking-[0.1em] uppercase text-ink-muted transition-colors hover:text-ink aria-[current=page]:text-ink aria-[current=page]:[box-shadow:inset_0_-2px_var(--accent)]";
 ---
 
-<nav class="results-nav" aria-label="Results">
+<nav class="mt-4 flex gap-1 overflow-x-auto border-b border-line" aria-label="Results">
   {tabs.map(([key, label]) => (
     <a
       href={`/results/${year}/${key}`}
-      class:list={["results-nav__item", { "is-active": key === active }]}
+      class={itemClasses}
       aria-current={key === active ? "page" : undefined}
     >{label}</a>
   ))}
 </nav>
-
-<style>
-  .results-nav { display: flex; gap: 1rem; margin-block: 1rem; }
-  .results-nav__item { color: inherit; text-decoration: none; opacity: 0.7; padding-block: 0.25rem; }
-  .results-nav__item.is-active { opacity: 1; box-shadow: inset 0 -2px 0 currentColor; }
-</style>

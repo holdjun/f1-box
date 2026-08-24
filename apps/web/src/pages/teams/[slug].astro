@@ -71,6 +71,11 @@ const initialSelected = resolveSeasonSelection(
   Astro.url.searchParams.get("year"),
   new Set((team?.seasons ?? []).map((s) => s.year)),
 );
+
+const lineageLabel = "lineage-label mr-1.5 text-[0.68rem] uppercase tracking-[0.1em] text-ink-muted";
+const lineageYears = "lineage-years text-[0.68rem] text-ink-muted";
+const chipClasses =
+  "lineage-chip inline-flex items-baseline gap-1.5 rounded-full border px-2.5 py-0.5 transition-colors hover:underline";
 ---
 
 {team ? (
@@ -79,49 +84,52 @@ const initialSelected = resolveSeasonSelection(
     description={`${team.fullName} — career statistics and complete race-by-race history.`}
     active="teams"
   >
-    <main id="main-content" class="page-shell">
-      <header
-        class="team-hero"
-        style={`--team-color: ${branding.colors[0] ?? "#84909e"}; --team-color-2: ${branding.colors[1] ?? branding.colors[0] ?? "#84909e"}`}
-      >
-        <span class="team-logo-frame">
+    <main id="main-content" class="shell pt-12 pb-section">
+      <header class="flex flex-col gap-6 md:flex-row md:items-center">
+        <span class="team-logo-frame grid h-16 w-24 flex-none place-items-center rounded-md border border-line bg-surface-raised p-2 light:shadow-panel">
           {branding.logoSrc ? (
+            /* 深色稿 logo 白底托（双主题）；白色稿 logo 亮色下换墨底托，深色下保留投影 */
             <img
-              class:list={["team-logo", { "logo-on-light": branding.logoVariant !== "white" }]}
+              class:list={[
+                "team-logo block size-full min-w-0 min-h-0 flex-none object-contain",
+                branding.logoVariant !== "white"
+                  ? "logo-on-light box-border rounded-[0.5rem] bg-white/[0.94] px-[0.7rem] py-[0.45rem]"
+                  : "light:box-border light:rounded-[0.5rem] light:bg-ink light:px-[0.7rem] light:py-[0.45rem] [filter:drop-shadow(0_4px_10px_rgb(0_0_0/0.35))] light:[filter:none]",
+              ]}
               src={branding.logoSrc}
               alt=""
             />
           ) : (
-            <span class="team-monogram" aria-hidden="true"
+            <span class="team-monogram grid size-16 flex-none place-items-center rounded-[12px] bg-line font-display text-[1.6rem] font-bold text-ink-strong" aria-hidden="true"
               >{team.name.slice(0, 2).toUpperCase()}</span
             >
           )}
         </span>
         <div>
-          <h1>{team.fullName}</h1>
-          <p class="team-country">
-            {flagSrc ? <img class="flag" src={flagSrc} alt="" /> : null}
+          <h1 class="max-w-[12ch] text-display-lg uppercase">{team.fullName}</h1>
+          <p class="team-country mt-3 flex items-center gap-1.5 text-[0.85rem] uppercase tracking-[0.06em] text-ink-strong">
+            {flagSrc ? <img class="flag h-[0.95rem] w-auto" src={flagSrc} alt="" /> : null}
             {team.countryName}
           </p>
         </div>
       </header>
 
       {team.lineage.length > 0 ? (
-        <div class="lineage" aria-label="Team lineage">
+        <div class="mt-6 grid gap-2.5 text-[0.78rem]" aria-label="Team lineage">
           {standaloneLineage.length > 0 ? (
-            <div class="lineage-block">
-              <span class="lineage-label">Earlier entries</span>
-              <div class="lineage-list">
+            <div class="lineage-block flex flex-wrap items-center gap-1.5">
+              <span class={lineageLabel}>Earlier entries</span>
+              <div class="lineage-list flex flex-wrap items-center gap-1.5">
                 {standaloneLineage.map((entry, index) => (
-                  <span class="lineage-item">
-                    {index > 0 ? <span class="lineage-separator">·</span> : null}
+                  <span class="lineage-item inline-flex items-center gap-1.5">
+                    {index > 0 ? <span class="lineage-separator text-ink-muted">·</span> : null}
                     <a
-                      class="lineage-chip"
+                      class={chipClasses}
                       href={`/teams/${entry.id}`}
                       style={`--chip-color: ${lineageColor(entry.yearTo, entry.id)}`}
                     >
                       {entry.name}
-                      <span class="lineage-years">
+                      <span class={lineageYears}>
                         {entry.yearTo === null || entry.yearTo === entry.yearFrom
                           ? entry.yearFrom
                           : `${entry.yearFrom}–${entry.yearTo}`}
@@ -133,19 +141,19 @@ const initialSelected = resolveSeasonSelection(
             </div>
           ) : null}
           {continuityLineage.length > 0 ? (
-            <div class="lineage-block">
-              <span class="lineage-label">Constructor continuity</span>
-              <div class="lineage-list">
+            <div class="lineage-block flex flex-wrap items-center gap-1.5">
+              <span class={lineageLabel}>Constructor continuity</span>
+              <div class="lineage-list flex flex-wrap items-center gap-1.5">
                 {continuityLineage.map((entry, index) => (
-                  <span class="lineage-item">
-                    {index > 0 ? <span class="lineage-arrow">→</span> : null}
+                  <span class="lineage-item inline-flex items-center gap-1.5">
+                    {index > 0 ? <span class="lineage-arrow text-ink-muted">→</span> : null}
                     <a
-                      class="lineage-chip"
+                      class={chipClasses}
                       href={`/teams/${entry.id}`}
                       style={`--chip-color: ${lineageColor(entry.yearTo, entry.id)}`}
                     >
                       {entry.name}
-                      <span class="lineage-years">
+                      <span class={lineageYears}>
                         {entry.yearTo === null || entry.yearTo === entry.yearFrom
                           ? entry.yearFrom
                           : `${entry.yearFrom}–${entry.yearTo}`}
@@ -182,8 +190,8 @@ const initialSelected = resolveSeasonSelection(
         </div>
       </section>
 
-      <section aria-labelledby="history-title">
-        <h2 id="history-title">Season results</h2>
+      <section class="mt-12" aria-labelledby="history-title">
+        <h2 id="history-title" class="mb-2 text-2xl">Season results</h2>
         <SeasonMatrix
           seasons={matrixSeasons}
           rowLabel="Driver"
@@ -200,138 +208,22 @@ const initialSelected = resolveSeasonSelection(
   </BaseLayout>
 ) : (
   <BaseLayout title="Team not found">
-    <main id="main-content" class="page-shell">
-      <h1>Team not found</h1>
-      <p>No constructor with this identifier exists in the database.</p>
+    <main id="main-content" class="shell pt-12 pb-section">
+      <h1 class="title-page">Team not found</h1>
+      <p class="mt-4 text-ink-strong">No constructor with this identifier exists in the database.</p>
     </main>
   </BaseLayout>
 )}
 
 <style>
-  .team-hero {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    padding: 2rem 2.25rem;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 14px;
-    color: #fff;
-    background:
-      radial-gradient(120% 170% at 88% -30%, rgba(255, 255, 255, 0.25), transparent 55%),
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--team-color) 72%, black),
-        var(--team-color-2)
-      );
-    box-shadow: 0 20px 44px -24px color-mix(in srgb, var(--team-color) 65%, transparent);
-  }
-  .team-logo-frame {
-    display: grid;
-    place-items: center;
-    width: 6rem;
-    height: 4rem;
-    flex: none;
-  }
-  .team-logo {
-    display: block;
-    min-width: 0;
-    min-height: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    flex: none;
-    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
-  }
-  .logo-on-light {
-    box-sizing: border-box;
-    padding: 0.45rem 0.7rem;
-    border-radius: 0.5rem;
-    background: rgba(255, 255, 255, 0.94);
-    filter: none;
-  }
-  .team-monogram {
-    display: grid;
-    place-items: center;
-    height: 4rem;
-    width: 4rem;
-    flex: none;
-    border-radius: 12px;
-    background: rgba(0, 0, 0, 0.3);
-    font-family: var(--display);
-    font-size: 1.6rem;
-    font-weight: 700;
-  }
-  .team-hero h1 {
-    margin: 0;
-    font-size: clamp(1.9rem, 4vw, 2.7rem);
-    letter-spacing: 0.01em;
-  }
-  .team-country {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    margin: 0.3rem 0 0;
-    font-size: 0.85rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    opacity: 0.85;
-  }
-  .flag {
-    height: 0.95rem;
-    width: auto;
-  }
-  .lineage {
-    display: grid;
-    gap: 0.65rem;
-    margin: 1rem 0 0;
-    font-size: 0.78rem;
-  }
-  .lineage-block {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  .lineage-list {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  .lineage-label {
-    margin-right: 0.3rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    font-size: 0.68rem;
-  }
-  .lineage-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  .lineage-arrow {
-    color: var(--muted);
-  }
-  .lineage-separator {
-    color: var(--muted);
-  }
-  .lineage-chip {
-    /* 身份名用该时期末的队色，缺配色回落灰 */
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.4rem;
-    padding: 0.15rem 0.6rem;
-    border: 1px solid color-mix(in srgb, var(--chip-color) 45%, transparent);
-    border-radius: 999px;
+  /* 身份名用该时期末的队色（--chip-color 行内下发，数据语义色例外），缺配色在数据层回落灰 */
+  a.lineage-chip {
+    border-color: color-mix(in srgb, var(--chip-color) 45%, transparent);
     color: var(--chip-color);
-    text-decoration: none;
   }
-  .lineage-chip:hover {
-    text-decoration: underline;
-  }
-  .lineage-years {
-    color: var(--muted);
-    font-size: 0.68rem;
+  /* 队色可能是白等浅色：亮色主题混入 ink 保住对比度 */
+  :global([data-theme="light"]) a.lineage-chip {
+    border-color: color-mix(in srgb, var(--chip-color) 45%, var(--line));
+    color: color-mix(in srgb, var(--chip-color) 55%, var(--ink));
   }
 </style>

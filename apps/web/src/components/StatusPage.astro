@@ -8,11 +8,14 @@ interface Props {
 const { code, title, message } = Astro.props;
 ---
 
-<main class="status-page page-shell">
-  <p class="status-page__code" aria-hidden="true">{code}</p>
+<main id="main-content" class="shell grid min-h-[calc(100svh-4rem)] grid-cols-1 content-center items-center gap-12 py-20 md:grid-cols-[5fr_7fr]">
+  <p
+    class="font-display text-[clamp(12rem,28vw,27rem)] leading-[0.7] font-bold text-transparent [-webkit-text-stroke:1px_var(--line)] max-md:text-[12rem]"
+    aria-hidden="true"
+  >{code}</p>
   <div>
-    <h1>{title}</h1>
-    <p>{message}</p>
+    <h1 class="text-display-lg">{title}</h1>
+    <p class="mt-6 mb-10 max-w-[35rem] text-ink-strong">{message}</p>
     <a class="button button--primary" href="/">Return home</a>
   </div>
 </main>

@@ -40,7 +40,7 @@ else {
   >
     <main id="main-content">
       <RaceHeader meta={page.meta} />
-      <div class="page-shell">
+      <div class="shell pt-6 pb-section">
         <SeasonFilter
           years={availableYears}
           mode="link"
@@ -56,8 +56,6 @@ else {
   </BaseLayout>
 ) : (
   <BaseLayout title="Race not found" year={year}>
-    <main id="main-content" class="page-shell">
-      <StatusPage code="404" title="Race not found" message="This race is not available yet." />
-    </main>
+    <StatusPage code="404" title="Race not found" message="This race is not available yet." />
   </BaseLayout>
 )}

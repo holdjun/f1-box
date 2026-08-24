@@ -97,7 +97,11 @@ function logoFor(indexes: VendorIndexes, teamId: string): LogoAsset | null {
   return best;
 }
 
-// 文件名里的 @ 需编码为 %40，否则 Cloudflare 静态资产层会先回一个 307 跳转
+// 文件名含年份版本 @：@ 本是合法路径字符；Astro dev 静态服务不解码 %40（404），
+// 生产 Cloudflare 对裸 @ 仅多一次 307 跳转后同资产 200，浏览器可缓存，故保留裸 @
 function logoUrl(file: string): string {
-  return `/vendor/${file.split("/").map(encodeURIComponent).join("/")}`;
+  return `/vendor/${file
+    .split("/")
+    .map((part) => encodeURIComponent(part).replace(/%40/g, "@"))
+    .join("/")}`;
 }

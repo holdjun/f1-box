@@ -21,14 +21,14 @@ const map = layoutId
   ? (rawMaps as unknown as Record<string, CircuitMapData>)[layoutId]
   : undefined;
 
-// F1 官方 sector 配色
+// F1 官方 sector 配色（数据语义色，不参与主题翻转）
 const SECTOR_COLORS = ["#ec008c", "#ffd400", "#00a3e0"];
 const pointsAttr = (pts: [number, number][]) =>
   pts.map(([x, y]) => `${x},${y}`).join(" ");
 ---
 
 {map ? (
-  <svg class="circuit-map" viewBox="0 0 500 500" role="img" aria-label={alt}>
+  <svg class="circuit-map text-ink-strong" viewBox="0 0 500 500" role="img" aria-label={alt}>
     {map.sectors.map((pts) => (
       <polyline class="circuit-map__outline" points={pointsAttr(pts)} />
     ))}
@@ -53,10 +53,12 @@ const pointsAttr = (pts: [number, number][]) =>
     ))}
   </svg>
 ) : fallbackSrc ? (
-  <img class="circuit-map" src={fallbackSrc} alt={alt} />
+  /* f1db 轮廓 SVG 描边固定白色，亮色主题反相成深色 */
+  <img class="circuit-map light:invert" src={fallbackSrc} alt={alt} />
 ) : null}
 
 <style>
+  /* SVG 结构必需：描边走 currentColor，由使用方（text-ink-strong）决定深浅，双主题自适应 */
   .circuit-map {
     display: block;
     width: 100%;
@@ -69,26 +71,14 @@ const pointsAttr = (pts: [number, number][]) =>
     stroke-linejoin: round;
     stroke-linecap: round;
   }
-  .circuit-map__outline {
-    stroke: var(--paper);
-    stroke-width: 13;
-  }
-  .circuit-map__track {
-    stroke: #0b0d10;
-    stroke-width: 9;
-  }
-  .circuit-map__sector {
-    stroke-width: 3.5;
-  }
-  .circuit-map__drs {
-    fill: #35d07f;
-  }
-  .circuit-map__corner circle {
-    fill: var(--paper);
-  }
+  .circuit-map__outline { stroke: currentColor; stroke-width: 13; }
+  .circuit-map__track { stroke: var(--surface); stroke-width: 9; }
+  .circuit-map__sector { stroke-width: 3.5; }
+  .circuit-map__drs { fill: var(--highlight); }
+  .circuit-map__corner circle { fill: currentColor; }
   .circuit-map__corner text {
-    fill: #0b0d10;
-    font-family: var(--body);
+    fill: var(--surface);
+    font-family: var(--font-sans);
     font-size: 10px;
     font-weight: 700;
     text-anchor: middle;

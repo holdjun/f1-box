@@ -1,5 +1,11 @@
 <div class="ask" transition:persist="ask-panel">
-  <button class="ask__trigger" type="button" aria-expanded="false" aria-controls="ask-panel" aria-label="打开 F1 问答">
+  <button
+    class="ask__trigger fixed right-4 bottom-4 z-40 grid size-12 cursor-pointer place-items-center rounded-md border border-line bg-surface-raised text-ink-strong shadow-panel transition-colors hover:text-ink light:shadow-panel"
+    type="button"
+    aria-expanded="false"
+    aria-controls="ask-panel"
+    aria-label="打开 F1 问答"
+  >
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
       <path
         d="M12 3a8 8 0 0 1 8 8 8 8 0 0 1-8 8 8 8 0 0 1-3.4-.76L5 20l.9-3.2A8 8 0 0 1 12 3Z"
@@ -7,29 +13,72 @@
         stroke="currentColor"
         stroke-width="1.6"
       />
-      <path d="M9.6 9.4a2.5 2.5 0 1 1 3.6 2.24c-.72.38-1.2.9-1.2 1.86" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+      <path
+        d="M9.6 9.4a2.5 2.5 0 1 1 3.6 2.24c-.72.38-1.2.9-1.2 1.86"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+      />
       <circle cx="12" cy="16.4" r="1" fill="currentColor" />
     </svg>
   </button>
-  <section class="ask__panel" id="ask-panel" role="dialog" aria-label="F1 问答" hidden>
-    <header class="ask__head">
-      <h2 class="ask__title">F1 问答</h2>
-      <p class="ask__note">统计数据：f1db（CC BY 4.0，非实时）</p>
-      <button class="ask__clear" type="button" hidden>清空</button>
-      <button class="ask__close" type="button" aria-label="关闭问答面板">✕</button>
+  <!-- 375px 视口下面板铺满全屏（e2e 断言），md 起收回右下角浮层 -->
+  <section
+    class="ask__panel fixed inset-0 z-40 flex flex-col bg-surface-raised md:inset-auto md:right-4 md:bottom-20 md:h-[35rem] md:max-h-[70svh] md:w-96 md:rounded-md md:border md:border-line md:shadow-panel md:light:shadow-panel"
+    id="ask-panel"
+    role="dialog"
+    aria-label="F1 问答"
+    hidden
+  >
+    <header class="ask__head flex items-center gap-2 border-b border-line px-3.5 py-3">
+      <h2 class="ask__title font-display text-lg tracking-[0.04em]">F1 问答</h2>
+      <p class="ask__note flex-1 text-[11px] text-ink-muted">
+        统计数据：f1db（CC BY 4.0，非实时）
+      </p>
+      <button
+        class="ask__clear min-h-11 min-w-11 cursor-pointer rounded-sm px-2 text-xs font-semibold tracking-wider uppercase text-ink-muted transition-colors hover:text-ink disabled:opacity-50"
+        type="button"
+        hidden
+      >
+        清空
+      </button>
+      <button
+        class="ask__close grid min-h-11 min-w-11 cursor-pointer place-items-center rounded-sm text-ink-muted transition-colors hover:text-ink"
+        type="button"
+        aria-label="关闭问答面板"
+      >
+        ✕
+      </button>
     </header>
-    <div class="ask__messages" aria-live="polite"></div>
-    <p class="ask__status" hidden>正在查询数据…</p>
-    <p class="ask__error" role="alert" hidden></p>
-    <form class="ask__form">
+    <div
+      class="ask__messages flex flex-1 flex-col gap-2.5 overflow-y-auto p-3.5"
+      aria-live="polite"
+    ></div>
+    <p class="ask__status px-3.5 py-1.5 text-[13px] text-ink-muted" hidden>
+      正在查询数据…
+    </p>
+    <p class="ask__error px-3.5 py-1.5 text-[13px] text-accent" role="alert" hidden></p>
+    <form class="ask__form flex gap-2 border-t border-line p-3">
       <textarea
-        class="ask__input"
+        class="ask__input min-h-11 flex-1 resize-none rounded-sm border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-muted focus:border-ink-muted"
         rows="1"
         placeholder="问点什么，如：汉密尔顿哪几年夺冠？"
         maxlength="2000"
       ></textarea>
-      <button class="ask__send" type="submit">发送</button>
-      <button class="ask__stop" type="button" hidden>停止</button>
+      <button
+        class="ask__send min-h-11 cursor-pointer rounded-sm bg-accent px-4 text-sm font-semibold text-on-accent transition-colors hover:bg-highlight hover:text-on-highlight disabled:opacity-50"
+        type="submit"
+      >
+        发送
+      </button>
+      <button
+        class="ask__stop min-h-11 cursor-pointer rounded-sm border border-accent px-4 text-sm font-semibold text-accent transition-colors hover:bg-accent hover:text-on-accent"
+        type="button"
+        hidden
+      >
+        停止
+      </button>
     </form>
   </section>
 </div>
@@ -38,167 +87,17 @@
   import "../scripts/ask-panel.ts";
 </script>
 
-<style>
-  .ask {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    z-index: 60;
-    font-size: 15px;
-  }
-  .ask__trigger {
-    display: grid;
-    place-items: center;
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    border: 1px solid var(--line);
-    background: var(--ink-soft);
-    color: var(--paper);
-    cursor: pointer;
-    transition: border-color 160ms ease, color 160ms ease;
-  }
-  .ask__trigger:hover {
-    border-color: var(--acid);
-    color: var(--acid);
-  }
-  .ask__panel {
-    position: fixed;
-    right: 20px;
-    bottom: 88px;
-    display: flex;
-    flex-direction: column;
-    width: min(400px, calc(100vw - 40px));
-    height: min(560px, calc(100dvh - 120px));
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: var(--ink-soft);
-    overflow: hidden;
-  }
-  .ask__panel[hidden] {
-    display: none;
-  }
-  .ask__head {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 14px;
-    border-bottom: 1px solid var(--line);
-  }
-  .ask__title {
-    margin: 0;
-    font-family: var(--display);
-    font-size: 18px;
-    letter-spacing: 0.04em;
-  }
-  .ask__note {
-    flex: 1;
-    margin: 0;
-    color: var(--muted);
-    font-size: 11px;
-  }
-  .ask__clear,
-  .ask__close {
-    min-width: 44px;
-    min-height: 44px;
-    border: none;
-    background: none;
-    color: var(--muted-light);
-    cursor: pointer;
-  }
-  .ask__messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .ask__status,
-  .ask__error {
-    margin: 0;
-    padding: 6px 14px;
-    color: var(--muted);
-    font-size: 13px;
-  }
-  .ask__error {
-    color: var(--coral);
-  }
-  .ask__form {
-    display: flex;
-    gap: 8px;
-    padding: 12px;
-    border-top: 1px solid var(--line);
-  }
-  .ask__input {
-    flex: 1;
-    min-height: 44px;
-    resize: none;
-    padding: 10px 12px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: var(--ink);
-    color: var(--paper);
-    font: inherit;
-  }
-  .ask__send,
-  .ask__stop {
-    min-width: 64px;
-    min-height: 44px;
-    border-radius: 8px;
-    border: 1px solid var(--acid);
-    background: var(--acid);
-    color: var(--ink);
-    font: inherit;
-    cursor: pointer;
-  }
-  .ask__stop {
-    border-color: var(--coral);
-    background: var(--coral);
-  }
-  @media (max-width: 420px) {
-    .ask {
-      right: 12px;
-      bottom: 12px;
-    }
-    .ask__panel {
-      right: 0;
-      bottom: 0;
-      width: 100vw;
-      height: 100dvh;
-      border-radius: 0;
-      border: none;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .ask__trigger,
-    .ask__send,
-    .ask__stop {
-      transition: none;
-    }
-  }
-</style>
-
-<!-- 气泡由脚本动态创建，拿不到 Astro 作用域属性，样式必须全局声明 -->
+<!-- 气泡由脚本动态创建，拿不到 Astro 作用域属性，工具类必须在全局生效 -->
 <style is:global>
+  @reference "../styles/theme.css";
+
   .ask__bubble {
-    max-width: 86%;
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid var(--line);
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    line-height: 1.55;
+    @apply max-w-[86%] rounded-md px-3 py-2.5 leading-[1.55] whitespace-pre-wrap wrap-anywhere;
   }
   .ask__bubble--user {
-    align-self: flex-end;
-    background: var(--coral);
-    border-color: var(--coral);
-    color: var(--ink);
+    @apply self-end bg-accent text-on-accent;
   }
   .ask__bubble--assistant {
-    align-self: flex-start;
-    background: var(--ink);
-    color: var(--paper);
+    @apply self-start border border-line bg-surface text-ink;
   }
 </style>
