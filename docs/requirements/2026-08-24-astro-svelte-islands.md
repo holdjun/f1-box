@@ -1,7 +1,19 @@
 # Astro 架构到位化：Svelte Islands + Astro 原生数据访问层
 
 日期：2026-08-24
-状态：评审中
+状态：预览验收
+
+## 实现偏差记录（与设计时的差异，均已验证）
+
+- AskPanel 与 SeasonFilter 的面板交互最终采用原生 Popover API（manual 模式），而非设计稿的 Svelte 状态控制：水合前的点击不依赖 JS 时序（dev 冷启动下 island 水合可能晚于用户点击）、导航后面板恢复不再需要 persisted island。manual popover 无 light dismiss，行为与原实现一致（点链接不关面板）；Escape/焦点回 trigger 由组件显式处理。
+- 对话与面板开合状态用 sessionStorage 持久化（会话级、刷新清空，与原实现行为一致）：island 客户端模块在每次导航都会重新执行，模块级 $state 不跨导航；过渡期曾尝试 transition:persist + 模块 store，实测 Astro 只保留 persist 元素的 DOM，Svelte 实例与状态会被销毁。
+- season-filter 的 class:list 语法在 Svelte 5 已废弃（解析为条件类名 "list"），改用 class 数组/对象原生支持；动态相关的 CSS 选择器需 :global 包裹（scoped 编译器报 unused）。
+- ThemeToggle 初始化不能在 $state 里读 document（SSR 端无 document 会崩溃），用 onMount 同步。
+- a11y.spec 的 axe 在重页面（teams/ferrari）耗时与环境负载强相关（低负载 3.7s，高负载 >50s，与代码无关），为 CI 稳健性给该 spec 单独放宽超时。
+- middleware 单测需要 vi.mock cloudflare:workers 与 astro:middleware 两个虚拟模块；MiddlewareHandler 返回类型含 void，需断言。
+- svelte-check 需并入 tsconfig include（src/**/*.svelte）才会扫描到组件；check 脚本 = wrangler types && astro check && svelte-check。
+
+（下方为设计原文，策略不变；组件层交互细节以上述偏差为准）
 
 ## 背景与目标
 
