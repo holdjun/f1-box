@@ -7,4 +7,6 @@ allowBuilds:
   workerd: true
 minimumReleaseAgeExclude:
   - '@astrojs/cloudflare@14.2.3'
+  - '@astrojs/svelte@9.0.1'
   - astro@7.2.4
+  - svelte@5.56.10
