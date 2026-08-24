@@ -3,9 +3,11 @@ name: data-sync
 on:
   workflow_dispatch:
   schedule:
-    # 每天四次：上游 release 多在 UTC 深夜到凌晨发布，6 小时轮询把滞后收敛到半天内；
-    # tag 门禁保证无变化时是零成本空转
-    - cron: "23 */6 * * *"
+    # f1db 主版本集中在周日晚 UTC（赛后数小时，见 releases 历史），修正版散落工作日：
+    # 周日晚到周二每 2 小时密集覆盖，其余每天一次兜底；tag 门禁下无变化为零成本空转
+    - cron: "23 18,20,22 * * 0"
+    - cron: "23 */2 * * 1,2"
+    - cron: "23 4 * * 3-6"
 
 # 仅在上游 release tag 变化时刷新：D1 整库重导（重导期间 /teams/* 短暂
 # 不可用，故用 tag 门禁收敛）。门禁状态存 D1 sync_state 表（R2 随 ingest

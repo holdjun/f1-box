@@ -26,7 +26,7 @@
 3. PR：用 `gh pr create` 开 PR；PR 标题和正文会原样成为压缩合并的提交信息，务必写清楚。CI 自动验证，preview worker 自动部署。
 4. 验收与合并：用户在 preview 页面查看效果（桌面和 375px 移动端），检查 PR 改动后压缩合并（squash）。PR 作者无法 Approve 自己的 PR，所以不设强制 Approve；合并门槛是 CI 全绿 + 用户亲自点合并。main 是保护分支，禁止直接推送。
 5. 发布：合并到 main 后 deploy 工作流自动发布到 f1-box.com；预览验收已在合并前完成，不再二次审批。
-6. 数据：data-sync.yml 每 6 小时轮询 f1db release tag，有变化时全量导入 D1（门禁状态存 D1 `sync_state` 表），也可手动触发；静态资产（logo/国旗/赛道 SVG）在仓库 `public/vendor/`。
+6. 数据：data-sync.yml 按 f1db 发布节奏轮询 release tag（周日晚到周二每 2 小时、其余每天一次），有变化时全量导入 D1（门禁状态存 D1 `sync_state` 表），也可手动触发；静态资产（logo/国旗/赛道 SVG）在仓库 `public/vendor/`。
 7. 回滚：数据问题重跑 data-sync 或恢复旧 D1 导入；代码问题重新部署旧提交。
 
 # 提交与分支规范
