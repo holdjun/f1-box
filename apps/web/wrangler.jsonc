@@ -11,12 +11,6 @@
   "routes": [
     { "pattern": "f1-box.com", "custom_domain": true }
   ],
-  "r2_buckets": [
-    {
-      "binding": "F1_DATA",
-      "bucket_name": "f1-box-data"
-    }
-  ],
   "d1_databases": [
     {
       "binding": "F1_DB",

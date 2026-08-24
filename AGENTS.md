@@ -11,8 +11,8 @@
 # 环境
 
 - Node.js >= 22.12.0；pnpm 11.9.0（Node 26 不再自带 corepack，用 `npm install -g pnpm@11.9.0` 安装）。
-- Python 一律走 `uv`（`services/ingest` 下 `uv sync`、`uv run pytest`、`uv run ruff check .`）。
-- 验证命令：`pnpm check`、`pnpm test`、`pnpm -r build`；e2e 用 `pnpm --filter @f1-box/web test:e2e`。
+- Python 独立脚本一律 `uv run`（PEP 723，如 `scripts/generate-circuit-maps.py`）。
+- 验证命令：`pnpm check`、`pnpm test`、`pnpm -r build`；e2e 用 `pnpm --filter @f1-box/web test:e2e`（桌面 / 375px / reduced-motion / 双主题 axe 可访问性）。
 - 视觉审阅（截图检查）可用 VLM 网关，配置见 `.env.example`；token 只放本地 `.env`，严禁提交。
 - `gh` 已登录 holdjun 账号；仓库为 holdjun/f1-box。Cloudflare 资源（Worker、R2）操作前先用 `wrangler whoami` 确认登录状态，有问题找用户处理。
 - wrangler 的 `r2 object` / `kv key` 命令不带参数时默认操作本地模拟存储；操作真实云端必须加 `--remote`。
@@ -26,8 +26,8 @@
 3. PR：用 `gh pr create` 开 PR；PR 标题和正文会原样成为压缩合并的提交信息，务必写清楚。CI 自动验证，preview worker 自动部署。
 4. 验收与合并：用户在 preview 页面查看效果（桌面和 375px 移动端），检查 PR 改动后压缩合并（squash）。PR 作者无法 Approve 自己的 PR，所以不设强制 Approve；合并门槛是 CI 全绿 + 用户亲自点合并。main 是保护分支，禁止直接推送。
 5. 发布：合并到 main 后 deploy 工作流自动发布到 f1-box.com；预览验收已在合并前完成，不再二次审批。
-6. 数据：ingest.yml 定时从 Jolpica 采集并发布到 R2（周五至周日每 30 分钟、周一至周四每天一次，UTC），也可手动触发。
-7. 回滚：数据问题重新上传旧的 latest.json；代码问题重新部署旧提交。
+6. 数据：data-sync.yml 每周把 f1db 全量导入 D1，也可手动触发；静态资产（logo/国旗/赛道 SVG）在仓库 `public/vendor/`。
+7. 回滚：数据问题重跑 data-sync 或恢复旧 D1 导入；代码问题重新部署旧提交。
 
 # 提交与分支规范
 
@@ -36,6 +36,13 @@
 - 提交前快速自查：diff 无 secrets、调试代码、无关改动、不应入库的文件；运行与改动范围匹配的验证。
 - `git add` 具体文件，不用 `git add -A`。
 - PR 标题和正文就是压缩合并的提交信息，统一用英文（与 git 历史保持一致）；对话和仓库文档仍用中文。完整 PR 流程与自查清单见 `.claude/skills/submit/SKILL.md`。
+
+# 样式纪律
+
+- 令牌单源在 `apps/web/src/styles/theme.css`：组件只消费语义工具类（`bg-surface`、`text-ink-muted`、`border-line`、`accent`/`highlight` 等），禁止硬编码颜色；数据语义色（队色、轮胎化合物色等）例外且需注释。
+- 新增或改动 UI 必须深/亮两主题同时验证（截图目检 + `tests/e2e/a11y.spec.ts` 的 axe 基线），单主题不算完成。
+- e2e 钩子类（`race-card`、`season-filter*`、`ask__*`、`result-podium` 等）被 spec 依赖；重构可换样式实现，不得改名或删除钩子。
+- 主题状态：`html[data-theme]` + localStorage 键 `f1-theme`；ClientRouter 导航会同步 `<html>` 属性，主题重应用靠 BaseLayout 内联脚本的 `astro:after-swap` 监听，动这块时先读注释。
 
 # 代码卫生
 

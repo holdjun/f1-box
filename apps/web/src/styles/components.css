@@ -56,28 +56,6 @@
   }
   .button--text:hover { border-color: var(--highlight); color: var(--highlight); }
 
-  .freshness-badge {
-    display: inline-flex;
-    min-height: 28px;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--ink-strong);
-    font-size: 0.72rem;
-    font-weight: 650;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-  .freshness-badge > span {
-    width: 7px;
-    height: 7px;
-    background: var(--ink-muted);
-    transform: rotate(45deg);
-  }
-  .freshness-badge--fresh > span { background: var(--highlight); }
-  .freshness-badge--delayed > span,
-  .freshness-badge--stale > span,
-  .freshness-badge--unavailable > span { background: var(--accent); }
-
   .status-label {
     display: inline-flex;
     align-items: center;

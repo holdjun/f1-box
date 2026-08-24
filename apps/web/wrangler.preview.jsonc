@@ -8,12 +8,6 @@
     "binding": "ASSETS",
     "directory": "./dist"
   },
-  "r2_buckets": [
-    {
-      "binding": "F1_DATA",
-      "bucket_name": "f1-box-data"
-    }
-  ],
   "d1_databases": [
     {
       "binding": "F1_DB",

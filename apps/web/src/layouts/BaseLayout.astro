@@ -19,9 +19,6 @@ interface Props {
   active?: "racing" | "results" | "circuits" | "drivers" | "teams";
   year?: number;
   season?: number;
-  sourceName?: string;
-  fetchedAt?: string;
-  freshness?: "fresh" | "delayed" | "stale" | "unavailable";
 }
 
 const {
@@ -30,9 +27,6 @@ const {
   active,
   year,
   season,
-  sourceName,
-  fetchedAt,
-  freshness,
 } = Astro.props;
 ---
 
@@ -73,12 +67,7 @@ const {
     <SiteHeader active={active} year={year} />
     <slot />
     <AskPanel />
-    <SiteFooter
-      season={year ?? season}
-      sourceName={sourceName}
-      fetchedAt={fetchedAt}
-      freshness={freshness}
-    />
+    <SiteFooter season={year ?? season} />
     <script>
       import "../scripts/client.ts";
     </script>
