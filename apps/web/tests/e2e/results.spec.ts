@@ -162,6 +162,59 @@ test("@mobile results pages have no page overflow", async ({ page }) => {
   }
 });
 
+// 比赛详情页各 tab 的表格在 SSR 时已全部渲染；点击 tab 应就地切换面板，
+// 不发生视图过渡换页：点击前的面板节点仍在文档中（仅 hidden），
+// 地址栏由 replaceState 同步。ClientRouter 换页会丢弃旧节点且重置滚动
+test("@desktop race tab switch swaps panels in place without reload", async ({
+  page,
+}) => {
+  await page.goto("/results/2026/races/australia/race-result");
+  await page.evaluate(() => {
+    const panel = document.querySelector('[data-race-tab-panel="race-result"]');
+    (window as { __panel?: Element | null }).__panel = panel;
+  });
+  const nav = page.getByRole("navigation", { name: "Race result types" });
+  await nav.scrollIntoViewIfNeeded();
+  const beforeScroll = await page.evaluate(() => window.scrollY);
+  expect(beforeScroll).toBeGreaterThan(0);
+  await nav.getByRole("link", { name: "Qualifying" }).click();
+  await page.waitForURL(/\/qualifying$/);
+  expect(
+    await page.evaluate(() =>
+      document.contains(
+        (window as { __panel?: Element | null }).__panel ?? null,
+      ),
+    ),
+  ).toBe(true);
+  await expect(
+    page.getByRole("table", { name: "Qualifying classification" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("table", { name: "Race classification" }),
+  ).toBeHidden();
+  // 视口保持点击前的位置，不再回页首
+  expect(await page.evaluate(() => window.scrollY)).toBe(beforeScroll);
+});
+
+test("@mobile race tab switch also swaps panels in place", async ({ page }) => {
+  await page.goto("/results/2026/races/australia/race-result");
+  await page.evaluate(() => {
+    (window as { __probe?: number }).__probe = 1;
+  });
+  const nav = page.getByRole("navigation", { name: "Race result types" });
+  await nav.getByRole("link", { name: "Fastest Laps" }).click();
+  await page.waitForURL(/\/fastest-laps$/);
+  expect(
+    await page.evaluate(() => (window as { __probe?: number }).__probe),
+  ).toBe(1);
+  await expect(page.getByRole("table", { name: "Fastest laps" })).toBeVisible();
+});
+
+test("@desktop direct tab url still opens at page top", async ({ page }) => {
+  await page.goto("/results/2026/races/australia/fastest-laps");
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+});
+
 test.describe("legacy results redirects", () => {
   test("@desktop old results paths redirect to new", async ({ page }) => {
     await page.goto("/2026/results/races");
