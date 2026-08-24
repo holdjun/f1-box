@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import { capStoredAnswer, windowForSend } from "../lib/ask/history.js";
   import type { AskMessage } from "../lib/ask/request.js";
   import { createSseAccumulator } from "../lib/ask/sse.js";
@@ -21,22 +21,6 @@
   let inputEl = $state<HTMLTextAreaElement>();
 
   const streaming = $derived(streamingText !== null);
-
-  // 导航期间的 popover 关闭（swap 前 light dismiss）不是用户操作，不得覆盖会话
-  // 状态；window 级标志跨导航存活且只注册一次（island 模块每次导航重新执行）
-  const navGuard = (): { isNavigating: () => boolean } => {
-    const w = window as unknown as Record<string, unknown>;
-    if (!w.__askNavGuard) {
-      w.__askNavGuard = true;
-      document.addEventListener("astro:before-swap", () => {
-        w.__askNavigating = true;
-      });
-      document.addEventListener("astro:after-swap", () => {
-        w.__askNavigating = false;
-      });
-    }
-    return { isNavigating: () => w.__askNavigating === true };
-  };
 
   let controller: AbortController | null = null;
 
@@ -93,13 +77,12 @@
       triggerEl?.setAttribute("aria-expanded", isOpen ? "true" : "false");
     };
     const onToggle = (event: Event): void => {
-      // ClientRouter 导航会关闭当前 popover（swap 前的 light dismiss），
-      // 这类 toggle 不视为用户操作，避免覆盖会话状态
-      if (document.documentElement.hasAttribute("data-astro-transition")) {
-        return;
-      }
+      // manual popover 在导航（DOM 移出）时不会派发 toggle，此处只处理真实
+      // 用户开合；closed 时把焦点还给 trigger（✕/trigger 的原生关闭路径）
       const toggled = event as ToggleEvent;
       openState = toggled.newState === "open";
+      if (openState) inputEl?.focus();
+      else triggerEl?.focus();
       persistState();
       render();
     };
@@ -138,6 +121,7 @@
 
   async function ask(text: string): Promise<void> {
     messages = [...messages, { role: "user", content: text }];
+    errorState = null;
     streamingText = "";
     controller = new AbortController();
     let answer = "";
@@ -190,6 +174,9 @@
               continue;
             }
             streamingText = answer;
+            // Svelte DOM 更新是异步 flush：先等 tick 再把几何写入，
+            // 与前实现"先测 stick → 写 DOM → 再滚"的贴底跟随语义等价
+            await tick();
             scrollToBottomIfNear();
           } else if (event.event === "error") {
             hadError = true;
@@ -365,6 +352,8 @@
         void submit();
       }}
     >
+      <!-- 有意：manual popover 无原生自动聚焦，autofocus 是打开即聚焦的机制 -->
+      <!-- svelte-ignore a11y_autofocus -->
       <textarea
         bind:this={inputEl}
         bind:value={inputValue}

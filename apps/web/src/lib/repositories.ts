@@ -59,11 +59,15 @@ export async function createAppData(env: Env): Promise<AppData> {
   };
 }
 
+// 模块级 memo：D1 wrapper 与 DEV 夹具均无状态，worker 实例内跨请求复用安全；
+// DEV 夹具只在首次请求构建一次，不随每次页面渲染重复 await。
+// 首次构建失败（如 DEV 夹具异常）时重置，避免失败被永久缓存成 rejected promise
 let cached: Promise<AppData> | undefined;
 
-// 模块级 memo：D1 wrapper 与 DEV 夹具均无状态，worker 实例内跨请求复用安全；
-// DEV 夹具只在首次请求构建一次，不随每次页面渲染重复 await
 export function getAppData(env: Env): Promise<AppData> {
   cached ??= createAppData(env);
+  cached.catch(() => {
+    cached = undefined;
+  });
   return cached;
 }

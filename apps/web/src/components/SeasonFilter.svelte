@@ -52,7 +52,8 @@
 
   let open = $state(false);
   let expandingUp = $state(false);
-  let selected = $state<Set<number>>(new Set());
+  // svelte-ignore state_referenced_locally —— props 渲染周期内不可变（静态 SSR 输入）
+  let selected = $state<Set<number>>(new Set(initialSelected ?? []));
   let triggerEl = $state<HTMLButtonElement>();
   let panelEl = $state<HTMLDivElement>();
 
@@ -181,16 +182,13 @@
     applyFilter();
   }
 
-  // initialSelected 只在首次水合时建立（服务端渲染期 selected 恒空，
-  // 避免在 SSR 阶段触碰 document）
-  let initialised = false;
+  // applyFilter 操作文档级 data-season-block（元素在 SeasonMatrix 内），
+  // 需水合后执行；selected 已从 props 初始化，SSR 首屏即输出正确的选中态
+  let applied = false;
   $effect(() => {
-    if (initialised) return;
-    initialised = true;
-    if (mode === "toggle" && initialSelected && initialSelected.length > 0) {
-      selected = new Set(initialSelected);
-      applyFilter();
-    }
+    if (applied) return;
+    applied = true;
+    applyFilter();
   });
 
   // preflight 把 button 光标重置为 default，交互按钮需补 cursor-pointer
@@ -201,9 +199,6 @@
 
 <div
   class={["season-filter relative mt-4 mb-5", { "season-filter--sticky": sticky }]}
-  data-season-filter
-  data-mode={mode}
-  data-initial-selected={initialSelected?.join(",") ?? ""}
 >
   <button
     type="button"
@@ -211,12 +206,9 @@
     class="season-filter__trigger inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-line bg-surface-raised px-4 text-[0.72rem] font-semibold tracking-[0.09em] uppercase text-ink-strong transition-colors hover:border-ink-muted hover:text-ink"
     aria-expanded="false"
     aria-label={label}
-    data-season-filter-trigger
     onclick={() => (open ? closePanel() : openPanel())}
   >
-    <span class="season-filter__summary" data-season-filter-summary
-      >{summary}</span
-    >
+    <span class="season-filter__summary">{summary}</span>
     <svg
       class="season-filter__caret w-2.8 h-auto fill-none stroke-current stroke-[1.6] transition-transform duration-200"
       viewBox="0 0 12 8"
@@ -231,7 +223,6 @@
   <div
     bind:this={panelEl}
     class={["season-filter__panel absolute left-0 top-[calc(100%+0.4rem)] z-20 w-[min(92vw,26rem)] min-w-64 overflow-y-auto rounded-md border border-line bg-surface-raised p-3 shadow-panel", { "season-filter__panel--up": expandingUp }]}
-    data-season-filter-panel
     hidden={!open}
   >
     {#if mode !== "link" || showAll}
@@ -245,14 +236,11 @@
           <button
             type="button"
             class={["season-filter__action", itemClasses, itemHover, "cursor-pointer text-ink-strong"]}
-            data-season-filter-all
             onclick={clearSelection}
           >All</button>
           <span
             class="season-filter__count ml-auto text-[0.7rem] text-ink-muted"
-            data-season-filter-count
-            >{countText}</span
-          >
+            >{countText}</span>
         {/if}
       </div>
     {/if}
@@ -264,7 +252,6 @@
             <button
               type="button"
               class={["season-filter__decade", itemClasses, itemHover, "cursor-pointer", { "is-active": isDecadeFullySelected(decade) }]}
-              data-season-decade={decade.label}
               onclick={() => toggleDecade(decade)}
             >{decade.label}</button>
           {:else}
@@ -278,13 +265,11 @@
                 <a
                   class={["season-filter__year", itemClasses, itemHover, { "is-active": current === year }]}
                   href={hrefFor(year)}
-                  data-season-year={year}
                 >{year}</a>
               {:else}
                 <button
                   type="button"
                   class={["season-filter__year", itemClasses, itemHover, "cursor-pointer", { "is-active": isActive(year) }]}
-                  data-season-year={year}
                   aria-pressed={isActive(year)}
                   onclick={() => toggleYear(year)}
                 >{year}</button>

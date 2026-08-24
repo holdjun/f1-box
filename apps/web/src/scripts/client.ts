@@ -1,5 +1,3 @@
-import { summarizeYears } from "../lib/season-summary.js";
-
 const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
   day: "2-digit",
   month: "short",
@@ -20,8 +18,6 @@ function enhanceLocalTimes(root: ParentNode = document): void {
     element.hidden = false;
   });
 }
-
-// 详情页赛季筛选：触发器展开面板，点选年份/年代控制 data-season-block 显隐。
 
 // 比赛详情页各 tab 的表格已在服务端全部渲染；JS 可用时点击 tab 就地切换
 // 面板并同步地址栏，省掉视图过渡与回页首。必须在捕获阶段拦截，
