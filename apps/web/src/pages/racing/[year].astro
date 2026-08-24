@@ -1,6 +1,6 @@
 ---
 import RaceCard from "../../components/RaceCard.astro";
-import SeasonFilter from "../../components/SeasonFilter.astro";
+import SeasonFilter from "../../components/SeasonFilter.svelte";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import type { RaceSummary } from "../../lib/race-results-repository.js";
 import { formatUtcDateTime } from "../../lib/time.js";
@@ -70,9 +70,10 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
       years={availableYears}
       mode="link"
       current={year}
-      hrefFor={(y) => `/racing/${y}`}
+      hrefPattern="/racing/{year}"
       sticky
       showAll={false}
+      client:load
     />
 
     {races.length === 0 ? (

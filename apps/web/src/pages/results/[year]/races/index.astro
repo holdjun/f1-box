@@ -1,6 +1,6 @@
 ---
 import ResultsNav from "../../../../components/ResultsNav.astro";
-import SeasonFilter from "../../../../components/SeasonFilter.astro";
+import SeasonFilter from "../../../../components/SeasonFilter.svelte";
 import BaseLayout from "../../../../layouts/BaseLayout.astro";
 import { formatUtcDate } from "../../../../lib/time.js";
 import { monogram, monogramStyle as monogramStyleFor } from "../../../../lib/tokens.js";
@@ -31,7 +31,7 @@ const winnerStyle = (teamId: string | null) =>
       years={availableYears}
       mode="link"
       current={year}
-      hrefFor={(y) => `/results/${y}/races`}
+      hrefPattern="/results/{year}/races"
       sticky
       showAll={false}
     />

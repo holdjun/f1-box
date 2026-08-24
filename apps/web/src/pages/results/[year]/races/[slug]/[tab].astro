@@ -2,7 +2,7 @@
 import RaceHeader from "../../../../../components/RaceHeader.astro";
 import RaceTable from "../../../../../components/RaceTable.astro";
 import RaceTabsNav from "../../../../../components/RaceTabsNav.astro";
-import SeasonFilter from "../../../../../components/SeasonFilter.astro";
+import SeasonFilter from "../../../../../components/SeasonFilter.svelte";
 import StatusPage from "../../../../../components/StatusPage.astro";
 import BaseLayout from "../../../../../layouts/BaseLayout.astro";
 import { RACE_TAB_FIELDS } from "../../../../../lib/race-results-repository.js";
@@ -40,7 +40,7 @@ const visibleTabs =
           years={availableYears}
           mode="link"
           current={year}
-          hrefFor={(y) => `/results/${y}/races/${slug}/${tab}`}
+          hrefPattern={`/results/{year}/races/${slug}/${tab}`}
           sticky
           showAll={false}
         />

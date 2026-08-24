@@ -1,5 +1,5 @@
 ---
-import SeasonFilter from "../../components/SeasonFilter.astro";
+import SeasonFilter from "../../components/SeasonFilter.svelte";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { gridFillers } from "../../lib/layout.js";
 import { resolveCatalogYear } from "../../lib/routing.js";
@@ -27,6 +27,7 @@ const cardClasses =
       current={year}
       label="Filter by season"
       sticky
+      client:load
     />
     <div class="grid grid-cols-1 gap-px rounded-md bg-line light:shadow-panel md:grid-cols-2 lg:grid-cols-3">
       {drivers.map((driver) => (
