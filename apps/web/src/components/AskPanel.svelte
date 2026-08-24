@@ -1,8 +1,8 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { capStoredAnswer, windowForSend } from "../lib/ask/history.js";
   import type { AskMessage } from "../lib/ask/request.js";
   import { createSseAccumulator } from "../lib/ask/sse.js";
-  import { onMount } from "svelte";
 
   // 对话与面板状态：本地 $state + sessionStorage 持久化（会话级）。
   // island 模块在每次页面导航都会重新执行（dev 与生产均如此），模块级状态

@@ -17,19 +17,40 @@ import { onRequest } from "../src/middleware.js";
 const CACHE_HEADER = "public, s-maxage=300, stale-while-revalidate=600";
 
 // context 只构造 middleware 用到的最小形状；locals 由 middleware 写入 app
-function makeContext(path: string, method = "GET", status = 200, headers: Record<string, string> = {}) {
+function makeContext(
+  path: string,
+  method = "GET",
+  status = 200,
+  headers: Record<string, string> = {},
+) {
   const request = new Request(`https://example.com${path}`, { method });
   const locals: { app?: unknown } = {};
   const next = vi.fn(async () => new Response(null, { status, headers }));
   return { context: { locals, request } as never, next };
 }
 
-async function run(path: string, opts: { method?: string; status?: number; headers?: Record<string, string> } = {}) {
-  const { context, next } = makeContext(path, opts.method, opts.status, opts.headers);
+async function run(
+  path: string,
+  opts: {
+    method?: string;
+    status?: number;
+    headers?: Record<string, string>;
+  } = {},
+) {
+  const { context, next } = makeContext(
+    path,
+    opts.method,
+    opts.status,
+    opts.headers,
+  );
   const result = await onRequest(context, next);
   // MiddlewareHandler 返回类型含 void，实际执行路径恒返回 Response
   const response = result as Response;
-  return { response, locals: (context as { locals: { app?: unknown } }).locals, next };
+  return {
+    response,
+    locals: (context as { locals: { app?: unknown } }).locals,
+    next,
+  };
 }
 
 beforeEach(() => {
@@ -51,7 +72,9 @@ describe("middleware 默认缓存", () => {
   });
 
   it("页面已显式设置 Cache-Control（no-store 信号）时不覆盖", async () => {
-    const { response } = await run("/racing/2026", { headers: { "Cache-Control": "no-store" } });
+    const { response } = await run("/racing/2026", {
+      headers: { "Cache-Control": "no-store" },
+    });
     expect(response.headers.get("Cache-Control")).toBe("no-store");
   });
 

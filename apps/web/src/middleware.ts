@@ -1,5 +1,5 @@
-import { env } from "cloudflare:workers";
 import { defineMiddleware } from "astro:middleware";
+import { env } from "cloudflare:workers";
 
 import { getAppData } from "./lib/repositories.js";
 
