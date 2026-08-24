@@ -6,14 +6,14 @@
     "includes": [
       "**",
       "!**/worker-configuration.d.ts",
-      "!apps/web/public/**",
-      "!apps/web/src/data/**",
-      "!apps/web/src/lib/fixtures/**"
+      "!apps/web/public",
+      "!apps/web/src/data",
+      "!apps/web/src/lib/fixtures"
     ]
   },
   "css": { "parser": { "tailwindDirectives": true } },
   "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2 },
-  "linter": { "enabled": true, "rules": { "recommended": true } },
+  "linter": { "enabled": true, "rules": { "preset": "recommended" } },
   "overrides": [
     {
       "includes": ["**/tests/**"],

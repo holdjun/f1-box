@@ -5,6 +5,15 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
+# PR 连续 push 取消过时流水线；main 排队而非取消，避免打断进行中的生产部署。
+# verify 与部署合并在一条流水线里，生产部署由 verify 结构性门禁
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -17,7 +26,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec biome ci .
+      # check 已含 biome ci（根 package.json），本地与 CI 走同一入口
       - run: pnpm check
       - run: pnpm test
       - run: pnpm -r build
@@ -28,3 +37,47 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - run: pnpm --filter @f1-box/web exec playwright install --with-deps chromium
       - run: pnpm --filter @f1-box/web test:e2e
+
+  preview:
+    # fork PR 读不到仓库 secrets，跳过部署只跑 verify，避免 CI 红在 wrangler 认证上
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @f1-box/web build
+        env:
+          F1BOX_WRANGLER_CONFIG: ./wrangler.preview.jsonc
+      - run: pnpm --filter @f1-box/web exec wrangler deploy
+
+  production:
+    # 显式锁定 main：部署生产的边界守卫，不依赖触发器配置的隐式保证
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @f1-box/web build
+      - run: pnpm --filter @f1-box/web exec wrangler deploy
