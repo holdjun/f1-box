@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 test.describe("results races list", () => {
   test("@desktop lists completed races with winners", async ({ page }) => {
@@ -160,6 +160,55 @@ test("@mobile results pages have no page overflow", async ({ page }) => {
     );
     expect(hasOverflow, path).toBe(false);
   }
+});
+
+// 切 tab 后视图过渡会把视口带回页首；恢复完成后 tab 栏须回到视口内，
+// 且不被 sticky 赛季筛选条遮挡（被盖住时整行都点不了）
+async function expectTabsSettled(page: Page): Promise<void> {
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const el = document.querySelector("[data-tab-anchor]");
+          if (!el) return false;
+          const rect = el.getBoundingClientRect();
+          if (rect.top < -50 || rect.top >= 300) return false;
+          const hit = document.elementFromPoint(
+            rect.left + rect.width / 2,
+            rect.top + rect.height / 2,
+          );
+          return !!hit?.closest("[data-tab-anchor]");
+        }),
+      { timeout: 3000 },
+    )
+    .toBe(true);
+}
+
+test("@desktop tab switch returns viewport to tabs instead of page top", async ({
+  page,
+}) => {
+  await page.goto("/results/2026/races/australia/race-result");
+  const tabs = page.locator("nav[data-tab-anchor]");
+  await tabs.scrollIntoViewIfNeeded();
+  await tabs.getByRole("link", { name: "Fastest Laps" }).click();
+  await page.waitForURL(/\/fastest-laps$/);
+  await expectTabsSettled(page);
+});
+
+test("@mobile race tab switch keeps tabs reachable below sticky season filter", async ({
+  page,
+}) => {
+  await page.goto("/results/2026/races/australia/race-result");
+  const tabs = page.locator("nav[data-tab-anchor]");
+  await tabs.scrollIntoViewIfNeeded();
+  await tabs.getByRole("link", { name: "Fastest Laps" }).click();
+  await page.waitForURL(/\/fastest-laps$/);
+  await expectTabsSettled(page);
+});
+
+test("@desktop direct tab url still opens at page top", async ({ page }) => {
+  await page.goto("/results/2026/races/australia/fastest-laps");
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
 });
 
 test.describe("legacy results redirects", () => {

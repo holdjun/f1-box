@@ -273,10 +273,47 @@ function enhanceThemeToggles(root: ParentNode = document): void {
     });
 }
 
+// 点击结果页 tab 后视图过渡会回到页首，体验差；
+// 记录被点击 tab 的地址，page-load 后把视口滚回 tab 锚点。
+// 地址对不上（导航被取消、用户改道）或直接访问 URL 时不滚动
+let tabScrollBound = false;
+
+function enhanceTabScroll(): void {
+  if (tabScrollBound) return;
+  tabScrollBound = true;
+
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const link = target.closest<HTMLAnchorElement>("[data-tab-anchor] a");
+    if (!link) return;
+    try {
+      sessionStorage.setItem("f1-tab-nav", link.href);
+    } catch {
+      // 隐私模式等写不进 sessionStorage 时放弃滚动恢复
+    }
+  });
+
+  document.addEventListener("astro:page-load", () => {
+    let expected = "";
+    try {
+      expected = sessionStorage.getItem("f1-tab-nav") ?? "";
+      sessionStorage.removeItem("f1-tab-nav");
+    } catch {
+      return;
+    }
+    if (expected !== location.href) return;
+    document
+      .querySelector("[data-tab-anchor]")
+      ?.scrollIntoView({ behavior: "instant", block: "start" });
+  });
+}
+
 function enhancePage(): void {
   enhanceThemeToggles();
   enhanceLocalTimes();
   enhanceSeasonFilters();
+  enhanceTabScroll();
 }
 
 enhancePage();

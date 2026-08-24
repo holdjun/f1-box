@@ -14,7 +14,7 @@ const itemClasses =
   "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap px-4 text-[0.72rem] font-semibold tracking-[0.1em] uppercase text-ink-muted transition-colors hover:text-ink aria-[current=page]:text-ink aria-[current=page]:[box-shadow:inset_0_-2px_var(--accent)]";
 ---
 
-<nav class="mt-4 flex gap-1 overflow-x-auto border-b border-line" aria-label="Results">
+<nav data-tab-anchor class="mt-4 flex scroll-mt-20 gap-1 overflow-x-auto border-b border-line" aria-label="Results">
   {tabs.map(([key, label]) => (
     <a
       href={`/results/${year}/${key}`}

@@ -16,7 +16,8 @@ const itemClasses =
   "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap px-4 text-[0.72rem] font-semibold tracking-[0.1em] uppercase text-ink-muted transition-colors hover:text-ink aria-[current=page]:text-ink aria-[current=page]:[box-shadow:inset_0_-2px_var(--accent)]";
 ---
 
-<nav class="mt-4 flex gap-1 overflow-x-auto border-b border-line" aria-label="Race result types">
+{/* sticky 赛季筛选条在本组件上方粘顶（top 4.5/5rem + 高约 2.75rem），滚动恢复落点须避让其粘顶区间，否则整行会被遮住点不了 */}
+<nav data-tab-anchor class="mt-4 flex scroll-mt-36 gap-1 overflow-x-auto border-b border-line" aria-label="Race result types">
   {visibleTabs.map((key) => (
     <a
       href={`/results/${year}/races/${slug}/${key}`}
