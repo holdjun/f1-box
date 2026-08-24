@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  type AskDatabase,
+  createStaticAskDatabase,
+} from "../src/lib/ask/db.js";
+import {
   constructorChampionshipYearsSql,
   constructorIdentitySql,
   constructorRefSql,
@@ -13,7 +17,6 @@ import {
   seasonConstructorStandings,
   seasonDriverStandings,
 } from "../src/lib/ask/tools.js";
-import { createStaticAskDatabase, type AskDatabase } from "../src/lib/ask/db.js";
 
 // 查询词刻意避开 f1-aliases.json 的中文键（如"汉密尔顿"），单测不依赖种子别名
 const hamiltonRows = [
@@ -167,7 +170,10 @@ describe("constructorSummary", () => {
     // "威廉姆斯"→williams；ref 查询按子串还会命中另外两支含 williams 的车队
     const db = createStaticAskDatabase({
       [constructorRefSql]: [
-        { id: "frank-williams-racing-cars", name: "Frank Williams Racing Cars" },
+        {
+          id: "frank-williams-racing-cars",
+          name: "Frank Williams Racing Cars",
+        },
         { id: "williams", name: "Williams" },
         { id: "wolf-williams", name: "Wolf-Williams" },
       ],

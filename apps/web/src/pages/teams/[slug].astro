@@ -1,15 +1,14 @@
 ---
 import { env } from "cloudflare:workers";
-
-import BaseLayout from "../../layouts/BaseLayout.astro";
 import CurrentSeasonPanel from "../../components/CurrentSeasonPanel.astro";
 import HistoryEnd from "../../components/HistoryEnd.astro";
 import SeasonMatrix from "../../components/SeasonMatrix.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { resolveSeasonSelection } from "../../lib/routing.js";
 import {
   createD1TeamDatabase,
   createTeamRepository,
 } from "../../lib/team-repository.js";
-import { resolveSeasonSelection } from "../../lib/routing.js";
 import {
   colorForYear,
   getTeamBranding,
@@ -115,7 +114,7 @@ const chipClasses =
       </header>
 
       {team.lineage.length > 0 ? (
-        <div class="mt-6 grid gap-2.5 text-[0.78rem]" aria-label="Team lineage">
+        <section class="mt-6 grid gap-2.5 text-[0.78rem]" aria-label="Team lineage">
           {standaloneLineage.length > 0 ? (
             <div class="lineage-block flex flex-wrap items-center gap-1.5">
               <span class={lineageLabel}>Earlier entries</span>
@@ -164,14 +163,14 @@ const chipClasses =
               </div>
             </div>
           ) : null}
-        </div>
+        </section>
       ) : null}
 
       <section class="info-panels">
         {team.currentSeason && team.currentSeason.year === currentYear ? (
           <CurrentSeasonPanel season={team.currentSeason} />
         ) : null}
-        <div class="info-panel" aria-label="Team summary">
+        <section class="info-panel" aria-label="Team summary">
           <h2>Team Summary</h2>
           <dl>
             <div><dt>Entries</dt><dd>{team.totals.entries}</dd></div>
@@ -187,7 +186,7 @@ const chipClasses =
             </div>
             <div><dt>First Team Entry</dt><dd>{team.firstEntry}</dd></div>
           </dl>
-        </div>
+        </section>
       </section>
 
       <section class="mt-12" aria-labelledby="history-title">

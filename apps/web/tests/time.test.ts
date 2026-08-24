@@ -8,18 +8,14 @@ import {
 
 describe("time formatting", () => {
   test("formats a timestamp in UTC", () => {
-    expect(
-      formatUtcDateTime("2026-03-08T04:00:00Z", "en-GB"),
-    ).toBe("08 Mar 2026, 04:00 UTC");
+    expect(formatUtcDateTime("2026-03-08T04:00:00Z", "en-GB")).toBe(
+      "08 Mar 2026, 04:00 UTC",
+    );
   });
 
   test("formats a timestamp in an explicit local time zone", () => {
     expect(
-      formatLocalDateTime(
-        "2026-03-08T04:00:00Z",
-        "Asia/Shanghai",
-        "en-GB",
-      ),
+      formatLocalDateTime("2026-03-08T04:00:00Z", "Asia/Shanghai", "en-GB"),
     ).toBe("08 Mar 2026, 12:00 GMT+8");
   });
 

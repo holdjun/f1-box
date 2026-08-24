@@ -1,17 +1,16 @@
 ---
 import { env } from "cloudflare:workers";
-
-import BaseLayout from "../../layouts/BaseLayout.astro";
 import CurrentSeasonPanel from "../../components/CurrentSeasonPanel.astro";
 import HistoryEnd from "../../components/HistoryEnd.astro";
 import SeasonMatrix from "../../components/SeasonMatrix.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
 import {
   createD1DriverDatabase,
   createDriverRepository,
 } from "../../lib/driver-repository.js";
+import { resolveSeasonSelection } from "../../lib/routing.js";
 import { formatUtcLongDate } from "../../lib/time.js";
 import { monogram } from "../../lib/tokens.js";
-import { resolveSeasonSelection } from "../../lib/routing.js";
 import { colorForYear, latestColor, vendorIndexes } from "../../lib/vendor.js";
 
 const slug = (Astro.params.id ?? "").toLowerCase();
@@ -136,7 +135,7 @@ const stintYears = "number-years text-[0.68rem] text-ink-muted";
       </header>
 
       {driver.numberStints.length > 1 ? (
-        <div class="mt-6 flex flex-wrap items-center gap-1.5 text-[0.78rem]" aria-label="Car number history">
+        <section class="mt-6 flex flex-wrap items-center gap-1.5 text-[0.78rem]" aria-label="Car number history">
           <span class={stintLabel}>Car number</span>
           {driver.numberStints.map((stint, index) => (
             <span class="number-item inline-flex items-center gap-1.5">
@@ -151,11 +150,11 @@ const stintYears = "number-years text-[0.68rem] text-ink-muted";
               </span>
             </span>
           ))}
-        </div>
+        </section>
       ) : null}
 
       {driver.teamStints.length > 0 ? (
-        <div class="mt-3 flex flex-wrap items-center gap-1.5 text-[0.78rem]" aria-label="Teams driven for">
+        <section class="mt-3 flex flex-wrap items-center gap-1.5 text-[0.78rem]" aria-label="Teams driven for">
           <span class={stintLabel}>Teams</span>
           {driver.teamStints.map((stint, index) => (
             <span class="number-item inline-flex items-center gap-1.5">
@@ -174,14 +173,14 @@ const stintYears = "number-years text-[0.68rem] text-ink-muted";
               </a>
             </span>
           ))}
-        </div>
+        </section>
       ) : null}
 
       <section class="info-panels">
         {driver.currentSeason && driver.currentSeason.year === currentYear ? (
           <CurrentSeasonPanel season={driver.currentSeason} />
         ) : null}
-        <div class="info-panel" aria-label="Career stats">
+        <section class="info-panel" aria-label="Career stats">
           <h2>Career Stats</h2>
           <dl>
             <div><dt>Entries</dt><dd>{driver.totals.entries}</dd></div>
@@ -198,7 +197,7 @@ const stintYears = "number-years text-[0.68rem] text-ink-muted";
               <dd>{driver.totals.bestChampionshipPosition ?? "—"}</dd>
             </div>
           </dl>
-        </div>
+        </section>
       </section>
 
       <section class="mt-12" aria-labelledby="history-title">

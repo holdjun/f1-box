@@ -38,7 +38,10 @@ export const vendorIndexes: VendorIndexes = {
   logos: rawLogos.logos as LogoAsset[],
 };
 
-export function getTeamBranding(indexes: VendorIndexes, teamId: string): TeamBranding {
+export function getTeamBranding(
+  indexes: VendorIndexes,
+  teamId: string,
+): TeamBranding {
   const logo = logoFor(indexes, teamId);
   return {
     colors: latestColors(indexes, teamId),
@@ -51,7 +54,10 @@ export function latestColors(indexes: VendorIndexes, teamId: string): string[] {
   return indexes.colors[teamId]?.colors ?? [];
 }
 
-export function latestColor(indexes: VendorIndexes, teamId: string): string | null {
+export function latestColor(
+  indexes: VendorIndexes,
+  teamId: string,
+): string | null {
   return latestColors(indexes, teamId)[0] ?? null;
 }
 
@@ -66,7 +72,8 @@ export function colorForYear(
   const team = indexes.colors[teamId];
   if (!team) return null;
   const containing = team.periods.find(
-    (period) => period.from <= year && (period.to === null || period.to >= year),
+    (period) =>
+      period.from <= year && (period.to === null || period.to >= year),
   );
   if (containing) return containing.colors[0] ?? null;
   if (team.periods[0] && year < team.periods[0].from) {
@@ -75,7 +82,10 @@ export function colorForYear(
   return team.colors[0] ?? null;
 }
 
-export function logoSrcFor(indexes: VendorIndexes, teamId: string): string | null {
+export function logoSrcFor(
+  indexes: VendorIndexes,
+  teamId: string,
+): string | null {
   const logo = logoFor(indexes, teamId);
   return logo ? logoUrl(logo.file) : null;
 }

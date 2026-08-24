@@ -28,60 +28,123 @@ export interface RaceSummary {
   poleCode: string | null;
 }
 
-export interface RaceSession { key: string; label: string; startsAtUtc: string; }
+export interface RaceSession {
+  key: string;
+  label: string;
+  startsAtUtc: string;
+}
 
 export interface RaceMeta {
-  year: number; round: number; slug: string; name: string; officialName: string;
-  date: string; laps: number; courseLength: number;
-  circuitId: string; circuitLayoutId: string; circuitName: string; circuitPlace: string; countryName: string; alpha2Code: string;
+  year: number;
+  round: number;
+  slug: string;
+  name: string;
+  officialName: string;
+  date: string;
+  laps: number;
+  courseLength: number;
+  circuitId: string;
+  circuitLayoutId: string;
+  circuitName: string;
+  circuitPlace: string;
+  countryName: string;
+  alpha2Code: string;
   sessions: RaceSession[];
 }
 
 export interface RaceResultRow {
-  position: number | null; positionText: string;
-  driverNumber: string | null; driverId: string; driverName: string; driverCode: string;
-  constructorId: string; constructorName: string;
-  laps: number | null; time: string | null; retiredReason: string | null; gap: string | null; points: number | null;
+  position: number | null;
+  positionText: string;
+  driverNumber: string | null;
+  driverId: string;
+  driverName: string;
+  driverCode: string;
+  constructorId: string;
+  constructorName: string;
+  laps: number | null;
+  time: string | null;
+  retiredReason: string | null;
+  gap: string | null;
+  points: number | null;
 }
 export interface QualifyingRow {
-  position: number | null; positionText: string;
-  driverNumber: string | null; driverId: string; driverName: string; driverCode: string;
-  constructorId: string; constructorName: string;
-  q1: string | null; q2: string | null; q3: string | null; laps: number | null;
+  position: number | null;
+  positionText: string;
+  driverNumber: string | null;
+  driverId: string;
+  driverName: string;
+  driverCode: string;
+  constructorId: string;
+  constructorName: string;
+  q1: string | null;
+  q2: string | null;
+  q3: string | null;
+  laps: number | null;
 }
 export interface GridRow {
-  position: number | null; positionText: string;
-  driverNumber: string | null; driverId: string; driverName: string; driverCode: string;
-  constructorId: string; constructorName: string;
+  position: number | null;
+  positionText: string;
+  driverNumber: string | null;
+  driverId: string;
+  driverName: string;
+  driverCode: string;
+  constructorId: string;
+  constructorName: string;
   time: string | null;
 }
 export interface FastestLapRow {
-  position: number | null; positionText: string;
-  driverNumber: string | null; driverId: string; driverName: string; driverCode: string;
-  constructorId: string; constructorName: string;
-  lap: number | null; time: string | null; avgSpeedKph: string | null;
+  position: number | null;
+  positionText: string;
+  driverNumber: string | null;
+  driverId: string;
+  driverName: string;
+  driverCode: string;
+  constructorId: string;
+  constructorName: string;
+  lap: number | null;
+  time: string | null;
+  avgSpeedKph: string | null;
 }
 export interface PitStopRow {
-  driverNumber: string | null; driverId: string; driverName: string; driverCode: string;
-  constructorId: string; constructorName: string;
-  stops: number; totalSeconds: string | null;
+  driverNumber: string | null;
+  driverId: string;
+  driverName: string;
+  driverCode: string;
+  constructorId: string;
+  constructorName: string;
+  stops: number;
+  totalSeconds: string | null;
 }
 export interface PracticeRow {
-  position: number | null; positionText: string;
-  driverNumber: string | null; driverId: string; driverName: string; driverCode: string;
-  constructorId: string; constructorName: string;
-  time: string | null; gap: string | null; laps: number | null;
+  position: number | null;
+  positionText: string;
+  driverNumber: string | null;
+  driverId: string;
+  driverName: string;
+  driverCode: string;
+  constructorId: string;
+  constructorName: string;
+  time: string | null;
+  gap: string | null;
+  laps: number | null;
 }
 
 export interface DriverStandingRow {
-  position: number | null; positionText: string;
-  driverId: string; driverName: string; driverCode: string;
-  points: number; wins: number;
+  position: number | null;
+  positionText: string;
+  driverId: string;
+  driverName: string;
+  driverCode: string;
+  points: number;
+  wins: number;
 }
 export interface TeamStandingRow {
-  position: number | null; positionText: string;
-  teamId: string; teamName: string;
-  points: number; wins: number;
+  position: number | null;
+  positionText: string;
+  teamId: string;
+  teamName: string;
+  points: number;
+  wins: number;
 }
 
 export interface RacePage {
@@ -92,16 +155,22 @@ export interface RacePage {
     startingGrid: GridRow[];
     fastestLaps: FastestLapRow[];
     pitStops: PitStopRow[];
-    practice1: PracticeRow[]; practice2: PracticeRow[]; practice3: PracticeRow[];
+    practice1: PracticeRow[];
+    practice2: PracticeRow[];
+    practice3: PracticeRow[];
   };
 }
 
 // tab key → tabs 字段，RaceTabsNav 与 [tab].astro 共用
 export const RACE_TAB_FIELDS: Record<RaceTabKey, keyof RacePage["tabs"]> = {
-  "race-result": "raceResult", "fastest-laps": "fastestLaps",
-  "pit-stop-summary": "pitStops", "starting-grid": "startingGrid",
-  "qualifying": "qualifying",
-  "practice-1": "practice1", "practice-2": "practice2", "practice-3": "practice3",
+  "race-result": "raceResult",
+  "fastest-laps": "fastestLaps",
+  "pit-stop-summary": "pitStops",
+  "starting-grid": "startingGrid",
+  qualifying: "qualifying",
+  "practice-1": "practice1",
+  "practice-2": "practice2",
+  "practice-3": "practice3",
 };
 
 export interface RaceResultsDatabase {
@@ -111,7 +180,9 @@ export interface RaceResultsDatabase {
 }
 
 // D1 batch 需要预编译语句，仓库层接口用 {sql, values} 以便测试替身
-export function createD1RaceResultsDatabase(d1: D1Database): RaceResultsDatabase {
+export function createD1RaceResultsDatabase(
+  d1: D1Database,
+): RaceResultsDatabase {
   return {
     batch: (statements) =>
       d1.batch(
@@ -164,12 +235,24 @@ function mapRaceSummary(row: unknown): RaceSummary {
     circuitId: asString(r.circuit_id, "circuit id"),
     circuitName: asString(r.circuit_name, "circuit name"),
     circuitPlace: asString(r.circuit_place, "circuit place"),
-    winnerName: r.winner_name === null ? null : asString(r.winner_name, "winner name"),
-    winnerCode: r.winner_code === null ? null : asString(r.winner_code, "winner code"),
-    winnerDriverId: r.winner_driver_id === null ? null : asString(r.winner_driver_id, "winner driver id"),
-    winnerTeamId: r.winner_team_id === null ? null : asString(r.winner_team_id, "winner team id"),
-    winnerTeamName: r.winner_team_name === null ? null : asString(r.winner_team_name, "winner team name"),
-    winnerTime: r.winner_time === null ? null : asString(r.winner_time, "winner time"),
+    winnerName:
+      r.winner_name === null ? null : asString(r.winner_name, "winner name"),
+    winnerCode:
+      r.winner_code === null ? null : asString(r.winner_code, "winner code"),
+    winnerDriverId:
+      r.winner_driver_id === null
+        ? null
+        : asString(r.winner_driver_id, "winner driver id"),
+    winnerTeamId:
+      r.winner_team_id === null
+        ? null
+        : asString(r.winner_team_id, "winner team id"),
+    winnerTeamName:
+      r.winner_team_name === null
+        ? null
+        : asString(r.winner_team_name, "winner team name"),
+    winnerTime:
+      r.winner_time === null ? null : asString(r.winner_time, "winner time"),
     poleName: r.pole_name === null ? null : asString(r.pole_name, "pole name"),
     poleCode: r.pole_code === null ? null : asString(r.pole_code, "pole code"),
   };
@@ -239,7 +322,9 @@ WHERE ps.race_id = ${raceIdSubquery}
 GROUP BY ps.driver_id, ps.driver_number, d.name, d.abbreviation, ct.id, ct.name
 ORDER BY stops ASC, total_millis ASC`;
 
-const practiceSql = (n: 1 | 2 | 3) => `SELECT p.position_number, p.position_text, p.driver_number,
+const practiceSql = (
+  n: 1 | 2 | 3,
+) => `SELECT p.position_number, p.position_text, p.driver_number,
        d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
        ct.id AS constructor_id, ct.name AS constructor_name,
        p.time, p.gap, p.laps
@@ -272,7 +357,10 @@ ORDER BY scs.position_display_order`;
 function mapDriverStandingRow(row: unknown): DriverStandingRow {
   const r = asRecord(row, "driver standing row");
   return {
-    position: r.position_number === null ? null : asNumber(r.position_number, "standing position"),
+    position:
+      r.position_number === null
+        ? null
+        : asNumber(r.position_number, "standing position"),
     positionText: asString(r.position_text, "standing position text"),
     driverId: asString(r.driver_id, "driver id"),
     driverName: asString(r.driver_name, "driver name"),
@@ -285,7 +373,10 @@ function mapDriverStandingRow(row: unknown): DriverStandingRow {
 function mapTeamStandingRow(row: unknown): TeamStandingRow {
   const r = asRecord(row, "team standing row");
   return {
-    position: r.position_number === null ? null : asNumber(r.position_number, "standing position"),
+    position:
+      r.position_number === null
+        ? null
+        : asNumber(r.position_number, "standing position"),
     positionText: asString(r.position_text, "standing position text"),
     teamId: asString(r.team_id, "team id"),
     teamName: asString(r.team_name, "team name"),
@@ -296,11 +387,31 @@ function mapTeamStandingRow(row: unknown): TeamStandingRow {
 
 function buildSessions(r: Record<string, unknown>): RaceSession[] {
   const defs: [string, string, string, string][] = [
-    ["practice-1", "Practice 1", "free_practice_1_date", "free_practice_1_time"],
-    ["practice-2", "Practice 2", "free_practice_2_date", "free_practice_2_time"],
-    ["practice-3", "Practice 3", "free_practice_3_date", "free_practice_3_time"],
+    [
+      "practice-1",
+      "Practice 1",
+      "free_practice_1_date",
+      "free_practice_1_time",
+    ],
+    [
+      "practice-2",
+      "Practice 2",
+      "free_practice_2_date",
+      "free_practice_2_time",
+    ],
+    [
+      "practice-3",
+      "Practice 3",
+      "free_practice_3_date",
+      "free_practice_3_time",
+    ],
     ["qualifying", "Qualifying", "qualifying_date", "qualifying_time"],
-    ["sprint-qualifying", "Sprint Qualifying", "sprint_qualifying_date", "sprint_qualifying_time"],
+    [
+      "sprint-qualifying",
+      "Sprint Qualifying",
+      "sprint_qualifying_date",
+      "sprint_qualifying_time",
+    ],
     ["sprint", "Sprint", "sprint_race_date", "sprint_race_time"],
     ["race", "Race", "date", "time"],
   ];
@@ -338,7 +449,10 @@ function mapRaceMeta(row: unknown): RaceMeta {
 // 各 tab 行共有的车手/车队字段
 function mapDriverFields(r: Record<string, unknown>) {
   return {
-    driverNumber: r.driver_number === null ? null : asString(r.driver_number, "driver number"),
+    driverNumber:
+      r.driver_number === null
+        ? null
+        : asString(r.driver_number, "driver number"),
     driverId: asString(r.driver_id, "driver id"),
     driverName: asString(r.driver_name, "driver name"),
     driverCode: asString(r.driver_code, "driver code"),
@@ -349,7 +463,10 @@ function mapDriverFields(r: Record<string, unknown>) {
 
 function mapPositionFields(r: Record<string, unknown>) {
   return {
-    position: r.position_number === null ? null : asNumber(r.position_number, "position"),
+    position:
+      r.position_number === null
+        ? null
+        : asNumber(r.position_number, "position"),
     positionText: asString(r.position_text, "position text"),
   };
 }
@@ -361,7 +478,10 @@ function mapRaceResultRow(row: unknown): RaceResultRow {
     ...mapDriverFields(r),
     laps: r.laps === null ? null : asNumber(r.laps, "laps"),
     time: r.time === null ? null : asString(r.time, "time"),
-    retiredReason: r.reason_retired === null ? null : asString(r.reason_retired, "retired reason"),
+    retiredReason:
+      r.reason_retired === null
+        ? null
+        : asString(r.reason_retired, "retired reason"),
     gap: r.gap === null ? null : asString(r.gap, "gap"),
     points: r.points === null ? null : asNumber(r.points, "points"),
   };
@@ -408,7 +528,9 @@ function mapPitStopRow(row: unknown): PitStopRow {
     ...mapDriverFields(r),
     stops: asNumber(r.stops, "stops"),
     totalSeconds: formatSeconds(
-      r.total_millis === null ? null : asNumber(r.total_millis, "pit stop millis"),
+      r.total_millis === null
+        ? null
+        : asNumber(r.total_millis, "pit stop millis"),
     ),
   };
 }
@@ -433,12 +555,16 @@ export interface RaceResultsRepository {
   getConstructorStandings(year: number): Promise<TeamStandingRow[]>;
 }
 
-export function createRaceResultsRepository(db?: RaceResultsDatabase): RaceResultsRepository {
+export function createRaceResultsRepository(
+  db?: RaceResultsDatabase,
+): RaceResultsRepository {
   const calendar = async (year: number): Promise<RaceSummary[]> => {
     if (!db) {
       // fixture 含全部 22 站（DEV）；生产同一条 SQL
       if (year !== 2026) return [];
-      const { default: fixture } = await import("./fixtures/season-races-2026.json");
+      const { default: fixture } = await import(
+        "./fixtures/season-races-2026.json"
+      );
       return (fixture as { races: RaceSummary[] }).races;
     }
     const [rows] = await db.batch([{ sql: seasonCalendarSql, values: [year] }]);
@@ -461,7 +587,9 @@ export function createRaceResultsRepository(db?: RaceResultsDatabase): RaceResul
 
     async getSeasonYears() {
       if (!db) {
-        const { default: fixture } = await import("./fixtures/season-races-2026.json");
+        const { default: fixture } = await import(
+          "./fixtures/season-races-2026.json"
+        );
         return (fixture as { years: number[] }).years;
       }
       const [rows] = await db.batch([{ sql: seasonYearsSql, values: [] }]);
@@ -471,13 +599,22 @@ export function createRaceResultsRepository(db?: RaceResultsDatabase): RaceResul
     async getRacePage(year, slug) {
       if (!db) {
         if (year !== 2026 || slug !== "australia") return null;
-        const { default: fixture } = await import("./fixtures/race-australia-2026.json");
+        const { default: fixture } = await import(
+          "./fixtures/race-australia-2026.json"
+        );
         return fixture as RacePage;
       }
       const values = [year, slug];
       const [
-        metaRows, raceRows, qualifyingRows, gridRows, fastestLapRows, pitStopRows,
-        practice1Rows, practice2Rows, practice3Rows,
+        metaRows,
+        raceRows,
+        qualifyingRows,
+        gridRows,
+        fastestLapRows,
+        pitStopRows,
+        practice1Rows,
+        practice2Rows,
+        practice3Rows,
       ] = await db.batch([
         { sql: raceMetaSql, values },
         { sql: raceResultSql, values },
@@ -497,7 +634,9 @@ export function createRaceResultsRepository(db?: RaceResultsDatabase): RaceResul
           raceResult: raceRows.results.map(mapRaceResultRow),
           qualifying: qualifyingRows.results.map(mapQualifyingRow),
           startingGrid: gridRows.results.map(mapGridRow),
-          fastestLaps: fastestLapRows.results.map((row) => mapFastestLapRow(row, meta.courseLength)),
+          fastestLaps: fastestLapRows.results.map((row) =>
+            mapFastestLapRow(row, meta.courseLength),
+          ),
           pitStops: pitStopRows.results.map(mapPitStopRow),
           practice1: practice1Rows.results.map(mapPracticeRow),
           practice2: practice2Rows.results.map(mapPracticeRow),
@@ -509,26 +648,37 @@ export function createRaceResultsRepository(db?: RaceResultsDatabase): RaceResul
     async getDriverStandings(year) {
       if (!db) {
         if (year !== 2026) return [];
-        const { default: fixture } = await import("./fixtures/standings-2026.json");
+        const { default: fixture } = await import(
+          "./fixtures/standings-2026.json"
+        );
         return (fixture as { drivers: DriverStandingRow[] }).drivers;
       }
-      const [rows] = await db.batch([{ sql: driverStandingsSql, values: [year] }]);
+      const [rows] = await db.batch([
+        { sql: driverStandingsSql, values: [year] },
+      ]);
       return rows.results.map(mapDriverStandingRow);
     },
 
     async getConstructorStandings(year) {
       if (!db) {
         if (year !== 2026) return [];
-        const { default: fixture } = await import("./fixtures/standings-2026.json");
+        const { default: fixture } = await import(
+          "./fixtures/standings-2026.json"
+        );
         return (fixture as { teams: TeamStandingRow[] }).teams;
       }
-      const [rows] = await db.batch([{ sql: constructorStandingsSql, values: [year] }]);
+      const [rows] = await db.batch([
+        { sql: constructorStandingsSql, values: [year] },
+      ]);
       return rows.results.map(mapTeamStandingRow);
     },
   };
 }
 
-export function formatAvgSpeedKph(courseLengthKm: number, timeMillis: number | null): string | null {
+export function formatAvgSpeedKph(
+  courseLengthKm: number,
+  timeMillis: number | null,
+): string | null {
   if (timeMillis === null || timeMillis <= 0) return null;
   return (courseLengthKm / (timeMillis / 3_600_000)).toFixed(3);
 }

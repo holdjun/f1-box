@@ -27,7 +27,9 @@ function enhanceLocalTimes(root: ParentNode = document): void {
 let seasonFilterGlobalsBound = false;
 
 function closeSeasonFilter(bar: HTMLElement): void {
-  const trigger = bar.querySelector<HTMLElement>("[data-season-filter-trigger]");
+  const trigger = bar.querySelector<HTMLElement>(
+    "[data-season-filter-trigger]",
+  );
   const panel = bar.querySelector<HTMLElement>("[data-season-filter-panel]");
   if (!panel) return;
   panel.hidden = true;
@@ -37,7 +39,9 @@ function closeSeasonFilter(bar: HTMLElement): void {
 }
 
 function positionSeasonFilter(bar: HTMLElement): void {
-  const trigger = bar.querySelector<HTMLElement>("[data-season-filter-trigger]");
+  const trigger = bar.querySelector<HTMLElement>(
+    "[data-season-filter-trigger]",
+  );
   const panel = bar.querySelector<HTMLElement>("[data-season-filter-panel]");
   if (!trigger || !panel) return;
   // 触发器下方空间不足时向上展开，并限制高度避免溢出视口
@@ -57,17 +61,21 @@ function bindSeasonFilterGlobals(): void {
   document.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof Node)) return;
-    document.querySelectorAll<HTMLElement>("[data-season-filter]").forEach((bar) => {
-      if (bar.dataset.enhanced !== "true") return;
-      if (!bar.contains(target)) closeSeasonFilter(bar);
-    });
+    document
+      .querySelectorAll<HTMLElement>("[data-season-filter]")
+      .forEach((bar) => {
+        if (bar.dataset.enhanced !== "true") return;
+        if (!bar.contains(target)) closeSeasonFilter(bar);
+      });
   });
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
-    document.querySelectorAll<HTMLElement>("[data-season-filter]").forEach((bar) => {
-      if (bar.dataset.enhanced !== "true") return;
-      closeSeasonFilter(bar);
-    });
+    document
+      .querySelectorAll<HTMLElement>("[data-season-filter]")
+      .forEach((bar) => {
+        if (bar.dataset.enhanced !== "true") return;
+        closeSeasonFilter(bar);
+      });
   });
   // 滚动时跟随触发器重新定位（sticky 粘顶后方向可能变化），而非关闭
   let scrollTick = false;
@@ -77,11 +85,15 @@ function bindSeasonFilterGlobals(): void {
       if (scrollTick) return;
       scrollTick = true;
       requestAnimationFrame(() => {
-        document.querySelectorAll<HTMLElement>("[data-season-filter]").forEach((bar) => {
-          if (bar.dataset.enhanced !== "true") return;
-          const panel = bar.querySelector<HTMLElement>("[data-season-filter-panel]");
-          if (panel && !panel.hidden) positionSeasonFilter(bar);
-        });
+        document
+          .querySelectorAll<HTMLElement>("[data-season-filter]")
+          .forEach((bar) => {
+            if (bar.dataset.enhanced !== "true") return;
+            const panel = bar.querySelector<HTMLElement>(
+              "[data-season-filter-panel]",
+            );
+            if (panel && !panel.hidden) positionSeasonFilter(bar);
+          });
         scrollTick = false;
       });
     },
@@ -98,9 +110,7 @@ function enhanceSeasonFilters(root: ParentNode = document): void {
     const trigger = bar.querySelector<HTMLElement>(
       "[data-season-filter-trigger]",
     );
-    const panel = bar.querySelector<HTMLElement>(
-      "[data-season-filter-panel]",
-    );
+    const panel = bar.querySelector<HTMLElement>("[data-season-filter-panel]");
     if (!trigger || !panel) return;
 
     const open = () => {
@@ -133,18 +143,19 @@ function enhanceSeasonFilters(root: ParentNode = document): void {
       "[data-season-filter-count]",
     );
     const selected = new Set<number>(
-      (bar.dataset.initialSelected ?? "")
-        .split(",")
-        .flatMap((part) => {
-          const year = Number(part);
-          return Number.isInteger(year) && year > 0 ? [year] : [];
-        }),
+      (bar.dataset.initialSelected ?? "").split(",").flatMap((part) => {
+        const year = Number(part);
+        return Number.isInteger(year) && year > 0 ? [year] : [];
+      }),
     );
 
     const decadeOf = (year: number) => Math.floor(year / 10) * 10;
     const decadeYears = (decadeStart: number) =>
       yearButtons
-        .filter((button) => decadeOf(Number(button.dataset.seasonYear)) === decadeStart)
+        .filter(
+          (button) =>
+            decadeOf(Number(button.dataset.seasonYear)) === decadeStart,
+        )
         .map((button) => Number(button.dataset.seasonYear));
     const decadeStartOf = (button: HTMLButtonElement) =>
       Number((button.dataset.seasonDecade ?? "").slice(0, 4));
@@ -161,11 +172,16 @@ function enhanceSeasonFilters(root: ParentNode = document): void {
         button.setAttribute("aria-pressed", String(active));
       }
       for (const decadeButton of decadeButtons) {
-        decadeButton.classList.toggle("is-active", isDecadeFullySelected(decadeButton));
+        decadeButton.classList.toggle(
+          "is-active",
+          isDecadeFullySelected(decadeButton),
+        );
       }
       if (summary) summary.textContent = summarizeYears(selected);
       if (count) {
-        count.textContent = showingAll ? "All seasons" : `${selected.size} selected`;
+        count.textContent = showingAll
+          ? "All seasons"
+          : `${selected.size} selected`;
       }
       document
         .querySelectorAll<HTMLElement>("[data-season-block]")
@@ -223,35 +239,38 @@ function enhanceSeasonFilters(root: ParentNode = document): void {
 const THEME_COLORS = { dark: "#0b0d10", light: "#f3f0e9" } as const;
 
 function enhanceThemeToggles(root: ParentNode = document): void {
-  root.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((button) => {
-    if (button.dataset.enhanced === "true") return;
-    button.dataset.enhanced = "true";
+  root
+    .querySelectorAll<HTMLButtonElement>("[data-theme-toggle]")
+    .forEach((button) => {
+      if (button.dataset.enhanced === "true") return;
+      button.dataset.enhanced = "true";
 
-    const sync = () => {
-      const isLight = document.documentElement.dataset.theme === "light";
-      button.setAttribute("aria-pressed", String(isLight));
-      button.setAttribute(
-        "aria-label",
-        isLight ? "Switch to dark theme" : "Switch to light theme",
-      );
-    };
+      const sync = () => {
+        const isLight = document.documentElement.dataset.theme === "light";
+        button.setAttribute("aria-pressed", String(isLight));
+        button.setAttribute(
+          "aria-label",
+          isLight ? "Switch to dark theme" : "Switch to light theme",
+        );
+      };
 
-    button.addEventListener("click", () => {
-      const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
-      document.documentElement.dataset.theme = next;
-      try {
-        localStorage.setItem("f1-theme", next);
-      } catch {
-        // 隐私模式等场景写不进，主题仍在当次会话生效
-      }
-      document
-        .querySelector('meta[name="theme-color"]')
-        ?.setAttribute("content", THEME_COLORS[next]);
+      button.addEventListener("click", () => {
+        const next =
+          document.documentElement.dataset.theme === "light" ? "dark" : "light";
+        document.documentElement.dataset.theme = next;
+        try {
+          localStorage.setItem("f1-theme", next);
+        } catch {
+          // 隐私模式等场景写不进，主题仍在当次会话生效
+        }
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute("content", THEME_COLORS[next]);
+        sync();
+      });
+
       sync();
     });
-
-    sync();
-  });
 }
 
 function enhancePage(): void {

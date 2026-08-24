@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  type KnowledgeEntry,
   knowledgeEntries,
   matchKnowledge,
-  type KnowledgeEntry,
 } from "../src/lib/ask/knowledge.js";
 
 const entries: KnowledgeEntry[] = [
@@ -25,9 +25,7 @@ const entries: KnowledgeEntry[] = [
 
 describe("matchKnowledge", () => {
   it("matches latin terms case-insensitively", () => {
-    expect(matchKnowledge("什么是 UnderCut？", entries)).toEqual([
-      entries[0],
-    ]);
+    expect(matchKnowledge("什么是 UnderCut？", entries)).toEqual([entries[0]]);
   });
 
   it("matches chinese terms by containment", () => {

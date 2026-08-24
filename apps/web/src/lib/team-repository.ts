@@ -1,10 +1,10 @@
 import { asNumber, asRecord, asString } from "./db-parse.js";
-import { mergeStanding } from "./standings-merge.js";
 import {
   deriveSeasonYears,
   mapSeasonYearRows,
   seasonYearsSql,
 } from "./season-years.js";
+import { mergeStanding } from "./standings-merge.js";
 
 export interface TeamTotals {
   entries: number;
@@ -341,7 +341,10 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
         firstEntry: seasons.at(-1)?.year ?? null,
         activeSeason:
           maxSeasonRows.results.length > 0
-            ? asNumber(asRecord(maxSeasonRows.results[0], "max season row").year, "max season")
+            ? asNumber(
+                asRecord(maxSeasonRows.results[0], "max season row").year,
+                "max season",
+              )
             : null,
         lineage: withEarlyStint(
           base,
@@ -353,7 +356,9 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
               name: asString(record.name, "lineage name"),
               yearFrom: asNumber(record.year_from, "lineage year from"),
               yearTo:
-                record.year_to == null ? null : asNumber(record.year_to, "lineage year to"),
+                record.year_to == null
+                  ? null
+                  : asNumber(record.year_to, "lineage year to"),
               segment: "continuity" as const,
             };
           }),
@@ -370,7 +375,9 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
 
     async getConstructors() {
       if (!db) {
-        const { default: fixture } = await import("./fixtures/constructors.json");
+        const { default: fixture } = await import(
+          "./fixtures/constructors.json"
+        );
         return (fixture as ConstructorCatalogFixture[]).map(
           ({ points, seasons, ...ref }) => ref,
         );
@@ -381,9 +388,14 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
 
     async getConstructorsByYear(year) {
       if (!db) {
-        const { default: fixture } = await import("./fixtures/constructors.json");
+        const { default: fixture } = await import(
+          "./fixtures/constructors.json"
+        );
         const rows: (ConstructorRef & { points: number })[] = [];
-        for (const { seasons, ...ref } of fixture as ConstructorCatalogFixture[]) {
+        for (const {
+          seasons,
+          ...ref
+        } of fixture as ConstructorCatalogFixture[]) {
           const entry = seasons[String(year)];
           if (entry) rows.push({ ...ref, points: entry.points });
         }
@@ -391,14 +403,18 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
           .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name))
           .map(({ points, ...row }) => row);
       }
-      const rows = await db.batch([{ sql: constructorsByYearSql, values: [year] }]);
+      const rows = await db.batch([
+        { sql: constructorsByYearSql, values: [year] },
+      ]);
       return rows[0].results.map(mapConstructorRef);
     },
 
     async getSeasonYears() {
       if (!db) {
         // DEV 从 fixture 参赛年份推导；生产读 season 表
-        const { default: fixture } = await import("./fixtures/constructors.json");
+        const { default: fixture } = await import(
+          "./fixtures/constructors.json"
+        );
         return deriveSeasonYears(fixture as ConstructorCatalogFixture[]);
       }
       const rows = await db.batch([{ sql: seasonYearsSql, values: [] }]);
@@ -422,9 +438,16 @@ export interface SeasonGap {
 }
 
 // 相邻两个赛季年份不连续时，给出中间缺失的区间（seasons 按降序展示，newer 在上）
-export function seasonGap(newerYear: number, olderYear: number): SeasonGap | null {
+export function seasonGap(
+  newerYear: number,
+  olderYear: number,
+): SeasonGap | null {
   if (newerYear - olderYear <= 1) return null;
-  return { from: olderYear + 1, to: newerYear - 1, seasons: newerYear - olderYear - 1 };
+  return {
+    from: olderYear + 1,
+    to: newerYear - 1,
+    seasons: newerYear - olderYear - 1,
+  };
 }
 
 // 传承链只覆盖近代入口（如 mercedes 从 1970 Tyrrell 起）；
@@ -436,11 +459,13 @@ function withEarlyStint(
 ): LineageEntry[] {
   const first = lineage[0];
   if (!first) return lineage;
-  const earlyYears = [...new Set(
-    seasons
-      .filter((season) => season.year < first.yearFrom)
-      .map((season) => season.year),
-  )].sort((a, b) => a - b);
+  const earlyYears = [
+    ...new Set(
+      seasons
+        .filter((season) => season.year < first.yearFrom)
+        .map((season) => season.year),
+    ),
+  ].sort((a, b) => a - b);
   if (earlyYears.length === 0) return lineage;
 
   const earlyStints: LineageEntry[] = [];
@@ -477,7 +502,9 @@ export function buildRaceCell(
 }
 
 export function buildCurrentSeason(
-  latest: { year: number; position: string | null; points: number | null } | undefined,
+  latest:
+    | { year: number; position: string | null; points: number | null }
+    | undefined,
   gpStatRows: unknown[],
   sprintStatRows: unknown[],
   sprintPoleRows: unknown[],
@@ -485,8 +512,9 @@ export function buildCurrentSeason(
   if (!latest) return null;
 
   const gp = asRecord(
-    gpStatRows.find((row) => asRecord(row, "gp stats row").year === latest.year) ??
-      emptyStats(),
+    gpStatRows.find(
+      (row) => asRecord(row, "gp stats row").year === latest.year,
+    ) ?? emptyStats(),
     "gp stats row",
   );
   const sprint = asRecord(
@@ -521,14 +549,26 @@ export function buildCurrentSeason(
       poles:
         sprintPoles === undefined
           ? 0
-          : asNumber(asRecord(sprintPoles, "sprint poles row").poles, "sprint poles"),
+          : asNumber(
+              asRecord(sprintPoles, "sprint poles row").poles,
+              "sprint poles",
+            ),
       top10s: asNumber(sprint.top10s, "sprint top 10s"),
     },
   };
 }
 
 function emptyStats(): Record<string, unknown> {
-  return { races: 0, points: 0, wins: 0, podiums: 0, poles: 0, top10s: 0, fastest_laps: 0, dnfs: 0 };
+  return {
+    races: 0,
+    points: 0,
+    wins: 0,
+    podiums: 0,
+    poles: 0,
+    top10s: 0,
+    fastest_laps: 0,
+    dnfs: 0,
+  };
 }
 
 function mergeSeasons(
@@ -551,7 +591,9 @@ function mergeSeasons(
       engines: splitNames(record.engines),
       powerUnits: splitNames(record.power_units),
       tyres: [
-        ...new Set(splitNames(record.tyres).map((name) => name.charAt(0).toUpperCase())),
+        ...new Set(
+          splitNames(record.tyres).map((name) => name.charAt(0).toUpperCase()),
+        ),
       ].sort(),
       rounds: [],
       drivers: [],
@@ -602,7 +644,10 @@ function mergeSeasons(
     if (byRound.has(round)) continue;
     byRound.set(
       round,
-      buildRaceCell(record, sprintRanks.get(`${year}:${round}:${driverId}`) ?? null),
+      buildRaceCell(
+        record,
+        sprintRanks.get(`${year}:${round}:${driverId}`) ?? null,
+      ),
     );
   }
 
@@ -610,7 +655,10 @@ function mergeSeasons(
   const retainedRounds = new Map<number, number[]>();
   for (const [year, season] of seasons) {
     const rounds = rawRounds.get(year) ?? [];
-    retainedRounds.set(year, rounds.map((r) => r.round));
+    retainedRounds.set(
+      year,
+      rounds.map((r) => r.round),
+    );
     season.rounds = rounds.map(({ code, name, circuitId }) => ({
       code,
       name,
@@ -631,16 +679,19 @@ function mergeSeasons(
     const record = asRecord(row, "driver row");
     const year = asNumber(record.year, "driver row year");
     // 车手行年份必来自 entrants/结果表，与 seasons 同源，无缺口
-    const season = seasons.get(year)!;
+    const season = seasons.get(year);
+    if (!season) continue;
     const driverId = asString(record.id, "driver id");
     const byRound = results.get(`${year}:${driverId}`);
     season.drivers.push({
       id: driverId,
       name: asString(record.name, "driver name"),
       flagCode:
-        record.alpha2_code === null ? null : asString(record.alpha2_code, "driver flag"),
+        record.alpha2_code === null
+          ? null
+          : asString(record.alpha2_code, "driver flag"),
       champion: champions.has(`${year}:${driverId}`),
-      results: retainedRounds.get(year)!.map(
+      results: (retainedRounds.get(year) ?? []).map(
         (round) => byRound?.get(round) ?? null,
       ),
     });
@@ -677,7 +728,12 @@ function applyStandingRows(
   }
 }
 
-function parseIdentityRow(row: unknown): Omit<TeamPage, "seasons" | "firstEntry" | "currentSeason" | "lineage" | "activeSeason"> {
+function parseIdentityRow(
+  row: unknown,
+): Omit<
+  TeamPage,
+  "seasons" | "firstEntry" | "currentSeason" | "lineage" | "activeSeason"
+> {
   const record = asRecord(row, "team identity row");
   return {
     id: asString(record.id, "team id"),

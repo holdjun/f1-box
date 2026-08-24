@@ -3,13 +3,15 @@ name: data-sync
 on:
   workflow_dispatch:
   schedule:
-    - cron: "23 4 * * *"
+    # f1db 主版本集中在周日晚 UTC（赛后数小时，见 releases 历史），修正版散落工作日：
+    # 周日晚到周二每 2 小时密集覆盖，其余每天一次兜底；tag 门禁下无变化为零成本空转
+    - cron: "23 18,20,22 * * 0"
+    - cron: "23 */2 * * 1,2"
+    - cron: "23 4 * * 3-6"
 
-# 仅在上游 release tag 变化时刷新：R2 原始归档 + D1 整库重导（重导期间
-# /teams/* 短暂不可用，故用 tag 门禁收敛）。release.json 是成功标记，
-# 最后一步才写入：D1 导入失败则不记录 tag，下次运行自动重试。
-# 策展层（team-colors/team-logos/country-flags/tires/参考表）由本地
-# .data/vendor 策展后手动镜像上传。
+# 仅在上游 release tag 变化时刷新：D1 整库重导（重导期间 /teams/* 短暂
+# 不可用，故用 tag 门禁收敛）。门禁状态存 D1 sync_state 表（R2 随 ingest
+# 下线退役）；状态行最后一步才写入：D1 导入失败则不记录 tag，下次运行自动重试。
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -19,6 +21,12 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
 
       - name: Download f1db release
         run: |
@@ -27,27 +35,20 @@ jobs:
           # 末跳落在 CDN 域名上没有 tag 信息；解析失败直接中止，门禁不容空 tag
           curl -sI https://github.com/f1db/f1db/releases/latest/download/f1db-json-splitted.zip \
             | awk 'tolower($1)=="location:"{u=$2} END{split(u,a,"/download/"); split(a[2],b,"/"); print b[1]}' > f1db-tag.txt
-          grep -Eq '^v[0-9]' f1db-tag.txt || { echo "failed to parse upstream tag: '$(cat f1db-tag.txt)'" >&2; exit 1; }
+          grep -Eq '^v[0-9][0-9A-Za-z.-]*$' f1db-tag.txt || { echo "failed to parse upstream tag: '$(cat f1db-tag.txt)'" >&2; exit 1; }
           cat f1db-tag.txt
-
-      - name: Install wrangler
-        run: npm install -g wrangler >/dev/null 2>&1
 
       - name: Detect new upstream release
         id: release
         run: |
-          # wrangler 的横幅也走 stdout，落盘后再解析
-          previous=none
-          if wrangler r2 object get --remote f1-box-data/vendor/f1db/release.json --file release-prev.json >/dev/null 2>&1; then
-            previous=$(node -p 'JSON.parse(require("fs").readFileSync("release-prev.json")).tag' || echo none)
-          fi
+          WRANGLER=apps/web/node_modules/.bin/wrangler
+          "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --command \
+            "CREATE TABLE IF NOT EXISTS sync_state (id INTEGER PRIMARY KEY CHECK (id = 1), tag TEXT NOT NULL, fetched_at TEXT NOT NULL)" > /dev/null
+          previous=$("$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --json \
+            --command "SELECT tag FROM sync_state WHERE id = 1" \
+            | node -p 'const r = JSON.parse(require("fs").readFileSync(0)); const rows = (Array.isArray(r) ? r[0] : r)?.results ?? []; rows[0]?.tag ?? "none"')
           echo "previous=${previous} current=$(cat f1db-tag.txt)"
           { [ "${previous}" = "$(cat f1db-tag.txt)" ] && echo changed=false || echo changed=true; } >> "$GITHUB_OUTPUT"
-
-      - name: Publish archive to R2
-        if: steps.release.outputs.changed == 'true'
-        run: |
-          wrangler r2 object put --remote f1-box-data/vendor/f1db/f1db-json-splitted.zip --file f1db-json-splitted.zip
 
       - name: Refresh D1 (f1db full)
         if: steps.release.outputs.changed == 'true'
@@ -55,9 +56,8 @@ jobs:
           ./scripts/f1db-d1-dump.sh f1db-d1
           ./scripts/f1db-d1-import.sh f1db-d1
 
-      - name: Record release.json
+      - name: Record sync state
         if: steps.release.outputs.changed == 'true'
         run: |
-          printf '{"source":"f1db","repo":"https://github.com/f1db/f1db","tag":"%s","fetchedAt":"%s","license":"CC-BY-4.0","artifact":"vendor/f1db/f1db-json-splitted.zip"}\n' \
-            "$(cat f1db-tag.txt)" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > f1db-release.json
-          wrangler r2 object put --remote f1-box-data/vendor/f1db/release.json --file f1db-release.json
+          apps/web/node_modules/.bin/wrangler d1 execute f1db --remote -c apps/web/wrangler.jsonc --command \
+            "INSERT OR REPLACE INTO sync_state (id, tag, fetched_at) VALUES (1, '$(cat f1db-tag.txt)', '$(date -u +%Y-%m-%dT%H:%M:%SZ)')"

@@ -30,7 +30,7 @@ describe("createSseAccumulator", () => {
 
   it("buffers an event split across chunks", () => {
     const acc = createSseAccumulator();
-    expect(acc.push('event: delta\nda')).toEqual([]);
+    expect(acc.push("event: delta\nda")).toEqual([]);
     expect(acc.push('ta: {"text":"汉"}\n\n')).toEqual([
       { event: "delta", data: '{"text":"汉"}' },
     ]);

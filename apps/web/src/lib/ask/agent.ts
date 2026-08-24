@@ -1,7 +1,11 @@
-import { encodeSseEvent } from "./sse.js";
-import { knowledgeEntries, matchKnowledge, type KnowledgeEntry } from "./knowledge.js";
-import type { AskMessage } from "./request.js";
 import type { AskDatabase } from "./db.js";
+import {
+  type KnowledgeEntry,
+  knowledgeEntries,
+  matchKnowledge,
+} from "./knowledge.js";
+import type { AskMessage } from "./request.js";
+import { encodeSseEvent } from "./sse.js";
 import {
   constructorSummary,
   driverSummary,
@@ -80,7 +84,10 @@ interface AskTool {
   description: string;
   parameters: {
     type: "object";
-    properties: Record<string, { type: "string" | "number"; description: string }>;
+    properties: Record<
+      string,
+      { type: "string" | "number"; description: string }
+    >;
     required: string[];
   };
   execute: (args: Record<string, unknown>) => Promise<Record<string, unknown>>;
@@ -90,7 +97,8 @@ function askTools(db: AskDatabase): AskTool[] {
   return [
     {
       name: "driver_summary",
-      description: "查询一名车手的身份、生涯统计（参赛/胜场/杆位/领奖台/积分）与车手世界冠军年份。query 支持英文名、中文译名或绰号。",
+      description:
+        "查询一名车手的身份、生涯统计（参赛/胜场/杆位/领奖台/积分）与车手世界冠军年份。query 支持英文名、中文译名或绰号。",
       parameters: {
         type: "object",
         properties: {
@@ -102,7 +110,8 @@ function askTools(db: AskDatabase): AskTool[] {
     },
     {
       name: "constructor_summary",
-      description: "查询一支车队的身份、生涯统计（参赛/胜场/杆位/领奖台/积分）与车队世界冠军年份。query 支持英文名或中文译名。",
+      description:
+        "查询一支车队的身份、生涯统计（参赛/胜场/杆位/领奖台/积分）与车队世界冠军年份。query 支持英文名或中文译名。",
       parameters: {
         type: "object",
         properties: {
@@ -143,11 +152,15 @@ function askTools(db: AskDatabase): AskTool[] {
         type: "object",
         properties: {
           year: { type: "number", description: "4 位年份" },
-          race: { type: "string", description: "大奖赛名，支持英文名、缩写或中文译名" },
+          race: {
+            type: "string",
+            description: "大奖赛名，支持英文名、缩写或中文译名",
+          },
         },
         required: ["year", "race"],
       },
-      execute: (args) => raceResults(db, args.year as number, args.race as string),
+      execute: (args) =>
+        raceResults(db, args.year as number, args.race as string),
     },
   ];
 }
@@ -173,7 +186,10 @@ function toolCallsOf(message: ChatMessage | undefined): unknown[] | null {
 
 // 模型响应是系统边界：参数解析失败、必填参数缺失、类型不对、工具名幻觉都以
 // tool 消息回传让模型自纠，不静默跳过
-async function runToolCalls(tools: AskTool[], rawCalls: unknown[]): Promise<unknown[]> {
+async function runToolCalls(
+  tools: AskTool[],
+  rawCalls: unknown[],
+): Promise<unknown[]> {
   const byName = new Map(tools.map((tool) => [tool.name, tool]));
   const messages: unknown[] = [];
   for (const raw of rawCalls) {
@@ -185,14 +201,25 @@ async function runToolCalls(tools: AskTool[], rawCalls: unknown[]): Promise<unkn
       });
       continue;
     }
-    const call = raw as { id?: unknown; function?: { name?: unknown; arguments?: unknown } };
+    const call = raw as {
+      id?: unknown;
+      function?: { name?: unknown; arguments?: unknown };
+    };
     const toolCallId = typeof call.id === "string" ? call.id : "";
-    const reply = (content: string) => ({ role: "tool", tool_call_id: toolCallId, content });
+    const reply = (content: string) => ({
+      role: "tool",
+      tool_call_id: toolCallId,
+      content,
+    });
 
     const name = call.function?.name;
     const tool = typeof name === "string" ? byName.get(name) : undefined;
     if (!tool) {
-      messages.push(reply(`未知工具 ${String(name)}，可用工具：${[...byName.keys()].join("、")}`));
+      messages.push(
+        reply(
+          `未知工具 ${String(name)}，可用工具：${[...byName.keys()].join("、")}`,
+        ),
+      );
       continue;
     }
 
@@ -201,7 +228,11 @@ async function runToolCalls(tools: AskTool[], rawCalls: unknown[]): Promise<unkn
     if (typeof rawArguments === "string") {
       try {
         const parsed: unknown = JSON.parse(rawArguments);
-        if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+        if (
+          typeof parsed === "object" &&
+          parsed !== null &&
+          !Array.isArray(parsed)
+        ) {
           args = parsed as Record<string, unknown>;
         }
       } catch {
@@ -209,7 +240,9 @@ async function runToolCalls(tools: AskTool[], rawCalls: unknown[]): Promise<unkn
       }
     }
     if (args === null) {
-      messages.push(reply("arguments 不是合法的 JSON 对象，请重新调用并传完整参数"));
+      messages.push(
+        reply("arguments 不是合法的 JSON 对象，请重新调用并传完整参数"),
+      );
       continue;
     }
 
@@ -233,7 +266,10 @@ async function runToolCalls(tools: AskTool[], rawCalls: unknown[]): Promise<unkn
   return messages;
 }
 
-function invalidParameters(tool: AskTool, args: Record<string, unknown>): string | null {
+function invalidParameters(
+  tool: AskTool,
+  args: Record<string, unknown>,
+): string | null {
   for (const key of tool.parameters.required) {
     if (args[key] === undefined) return `缺少必填参数 ${key}`;
     const expected = tool.parameters.properties[key]?.type;
@@ -275,8 +311,11 @@ export function runAgent(options: {
       };
       try {
         throwIfAborted();
-        const query = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
-        const prompt = buildSystemPrompt(matchKnowledge(query, knowledgeEntries));
+        const query =
+          [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
+        const prompt = buildSystemPrompt(
+          matchKnowledge(query, knowledgeEntries),
+        );
         const conversation: unknown[] = [
           { role: "system", content: prompt },
           ...messages.map((m) => ({ role: m.role, content: m.content })),
@@ -301,14 +340,19 @@ export function runAgent(options: {
         // （或达到轮次上限）由无 tools 的流式调用产出最终回答
         let rounds = 0;
         let message = messageOf(
-          await runModel({ messages: conversation, tools: wireTools, stream: false }),
+          await runModel({
+            messages: conversation,
+            tools: wireTools,
+            stream: false,
+          }),
         );
         let toolCalls = toolCallsOf(message);
         while (toolCalls !== null && rounds < MAX_TOOL_ROUNDS) {
           throwIfAborted();
           conversation.push({
             role: "assistant",
-            content: typeof message?.content === "string" ? message.content : null,
+            content:
+              typeof message?.content === "string" ? message.content : null,
             tool_calls: message?.tool_calls,
           });
           conversation.push(...(await runToolCalls(tools, toolCalls)));
@@ -316,7 +360,11 @@ export function runAgent(options: {
           if (rounds === MAX_TOOL_ROUNDS) break;
           throwIfAborted();
           message = messageOf(
-            await runModel({ messages: conversation, tools: wireTools, stream: false }),
+            await runModel({
+              messages: conversation,
+              tools: wireTools,
+              stream: false,
+            }),
           );
           toolCalls = toolCallsOf(message);
         }
@@ -350,7 +398,9 @@ export function runAgent(options: {
               await reader.cancel();
               throw new Error("request aborted");
             }
-            const text = finalDecoder.push(decoder.decode(value, { stream: true }));
+            const text = finalDecoder.push(
+              decoder.decode(value, { stream: true }),
+            );
             if (text.length > 0) delta(text);
           }
           const tail = finalDecoder.flush();
@@ -358,7 +408,11 @@ export function runAgent(options: {
         }
         // 无任何内容可展示时明确报错，客户端得以回滚问题提示重试，而非静默空回答
         if (sentDelta) send("done", {});
-        else send("error", { code: "empty_response", message: "未能生成回答，请重试" });
+        else
+          send("error", {
+            code: "empty_response",
+            message: "未能生成回答，请重试",
+          });
       } catch (error) {
         // 用户主动停止：静默关流，不产生错误事件与服务端日志噪音
         if (signal?.aborted) return;
@@ -367,7 +421,10 @@ export function runAgent(options: {
           "[ask] agent error:",
           error instanceof Error ? error.message : String(error),
         );
-        send("error", { code: "model_error", message: "回答生成失败，请稍后重试" });
+        send("error", {
+          code: "model_error",
+          message: "回答生成失败，请稍后重试",
+        });
       } finally {
         try {
           controller.close();

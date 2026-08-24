@@ -14,7 +14,9 @@ function fakeDb(responses: Record<string, unknown[]>): TeamDatabase {
   };
   return {
     batch(statements) {
-      return Promise.all(statements.map((statement) => Promise.resolve(find(statement.sql))));
+      return Promise.all(
+        statements.map((statement) => Promise.resolve(find(statement.sql))),
+      );
     },
   };
 }
@@ -38,37 +40,167 @@ const identityRow = {
 const db = fakeDb({
   "co.id = c.country_id": [identityRow],
   "GROUP BY sec.year": [
-    { year: 2026, chassis: "SF-26", engines: "067/6", power_units: "Ferrari", tyres: "Pirelli" },
-    { year: 1979, chassis: "312T3,312T4", engines: "015", power_units: "Ferrari", tyres: "Michelin" },
-    { year: 1950, chassis: null, engines: null, power_units: "Ferrari", tyres: null },
+    {
+      year: 2026,
+      chassis: "SF-26",
+      engines: "067/6",
+      power_units: "Ferrari",
+      tyres: "Pirelli",
+    },
+    {
+      year: 1979,
+      chassis: "312T3,312T4",
+      engines: "015",
+      power_units: "Ferrari",
+      tyres: "Michelin",
+    },
+    {
+      year: 1950,
+      chassis: null,
+      engines: null,
+      power_units: "Ferrari",
+      tyres: null,
+    },
   ],
   "grand_prix gp": [
-    { year: 2026, round: 1, code: "AUS", name: "Australian Grand Prix", circuit_id: "albert-park" },
-    { year: 2026, round: 2, code: "CHN", name: "Chinese Grand Prix", circuit_id: "shanghai" },
-    { year: 1979, round: 1, code: "ARG", name: "Argentine Grand Prix", circuit_id: "buenos-aires" },
-    { year: 1950, round: 1, code: "GBR", name: "British Grand Prix", circuit_id: "silverstone" },
-    { year: 2026, round: 3, code: "JPN", name: "Japanese Grand Prix", circuit_id: "suzuka" },
+    {
+      year: 2026,
+      round: 1,
+      code: "AUS",
+      name: "Australian Grand Prix",
+      circuit_id: "albert-park",
+    },
+    {
+      year: 2026,
+      round: 2,
+      code: "CHN",
+      name: "Chinese Grand Prix",
+      circuit_id: "shanghai",
+    },
+    {
+      year: 1979,
+      round: 1,
+      code: "ARG",
+      name: "Argentine Grand Prix",
+      circuit_id: "buenos-aires",
+    },
+    {
+      year: 1950,
+      round: 1,
+      code: "GBR",
+      name: "British Grand Prix",
+      circuit_id: "silverstone",
+    },
+    {
+      year: 2026,
+      round: 3,
+      code: "JPN",
+      name: "Japanese Grand Prix",
+      circuit_id: "suzuka",
+    },
   ],
   "position_text = 'DNF'": [
-    { year: 2026, races: 2, points: 87, wins: 1, podiums: 2, poles: 0, top10s: 2, fastest_laps: 1, dnfs: 1 },
+    {
+      year: 2026,
+      races: 2,
+      points: 87,
+      wins: 1,
+      podiums: 2,
+      poles: 0,
+      top10s: 2,
+      fastest_laps: 1,
+      dnfs: 1,
+    },
   ],
-  "sprint_starting_grid_position": [
-    { year: 2026, poles: 1 },
-  ],
-  "UNION": [
-    { year: 2026, id: "charles-leclerc", name: "Charles Leclerc", alpha2_code: "MC" },
-    { year: 2026, id: "lewis-hamilton", name: "Lewis Hamilton", alpha2_code: "GB" },
-    { year: 1979, id: "jody-scheckter", name: "Jody Scheckter", alpha2_code: "ZA" },
-    { year: 1950, id: "alberto-ascari", name: "Alberto Ascari", alpha2_code: "IT" },
+  sprint_starting_grid_position: [{ year: 2026, poles: 1 }],
+  UNION: [
+    {
+      year: 2026,
+      id: "charles-leclerc",
+      name: "Charles Leclerc",
+      alpha2_code: "MC",
+    },
+    {
+      year: 2026,
+      id: "lewis-hamilton",
+      name: "Lewis Hamilton",
+      alpha2_code: "GB",
+    },
+    {
+      year: 1979,
+      id: "jody-scheckter",
+      name: "Jody Scheckter",
+      alpha2_code: "ZA",
+    },
+    {
+      year: 1950,
+      id: "alberto-ascari",
+      name: "Alberto Ascari",
+      alpha2_code: "IT",
+    },
   ],
   "race_result rr": [
-    { year: 2026, round: 1, driver_id: "charles-leclerc", position_text: "1", pole_position: 1, fastest_lap: 1, reason_retired: null, position_number: 1 },
-    { year: 2026, round: 1, driver_id: "lewis-hamilton", position_text: "DNF", pole_position: 0, fastest_lap: 0, reason_retired: "Engine", position_number: null },
-    { year: 2026, round: 2, driver_id: "charles-leclerc", position_text: "4", pole_position: 0, fastest_lap: 0, reason_retired: "Collision", position_number: 4 },
-    { year: 1979, round: 1, driver_id: "jody-scheckter", position_text: "1", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 1 },
+    {
+      year: 2026,
+      round: 1,
+      driver_id: "charles-leclerc",
+      position_text: "1",
+      pole_position: 1,
+      fastest_lap: 1,
+      reason_retired: null,
+      position_number: 1,
+    },
+    {
+      year: 2026,
+      round: 1,
+      driver_id: "lewis-hamilton",
+      position_text: "DNF",
+      pole_position: 0,
+      fastest_lap: 0,
+      reason_retired: "Engine",
+      position_number: null,
+    },
+    {
+      year: 2026,
+      round: 2,
+      driver_id: "charles-leclerc",
+      position_text: "4",
+      pole_position: 0,
+      fastest_lap: 0,
+      reason_retired: "Collision",
+      position_number: 4,
+    },
+    {
+      year: 1979,
+      round: 1,
+      driver_id: "jody-scheckter",
+      position_text: "1",
+      pole_position: 0,
+      fastest_lap: 0,
+      reason_retired: null,
+      position_number: 1,
+    },
     // 共享赛车：SQL 按排名序，首条（最佳）生效
-    { year: 1950, round: 1, driver_id: "alberto-ascari", position_text: "1", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 1 },
-    { year: 1950, round: 1, driver_id: "alberto-ascari", position_text: "11", pole_position: 0, fastest_lap: 0, reason_retired: null, position_number: 11 },
+    {
+      year: 1950,
+      round: 1,
+      driver_id: "alberto-ascari",
+      position_text: "1",
+      pole_position: 0,
+      fastest_lap: 0,
+      reason_retired: null,
+      position_number: 1,
+    },
+    {
+      year: 1950,
+      round: 1,
+      driver_id: "alberto-ascari",
+      position_text: "11",
+      pole_position: 0,
+      fastest_lap: 0,
+      reason_retired: null,
+      position_number: 11,
+    },
   ],
   "position_number IS NOT NULL": [
     { year: 2026, round: 1, driver_id: "lewis-hamilton", position_number: 3 },
@@ -77,14 +209,12 @@ const db = fakeDb({
     { year: 2026, races: 1, points: 10, wins: 0, podiums: 1, top10s: 2 },
   ],
   "MAX(year)": [{ year: 2026 }],
-  "season_driver_standing": [
-    { year: 1979, driver_id: "jody-scheckter" },
-  ],
-  "constructor_chronology": [
+  season_driver_standing: [{ year: 1979, driver_id: "jody-scheckter" }],
+  constructor_chronology: [
     { id: "tyrrell", name: "Tyrrell", year_from: 1970, year_to: 1998 },
     { id: "mercedes", name: "Mercedes", year_from: 2010, year_to: null },
   ],
-  "season_constructor_standing": [
+  season_constructor_standing: [
     { year: 2026, position_text: "2", points: 307, championship_won: 0 },
     // 60 年代式多引擎变体：积分累加、名次取最好
     { year: 1979, position_text: "3", points: 100, championship_won: 0 },
@@ -104,7 +234,11 @@ describe("createTeamRepository with database", () => {
     expect(team?.firstEntry).toBe(1950);
     expect(team?.activeSeason).toBe(2026);
     // 1950 早于传承链起点 1970，链首补早期自身
-    expect(team?.lineage.map((l) => l.id)).toEqual(["ferrari", "tyrrell", "mercedes"]);
+    expect(team?.lineage.map((l) => l.id)).toEqual([
+      "ferrari",
+      "tyrrell",
+      "mercedes",
+    ]);
     expect(team?.totals.championships).toBe(16);
     expect(team?.seasons.map((s) => s.year)).toEqual([2026, 1979, 1950]);
   });
@@ -113,29 +247,59 @@ describe("createTeamRepository with database", () => {
     const sparseDb = fakeDb({
       "co.id = c.country_id": [identityRow],
       "GROUP BY sec.year": [
-        { year: 1980, chassis: null, engines: null, power_units: null, tyres: null },
-        { year: 1978, chassis: null, engines: null, power_units: null, tyres: null },
+        {
+          year: 1980,
+          chassis: null,
+          engines: null,
+          power_units: null,
+          tyres: null,
+        },
+        {
+          year: 1978,
+          chassis: null,
+          engines: null,
+          power_units: null,
+          tyres: null,
+        },
       ],
       "grand_prix gp": [],
       "position_text = 'DNF'": [],
-      "sprint_starting_grid_position": [],
-      "UNION": [],
+      sprint_starting_grid_position: [],
+      UNION: [],
       "race_result rr": [],
       "position_number IS NOT NULL": [],
       "sprint_race_result srr": [],
       "MAX(year)": [{ year: 1980 }],
-      "season_driver_standing": [],
-      "constructor_chronology": [
+      season_driver_standing: [],
+      constructor_chronology: [
         { id: "tyrrell", name: "Tyrrell", year_from: 1990, year_to: null },
       ],
-      "season_constructor_standing": [],
+      season_constructor_standing: [],
     });
 
     const team = await createTeamRepository(sparseDb).getTeam("ferrari");
     expect(team?.lineage).toEqual([
-      { id: "ferrari", name: "Ferrari", yearFrom: 1978, yearTo: 1978, segment: "standalone" },
-      { id: "ferrari", name: "Ferrari", yearFrom: 1980, yearTo: 1980, segment: "standalone" },
-      { id: "tyrrell", name: "Tyrrell", yearFrom: 1990, yearTo: null, segment: "continuity" },
+      {
+        id: "ferrari",
+        name: "Ferrari",
+        yearFrom: 1978,
+        yearTo: 1978,
+        segment: "standalone",
+      },
+      {
+        id: "ferrari",
+        name: "Ferrari",
+        yearFrom: 1980,
+        yearTo: 1980,
+        segment: "standalone",
+      },
+      {
+        id: "tyrrell",
+        name: "Tyrrell",
+        yearFrom: 1990,
+        yearTo: null,
+        segment: "continuity",
+      },
     ]);
   });
 
@@ -182,7 +346,11 @@ describe("createTeamRepository with database", () => {
     expect(hamilton.results[1]).toBeNull();
 
     // 赛季未结束，将来轮次保留为空列
-    expect(byYear[2026].rounds.map((r) => r.circuitId)).toEqual(["albert-park", "shanghai", "suzuka"]);
+    expect(byYear[2026].rounds.map((r) => r.circuitId)).toEqual([
+      "albert-park",
+      "shanghai",
+      "suzuka",
+    ]);
     expect(leclerc.results[2]).toBeNull();
     expect(byYear[2026].powerUnits).toEqual(["Ferrari"]);
     expect(byYear[2026].tyres).toEqual(["P"]);
@@ -194,7 +362,9 @@ describe("createTeamRepository with database", () => {
     expect(ascari?.results[0]).toMatchObject({ text: "1" });
     expect(byYear[1950]).toMatchObject({ points: 10, position: "2" });
     // 车手冠军标记
-    const scheckter = byYear[1979].drivers.find((d) => d.id === "jody-scheckter");
+    const scheckter = byYear[1979].drivers.find(
+      (d) => d.id === "jody-scheckter",
+    );
     expect(scheckter?.champion).toBe(true);
     expect(leclerc.champion).toBe(false);
   });
@@ -205,7 +375,14 @@ describe("createTeamRepository with database", () => {
       year: 2026,
       position: "2",
       points: 307,
-      grandPrix: { races: 2, points: 87, wins: 1, podiums: 2, fastestLaps: 1, dnfs: 1 },
+      grandPrix: {
+        races: 2,
+        points: 87,
+        wins: 1,
+        podiums: 2,
+        fastestLaps: 1,
+        dnfs: 1,
+      },
       sprint: { races: 1, points: 10, poles: 1 },
     });
   });
@@ -226,18 +403,30 @@ describe("createTeamRepository with database", () => {
     const preSeasonDb = fakeDb({
       "co.id = c.country_id": [identityRow],
       "GROUP BY sec.year": [
-        { year: 2026, chassis: "SF-26", engines: "067/6", power_units: "Ferrari", tyres: "Pirelli" },
+        {
+          year: 2026,
+          chassis: "SF-26",
+          engines: "067/6",
+          power_units: "Ferrari",
+          tyres: "Pirelli",
+        },
       ],
       "grand_prix gp": [
-        { year: 2026, round: 1, code: "AUS", name: "Australian Grand Prix", circuit_id: "albert-park" },
+        {
+          year: 2026,
+          round: 1,
+          code: "AUS",
+          name: "Australian Grand Prix",
+          circuit_id: "albert-park",
+        },
       ],
       "position_text = 'DNF'": [],
       "sprint_race_result srr": [],
-      "sprint_starting_grid_position": [],
-      "UNION": [],
+      sprint_starting_grid_position: [],
+      UNION: [],
       "race_result rr": [],
       "position_number IS NOT NULL": [],
-      "season_constructor_standing": [],
+      season_constructor_standing: [],
     });
     const team = await createTeamRepository(preSeasonDb).getTeam("ferrari");
     expect(team?.currentSeason).toMatchObject({
@@ -249,14 +438,16 @@ describe("createTeamRepository with database", () => {
 
   it("returns null for an unknown constructor", async () => {
     const emptyDb = fakeDb({ "co.id = c.country_id": [] });
-    await expect(createTeamRepository(emptyDb).getTeam("nope")).resolves.toBeNull();
+    await expect(
+      createTeamRepository(emptyDb).getTeam("nope"),
+    ).resolves.toBeNull();
   });
 
   it("throws on a malformed identity row", async () => {
     const badDb = fakeDb({ "co.id = c.country_id": [{ id: "ferrari" }] });
-    await expect(createTeamRepository(badDb).getTeam("ferrari")).rejects.toThrow(
-      /Invalid row data/,
-    );
+    await expect(
+      createTeamRepository(badDb).getTeam("ferrari"),
+    ).rejects.toThrow(/Invalid row data/);
   });
 });
 
@@ -278,7 +469,9 @@ describe("createTeamRepository without database (DEV fixture)", () => {
   });
 
   it("returns null for other teams", async () => {
-    await expect(createTeamRepository().getTeam("mercedes")).resolves.toBeNull();
+    await expect(
+      createTeamRepository().getTeam("mercedes"),
+    ).resolves.toBeNull();
   });
 });
 
@@ -289,8 +482,16 @@ describe("seasonGap", () => {
   });
 
   it("describes the missing span between distant seasons", () => {
-    expect(seasonGap(2019, 1985)).toEqual({ from: 1986, to: 2018, seasons: 33 });
-    expect(seasonGap(1979, 1951)).toEqual({ from: 1952, to: 1978, seasons: 27 });
+    expect(seasonGap(2019, 1985)).toEqual({
+      from: 1986,
+      to: 2018,
+      seasons: 33,
+    });
+    expect(seasonGap(1979, 1951)).toEqual({
+      from: 1952,
+      to: 1978,
+      seasons: 27,
+    });
   });
 });
 

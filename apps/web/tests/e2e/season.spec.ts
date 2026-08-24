@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-test("@desktop root redirects to active season racing page", async ({ page }) => {
+test("@desktop root redirects to active season racing page", async ({
+  page,
+}) => {
   const browserRequests: string[] = [];
   page.on("request", (request) => browserRequests.push(request.url()));
 
@@ -11,13 +13,17 @@ test("@desktop root redirects to active season racing page", async ({ page }) =>
   expect(browserRequests.some((url) => /jolpi|ergast/i.test(url))).toBe(false);
 });
 
-test("@desktop non-numeric year falls back home instead of chaining undefined", async ({ page }) => {
+test("@desktop non-numeric year falls back home instead of chaining undefined", async ({
+  page,
+}) => {
   await page.goto("/undefined");
   await page.waitForURL(/\/racing\/2026$/);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
 
-test("@desktop racing calendar links every round to its results page", async ({ page }) => {
+test("@desktop racing calendar links every round to its results page", async ({
+  page,
+}) => {
   await page.goto("/racing/2026");
   const cards = page.locator("main .race-card");
   await expect(cards).toHaveCount(22);
@@ -59,7 +65,9 @@ test("@mobile 375px layout has no page overflow", async ({ page }) => {
 
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   const hasPageOverflow = await page.evaluate(
-    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    () =>
+      document.documentElement.scrollWidth >
+      document.documentElement.clientWidth,
   );
   expect(hasPageOverflow).toBe(false);
 });

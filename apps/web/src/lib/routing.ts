@@ -6,14 +6,19 @@ export function parseYearParam(value: string | null): number[] | null {
       value
         .split(",")
         .map((part) => Number(part.trim()))
-        .filter((year) => Number.isInteger(year) && year >= 1950 && year <= 2100),
+        .filter(
+          (year) => Number.isInteger(year) && year >= 1950 && year <= 2100,
+        ),
     ),
   ];
   return years.length > 0 ? years.sort((a, b) => a - b) : null;
 }
 
 // 目录页：单年份参数，且必须在已知年份内（无效回落 null = 全部）
-export function resolveCatalogYear(value: string | null, years: number[]): number | null {
+export function resolveCatalogYear(
+  value: string | null,
+  years: number[],
+): number | null {
   const param = parseYearParam(value);
   return param !== null && param.length === 1 && years.includes(param[0])
     ? param[0]
@@ -32,8 +37,14 @@ export function resolveSeasonSelection(
 }
 
 export const raceTabKeys = [
-  "race-result", "fastest-laps", "pit-stop-summary", "starting-grid",
-  "qualifying", "practice-1", "practice-2", "practice-3",
+  "race-result",
+  "fastest-laps",
+  "pit-stop-summary",
+  "starting-grid",
+  "qualifying",
+  "practice-1",
+  "practice-2",
+  "practice-3",
 ] as const;
 export type RaceTabKey = (typeof raceTabKeys)[number];
 
@@ -50,5 +61,7 @@ export const RACE_TAB_LABELS: Record<RaceTabKey, string> = {
 };
 
 export function resolveRaceTab(value: string): RaceTabKey | null {
-  return (raceTabKeys as readonly string[]).includes(value) ? (value as RaceTabKey) : null;
+  return (raceTabKeys as readonly string[]).includes(value)
+    ? (value as RaceTabKey)
+    : null;
 }

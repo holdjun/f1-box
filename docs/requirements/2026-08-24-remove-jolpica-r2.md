@@ -1,0 +1,37 @@
+# 移除 Jolpica → ingest → R2 链路
+
+日期：2026-08-24
+状态：开发中
+
+## 背景与目标
+
+样式现代化后站点全部页面改读 D1（f1db 周同步），Jolpica ingest 产出的 R2 season payload 只剩两个消费方：`/` 重定向取 `activeSeason`、`/api/health` 检查 manifest。定时采集写着没人读的数据，是纯成本。本次移除整条链路；实时/遥测数据后续以 FastF1 另立需求（静态 f1db + 动态 FastF1 的双源架构已讨论确认）。
+
+## 用户可见行为
+
+- 无可见变化：`/` 仍重定向到当前赛季；`/api/health` 仍返回 ok，改报 D1 赛季覆盖范围。
+- 页脚本就不渲染 freshness 徽章（无调用方），删除相关死组件后无视觉差异。
+
+## 验收标准
+
+- `services/ingest`、`packages/contracts`、`.github/workflows/ingest.yml`、`scripts/publish-release.sh`、`season-repository.ts`、`page-data.ts`、`FreshnessBadge.astro`、`repository.test.ts` 全部删除；wrangler 两个配置文件移除 `F1_DATA` R2 绑定。
+- `pages/index.astro` 的 activeSeason 改从 D1 赛历（`getSeasonYears` 最大值）取；`/` 与 `/undefined` 重定向 e2e 仍绿。
+- `api/health.ts` 改查 D1，不再引用 R2。
+- CI 移除 Python/ingest 与 contracts 生成检查步骤；`pnpm check`、`pnpm test`、`pnpm -r build`、e2e 全绿。
+- README / AGENTS.md / CLAUDE.md / docs/context 同步：数据流改为 f1db → D1 + 仓库本地 vendor；过期上下文文档删除。
+- 云端 R2 bucket 不删（破坏性操作留给用户另行处理），仅移除代码侧绑定。
+
+## 范围外
+
+- 不引入 FastF1 采集服务（另立需求）。
+- 不删 Cloudflare 上的 R2 bucket 与其中对象（合并部署后由用户确认执行 `wrangler r2 bucket delete f1-box-data --remote`）。
+- D1 四个 repository、dev fixture 不动。
+
+## 追加范围（2026-08-24 补充）
+
+data-sync 工作流原本把门禁状态（release.json）与 zip 归档存在 R2，是 bucket 的最后消费者，一并迁移：
+
+- 门禁状态改存 D1 `sync_state` 单行表（导入失败不记录 tag，下次自动重试的语义保持）。
+- 删除 R2 归档上传（zip 可随时从上游重下，无消费者）。
+- 轮询频率对齐 f1db 实际发布节奏（releases 历史：主版本集中在周日晚 UTC、修正版散落工作日）：周日晚到周二每 2 小时、其余每天一次；tag 门禁下无变化为零成本空转。主版本发布后的滞后从 ≤24h 收敛到 ≤2h。
+- `npm install -g wrangler` 改走仓库本地 wrangler（pnpm install 后脚本自动选用），消除未钉版全局安装。

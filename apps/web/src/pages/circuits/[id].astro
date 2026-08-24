@@ -1,8 +1,7 @@
 ---
 import { env } from "cloudflare:workers";
-
-import StatusPage from "../../components/StatusPage.astro";
 import CircuitMap from "../../components/CircuitMap.astro";
+import StatusPage from "../../components/StatusPage.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import {
   createCircuitRepository,
@@ -14,6 +13,7 @@ const repository = import.meta.env.DEV
   ? createCircuitRepository()
   : createCircuitRepository(createD1CircuitDatabase(env.F1_DB));
 const circuit = await repository.getCircuit(id);
+// 赛道全名常含长词 (International), 小屏降到 display-md 防整词溢出
 if (!circuit) Astro.response.status = 404;
 else {
   Astro.response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
@@ -25,7 +25,6 @@ else {
     <main id="main-content" class="shell pt-12 pb-section">
       <div class="circuit-hero grid grid-cols-1 items-end gap-8 lg:grid-cols-[3fr_2fr]">
         <div>
-          <!-- 赛道全名常含长词（International），小屏降到 display-md 防整词溢出 -->
           <h1 class="max-w-[10ch] text-display-lg uppercase max-md:text-display-md">
             {circuit.fullName}
           </h1>

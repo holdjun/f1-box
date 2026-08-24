@@ -6,12 +6,12 @@ import {
   runAgent,
 } from "../src/lib/ask/agent.js";
 import { createStaticAskDatabase } from "../src/lib/ask/db.js";
+import type { KnowledgeEntry } from "../src/lib/ask/knowledge.js";
 import {
   driverChampionshipYearsSql,
   driverIdentitySql,
   driverRefSql,
 } from "../src/lib/ask/tools.js";
-import type { KnowledgeEntry } from "../src/lib/ask/knowledge.js";
 
 const entries: KnowledgeEntry[] = [
   { id: "undercut", terms: ["undercut"], content: "Undercut 内容" },
@@ -113,7 +113,9 @@ describe("createFinalChunkDecoder", () => {
 
   it("returns the pending partial line from flush", () => {
     const decoder = createFinalChunkDecoder();
-    expect(decoder.push('data: {"choices":[{"delta":{"content":"尾"}}]}')).toBe("");
+    expect(decoder.push('data: {"choices":[{"delta":{"content":"尾"}}]}')).toBe(
+      "",
+    );
     expect(decoder.flush()).toBe("尾");
   });
 });
@@ -191,7 +193,11 @@ const TOOL_NAMES = [
 describe("runAgent", () => {
   it("answers a pure knowledge question from the first response in one call", async () => {
     const { ai, calls } = fakeAi([
-      { choices: [{ message: { content: "Undercut 是先进站换胎抢位置的策略" } }] },
+      {
+        choices: [
+          { message: { content: "Undercut 是先进站换胎抢位置的策略" } },
+        ],
+      },
     ]);
     const out = await collectSse(
       runAgent({
@@ -258,7 +264,7 @@ describe("runAgent", () => {
 
     // 工具往来按 OpenAI 形态原样回填，最终调用的 messages 能引用工具结果
     const finalMessages = calls[2].input.messages as Record<string, any>[];
-    const assistant = finalMessages.find((m) => m.role === "assistant")!
+    const assistant = finalMessages.find((m) => m.role === "assistant")!;
     expect(assistant.tool_calls).toEqual([
       {
         id: "chatcmpl-tool-1",
@@ -269,7 +275,7 @@ describe("runAgent", () => {
         },
       },
     ]);
-    const toolMessage = finalMessages.find((m) => m.role === "tool")!
+    const toolMessage = finalMessages.find((m) => m.role === "tool")!;
     expect(toolMessage.tool_call_id).toBe("chatcmpl-tool-1");
     expect(JSON.parse(toolMessage.content)).toMatchObject({
       found: true,
@@ -303,14 +309,14 @@ describe("runAgent", () => {
 
     // 缺必填参数的调用以错误 tool 消息回传，供下一次调用自纠
     const retryMessages = calls[1].input.messages as Record<string, any>[];
-    const errorTool = retryMessages.find((m) => m.role === "tool")!
+    const errorTool = retryMessages.find((m) => m.role === "tool")!;
     expect(errorTool.tool_call_id).toBe("call-bad");
     expect(errorTool.content).toContain("query");
 
     const correctedMessages = calls[2].input.messages as Record<string, any>[];
     const correctedTool = correctedMessages
       .filter((m) => m.role === "tool")
-      .find((m) => m.tool_call_id === "call-good")!
+      .find((m) => m.tool_call_id === "call-good")!;
     expect(JSON.parse(correctedTool.content)).toMatchObject({ found: true });
 
     expect(out).toContain('event: delta\ndata: {"text":"已纠正"}');
@@ -336,7 +342,7 @@ describe("runAgent", () => {
     );
 
     const messages = calls[1].input.messages as Record<string, any>[];
-    const toolMessage = messages.find((m) => m.role === "tool")!
+    const toolMessage = messages.find((m) => m.role === "tool")!;
     expect(toolMessage.tool_call_id).toBe("call-x");
     expect(toolMessage.content).toContain("未知工具");
     expect(toolMessage.content).toContain("schedule_lookup");
@@ -350,7 +356,10 @@ describe("runAgent", () => {
       "data: [DONE]\n\n",
     ]);
     const { ai, calls } = fakeAi([
-      toolCallResponse("call-db", "race_results", { year: 2024, race: "摩纳哥" }),
+      toolCallResponse("call-db", "race_results", {
+        year: 2024,
+        race: "摩纳哥",
+      }),
       { choices: [{ message: { content: null } }] },
       stream,
     ]);
@@ -514,7 +523,9 @@ describe("runAgent", () => {
     const stream = new ReadableStream<Uint8Array>({
       start(c) {
         const encoder = new TextEncoder();
-        c.enqueue(encoder.encode('data: {"choices":[{"delta":{"content":"半"}}]}\n\n'));
+        c.enqueue(
+          encoder.encode('data: {"choices":[{"delta":{"content":"半"}}]}\n\n'),
+        );
         c.enqueue(encoder.encode("data: [DONE]\n\n"));
         c.close();
       },

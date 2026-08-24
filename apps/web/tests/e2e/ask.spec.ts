@@ -1,6 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
+import { expect, type Page, test } from "@playwright/test";
 
 const SSE_OK = [
   'event: delta\ndata: {"text":"刘易斯·汉密尔顿 "}\n\n',
@@ -74,7 +74,9 @@ test.describe("ask panel", () => {
     ]);
   });
 
-  test("@desktop escape closes and focus returns to trigger", async ({ page }) => {
+  test("@desktop escape closes and focus returns to trigger", async ({
+    page,
+  }) => {
     await page.goto("/");
     await page.locator(".ask__trigger").click();
     await expect(page.locator(".ask__panel")).toBeVisible();
@@ -83,7 +85,9 @@ test.describe("ask panel", () => {
     await expect(page.locator(".ask__trigger")).toBeFocused();
   });
 
-  test("@desktop shows rate limit message on 429 and keeps the question", async ({ page }) => {
+  test("@desktop shows rate limit message on 429 and keeps the question", async ({
+    page,
+  }) => {
     mockAsk(page, "", 429);
     await page.goto("/");
     await page.locator(".ask__trigger").click();
@@ -119,7 +123,9 @@ test.describe("ask panel", () => {
     await page.locator(".ask__trigger").click();
     await page.locator(".ask__input").fill("问题一");
     await page.locator(".ask__send").click();
-    await expect(page.locator(".ask__messages").locator(".ask__bubble")).toHaveCount(2);
+    await expect(
+      page.locator(".ask__messages").locator(".ask__bubble"),
+    ).toHaveCount(2);
     await page.locator(".ask__clear").click();
     await expect(page.locator(".ask__messages")).toBeEmpty();
   });
@@ -149,7 +155,9 @@ test.describe("ask panel", () => {
     expect(box?.width).toBe(375);
     await page.locator(".ask__input").fill("移动端问题");
     await page.locator(".ask__send").click();
-    await expect(page.locator(".ask__messages")).toContainText("刘易斯·汉密尔顿");
+    await expect(page.locator(".ask__messages")).toContainText(
+      "刘易斯·汉密尔顿",
+    );
   });
 
   test("@desktop answer bubbles keep their styles when created client-side", async ({

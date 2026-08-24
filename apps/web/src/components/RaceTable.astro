@@ -3,8 +3,8 @@ import type {
   FastestLapRow, GridRow, PitStopRow, PracticeRow, QualifyingRow,
   RaceResultRow, RaceTabKey,
 } from "../lib/race-results-repository.js";
-import { colorForYear, logoSrcFor, logoVariantFor, vendorIndexes } from "../lib/vendor.js";
 import { monogram, monogramStyle as monogramStyleFor } from "../lib/tokens.js";
+import { colorForYear, logoSrcFor, logoVariantFor, vendorIndexes } from "../lib/vendor.js";
 
 interface Props {
   tab: RaceTabKey;
@@ -39,7 +39,8 @@ const positionClasses = "w-14 font-display text-[1.35rem] text-ink-muted";
 const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6, "starting-grid": 5, qualifying: 8, "practice-1": 7, "practice-2": 7, "practice-3": 7 }[tab];
 ---
 
-<div class="table-scroll" tabindex="0">
+<!-- biome-ignore lint/a11y/noNoninteractiveTabindex: 横滚表容器需要 tabindex，键盘用户才能滚动查看溢出列 -->
+<section class="table-scroll" aria-label={`${label}, scrollable`} tabindex="0">
   <table class="result-table" aria-label={label}>
     {tab === "race-result" ? (
       <>
@@ -280,4 +281,4 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
       </>
     )}
   </table>
-</div>
+</section>

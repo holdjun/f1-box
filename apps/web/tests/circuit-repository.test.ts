@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  createCircuitRepository,
   type CircuitDatabase,
+  createCircuitRepository,
 } from "../src/lib/circuit-repository.js";
 
-function fakeDbBySql(rowsBySqlFragment: Record<string, unknown[]>): CircuitDatabase {
+function fakeDbBySql(
+  rowsBySqlFragment: Record<string, unknown[]>,
+): CircuitDatabase {
   return {
     batch(statements) {
       return Promise.resolve(
@@ -118,7 +120,11 @@ describe("createCircuitRepository with database", () => {
       laps: 56,
       distance: 305.066,
       layoutId: "shanghai-1",
-      recordLap: { time: "1:32.238", driverName: "Michael Schumacher", year: 2004 },
+      recordLap: {
+        time: "1:32.238",
+        driverName: "Michael Schumacher",
+        year: 2004,
+      },
     });
   });
 

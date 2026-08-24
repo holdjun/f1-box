@@ -42,7 +42,8 @@ const winnerStyle = (teamId: string | null) =>
       sticky
       showAll={false}
     />
-    <div class="table-scroll" tabindex="0">
+    <!-- biome-ignore lint/a11y/noNoninteractiveTabindex: 横滚表容器需要 tabindex，键盘用户才能滚动查看溢出列 -->
+    <section class="table-scroll" aria-label={`${year} race results, scrollable`} tabindex="0">
       <table class="result-table" aria-label={`${year} race results`}>
         <thead>
           <tr>
@@ -99,6 +100,6 @@ const winnerStyle = (teamId: string | null) =>
           )}
         </tbody>
       </table>
-    </div>
+    </section>
   </main>
 </BaseLayout>

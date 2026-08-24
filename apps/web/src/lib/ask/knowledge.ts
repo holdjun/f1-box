@@ -18,9 +18,7 @@ export function matchKnowledge(
   const haystack = query.toLowerCase();
   const hits: KnowledgeEntry[] = [];
   for (const entry of entries) {
-    if (
-      entry.terms.some((term) => haystack.includes(term.toLowerCase()))
-    ) {
+    if (entry.terms.some((term) => haystack.includes(term.toLowerCase()))) {
       hits.push(entry);
       if (hits.length >= MAX_INJECT) break;
     }

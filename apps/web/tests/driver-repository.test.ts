@@ -217,7 +217,10 @@ describe("getDriversByYear", () => {
     ]);
     expect(drivers[1]).toMatchObject({ number: "9" });
     // 车队取该年最后参赛车队（schumacher 生涯最后车队是 Mercedes，1997 在 Ferrari）
-    expect(drivers[0]).toMatchObject({ teamId: "ferrari", teamName: "Ferrari" });
+    expect(drivers[0]).toMatchObject({
+      teamId: "ferrari",
+      teamName: "Ferrari",
+    });
   });
 
   it("shows that year's race number over the permanent one", async () => {

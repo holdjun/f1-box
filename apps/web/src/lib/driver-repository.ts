@@ -1,3 +1,9 @@
+import { asNumber, asRecord, asString } from "./db-parse.js";
+import {
+  deriveSeasonYears,
+  mapSeasonYearRows,
+  seasonYearsSql,
+} from "./season-years.js";
 import {
   buildCurrentSeason,
   buildRaceCell,
@@ -5,12 +11,6 @@ import {
   type RaceCell,
   type SeasonRound,
 } from "./team-repository.js";
-import { asNumber, asRecord, asString } from "./db-parse.js";
-import {
-  deriveSeasonYears,
-  mapSeasonYearRows,
-  seasonYearsSql,
-} from "./season-years.js";
 
 export interface DriverSummary {
   id: string;
@@ -367,7 +367,10 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
       if (!db) {
         const { default: fixture } = await import("./fixtures/drivers.json");
         const rows: (DriverSummary & { points: number })[] = [];
-        for (const { seasons, ...summary } of fixture as DriverCatalogFixture[]) {
+        for (const {
+          seasons,
+          ...summary
+        } of fixture as DriverCatalogFixture[]) {
           const entry = seasons[String(year)];
           if (entry) {
             rows.push({
@@ -385,7 +388,9 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
           .map(({ points, ...row }) => row);
       }
 
-      const [rows] = await db.batch([{ sql: driversByYearSql, values: [year] }]);
+      const [rows] = await db.batch([
+        { sql: driversByYearSql, values: [year] },
+      ]);
       return rows.results.map(mapDriverRow);
     },
 
@@ -469,7 +474,10 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
         lastNumber:
           lastNumberRow === undefined
             ? null
-            : asString(asRecord(lastNumberRow, "last number row").driver_number, "last number"),
+            : asString(
+                asRecord(lastNumberRow, "last number row").driver_number,
+                "last number",
+              ),
         numberStints: mergeNumberStints(numberRows.results),
         teamStints: mergeTeamStints(seasons),
         currentSeason: buildCurrentSeason(
@@ -481,7 +489,10 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
         seasons,
         activeSeason: (() => {
           // MAX() 恒返回一行；season 表为空时 year 为 NULL
-          const year = asRecord(maxSeasonRows.results[0], "max season row").year;
+          const year = asRecord(
+            maxSeasonRows.results[0],
+            "max season row",
+          ).year;
           return year == null ? null : asNumber(year, "max season");
         })(),
       };
@@ -495,7 +506,8 @@ function mapDriverRow(row: unknown): DriverSummary {
   return {
     id: asString(record.id, "driver id"),
     name: asString(record.name, "driver name"),
-    number: record.number == null ? null : asString(record.number, "driver number"),
+    number:
+      record.number == null ? null : asString(record.number, "driver number"),
     // 国旗 SVG 以 alpha2 小写命名
     flagCode:
       record.alpha2_code == null
@@ -515,7 +527,15 @@ function mapDriverRow(row: unknown): DriverSummary {
 
 function parseIdentity(
   value: unknown,
-): Omit<DriverPage, "lastNumber" | "numberStints" | "teamStints" | "currentSeason" | "seasons" | "activeSeason"> {
+): Omit<
+  DriverPage,
+  | "lastNumber"
+  | "numberStints"
+  | "teamStints"
+  | "currentSeason"
+  | "seasons"
+  | "activeSeason"
+> {
   const record = asRecord(value, "driver identity");
   return {
     id: asString(record.id, "driver id"),
@@ -574,7 +594,9 @@ export function mergeNumberStints(rows: unknown[]): NumberStint[] {
 export function mergeTeamStints(seasons: DriverSeason[]): TeamStint[] {
   const stints: TeamStint[] = [];
   for (const season of [...seasons].reverse()) {
-    for (const team of [...season.teams].sort((a, b) => a.lastRound - b.lastRound)) {
+    for (const team of [...season.teams].sort(
+      (a, b) => a.lastRound - b.lastRound,
+    )) {
       const last = stints.at(-1);
       if (last && last.id === team.id && last.yearTo === season.year - 1) {
         last.yearTo = season.year;
@@ -606,7 +628,10 @@ function mergeDriverSeasons(
   teammateSprintRankRows: unknown[],
 ): DriverSeason[] {
   const seasons = new Map<number, DriverSeason>();
-  const rawRounds = new Map<number, { round: number; code: string; name: string; circuitId: string }[]>();
+  const rawRounds = new Map<
+    number,
+    { round: number; code: string; name: string; circuitId: string }[]
+  >();
   for (const row of roundRows) {
     const record = asRecord(row, "round row");
     const year = asNumber(record.year, "round row year");
@@ -630,7 +655,9 @@ function mergeDriverSeasons(
     }
   }
   for (const [year, season] of seasons) {
-    season.rounds = rawRounds.get(year)!.map(({ round, ...display }) => display);
+    season.rounds = (rawRounds.get(year) ?? []).map(
+      ({ round, ...display }) => display,
+    );
   }
 
   const sprintRanks = new Map<string, number>();
@@ -648,7 +675,10 @@ function mergeDriverSeasons(
     const record = asRecord(row, "result row");
     const year = asNumber(record.year, "result row year");
     const round = asNumber(record.round, "result row round");
-    const constructorId = asString(record.constructor_id, "result row constructor");
+    const constructorId = asString(
+      record.constructor_id,
+      "result row constructor",
+    );
     let byRound = cells.get(`${year}:${constructorId}`);
     if (!byRound) {
       byRound = new Map();
@@ -673,14 +703,25 @@ function mergeDriverSeasons(
 
   const teammateCells = new Map<
     string,
-    Map<string, { id: string; name: string; flagCode: string | null; byRound: Map<number, RaceCell> }>
+    Map<
+      string,
+      {
+        id: string;
+        name: string;
+        flagCode: string | null;
+        byRound: Map<number, RaceCell>;
+      }
+    >
   >();
   for (const row of teammateResultRows) {
     const record = asRecord(row, "teammate result row");
     const year = asNumber(record.year, "teammate result year");
     const round = asNumber(record.round, "teammate result round");
     const driverId = asString(record.driver_id, "teammate result driver");
-    const constructorId = asString(record.constructor_id, "teammate result constructor");
+    const constructorId = asString(
+      record.constructor_id,
+      "teammate result constructor",
+    );
     const groupKey = `${year}:${constructorId}`;
     let group = teammateCells.get(groupKey);
     if (!group) {
@@ -715,7 +756,8 @@ function mergeDriverSeasons(
     const record = asRecord(row, "driver team row");
     const year = asNumber(record.year, "driver team year");
     // team 年份必然在 roundsSql 并集里，season 必存在
-    const season = seasons.get(year)!;
+    const season = seasons.get(year);
+    if (!season) continue;
     const constructorId = asString(record.id, "driver team id");
     const byRound = cells.get(`${year}:${constructorId}`);
     const teammates = [
@@ -725,14 +767,18 @@ function mergeDriverSeasons(
         id: entry.id,
         name: entry.name,
         flagCode: entry.flagCode,
-        results: rawRounds.get(year)!.map((r) => entry.byRound.get(r.round) ?? null),
+        results: (rawRounds.get(year) ?? []).map(
+          (r) => entry.byRound.get(r.round) ?? null,
+        ),
       }))
       .sort((a, b) => a.name.localeCompare(b.name));
     season.teams.push({
       id: constructorId,
       name: asString(record.name, "driver team name"),
       lastRound: asNumber(record.last_round, "driver team last round"),
-      results: rawRounds.get(year)!.map((r) => byRound?.get(r.round) ?? null),
+      results: (rawRounds.get(year) ?? []).map(
+        (r) => byRound?.get(r.round) ?? null,
+      ),
       teammates,
     });
   }
@@ -742,8 +788,12 @@ function mergeDriverSeasons(
     const season = seasons.get(asNumber(record.year, "driver standing year"));
     if (!season) continue;
     season.points = asNumber(record.points, "driver standing points");
-    season.position = asString(record.position_text, "driver standing position");
-    season.championshipWon = season.championshipWon || record.championship_won === 1;
+    season.position = asString(
+      record.position_text,
+      "driver standing position",
+    );
+    season.championshipWon =
+      season.championshipWon || record.championship_won === 1;
   }
 
   return [...seasons.values()].sort((a, b) => b.year - a.year);

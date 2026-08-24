@@ -14,7 +14,9 @@ export function monogram(name: string): string {
 
 // 队色作 monogram 背景时，文字按背景亮度取纯黑/纯白，
 // 保证小字号文本对比度 ≥ 4.5:1（主题色固定时部分队色两方向都不达标）
-export function monogramStyle(color: string | null | undefined): string | undefined {
+export function monogramStyle(
+  color: string | null | undefined,
+): string | undefined {
   if (!color) return undefined;
   // 经自定义属性下发：类自身的 color 声明会压过从父元素继承的内联 color
   return `--monogram-bg: ${color}; --monogram-fg: ${contrastOn(color)}`;

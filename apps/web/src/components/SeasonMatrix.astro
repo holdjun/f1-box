@@ -1,8 +1,8 @@
 ---
-import SeasonFilter from "./SeasonFilter.astro";
-import { seasonGap, type RaceCell } from "../lib/team-repository.js";
 import { formatPosition, resultClass } from "../lib/result-display.js";
+import { type RaceCell, seasonGap } from "../lib/team-repository.js";
 import { alpha2Flag } from "../lib/tokens.js";
+import SeasonFilter from "./SeasonFilter.astro";
 
 interface MatrixRound {
   code: string;
@@ -65,7 +65,7 @@ const cellClasses =
   sticky
   initialSelected={initialSelected}
 />
-<p class="legend mb-5 flex flex-wrap gap-x-[1.1rem] gap-y-2 text-[0.72rem] text-ink-muted" aria-label="Table legend">
+<section class="legend mb-5 flex flex-wrap gap-x-[1.1rem] gap-y-2 text-[0.72rem] text-ink-muted" aria-label="Table legend">
   <span class={keyClasses}><i class="result-win size-[0.72rem] rounded-[4px]"></i>Win</span>
   <span class={keyClasses}><i class="result-podium size-[0.72rem] rounded-[4px]"></i>Podium</span>
   <span class={keyClasses}><i class="result-points size-[0.72rem] rounded-[4px]"></i>Points</span>
@@ -76,7 +76,7 @@ const cellClasses =
   {showChampionKey ? (
     <span class:list={[keyClasses, "driver-champion text-highlight"]}>driver champion</span>
   ) : null}
-</p>
+</section>
 <div class="flex flex-col gap-6">
   {seasons.map((season, index) => {
     const prev = seasons[index - 1];
@@ -87,9 +87,7 @@ const cellClasses =
           <div
             class="team-split flex items-center gap-3 text-[0.68rem] uppercase tracking-[0.09em] text-ink-muted"
             data-season-block={season.year}
-            role="separator"
             hidden={isBlockHidden(season.year)}
-            aria-label="Mid-season team change"
           >
             Mid-season team change
           </div>
@@ -97,9 +95,7 @@ const cellClasses =
           <div
             class="season-gap flex items-center border-l-2 border-dashed border-line py-2 pl-3"
             data-season-block={season.year}
-            role="separator"
             hidden={isBlockHidden(season.year)}
-            aria-label={`${gap.seasons} seasons without entries, ${gap.from} to ${gap.to}`}
           >
             <span class="season-gap__label text-[0.7rem] uppercase tracking-[0.08em] text-ink-muted">
               {gap.from}–{gap.to} · {gap.seasons}{" "}

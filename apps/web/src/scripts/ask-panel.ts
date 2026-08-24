@@ -5,6 +5,51 @@ import { createSseAccumulator } from "../lib/ask/sse.js";
 const conversation: AskMessage[] = [];
 let controller: AbortController | null = null;
 
+// 标记类与组件同源，正常渲染下必然齐备；缺一即视为结构异常，不绑定。
+// 收敛进独立函数返回定型对象：内部 function 声明会提升，外层守卫的
+// 收窄对它们不可见，必须让变量声明类型本身非空
+function queryAskElements(root: HTMLElement) {
+  const trigger = root.querySelector<HTMLButtonElement>(".ask__trigger");
+  const panel = root.querySelector<HTMLElement>(".ask__panel");
+  const messages = root.querySelector<HTMLElement>(".ask__messages");
+  const status = root.querySelector<HTMLElement>(".ask__status");
+  const error = root.querySelector<HTMLElement>(".ask__error");
+  const clear = root.querySelector<HTMLButtonElement>(".ask__clear");
+  const close = root.querySelector<HTMLButtonElement>(".ask__close");
+  const form = root.querySelector<HTMLFormElement>(".ask__form");
+  const input = root.querySelector<HTMLTextAreaElement>(".ask__input");
+  const send = root.querySelector<HTMLButtonElement>(".ask__send");
+  const stop = root.querySelector<HTMLButtonElement>(".ask__stop");
+  if (
+    !trigger ||
+    !panel ||
+    !messages ||
+    !status ||
+    !error ||
+    !clear ||
+    !close ||
+    !form ||
+    !input ||
+    !send ||
+    !stop
+  ) {
+    return null;
+  }
+  return {
+    trigger,
+    panel,
+    messages,
+    status,
+    error,
+    clear,
+    close,
+    form,
+    input,
+    send,
+    stop,
+  };
+}
+
 // transition:persist 保住 DOM；astro:page-load 首次加载与每次客户端导航后触发，
 // setupAskPanel 用标志位防止重复绑定（模块本身每个完整加载只执行一次）
 export function setupAskPanel(): void {
@@ -12,19 +57,25 @@ export function setupAskPanel(): void {
   if (!root || root.dataset.askBound === "true") return;
   root.dataset.askBound = "true";
 
-  const trigger = root.querySelector<HTMLButtonElement>(".ask__trigger")!;
-  const panel = root.querySelector<HTMLElement>(".ask__panel")!;
-  const messages = root.querySelector<HTMLElement>(".ask__messages")!;
-  const status = root.querySelector<HTMLElement>(".ask__status")!;
-  const error = root.querySelector<HTMLElement>(".ask__error")!;
-  const clear = root.querySelector<HTMLButtonElement>(".ask__clear")!;
-  const close = root.querySelector<HTMLButtonElement>(".ask__close")!;
-  const form = root.querySelector<HTMLFormElement>(".ask__form")!;
-  const input = root.querySelector<HTMLTextAreaElement>(".ask__input")!;
-  const send = root.querySelector<HTMLButtonElement>(".ask__send")!;
-  const stop = root.querySelector<HTMLButtonElement>(".ask__stop")!;
+  const els = queryAskElements(root);
+  if (!els) return;
+  const {
+    trigger,
+    panel,
+    messages,
+    status,
+    error,
+    clear,
+    close,
+    form,
+    input,
+    send,
+    stop,
+  } = els;
 
-  trigger.addEventListener("click", () => (panel.hidden ? openPanel() : closePanel()));
+  trigger.addEventListener("click", () =>
+    panel.hidden ? openPanel() : closePanel(),
+  );
   close.addEventListener("click", closePanel);
   clear.addEventListener("click", () => {
     conversation.length = 0;
@@ -132,7 +183,9 @@ export function setupAskPanel(): void {
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
-        for (const event of accumulator.push(decoder.decode(value, { stream: true }))) {
+        for (const event of accumulator.push(
+          decoder.decode(value, { stream: true }),
+        )) {
           if (event.event === "delta") {
             let text = "";
             try {
@@ -150,7 +203,8 @@ export function setupAskPanel(): void {
             // 文案以服务端为准（已脱敏）；解析失败退回通用提示
             let message = "";
             try {
-              message = (JSON.parse(event.data) as { message?: string }).message ?? "";
+              message =
+                (JSON.parse(event.data) as { message?: string }).message ?? "";
             } catch {
               // 退回通用文案
             }

@@ -56,16 +56,16 @@ test("@desktop race hero links to its circuit page", async ({ page }) => {
 
 test("@desktop header navigation includes circuits", async ({ page }) => {
   await page.goto("/");
-  await expect(
-    page.locator('header nav a[href="/circuits"]'),
-  ).toBeVisible();
+  await expect(page.locator('header nav a[href="/circuits"]')).toBeVisible();
 });
 
 test("@mobile 375px circuit detail has no page overflow", async ({ page }) => {
   await page.goto("/circuits/shanghai");
   await expect(page.locator("main h1")).toBeVisible();
   const hasPageOverflow = await page.evaluate(
-    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    () =>
+      document.documentElement.scrollWidth >
+      document.documentElement.clientWidth,
   );
   expect(hasPageOverflow).toBe(false);
 });
