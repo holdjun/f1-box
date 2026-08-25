@@ -51,17 +51,15 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
         </p>
       </div>
       {next && (
-        <div class="relative overflow-hidden rounded-md border border-line bg-surface-raised p-6 light:shadow-panel">
+        <div class="rounded-md border border-line bg-surface-raised p-6 light:shadow-panel">
           <p class="status-label status-label--accent">
             Next · Round {String(next.round).padStart(2, "0")}
           </p>
-          <p class="mt-3 font-display text-[2rem] leading-[1.02] font-semibold uppercase md:pr-28">
+          <p class="mt-3 font-display text-[2rem] leading-[1.02] font-semibold uppercase">
             {next.name}
           </p>
-          <div class="md:pr-28">
-            <RaceCountdown sessions={next.sessions} client:load />
-          </div>
-          <p class="mt-2 flex items-center gap-2 text-[0.8rem] text-ink-strong md:pr-28">
+          <RaceCountdown sessions={next.sessions} client:load />
+          <p class="mt-2 flex items-center gap-2 text-[0.8rem] text-ink-strong">
             <img
               src={`/vendor/country-flags/${next.alpha2Code.toLowerCase()}.svg`}
               alt=""
@@ -70,12 +68,6 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
             {nextLine}
           </p>
           <a class="button button--text mt-5" href={cardHref(next)}>View weekend</a>
-          <img
-            src={`/vendor/circuits/${next.circuitLayoutId}.svg`}
-            alt=""
-            loading="lazy"
-            class="pointer-events-none absolute right-5 bottom-5 h-24 w-28 object-contain opacity-15 md:top-1/2 md:right-6 md:bottom-auto md:h-32 md:w-36 md:-translate-y-1/2 md:opacity-20 light:invert"
-          />
         </div>
       )}
     </div>
