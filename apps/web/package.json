@@ -6,16 +6,18 @@
   "scripts": {
     "types": "wrangler types",
     "dev": "wrangler types && CLOUDFLARE_VITE_FORCE_LOCAL=true astro dev",
-    "check": "wrangler types && astro check",
+    "check": "wrangler types && astro check && svelte-check --tsconfig ./tsconfig.json",
     "test": "wrangler types && vitest run",
     "build": "wrangler types && astro build",
     "test:e2e": "playwright test"
   },
   "dependencies": {
     "@astrojs/cloudflare": "14.2.3",
+    "@astrojs/svelte": "9.0.1",
     "@fontsource-variable/space-grotesk": "5.3.0",
     "@fontsource/barlow-condensed": "5.3.0",
-    "astro": "7.2.4"
+    "astro": "7.2.4",
+    "svelte": "5.56.10"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
@@ -23,6 +25,7 @@
     "@playwright/test": "1.61.1",
     "@tailwindcss/vite": "4.3.3",
     "@types/node": "^24.0.0",
+    "svelte-check": "^4.7.6",
     "tailwindcss": "4.3.3",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4",

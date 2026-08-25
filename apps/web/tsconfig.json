@@ -3,6 +3,7 @@
   "include": [
     ".astro/types.d.ts",
     "src/**/*",
+    "src/**/*.svelte",
     "tests/**/*",
     "worker-configuration.d.ts"
   ],

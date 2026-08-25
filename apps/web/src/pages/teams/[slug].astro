@@ -1,14 +1,9 @@
 ---
-import { env } from "cloudflare:workers";
 import CurrentSeasonPanel from "../../components/CurrentSeasonPanel.astro";
 import HistoryEnd from "../../components/HistoryEnd.astro";
 import SeasonMatrix from "../../components/SeasonMatrix.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { resolveSeasonSelection } from "../../lib/routing.js";
-import {
-  createD1TeamDatabase,
-  createTeamRepository,
-} from "../../lib/team-repository.js";
 import {
   colorForYear,
   getTeamBranding,
@@ -16,23 +11,12 @@ import {
   vendorIndexes,
 } from "../../lib/vendor.js";
 
+const { team: teamRepository } = Astro.locals.app.repositories;
 const slug = (Astro.params.slug ?? "").toLowerCase();
-const repository = import.meta.env.DEV
-  ? createTeamRepository()
-  : createTeamRepository(createD1TeamDatabase(env.F1_DB));
-
-const team = await repository.getTeam(slug);
+const team = await teamRepository.getTeam(slug);
 if (!team) Astro.response.status = 404;
 
 const branding = getTeamBranding(vendorIndexes, slug);
-
-// 上游数据最快 30 分钟更新一次，边缘短暂缓存可吸收重复请求
-if (team) {
-  Astro.response.headers.set(
-    "Cache-Control",
-    "public, s-maxage=300, stale-while-revalidate=600",
-  );
-}
 
 const currentYear = team?.activeSeason ?? null;
 const standaloneLineage = team?.lineage.filter((entry) => entry.segment === "standalone") ?? [];

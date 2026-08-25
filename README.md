@@ -2,7 +2,7 @@
 
 F1 比赛周末信息中心：为当前赛季提供结构化、易浏览的数据，包括赛历与赛季进度、下一站倒计时、各站排位赛与正赛结果、车手与车队积分榜、数据来源与新鲜度。
 
-技术路线：Astro（Cloudflare Workers）+ Tailwind CSS v4（双层令牌、深/亮双主题）+ f1db 数据经周同步进 D1。
+技术路线：Astro（Cloudflare Workers）+ Svelte 5 islands（仅交互组件）+ Tailwind CSS v4（双层令牌、深/亮双主题）+ f1db 数据经周同步进 D1。
 
 ## 目录结构
 
@@ -38,6 +38,11 @@ f1db（CC-BY-4.0）→ `data-sync.yml` 按上游发布节奏轮询 release tag�
 - `base.css` 承载元素级基础与全局效果，`components.css` 承载高频组件类。
 - 组件以工具类为主、禁止硬编码颜色（队色等数据语义色例外，需注释）。
 - 双主题与对比度由 `tests/e2e/theme.spec.ts` 与 `tests/e2e/a11y.spec.ts`（axe，双主题 × 页面矩阵）回归兜底。
+
+## 前端架构
+
+- Astro 负责页面、路由、布局、服务端数据层与全部纯展示组件；交互组件（ThemeToggle / SeasonFilter / AskPanel）是 Svelte 5 island，按需局部水合，其余页面零 JS。
+- 选型判据与例外（渐进增强、一次性变换、首屏内联）见 `AGENTS.md` 的「框架边界」。
 
 ## 开发与发布流程
 

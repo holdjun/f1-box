@@ -22,6 +22,10 @@ for (const scheme of ["dark", "light"] as const) {
 
     for (const path of pages) {
       test(`@desktop ${path} has no axe violations`, async ({ page }) => {
+        // axe 的 color-contrast 对重页面（teams/ferrari 数千元素）耗时
+        // 与环境负载成正比，低负载数秒、高负载可达数十秒；30s 默认超时
+        // 在 CI 偶发负载下不足，放宽到 90s 只影响本 spec
+        test.setTimeout(90_000);
         await page.goto(path);
         const { violations } = await new AxeBuilder({ page }).analyze();
         expect(

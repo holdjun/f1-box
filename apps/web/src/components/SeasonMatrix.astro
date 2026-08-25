@@ -2,7 +2,7 @@
 import { formatPosition, resultClass } from "../lib/result-display.js";
 import { type RaceCell, seasonGap } from "../lib/team-repository.js";
 import { alpha2Flag } from "../lib/tokens.js";
-import SeasonFilter from "./SeasonFilter.astro";
+import SeasonFilter from "./SeasonFilter.svelte";
 
 interface MatrixRound {
   code: string;
@@ -64,6 +64,7 @@ const cellClasses =
   label="Filter by season"
   sticky
   initialSelected={initialSelected}
+  client:load
 />
 <section class="legend mb-5 flex flex-wrap gap-x-[1.1rem] gap-y-2 text-[0.72rem] text-ink-muted" aria-label="Table legend">
   <span class={keyClasses}><i class="result-win size-[0.72rem] rounded-[4px]"></i>Win</span>

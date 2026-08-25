@@ -1,31 +1,17 @@
 ---
-import { env } from "cloudflare:workers";
-import SeasonFilter from "../../components/SeasonFilter.astro";
+import SeasonFilter from "../../components/SeasonFilter.svelte";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import {
-  createD1DriverDatabase,
-  createDriverRepository,
-} from "../../lib/driver-repository.js";
 import { gridFillers } from "../../lib/layout.js";
 import { resolveCatalogYear } from "../../lib/routing.js";
 import { monogram } from "../../lib/tokens.js";
 
-const repository = import.meta.env.DEV
-  ? createDriverRepository()
-  : createDriverRepository(createD1DriverDatabase(env.F1_DB));
-
-const years = await repository.getSeasonYears();
+const { driver: driverRepository } = Astro.locals.app.repositories;
+const years = await driverRepository.getSeasonYears();
 const year = resolveCatalogYear(Astro.url.searchParams.get("year"), years);
 const drivers =
   year === null
-    ? await repository.getDrivers()
-    : await repository.getDriversByYear(year);
-
-// 目录查询是全库最重的聚合，边缘短暂缓存吸收重复请求
-Astro.response.headers.set(
-  "Cache-Control",
-  "public, s-maxage=300, stale-while-revalidate=600",
-);
+    ? await driverRepository.getDrivers()
+    : await driverRepository.getDriversByYear(year);
 
 const cardClasses =
   "driver-card group relative flex flex-col items-center gap-3 rounded-md bg-surface-raised p-5 transition-[background-color,transform] duration-200 [content-visibility:auto] [contain-intrinsic-size:auto_11rem] hover:-translate-y-1 hover:bg-surface-overlay hover:z-1";
@@ -41,6 +27,7 @@ const cardClasses =
       current={year}
       label="Filter by season"
       sticky
+      client:load
     />
     <div class="grid grid-cols-1 gap-px rounded-md bg-line light:shadow-panel md:grid-cols-2 lg:grid-cols-3">
       {drivers.map((driver) => (

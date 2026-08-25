@@ -1,26 +1,19 @@
 ---
-import { env } from "cloudflare:workers";
-
 import ResultsNav from "../../../components/ResultsNav.astro";
-import SeasonFilter from "../../../components/SeasonFilter.astro";
+import SeasonFilter from "../../../components/SeasonFilter.svelte";
 import StandingsTable from "../../../components/StandingsTable.astro";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
-import {
-  createD1RaceResultsDatabase,
-  createRaceResultsRepository,
-} from "../../../lib/race-results-repository.js";
 
 const year = Number(Astro.params.year);
-const repository = import.meta.env.DEV
-  ? createRaceResultsRepository()
-  : createRaceResultsRepository(createD1RaceResultsDatabase(env.F1_DB));
+const { raceResults } = Astro.locals.app.repositories;
 const [availableYears, rows] = await Promise.all([
-  repository.getSeasonYears(),
-  repository.getConstructorStandings(year),
+  raceResults.getSeasonYears(),
+  raceResults.getConstructorStandings(year),
 ]);
 if (!availableYears.includes(year)) Astro.response.status = 404;
-if (rows.length > 0) {
-  Astro.response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
+// 空排名显式 no-store，避免 data-sync 更新被边缘缓存延迟
+if (rows.length === 0) {
+  Astro.response.headers.set("Cache-Control", "no-store");
 }
 ---
 
@@ -32,9 +25,10 @@ if (rows.length > 0) {
       years={availableYears}
       mode="link"
       current={year}
-      hrefFor={(y) => `/results/${y}/teams`}
+      hrefPattern="/results/{year}/teams"
       sticky
       showAll={false}
+      client:load
     />
     <StandingsTable kind="constructors" rows={rows} />
   </main>
