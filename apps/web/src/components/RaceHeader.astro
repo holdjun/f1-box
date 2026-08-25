@@ -1,7 +1,8 @@
 ---
 import type { RaceMeta } from "../lib/race-results-repository.js";
-import { formatUtcDate, formatUtcDateTime } from "../lib/time.js";
+import { formatUtcDate } from "../lib/time.js";
 import CircuitMap from "./CircuitMap.astro";
+import WeekendSchedule from "./WeekendSchedule.svelte";
 
 interface Props {
   meta: RaceMeta;
@@ -41,26 +42,6 @@ const round = String(meta.round).padStart(2, "0");
     </div>
   </div>
   {meta.sessions.length > 0 ? (
-    <ol class="weekend-schedule mt-12 list-none border-t border-line p-0">
-      {meta.sessions.map((session, index) => (
-        <li class="grid min-h-28 grid-cols-[3rem_1fr] items-center gap-3 border-b border-line py-4 md:grid-cols-[6rem_1fr_auto] md:gap-6">
-          <span class="font-display text-2xl text-ink-muted md:text-[2.6rem]" aria-hidden="true"
-            >{String(index + 1).padStart(2, "0")}</span
-          >
-          <div>
-            <h2 class="mb-1.5 text-[1.75rem]">{session.label}</h2>
-            <time class="block text-[0.76rem] text-ink-strong" datetime={session.startsAtUtc}
-              >{formatUtcDateTime(session.startsAtUtc)}</time
-            >
-            <span
-              class="mt-0.5 block text-[0.76rem] text-ink-muted"
-              data-local-time
-              data-timestamp={session.startsAtUtc}
-              hidden
-            ></span>
-          </div>
-        </li>
-      ))}
-    </ol>
+    <WeekendSchedule sessions={meta.sessions} client:load />
   ) : null}
 </header>

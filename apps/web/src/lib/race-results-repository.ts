@@ -16,8 +16,10 @@ export interface RaceSummary {
   time: string | null;
   laps: number;
   circuitId: string;
+  circuitLayoutId: string;
   circuitName: string;
   circuitPlace: string;
+  sessions: RaceSession[];
   winnerName: string | null;
   winnerCode: string | null;
   winnerDriverId: string | null;
@@ -200,7 +202,13 @@ export function createD1RaceResultsDatabase(
 const seasonCalendarSql = `SELECT ra.round, ra.grand_prix_id AS slug, gp.name,
        gp.full_name AS race_name, c.alpha2_code, c.name AS country_name,
        ra.date, ra.time, ra.laps,
-       ci.id AS circuit_id, ci.name AS circuit_name, ci.place_name AS circuit_place,
+       ra.circuit_layout_id, ci.id AS circuit_id, ci.name AS circuit_name, ci.place_name AS circuit_place,
+       ra.free_practice_1_date, ra.free_practice_1_time,
+       ra.free_practice_2_date, ra.free_practice_2_time,
+       ra.free_practice_3_date, ra.free_practice_3_time,
+       ra.qualifying_date, ra.qualifying_time,
+       ra.sprint_qualifying_date, ra.sprint_qualifying_time,
+       ra.sprint_race_date, ra.sprint_race_time,
        wd.id AS winner_driver_id, wd.name AS winner_name, wd.abbreviation AS winner_code,
        wct.id AS winner_team_id, wct.name AS winner_team_name, wrr.time AS winner_time,
        pd.name AS pole_name, pd.abbreviation AS pole_code
@@ -233,8 +241,10 @@ function mapRaceSummary(row: unknown): RaceSummary {
     time: r.time === null ? null : asString(r.time, "race time"),
     laps: asNumber(r.laps, "laps"),
     circuitId: asString(r.circuit_id, "circuit id"),
+    circuitLayoutId: asString(r.circuit_layout_id, "circuit layout id"),
     circuitName: asString(r.circuit_name, "circuit name"),
     circuitPlace: asString(r.circuit_place, "circuit place"),
+    sessions: buildSessions(r),
     winnerName:
       r.winner_name === null ? null : asString(r.winner_name, "winner name"),
     winnerCode:
@@ -422,7 +432,8 @@ function buildSessions(r: Record<string, unknown>): RaceSession[] {
     const time = r[timeKey] ?? "00:00";
     sessions.push({ key, label, startsAtUtc: `${date}T${time}:00Z` });
   }
-  return sessions;
+  // defs 顺序是字段映射序；sprint 周末 Quali 在 Sprint 之后，按开始时间排回真实顺序
+  return sessions.sort((a, b) => a.startsAtUtc.localeCompare(b.startsAtUtc));
 }
 
 function mapRaceMeta(row: unknown): RaceMeta {

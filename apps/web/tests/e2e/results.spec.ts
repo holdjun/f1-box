@@ -73,6 +73,22 @@ test.describe("race detail", () => {
     await expect(schedule).toContainText("Qualifying");
   });
 
+  test("@desktop session times toggle between UTC and local", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races/australia/race-result");
+    const toggle = page.locator("[data-time-toggle]");
+    const firstTime = page.locator("[data-session-time]").first();
+    // SSR 默认 UTC
+    await expect(toggle).toHaveText("UTC");
+    await expect(firstTime).toContainText("UTC");
+    await toggle.click();
+    await expect(toggle).toHaveText("Your time");
+    await expect(firstTime).not.toContainText("UTC");
+    await toggle.click();
+    await expect(firstTime).toContainText("UTC");
+  });
+
   test("@desktop hero shows the circuit map linking to its circuit page", async ({
     page,
   }) => {

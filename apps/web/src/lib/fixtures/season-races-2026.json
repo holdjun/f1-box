@@ -1,27 +1,1108 @@
 {
-  "years": [2026, 2025],
+  "years": [
+    2026,
+    2025
+  ],
   "races": [
-    { "round": 1, "slug": "australia", "name": "Australia", "raceName": "Australian Grand Prix", "alpha2Code": "AU", "countryName": "Australia", "date": "2026-03-08", "time": "04:00", "laps": 58, "circuitId": "melbourne", "circuitName": "Melbourne", "circuitPlace": "Melbourne", "winnerName": "George Russell", "winnerCode": "RUS", "winnerDriverId": "george-russell", "winnerTeamId": "mercedes", "winnerTeamName": "Mercedes", "winnerTime": "1:23:06.801", "poleName": "George Russell", "poleCode": "RUS" },
-    { "round": 2, "slug": "china", "name": "China", "raceName": "Chinese Grand Prix", "alpha2Code": "CN", "countryName": "China", "date": "2026-03-15", "time": "07:00", "laps": 56, "circuitId": "shanghai", "circuitName": "Shanghai", "circuitPlace": "Shanghai", "winnerName": "Kimi Antonelli", "winnerCode": "ANT", "winnerDriverId": "kimi-antonelli", "winnerTeamId": "mercedes", "winnerTeamName": "Mercedes", "winnerTime": "1:33:15.607", "poleName": "Kimi Antonelli", "poleCode": "ANT" },
-    { "round": 3, "slug": "japan", "name": "Japan", "raceName": "Japanese Grand Prix", "alpha2Code": "JP", "countryName": "Japan", "date": "2026-03-29", "time": "05:00", "laps": 53, "circuitId": "suzuka", "circuitName": "Suzuka", "circuitPlace": "Suzuka", "winnerName": "Kimi Antonelli", "winnerCode": "ANT", "winnerDriverId": "kimi-antonelli", "winnerTeamId": "mercedes", "winnerTeamName": "Mercedes", "winnerTime": "1:28:03.403", "poleName": "Kimi Antonelli", "poleCode": "ANT" },
-    { "round": 4, "slug": "miami", "name": "Miami", "raceName": "Miami Grand Prix", "alpha2Code": "US", "countryName": "United States of America", "date": "2026-05-03", "time": "17:00", "laps": 57, "circuitId": "miami", "circuitName": "Miami", "circuitPlace": "Miami Gardens", "winnerName": "Kimi Antonelli", "winnerCode": "ANT", "winnerDriverId": "kimi-antonelli", "winnerTeamId": "mercedes", "winnerTeamName": "Mercedes", "winnerTime": "1:33:19.273", "poleName": "Kimi Antonelli", "poleCode": "ANT" },
-    { "round": 5, "slug": "canada", "name": "Canada", "raceName": "Canadian Grand Prix", "alpha2Code": "CA", "countryName": "Canada", "date": "2026-05-24", "time": "20:00", "laps": 68, "circuitId": "montreal", "circuitName": "Gilles Villeneuve", "circuitPlace": "Montreal", "winnerName": "Kimi Antonelli", "winnerCode": "ANT", "winnerDriverId": "kimi-antonelli", "winnerTeamId": "mercedes", "winnerTeamName": "Mercedes", "winnerTime": "1:28:15.758", "poleName": "George Russell", "poleCode": "RUS" },
-    { "round": 6, "slug": "monaco", "name": "Monaco", "raceName": "Monaco Grand Prix", "alpha2Code": "MC", "countryName": "Monaco", "date": "2026-06-07", "time": "13:00", "laps": 78, "circuitId": "monaco", "circuitName": "Monaco", "circuitPlace": "Monte Carlo", "winnerName": "Kimi Antonelli", "winnerCode": "ANT", "winnerDriverId": "kimi-antonelli", "winnerTeamId": "mercedes", "winnerTeamName": "Mercedes", "winnerTime": "2:23:31.243", "poleName": "Kimi Antonelli", "poleCode": "ANT" },
-    { "round": 7, "slug": "barcelona-catalunya", "name": "Barcelona-Catalunya", "raceName": "Barcelona-Catalunya Grand Prix", "alpha2Code": "ES", "countryName": "Spain", "date": "2026-06-14", "time": "13:00", "laps": 66, "circuitId": "catalunya", "circuitName": "Catalunya", "circuitPlace": "Montmeló", "winnerName": "Lewis Hamilton", "winnerCode": "HAM", "winnerDriverId": "lewis-hamilton", "winnerTeamId": "ferrari", "winnerTeamName": "Ferrari", "winnerTime": "1:32:28.105", "poleName": "George Russell", "poleCode": "RUS" },
-    { "round": 8, "slug": "austria", "name": "Austria", "raceName": "Austrian Grand Prix", "alpha2Code": "AT", "countryName": "Austria", "date": "2026-06-28", "time": "13:00", "laps": 71, "circuitId": "spielberg", "circuitName": "Red Bull Ring", "circuitPlace": "Spielberg", "winnerName": "George Russell", "winnerCode": "RUS", "winnerDriverId": "george-russell", "winnerTeamId": "mercedes", "winnerTeamName": "Mercedes", "winnerTime": "1:26:37.979", "poleName": "George Russell", "poleCode": "RUS" },
-    { "round": 9, "slug": "great-britain", "name": "Great Britain", "raceName": "British Grand Prix", "alpha2Code": "GB", "countryName": "United Kingdom", "date": "2026-07-05", "time": "14:00", "laps": 52, "circuitId": "silverstone", "circuitName": "Silverstone", "circuitPlace": "Silverstone", "winnerName": "Charles Leclerc", "winnerCode": "LEC", "winnerDriverId": "charles-leclerc", "winnerTeamId": "ferrari", "winnerTeamName": "Ferrari", "winnerTime": "1:27:11.335", "poleName": "Kimi Antonelli", "poleCode": "ANT" },
-    { "round": 10, "slug": "belgium", "name": "Belgium", "raceName": "Belgian Grand Prix", "alpha2Code": "BE", "countryName": "Belgium", "date": "2026-07-19", "time": "13:00", "laps": 44, "circuitId": "spa-francorchamps", "circuitName": "Spa-Francorchamps", "circuitPlace": "Spa", "winnerName": "Kimi Antonelli", "winnerCode": "ANT", "winnerDriverId": "kimi-antonelli", "winnerTeamId": "mercedes", "winnerTeamName": "Mercedes", "winnerTime": "1:24:42.479", "poleName": "Kimi Antonelli", "poleCode": "ANT" },
-    { "round": 11, "slug": "hungary", "name": "Hungary", "raceName": "Hungarian Grand Prix", "alpha2Code": "HU", "countryName": "Hungary", "date": "2026-07-26", "time": "13:00", "laps": 70, "circuitId": "hungaroring", "circuitName": "Hungaroring", "circuitPlace": "Budapest", "winnerName": "Lando Norris", "winnerCode": "NOR", "winnerDriverId": "lando-norris", "winnerTeamId": "mclaren", "winnerTeamName": "McLaren", "winnerTime": "1:39:56.180", "poleName": "Lando Norris", "poleCode": "NOR" },
-    { "round": 12, "slug": "netherlands", "name": "Netherlands", "raceName": "Dutch Grand Prix", "alpha2Code": "NL", "countryName": "Netherlands", "date": "2026-08-23", "time": "13:00", "laps": 72, "circuitId": "zandvoort", "circuitName": "Zandvoort", "circuitPlace": "Zandvoort", "winnerName": null, "winnerCode": null, "winnerDriverId": null, "winnerTeamId": null, "winnerTeamName": null, "winnerTime": null, "poleName": null, "poleCode": null },
-    { "round": 13, "slug": "italy", "name": "Italy", "raceName": "Italian Grand Prix", "alpha2Code": "IT", "countryName": "Italy", "date": "2026-09-06", "time": "13:00", "laps": 53, "circuitId": "monza", "circuitName": "Monza", "circuitPlace": "Monza", "winnerName": null, "winnerCode": null, "winnerDriverId": null, "winnerTeamId": null, "winnerTeamName": null, "winnerTime": null, "poleName": null, "poleCode": null },
-    { "round": 14, "slug": "spain", "name": "Spain", "raceName": "Spanish Grand Prix", "alpha2Code": "ES", "countryName": "Spain", "date": "2026-09-13", "time": "13:00", "laps": 57, "circuitId": "madring", "circuitName": "Madring", "circuitPlace": "Madrid", "winnerName": null, "winnerCode": null, "winnerDriverId": null, "winnerTeamId": null, "winnerTeamName": null, "winnerTime": null, "poleName": null, "poleCode": null },
-    { "round": 15, "slug": "azerbaijan", "name": "Azerbaijan", "raceName": "Azerbaijan Grand Prix", "alpha2Code": "AZ", "countryName": "Azerbaijan", "date": "2026-09-26", "time": "11:00", "laps": 51, "circuitId": "baku", "circuitName": "Baku", "circuitPlace": "Baku", "winnerName": null, "winnerCode": null, "winnerDriverId": null, "winnerTeamId": null, "winnerTeamName": null, "winnerTime": null, "poleName": null, "poleCode": null },
-    { "round": 16, "slug": "singapore", "name": "Singapore", "raceName": "Singapore Grand Prix", "alpha2Code": "SG", "countryName": "Singapore", "date": "2026-10-11", "time": "12:00", "laps": 62, "circuitId": "marina-bay", "circuitName": "Marina Bay", "circuitPlace": "Singapore", "winnerName": null, "winnerCode": null, "winnerDriverId": null, "winnerTeamId": null, "winnerTeamName": null, "winnerTime": null, "poleName": null, "poleCode": null },
-    { "round": 17, "slug": "united-states", "name": "United States", "raceName": "United States Grand Prix", "alpha2Code": "US", "countryName": "United States of America", "date": "2026-10-25", "time": "20:00", "laps": 56, "circuitId": "austin", "circuitName": "Americas", "circuitPlace": "Austin", "winnerName": null, "winnerCode": null, "winnerDriverId": null, "winnerTeamId": null, "winnerTeamName": null, "winnerTime": null, "poleName": null, "poleCode": null },
-    { "round": 18, "slug": "mexico", "name": "Mexico", "raceName": "Mexican Grand Prix", "alpha2Code": "MX", "countryName": "Mexico", "date": "2026-11-01", "time": "20:00", "laps": 71, "circuitId": "mexico-city", "circuitName": "Hermanos Rodríguez", "circuitPlace": "Mexico City", "winnerName": null, "winnerCode": null, "winnerDriverId": null, "winnerTeamId": null, "winnerTeamName": null, "winnerTime": null, "poleName": null, "poleCode": null },
-    { "round": 19, "slug": "sao-paulo", "name": "São Paulo", "raceName": "São Paulo Grand Prix", "alpha2Code": "BR", "countryName": "Brazil", "date": "2026-11-08", "time": "17:00", "laps": 71, "circuitId": "interlagos", "circuitName": "José Carlos Pace", "circuitPlace": "São Paulo", "winnerName": null, "winnerCode": null, "winnerDriverId": null, "winnerTeamId": null, "winnerTeamName": null, "winnerTime": null, "poleName": null, "poleCode": null },
-    { "round": 20, "slug": "las-vegas", "name": "Las Vegas", "raceName": "Las Vegas Grand Prix", "alpha2Code": "US", "countryName": "United States of America", "date": "2026-11-22", "time": "04:00", "laps": 50, "circuitId": "las-vegas", "circuitName": "Las Vegas", "circuitPlace": "Las Vegas", "winnerName": null, "winnerCode": null, "winnerDriverId": null, "winnerTeamId": null, "winnerTeamName": null, "winnerTime": null, "poleName": null, "poleCode": null },
-    { "round": 21, "slug": "qatar", "name": "Qatar", "raceName": "Qatar Grand Prix", "alpha2Code": "QA", "countryName": "Qatar", "date": "2026-11-29", "time": "16:00", "laps": 57, "circuitId": "lusail", "circuitName": "Lusail", "circuitPlace": "Lusail", "winnerName": null, "winnerCode": null, "winnerDriverId": null, "winnerTeamId": null, "winnerTeamName": null, "winnerTime": null, "poleName": null, "poleCode": null },
-    { "round": 22, "slug": "abu-dhabi", "name": "Abu Dhabi", "raceName": "Abu Dhabi Grand Prix", "alpha2Code": "AE", "countryName": "United Arab Emirates", "date": "2026-12-06", "time": "13:00", "laps": 58, "circuitId": "yas-marina", "circuitName": "Yas Marina", "circuitPlace": "Abu Dhabi", "winnerName": null, "winnerCode": null, "winnerDriverId": null, "winnerTeamId": null, "winnerTeamName": null, "winnerTime": null, "poleName": null, "poleCode": null }
+    {
+      "round": 1,
+      "slug": "australia",
+      "name": "Australia",
+      "raceName": "Australian Grand Prix",
+      "alpha2Code": "AU",
+      "countryName": "Australia",
+      "date": "2026-03-08",
+      "time": "04:00",
+      "laps": 58,
+      "circuitId": "melbourne",
+      "circuitName": "Melbourne",
+      "circuitPlace": "Melbourne",
+      "winnerName": "George Russell",
+      "winnerCode": "RUS",
+      "winnerDriverId": "george-russell",
+      "winnerTeamId": "mercedes",
+      "winnerTeamName": "Mercedes",
+      "winnerTime": "1:23:06.801",
+      "poleName": "George Russell",
+      "poleCode": "RUS",
+      "circuitLayoutId": "melbourne-2",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-03-06T01:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-03-06T05:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-03-07T01:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-03-07T05:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-03-08T04:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "slug": "china",
+      "name": "China",
+      "raceName": "Chinese Grand Prix",
+      "alpha2Code": "CN",
+      "countryName": "China",
+      "date": "2026-03-15",
+      "time": "07:00",
+      "laps": 56,
+      "circuitId": "shanghai",
+      "circuitName": "Shanghai",
+      "circuitPlace": "Shanghai",
+      "winnerName": "Kimi Antonelli",
+      "winnerCode": "ANT",
+      "winnerDriverId": "kimi-antonelli",
+      "winnerTeamId": "mercedes",
+      "winnerTeamName": "Mercedes",
+      "winnerTime": "1:33:15.607",
+      "poleName": "Kimi Antonelli",
+      "poleCode": "ANT",
+      "circuitLayoutId": "shanghai-1",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-03-13T03:30:00Z"
+        },
+        {
+          "key": "sprint-qualifying",
+          "label": "Sprint Qualifying",
+          "startsAtUtc": "2026-03-13T07:30:00Z"
+        },
+        {
+          "key": "sprint",
+          "label": "Sprint",
+          "startsAtUtc": "2026-03-14T03:00:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-03-14T07:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-03-15T07:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "slug": "japan",
+      "name": "Japan",
+      "raceName": "Japanese Grand Prix",
+      "alpha2Code": "JP",
+      "countryName": "Japan",
+      "date": "2026-03-29",
+      "time": "05:00",
+      "laps": 53,
+      "circuitId": "suzuka",
+      "circuitName": "Suzuka",
+      "circuitPlace": "Suzuka",
+      "winnerName": "Kimi Antonelli",
+      "winnerCode": "ANT",
+      "winnerDriverId": "kimi-antonelli",
+      "winnerTeamId": "mercedes",
+      "winnerTeamName": "Mercedes",
+      "winnerTime": "1:28:03.403",
+      "poleName": "Kimi Antonelli",
+      "poleCode": "ANT",
+      "circuitLayoutId": "suzuka-2",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-03-27T02:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-03-27T06:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-03-28T02:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-03-28T06:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-03-29T05:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "slug": "miami",
+      "name": "Miami",
+      "raceName": "Miami Grand Prix",
+      "alpha2Code": "US",
+      "countryName": "United States of America",
+      "date": "2026-05-03",
+      "time": "17:00",
+      "laps": 57,
+      "circuitId": "miami",
+      "circuitName": "Miami",
+      "circuitPlace": "Miami Gardens",
+      "winnerName": "Kimi Antonelli",
+      "winnerCode": "ANT",
+      "winnerDriverId": "kimi-antonelli",
+      "winnerTeamId": "mercedes",
+      "winnerTeamName": "Mercedes",
+      "winnerTime": "1:33:19.273",
+      "poleName": "Kimi Antonelli",
+      "poleCode": "ANT",
+      "circuitLayoutId": "miami-1",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-05-01T16:00:00Z"
+        },
+        {
+          "key": "sprint-qualifying",
+          "label": "Sprint Qualifying",
+          "startsAtUtc": "2026-05-01T20:30:00Z"
+        },
+        {
+          "key": "sprint",
+          "label": "Sprint",
+          "startsAtUtc": "2026-05-02T16:00:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-05-02T20:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-05-03T17:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "slug": "canada",
+      "name": "Canada",
+      "raceName": "Canadian Grand Prix",
+      "alpha2Code": "CA",
+      "countryName": "Canada",
+      "date": "2026-05-24",
+      "time": "20:00",
+      "laps": 68,
+      "circuitId": "montreal",
+      "circuitName": "Gilles Villeneuve",
+      "circuitPlace": "Montreal",
+      "winnerName": "Kimi Antonelli",
+      "winnerCode": "ANT",
+      "winnerDriverId": "kimi-antonelli",
+      "winnerTeamId": "mercedes",
+      "winnerTeamName": "Mercedes",
+      "winnerTime": "1:28:15.758",
+      "poleName": "George Russell",
+      "poleCode": "RUS",
+      "circuitLayoutId": "montreal-6",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-05-22T16:30:00Z"
+        },
+        {
+          "key": "sprint-qualifying",
+          "label": "Sprint Qualifying",
+          "startsAtUtc": "2026-05-22T20:30:00Z"
+        },
+        {
+          "key": "sprint",
+          "label": "Sprint",
+          "startsAtUtc": "2026-05-23T16:00:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-05-23T20:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-05-24T20:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "slug": "monaco",
+      "name": "Monaco",
+      "raceName": "Monaco Grand Prix",
+      "alpha2Code": "MC",
+      "countryName": "Monaco",
+      "date": "2026-06-07",
+      "time": "13:00",
+      "laps": 78,
+      "circuitId": "monaco",
+      "circuitName": "Monaco",
+      "circuitPlace": "Monte Carlo",
+      "winnerName": "Kimi Antonelli",
+      "winnerCode": "ANT",
+      "winnerDriverId": "kimi-antonelli",
+      "winnerTeamId": "mercedes",
+      "winnerTeamName": "Mercedes",
+      "winnerTime": "2:23:31.243",
+      "poleName": "Kimi Antonelli",
+      "poleCode": "ANT",
+      "circuitLayoutId": "monaco-6",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-06-05T11:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-06-05T15:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-06-06T10:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-06-06T14:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-06-07T13:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "slug": "barcelona-catalunya",
+      "name": "Barcelona-Catalunya",
+      "raceName": "Barcelona-Catalunya Grand Prix",
+      "alpha2Code": "ES",
+      "countryName": "Spain",
+      "date": "2026-06-14",
+      "time": "13:00",
+      "laps": 66,
+      "circuitId": "catalunya",
+      "circuitName": "Catalunya",
+      "circuitPlace": "Montmeló",
+      "winnerName": "Lewis Hamilton",
+      "winnerCode": "HAM",
+      "winnerDriverId": "lewis-hamilton",
+      "winnerTeamId": "ferrari",
+      "winnerTeamName": "Ferrari",
+      "winnerTime": "1:32:28.105",
+      "poleName": "George Russell",
+      "poleCode": "RUS",
+      "circuitLayoutId": "catalunya-6",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-06-12T11:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-06-12T15:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-06-13T10:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-06-13T14:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-06-14T13:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 8,
+      "slug": "austria",
+      "name": "Austria",
+      "raceName": "Austrian Grand Prix",
+      "alpha2Code": "AT",
+      "countryName": "Austria",
+      "date": "2026-06-28",
+      "time": "13:00",
+      "laps": 71,
+      "circuitId": "spielberg",
+      "circuitName": "Red Bull Ring",
+      "circuitPlace": "Spielberg",
+      "winnerName": "George Russell",
+      "winnerCode": "RUS",
+      "winnerDriverId": "george-russell",
+      "winnerTeamId": "mercedes",
+      "winnerTeamName": "Mercedes",
+      "winnerTime": "1:26:37.979",
+      "poleName": "George Russell",
+      "poleCode": "RUS",
+      "circuitLayoutId": "spielberg-3",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-06-26T11:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-06-26T15:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-06-27T10:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-06-27T14:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-06-28T13:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 9,
+      "slug": "great-britain",
+      "name": "Great Britain",
+      "raceName": "British Grand Prix",
+      "alpha2Code": "GB",
+      "countryName": "United Kingdom",
+      "date": "2026-07-05",
+      "time": "14:00",
+      "laps": 52,
+      "circuitId": "silverstone",
+      "circuitName": "Silverstone",
+      "circuitPlace": "Silverstone",
+      "winnerName": "Charles Leclerc",
+      "winnerCode": "LEC",
+      "winnerDriverId": "charles-leclerc",
+      "winnerTeamId": "ferrari",
+      "winnerTeamName": "Ferrari",
+      "winnerTime": "1:27:11.335",
+      "poleName": "Kimi Antonelli",
+      "poleCode": "ANT",
+      "circuitLayoutId": "silverstone-8",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-07-03T11:30:00Z"
+        },
+        {
+          "key": "sprint-qualifying",
+          "label": "Sprint Qualifying",
+          "startsAtUtc": "2026-07-03T15:30:00Z"
+        },
+        {
+          "key": "sprint",
+          "label": "Sprint",
+          "startsAtUtc": "2026-07-04T11:00:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-07-04T15:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-07-05T14:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 10,
+      "slug": "belgium",
+      "name": "Belgium",
+      "raceName": "Belgian Grand Prix",
+      "alpha2Code": "BE",
+      "countryName": "Belgium",
+      "date": "2026-07-19",
+      "time": "13:00",
+      "laps": 44,
+      "circuitId": "spa-francorchamps",
+      "circuitName": "Spa-Francorchamps",
+      "circuitPlace": "Spa",
+      "winnerName": "Kimi Antonelli",
+      "winnerCode": "ANT",
+      "winnerDriverId": "kimi-antonelli",
+      "winnerTeamId": "mercedes",
+      "winnerTeamName": "Mercedes",
+      "winnerTime": "1:24:42.479",
+      "poleName": "Kimi Antonelli",
+      "poleCode": "ANT",
+      "circuitLayoutId": "spa-francorchamps-4",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-07-17T11:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-07-17T15:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-07-18T10:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-07-18T14:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-07-19T13:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 11,
+      "slug": "hungary",
+      "name": "Hungary",
+      "raceName": "Hungarian Grand Prix",
+      "alpha2Code": "HU",
+      "countryName": "Hungary",
+      "date": "2026-07-26",
+      "time": "13:00",
+      "laps": 70,
+      "circuitId": "hungaroring",
+      "circuitName": "Hungaroring",
+      "circuitPlace": "Budapest",
+      "winnerName": "Lando Norris",
+      "winnerCode": "NOR",
+      "winnerDriverId": "lando-norris",
+      "winnerTeamId": "mclaren",
+      "winnerTeamName": "McLaren",
+      "winnerTime": "1:39:56.180",
+      "poleName": "Lando Norris",
+      "poleCode": "NOR",
+      "circuitLayoutId": "hungaroring-3",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-07-24T11:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-07-24T15:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-07-25T10:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-07-25T14:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-07-26T13:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 12,
+      "slug": "netherlands",
+      "name": "Netherlands",
+      "raceName": "Dutch Grand Prix",
+      "alpha2Code": "NL",
+      "countryName": "Netherlands",
+      "date": "2026-08-23",
+      "time": "13:00",
+      "laps": 72,
+      "circuitId": "zandvoort",
+      "circuitName": "Zandvoort",
+      "circuitPlace": "Zandvoort",
+      "winnerName": null,
+      "winnerCode": null,
+      "winnerDriverId": null,
+      "winnerTeamId": null,
+      "winnerTeamName": null,
+      "winnerTime": null,
+      "poleName": null,
+      "poleCode": null,
+      "circuitLayoutId": "zandvoort-5",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-08-21T10:30:00Z"
+        },
+        {
+          "key": "sprint-qualifying",
+          "label": "Sprint Qualifying",
+          "startsAtUtc": "2026-08-21T14:30:00Z"
+        },
+        {
+          "key": "sprint",
+          "label": "Sprint",
+          "startsAtUtc": "2026-08-22T10:00:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-08-22T14:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-08-23T13:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 13,
+      "slug": "italy",
+      "name": "Italy",
+      "raceName": "Italian Grand Prix",
+      "alpha2Code": "IT",
+      "countryName": "Italy",
+      "date": "2026-09-06",
+      "time": "13:00",
+      "laps": 53,
+      "circuitId": "monza",
+      "circuitName": "Monza",
+      "circuitPlace": "Monza",
+      "winnerName": null,
+      "winnerCode": null,
+      "winnerDriverId": null,
+      "winnerTeamId": null,
+      "winnerTeamName": null,
+      "winnerTime": null,
+      "poleName": null,
+      "poleCode": null,
+      "circuitLayoutId": "monza-7",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-09-04T10:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-09-04T14:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-09-05T10:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-09-05T14:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-09-06T13:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 14,
+      "slug": "spain",
+      "name": "Spain",
+      "raceName": "Spanish Grand Prix",
+      "alpha2Code": "ES",
+      "countryName": "Spain",
+      "date": "2026-09-13",
+      "time": "13:00",
+      "laps": 57,
+      "circuitId": "madring",
+      "circuitName": "Madring",
+      "circuitPlace": "Madrid",
+      "winnerName": null,
+      "winnerCode": null,
+      "winnerDriverId": null,
+      "winnerTeamId": null,
+      "winnerTeamName": null,
+      "winnerTime": null,
+      "poleName": null,
+      "poleCode": null,
+      "circuitLayoutId": "madring-1",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-09-11T11:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-09-11T15:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-09-12T10:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-09-12T14:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-09-13T13:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 15,
+      "slug": "azerbaijan",
+      "name": "Azerbaijan",
+      "raceName": "Azerbaijan Grand Prix",
+      "alpha2Code": "AZ",
+      "countryName": "Azerbaijan",
+      "date": "2026-09-26",
+      "time": "11:00",
+      "laps": 51,
+      "circuitId": "baku",
+      "circuitName": "Baku",
+      "circuitPlace": "Baku",
+      "winnerName": null,
+      "winnerCode": null,
+      "winnerDriverId": null,
+      "winnerTeamId": null,
+      "winnerTeamName": null,
+      "winnerTime": null,
+      "poleName": null,
+      "poleCode": null,
+      "circuitLayoutId": "baku-1",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-09-24T08:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-09-24T12:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-09-25T08:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-09-25T12:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-09-26T11:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 16,
+      "slug": "singapore",
+      "name": "Singapore",
+      "raceName": "Singapore Grand Prix",
+      "alpha2Code": "SG",
+      "countryName": "Singapore",
+      "date": "2026-10-11",
+      "time": "12:00",
+      "laps": 62,
+      "circuitId": "marina-bay",
+      "circuitName": "Marina Bay",
+      "circuitPlace": "Singapore",
+      "winnerName": null,
+      "winnerCode": null,
+      "winnerDriverId": null,
+      "winnerTeamId": null,
+      "winnerTeamName": null,
+      "winnerTime": null,
+      "poleName": null,
+      "poleCode": null,
+      "circuitLayoutId": "marina-bay-4",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-10-09T09:30:00Z"
+        },
+        {
+          "key": "sprint-qualifying",
+          "label": "Sprint Qualifying",
+          "startsAtUtc": "2026-10-09T12:30:00Z"
+        },
+        {
+          "key": "sprint",
+          "label": "Sprint",
+          "startsAtUtc": "2026-10-10T09:00:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-10-10T13:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-10-11T12:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 17,
+      "slug": "united-states",
+      "name": "United States",
+      "raceName": "United States Grand Prix",
+      "alpha2Code": "US",
+      "countryName": "United States of America",
+      "date": "2026-10-25",
+      "time": "20:00",
+      "laps": 56,
+      "circuitId": "austin",
+      "circuitName": "Americas",
+      "circuitPlace": "Austin",
+      "winnerName": null,
+      "winnerCode": null,
+      "winnerDriverId": null,
+      "winnerTeamId": null,
+      "winnerTeamName": null,
+      "winnerTime": null,
+      "poleName": null,
+      "poleCode": null,
+      "circuitLayoutId": "austin-1",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-10-23T17:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-10-23T21:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-10-24T17:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-10-24T21:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-10-25T20:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 18,
+      "slug": "mexico",
+      "name": "Mexico",
+      "raceName": "Mexican Grand Prix",
+      "alpha2Code": "MX",
+      "countryName": "Mexico",
+      "date": "2026-11-01",
+      "time": "20:00",
+      "laps": 71,
+      "circuitId": "mexico-city",
+      "circuitName": "Hermanos Rodríguez",
+      "circuitPlace": "Mexico City",
+      "winnerName": null,
+      "winnerCode": null,
+      "winnerDriverId": null,
+      "winnerTeamId": null,
+      "winnerTeamName": null,
+      "winnerTime": null,
+      "poleName": null,
+      "poleCode": null,
+      "circuitLayoutId": "mexico-city-3",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-10-30T18:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-10-30T22:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-10-31T17:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-10-31T21:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-11-01T20:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 19,
+      "slug": "sao-paulo",
+      "name": "São Paulo",
+      "raceName": "São Paulo Grand Prix",
+      "alpha2Code": "BR",
+      "countryName": "Brazil",
+      "date": "2026-11-08",
+      "time": "17:00",
+      "laps": 71,
+      "circuitId": "interlagos",
+      "circuitName": "José Carlos Pace",
+      "circuitPlace": "São Paulo",
+      "winnerName": null,
+      "winnerCode": null,
+      "winnerDriverId": null,
+      "winnerTeamId": null,
+      "winnerTeamName": null,
+      "winnerTime": null,
+      "poleName": null,
+      "poleCode": null,
+      "circuitLayoutId": "interlagos-2",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-11-06T15:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-11-06T19:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-11-07T14:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-11-07T18:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-11-08T17:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 20,
+      "slug": "las-vegas",
+      "name": "Las Vegas",
+      "raceName": "Las Vegas Grand Prix",
+      "alpha2Code": "US",
+      "countryName": "United States of America",
+      "date": "2026-11-22",
+      "time": "04:00",
+      "laps": 50,
+      "circuitId": "las-vegas",
+      "circuitName": "Las Vegas",
+      "circuitPlace": "Las Vegas",
+      "winnerName": null,
+      "winnerCode": null,
+      "winnerDriverId": null,
+      "winnerTeamId": null,
+      "winnerTeamName": null,
+      "winnerTime": null,
+      "poleName": null,
+      "poleCode": null,
+      "circuitLayoutId": "las-vegas-1",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-11-20T00:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-11-20T04:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-11-21T00:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-11-21T04:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-11-22T04:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 21,
+      "slug": "qatar",
+      "name": "Qatar",
+      "raceName": "Qatar Grand Prix",
+      "alpha2Code": "QA",
+      "countryName": "Qatar",
+      "date": "2026-11-29",
+      "time": "16:00",
+      "laps": 57,
+      "circuitId": "lusail",
+      "circuitName": "Lusail",
+      "circuitPlace": "Lusail",
+      "winnerName": null,
+      "winnerCode": null,
+      "winnerDriverId": null,
+      "winnerTeamId": null,
+      "winnerTeamName": null,
+      "winnerTime": null,
+      "poleName": null,
+      "poleCode": null,
+      "circuitLayoutId": "lusail-1",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-11-27T13:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-11-27T17:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-11-28T14:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-11-28T18:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-11-29T16:00:00Z"
+        }
+      ]
+    },
+    {
+      "round": 22,
+      "slug": "abu-dhabi",
+      "name": "Abu Dhabi",
+      "raceName": "Abu Dhabi Grand Prix",
+      "alpha2Code": "AE",
+      "countryName": "United Arab Emirates",
+      "date": "2026-12-06",
+      "time": "13:00",
+      "laps": 58,
+      "circuitId": "yas-marina",
+      "circuitName": "Yas Marina",
+      "circuitPlace": "Abu Dhabi",
+      "winnerName": null,
+      "winnerCode": null,
+      "winnerDriverId": null,
+      "winnerTeamId": null,
+      "winnerTeamName": null,
+      "winnerTime": null,
+      "poleName": null,
+      "poleCode": null,
+      "circuitLayoutId": "yas-marina-2",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-12-04T09:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-12-04T13:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-12-05T10:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-12-05T14:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-12-06T13:00:00Z"
+        }
+      ]
+    }
   ]
 }

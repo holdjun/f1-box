@@ -1,5 +1,6 @@
 ---
 import RaceCard from "../../components/RaceCard.astro";
+import RaceCountdown from "../../components/RaceCountdown.svelte";
 import SeasonFilter from "../../components/SeasonFilter.svelte";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import type { RaceSummary } from "../../lib/race-results-repository.js";
@@ -19,7 +20,13 @@ if (races.length === 0) {
 
 const completed = races.filter((race) => race.winnerName !== null);
 const upcoming = races.filter((race) => race.winnerName === null);
-const next = upcoming[0];
+// Next 取第一个还有未开始 session 的未完赛站（结果滞后发布时，面板仍指向
+// 下一场即将开始的练习赛/排位/正赛所在站）；全部已过则回退首站
+const now = Date.now();
+const next =
+  upcoming.find((race) =>
+    race.sessions.some((s) => new Date(s.startsAtUtc).getTime() > now),
+  ) ?? upcoming[0];
 const nextLine = next
   ? `${formatUtcDateTime(`${next.date}T${next.time ?? "00:00"}:00Z`)} · ${next.circuitPlace}`
   : null;
@@ -51,6 +58,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
           <p class="mt-3 font-display text-[2rem] leading-[1.02] font-semibold uppercase">
             {next.raceName}
           </p>
+          <RaceCountdown sessions={next.sessions} client:load />
           <p class="mt-2 flex items-center gap-2 text-[0.8rem] text-ink-strong">
             <img
               src={`/vendor/country-flags/${next.alpha2Code.toLowerCase()}.svg`}
