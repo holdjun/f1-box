@@ -55,11 +55,13 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
           <p class="status-label status-label--accent">
             Next · Round {String(next.round).padStart(2, "0")}
           </p>
-          <p class="mt-3 font-display text-[2rem] leading-[1.02] font-semibold uppercase">
+          <p class="mt-3 font-display text-[2rem] leading-[1.02] font-semibold uppercase md:pr-28">
             {next.name}
           </p>
-          <RaceCountdown sessions={next.sessions} client:load />
-          <p class="mt-2 flex items-center gap-2 text-[0.8rem] text-ink-strong">
+          <div class="md:pr-28">
+            <RaceCountdown sessions={next.sessions} client:load />
+          </div>
+          <p class="mt-2 flex items-center gap-2 text-[0.8rem] text-ink-strong md:pr-28">
             <img
               src={`/vendor/country-flags/${next.alpha2Code.toLowerCase()}.svg`}
               alt=""
@@ -72,7 +74,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
             src={`/vendor/circuits/${next.circuitLayoutId}.svg`}
             alt=""
             loading="lazy"
-            class="pointer-events-none absolute top-1/2 right-5 h-20 w-24 -translate-y-1/2 object-contain opacity-15 light:invert"
+            class="pointer-events-none absolute right-5 bottom-5 h-24 w-28 object-contain opacity-15 md:top-1/2 md:right-6 md:bottom-auto md:h-32 md:w-36 md:-translate-y-1/2 md:opacity-20 light:invert"
           />
         </div>
       )}
