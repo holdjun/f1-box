@@ -44,6 +44,14 @@
 - e2e 钩子类（`race-card`、`season-filter*`、`ask__*`、`result-podium` 等）被 spec 依赖；重构可换样式实现，不得改名或删除钩子。
 - 主题状态：`html[data-theme]` + localStorage 键 `f1-theme`；ClientRouter 导航会同步 `<html>` 属性，主题重应用靠 BaseLayout 内联脚本的 `astro:after-swap` 监听，动这块时先读注释。
 
+# 框架边界
+
+- 默认 .astro + 服务端 TS：页面、路由、布局、数据层、API 路由、数据库内容的展示一律不做进 island——查库内容塞进 island 意味着巨大的 props 序列化与首屏/SEO 损失。
+- 满足任一条才起 Svelte island：用户操作后显示需持续随本地状态变化（开合、筛选、输入、对话）；需要管理焦点或键盘状态；状态需跨导航保留。
+- 两类交互仍走原生脚本，不是待迁移债务：无 JS 必须可用的渐进增强（如比赛详情 tab 就地切换：拦截链接降级为整页导航，操作对象是岛外服务端渲染的 DOM）；一次性客户端变换（如 data-local-time 时区格式化，无用户交互、无持续状态，几行全局脚本即最优解）。
+- 首屏绘制前必须执行的逻辑只能 is:inline 内联（如 BaseLayout 主题初始化）：island 水合晚于绘制，结构性不可承担。
+- 新交互功能默认从 island 起步；AskPanel 已让 Svelte runtime 全局加载，新增岛的边际成本只有组件代码本身，但这不构成扩大 island 化的理由。
+
 # 代码卫生
 
 - 注释只解释"为什么"，不解释"做什么"；不留注释掉的代码。
