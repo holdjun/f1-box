@@ -14,7 +14,7 @@ vi.mock("../src/lib/repositories.js", () => ({
 
 import { onRequest } from "../src/middleware.js";
 
-const CACHE_HEADER = "public, s-maxage=300, stale-while-revalidate=600";
+const CACHE_OPTIONS = { maxAge: 300, swr: 600, tags: ["f1db"] };
 
 // context 只构造 middleware 用到的最小形状；locals 由 middleware 写入 app
 function makeContext(
@@ -25,8 +25,9 @@ function makeContext(
 ) {
   const request = new Request(`https://example.com${path}`, { method });
   const locals: { app?: unknown } = {};
+  const cache = { set: vi.fn() };
   const next = vi.fn(async () => new Response(null, { status, headers }));
-  return { context: { locals, request } as never, next };
+  return { context: { locals, request, cache } as never, next, cache };
 }
 
 async function run(
@@ -37,7 +38,7 @@ async function run(
     headers?: Record<string, string>;
   } = {},
 ) {
-  const { context, next } = makeContext(
+  const { context, next, cache } = makeContext(
     path,
     opts.method,
     opts.status,
@@ -49,6 +50,7 @@ async function run(
   return {
     response,
     locals: (context as { locals: { app?: unknown } }).locals,
+    cache: cache as { set: ReturnType<typeof vi.fn> },
     next,
   };
 }
@@ -66,35 +68,36 @@ describe("middleware 默认缓存", () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 
-  it("GET 渲染页 2xx 无显式头时设置默认缓存", async () => {
-    const { response } = await run("/racing/2026");
-    expect(response.headers.get("Cache-Control")).toBe(CACHE_HEADER);
+  it("GET 渲染页 2xx 无显式头时 opt-in 边缘缓存", async () => {
+    const { cache } = await run("/racing/2026");
+    expect(cache.set).toHaveBeenCalledTimes(1);
+    expect(cache.set).toHaveBeenCalledWith(CACHE_OPTIONS);
   });
 
-  it("页面已显式设置 Cache-Control（no-store 信号）时不覆盖", async () => {
-    const { response } = await run("/racing/2026", {
+  it("页面已显式设置 Cache-Control（no-store 信号）时不 opt-in", async () => {
+    const { cache } = await run("/racing/2026", {
       headers: { "Cache-Control": "no-store" },
     });
-    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(cache.set).not.toHaveBeenCalled();
   });
 
-  it("POST API 请求不设缓存", async () => {
-    const { response } = await run("/api/ask", { method: "POST" });
-    expect(response.headers.has("Cache-Control")).toBe(false);
+  it("POST API 请求不 opt-in", async () => {
+    const { cache } = await run("/api/ask", { method: "POST" });
+    expect(cache.set).not.toHaveBeenCalled();
   });
 
-  it("GET API 路由不设缓存", async () => {
-    const { response } = await run("/api/health");
-    expect(response.headers.has("Cache-Control")).toBe(false);
+  it("GET API 路由不 opt-in", async () => {
+    const { cache } = await run("/api/health");
+    expect(cache.set).not.toHaveBeenCalled();
   });
 
-  it("重定向（3xx）不设缓存", async () => {
-    const { response } = await run("/", { status: 302 });
-    expect(response.headers.has("Cache-Control")).toBe(false);
+  it("重定向（3xx）不 opt-in", async () => {
+    const { cache } = await run("/", { status: 302 });
+    expect(cache.set).not.toHaveBeenCalled();
   });
 
-  it("404 不设缓存", async () => {
-    const { response } = await run("/results/2026/drivers", { status: 404 });
-    expect(response.headers.has("Cache-Control")).toBe(false);
+  it("404 不 opt-in", async () => {
+    const { cache } = await run("/results/2026/drivers", { status: 404 });
+    expect(cache.set).not.toHaveBeenCalled();
   });
 });
