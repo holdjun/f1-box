@@ -16,10 +16,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
     response.status < 300 &&
     !response.headers.has("Cache-Control")
   ) {
-    response.headers.set(
-      "Cache-Control",
-      "public, s-maxage=300, stale-while-revalidate=600",
-    );
+    // opt-in 边缘缓存：provider 生成 Cloudflare-CDN-Cache-Control + Cache-Tag，
+    // 命中时 Worker 完全不执行；列表页空数据 no-store 信号由上方条件跳过
+    context.cache.set({ maxAge: 300, swr: 600, tags: ["f1db"] });
   }
   return response;
 });
