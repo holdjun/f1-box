@@ -33,7 +33,7 @@ const teamColor = (constructorId: string | null): string | undefined =>
     href={href}
     aria-label={`Round ${round}: ${race.raceName}, ${race.countryName}`}
     class:list={[
-      "group relative flex h-full flex-col overflow-hidden rounded-md border bg-surface-raised p-5 transition-[background-color,transform,border-color] duration-200 hover:z-1 hover:-translate-y-1 hover:bg-surface-overlay focus-visible:z-1",
+      "group relative flex h-full flex-col overflow-hidden rounded-md border bg-surface-raised p-5 transition-[background-color,transform,border-color] duration-200 hover:z-1 hover:-translate-y-1 hover:bg-surface-overlay focus-visible:z-1 md:p-6",
       // border-line 与 border-accent 互斥：并列时编译顺序会让 border-line 覆盖 accent；
       // 同理 light:shadow-panel 会盖掉 next 的 inset 顶栏，只给非 next 卡
       status === "next"
@@ -41,55 +41,57 @@ const teamColor = (constructorId: string | null): string | undefined =>
         : "border-line light:shadow-panel",
     ]}
   >
-    <div class="flex items-end gap-2.5">
+    <div class="flex items-end gap-3">
       <span
-        class="font-display text-[2.6rem] leading-none font-semibold text-transparent [-webkit-text-stroke:1px_var(--ink-muted)]"
+        class="font-display text-[2.25rem] leading-none font-semibold text-transparent [-webkit-text-stroke:1px_var(--ink-muted)]"
         aria-hidden="true">{round}</span>
       <img
         src={`/vendor/country-flags/${race.alpha2Code.toLowerCase()}.svg`}
         alt=""
-        class="vendor-cell__flag mb-1.5"
+        class="vendor-cell__flag mb-1 h-4 w-6"
         loading="lazy"
       />
       <time
-        class="ml-auto flex items-center gap-1 pb-1 text-[0.72rem] tabular-nums text-ink-strong"
+        class="ml-auto flex items-center gap-1.5 pb-1 text-[0.72rem] tracking-[0.08em] tabular-nums text-ink-muted"
         datetime={race.date}
       >
         <span aria-hidden="true">🏁</span>
         {weekendRange}
       </time>
     </div>
-    <div class="mt-4 pr-8">
-      <h3 class="font-display text-[1.9rem] leading-[1.02] font-semibold uppercase">{race.name}</h3>
-      <p class="mt-1 text-[0.78rem] text-ink-muted">{placeLine}</p>
-      {status === "complete" && race.podium.length > 0 && (
-        <ol class="mt-5 grid grid-cols-3 gap-3 border-t border-line pt-4">
-          {race.podium.map((entry, index) => (
-            <li class="flex min-w-0 items-center gap-2.5">
-              <span
-                aria-hidden="true"
-                class="podium-mark w-6 shrink-0 font-display text-[1.5rem] leading-none font-bold [-webkit-text-stroke:1.5px_currentColor]"
-                style={teamColor(entry.constructorId) ? { color: teamColor(entry.constructorId) } : undefined}
-              >
-                {"/".repeat(index + 1)}
-              </span>
-              <span class="flex min-w-0 flex-col">
-                <span class="font-display text-[0.8rem] font-semibold tracking-[0.12em]">{entry.driverCode ?? "—"}</span>
-                <span class="text-[0.72rem] tabular-nums text-ink-strong">{entry.time ?? "—"}</span>
-              </span>
-            </li>
-          ))}
-        </ol>
-      )}
-      {status === "complete" && race.podium.length === 0 && (
-        <p class="mt-5 border-t border-line pt-4 text-[0.78rem] text-ink-muted">{race.winnerName}</p>
-      )}
+    <!-- 标题区 flex-1 吸收同行卡片的高差，等高分布在标题与领奖台之间；赛道图水印居中在右侧空带，不再与领奖台抢右下角 -->
+    <div class="relative mt-5 flex-1">
+      <h3 class="font-display text-[2.05rem] leading-[1.05] font-semibold uppercase md:pr-24">{race.name}</h3>
+      <p class="mt-1.5 text-[0.78rem] text-ink-muted md:pr-24">{placeLine}</p>
+      <img
+        src={`/vendor/circuits/${race.circuitLayoutId}.svg`}
+        alt=""
+        loading="lazy"
+        // 移动端标题常占满整行，水印底对齐避开标题、贴近较短的地点行；桌面标题带 pr-24 留白，可垂直居中
+        class="pointer-events-none absolute right-0 bottom-0 h-12 w-14 max-h-full object-contain opacity-20 transition-opacity duration-200 group-hover:opacity-45 md:top-1/2 md:bottom-auto md:h-16 md:w-20 md:-translate-y-1/2 light:invert"
+      />
     </div>
-    <img
-      src={`/vendor/circuits/${race.circuitLayoutId}.svg`}
-      alt=""
-      loading="lazy"
-      class="pointer-events-none absolute right-2 bottom-2 h-14 w-16 object-contain opacity-20 transition-opacity duration-200 group-hover:opacity-45 light:invert"
-    />
+    {status === "complete" && race.podium.length > 0 && (
+      <ol class="mt-5 grid grid-cols-3 gap-2 border-t border-line pt-4 md:gap-4">
+        {race.podium.map((entry, index) => (
+          <li class="flex min-w-0 items-center gap-2 md:gap-2.5">
+            <span
+              aria-hidden="true"
+              class="podium-mark w-5 shrink-0 font-display text-[1.35rem] leading-none font-bold [-webkit-text-stroke:1.5px_currentColor]"
+              style={teamColor(entry.constructorId) ? { color: teamColor(entry.constructorId) } : undefined}
+            >
+              {"/".repeat(index + 1)}
+            </span>
+            <span class="flex min-w-0 flex-col">
+              <span class="font-display text-[0.78rem] font-semibold tracking-[0.12em]">{entry.driverCode ?? "—"}</span>
+              <span class="mt-0.5 text-[0.72rem] tabular-nums text-ink-strong">{entry.time ?? "—"}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    )}
+    {status === "complete" && race.podium.length === 0 && (
+      <p class="mt-5 border-t border-line pt-4 text-[0.78rem] text-ink-muted">{race.winnerName}</p>
+    )}
   </a>
 </article>
