@@ -45,11 +45,12 @@ const teamColor = (constructorId: string | null): string | undefined =>
       <span
         class="font-display text-[2.25rem] leading-none font-semibold text-transparent [-webkit-text-stroke:1px_var(--ink-muted)]"
         aria-hidden="true">{round}</span>
-      <!-- 圆角和轮廓加在国旗图像本身，ring 会外扩一圈比国旗大 -->
+      <!-- 圆角和轮廓加在国旗图像本身，ring 会外扩一圈比国旗大；
+           国旗 SVG 为 4:3，盒同比例轮廓才贴合图案，3:2 盒会 letterbox 出一圈缝 -->
       <img
         src={`/vendor/country-flags/${race.alpha2Code.toLowerCase()}.svg`}
         alt=""
-        class="vendor-cell__flag mb-1 h-4 w-6 rounded-[2px] border border-ink/25"
+        class="vendor-cell__flag mb-1 h-4 w-auto aspect-4/3 rounded-[2px] border border-ink/25"
         loading="lazy"
       />
       <time
@@ -62,15 +63,15 @@ const teamColor = (constructorId: string | null): string | undefined =>
     </div>
     <!-- 标题区 flex-1 吸收同行卡片的高差，等高分布在标题与领奖台之间；赛道图水印居中在右侧空带，不再与领奖台抢右下角 -->
     <div class="relative mt-5 flex-1">
-      <h3 class="font-display text-[2.05rem] leading-[1.05] font-semibold uppercase md:pr-36">{race.name}</h3>
-      <p class="mt-1.5 text-[0.78rem] text-ink-muted md:pr-36">{placeLine}</p>
+      <h3 class="font-display text-[2.05rem] leading-[1.05] font-semibold uppercase md:pr-24">{race.name}</h3>
+      <p class="mt-1.5 text-[0.78rem] text-ink-muted md:pr-24">{placeLine}</p>
       <!-- vendor SVG 为 500×500 方框：等比方形盒、不钳制高度放大才可见；右缘钉死 right-0，
            桌面顶对齐标题带向下延伸——右上有日期，往下才是空区（领奖台居中让出右侧） -->
       <img
         src={`/vendor/circuits/${race.circuitLayoutId}.svg`}
         alt=""
         loading="lazy"
-        class="pointer-events-none absolute right-0 bottom-0 h-24 w-auto object-contain opacity-20 transition-opacity duration-200 group-hover:opacity-45 md:top-0 md:bottom-auto md:h-36 light:invert"
+        class="pointer-events-none absolute right-0 bottom-0 h-24 w-auto object-contain opacity-20 transition-opacity duration-200 group-hover:opacity-45 md:-top-6 md:bottom-auto light:invert"
       />
     </div>
     {status === "complete" && race.podium.length > 0 && (
