@@ -27,7 +27,7 @@ function fakeDbBySql(
 }
 
 describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
-  it("maps a completed race with winner, pole, layout and sessions", async () => {
+  it("maps a completed race with winner, pole, layout, sessions and podium", async () => {
     const db = fakeDbBySql({
       circuit_place: [
         {
@@ -64,6 +64,29 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
           winner_time: "1:23:06.801",
           pole_name: "George Russell",
           pole_code: "RUS",
+        },
+      ],
+      "JOIN race ra ON rr.race_id": [
+        {
+          round: 1,
+          position_number: 1,
+          driver_code: "RUS",
+          constructor_id: "mercedes",
+          display_time: "1:23:06.801",
+        },
+        {
+          round: 1,
+          position_number: 2,
+          driver_code: "ANT",
+          constructor_id: "mercedes",
+          display_time: "+2.974",
+        },
+        {
+          round: 1,
+          position_number: 3,
+          driver_code: "LEC",
+          constructor_id: "ferrari",
+          display_time: "+15.519",
         },
       ],
     });
@@ -105,6 +128,23 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
             startsAtUtc: "2026-03-07T05:00:00Z",
           },
           { key: "race", label: "Race", startsAtUtc: "2026-03-08T04:00:00Z" },
+        ],
+        podium: [
+          {
+            driverCode: "RUS",
+            constructorId: "mercedes",
+            time: "1:23:06.801",
+          },
+          {
+            driverCode: "ANT",
+            constructorId: "mercedes",
+            time: "+2.974",
+          },
+          {
+            driverCode: "LEC",
+            constructorId: "ferrari",
+            time: "+15.519",
+          },
         ],
         winnerName: "George Russell",
         winnerCode: "RUS",
@@ -157,6 +197,7 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
           pole_code: null,
         },
       ],
+      "JOIN race ra ON rr.race_id": [],
     });
     const [row] = await createRaceResultsRepository(db).getSeasonCalendar(2026);
     expect(row.winnerName).toBeNull();
@@ -203,6 +244,7 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
           pole_code: null,
         },
       ],
+      "JOIN race ra ON rr.race_id": [],
     });
     const [row] = await createRaceResultsRepository(db).getSeasonCalendar(2026);
     // Quali 在 Sprint 之后，不能按字段定义序排列
@@ -264,6 +306,7 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
               sharedWinRow("juan-manuel-fangio", "Juan Manuel Fangio"),
             ],
           },
+          { results: [] }, // podium：1951 共享冠军老数据无前三名补充
         ]);
       },
     };
@@ -274,7 +317,7 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
     expect(sqls[0]).toContain("MIN(x.position_display_order)");
   });
 
-  it("DEV fixture calendar has 22 rounds with sessions, list only completed", async () => {
+  it("DEV fixture calendar has 22 rounds with sessions and podium, list only completed", async () => {
     const repository = createRaceResultsRepository();
     const calendar = await repository.getSeasonCalendar(2026);
     expect(calendar).toHaveLength(22);
@@ -286,6 +329,13 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
     expect(completed).toHaveLength(11);
     expect(completed.every((race) => race.winnerName !== null)).toBe(true);
     expect(completed.every((race) => race.winnerDriverId !== null)).toBe(true);
+    // 完赛站都有前三名，且首站为 Russell/1:23:06.801
+    expect(completed.every((race) => race.podium.length === 3)).toBe(true);
+    expect(completed[0].podium[0]).toEqual({
+      driverCode: "RUS",
+      constructorId: "mercedes",
+      time: "1:23:06.801",
+    });
     expect(await repository.getSeasonCalendar(2025)).toEqual([]);
   });
 });

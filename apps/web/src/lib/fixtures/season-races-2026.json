@@ -52,6 +52,23 @@
           "label": "Race",
           "startsAtUtc": "2026-03-08T04:00:00Z"
         }
+      ],
+      "podium": [
+        {
+          "driverCode": "RUS",
+          "constructorId": "mercedes",
+          "time": "1:23:06.801"
+        },
+        {
+          "driverCode": "ANT",
+          "constructorId": "mercedes",
+          "time": "+2.974"
+        },
+        {
+          "driverCode": "LEC",
+          "constructorId": "ferrari",
+          "time": "+15.519"
+        }
       ]
     },
     {
@@ -101,6 +118,23 @@
           "key": "race",
           "label": "Race",
           "startsAtUtc": "2026-03-15T07:00:00Z"
+        }
+      ],
+      "podium": [
+        {
+          "driverCode": "ANT",
+          "constructorId": "mercedes",
+          "time": "1:33:15.607"
+        },
+        {
+          "driverCode": "RUS",
+          "constructorId": "mercedes",
+          "time": "+5.515"
+        },
+        {
+          "driverCode": "HAM",
+          "constructorId": "ferrari",
+          "time": "+25.267"
         }
       ]
     },
@@ -152,6 +186,23 @@
           "label": "Race",
           "startsAtUtc": "2026-03-29T05:00:00Z"
         }
+      ],
+      "podium": [
+        {
+          "driverCode": "ANT",
+          "constructorId": "mercedes",
+          "time": "1:28:03.403"
+        },
+        {
+          "driverCode": "PIA",
+          "constructorId": "mclaren",
+          "time": "+13.722"
+        },
+        {
+          "driverCode": "LEC",
+          "constructorId": "ferrari",
+          "time": "+15.270"
+        }
       ]
     },
     {
@@ -201,6 +252,23 @@
           "key": "race",
           "label": "Race",
           "startsAtUtc": "2026-05-03T17:00:00Z"
+        }
+      ],
+      "podium": [
+        {
+          "driverCode": "ANT",
+          "constructorId": "mercedes",
+          "time": "1:33:19.273"
+        },
+        {
+          "driverCode": "NOR",
+          "constructorId": "mclaren",
+          "time": "+3.264"
+        },
+        {
+          "driverCode": "PIA",
+          "constructorId": "mclaren",
+          "time": "+27.092"
         }
       ]
     },
@@ -252,6 +320,23 @@
           "label": "Race",
           "startsAtUtc": "2026-05-24T20:00:00Z"
         }
+      ],
+      "podium": [
+        {
+          "driverCode": "ANT",
+          "constructorId": "mercedes",
+          "time": "1:28:15.758"
+        },
+        {
+          "driverCode": "HAM",
+          "constructorId": "ferrari",
+          "time": "+10.768"
+        },
+        {
+          "driverCode": "VER",
+          "constructorId": "red-bull",
+          "time": "+11.276"
+        }
       ]
     },
     {
@@ -301,6 +386,23 @@
           "key": "race",
           "label": "Race",
           "startsAtUtc": "2026-06-07T13:00:00Z"
+        }
+      ],
+      "podium": [
+        {
+          "driverCode": "ANT",
+          "constructorId": "mercedes",
+          "time": "2:23:31.243"
+        },
+        {
+          "driverCode": "HAM",
+          "constructorId": "ferrari",
+          "time": "+6.271"
+        },
+        {
+          "driverCode": "GAS",
+          "constructorId": "alpine",
+          "time": "+20.369"
         }
       ]
     },
@@ -352,6 +454,23 @@
           "label": "Race",
           "startsAtUtc": "2026-06-14T13:00:00Z"
         }
+      ],
+      "podium": [
+        {
+          "driverCode": "HAM",
+          "constructorId": "ferrari",
+          "time": "1:32:28.105"
+        },
+        {
+          "driverCode": "RUS",
+          "constructorId": "mercedes",
+          "time": "+19.561"
+        },
+        {
+          "driverCode": "NOR",
+          "constructorId": "mclaren",
+          "time": "+23.719"
+        }
       ]
     },
     {
@@ -401,6 +520,23 @@
           "key": "race",
           "label": "Race",
           "startsAtUtc": "2026-06-28T13:00:00Z"
+        }
+      ],
+      "podium": [
+        {
+          "driverCode": "RUS",
+          "constructorId": "mercedes",
+          "time": "1:26:37.979"
+        },
+        {
+          "driverCode": "VER",
+          "constructorId": "red-bull",
+          "time": "+1.611"
+        },
+        {
+          "driverCode": "ANT",
+          "constructorId": "mercedes",
+          "time": "+1.986"
         }
       ]
     },
@@ -452,6 +588,23 @@
           "label": "Race",
           "startsAtUtc": "2026-07-05T14:00:00Z"
         }
+      ],
+      "podium": [
+        {
+          "driverCode": "LEC",
+          "constructorId": "ferrari",
+          "time": "1:27:11.335"
+        },
+        {
+          "driverCode": "RUS",
+          "constructorId": "mercedes",
+          "time": "+0.427"
+        },
+        {
+          "driverCode": "HAM",
+          "constructorId": "ferrari",
+          "time": "+0.772"
+        }
       ]
     },
     {
@@ -501,6 +654,23 @@
           "key": "race",
           "label": "Race",
           "startsAtUtc": "2026-07-19T13:00:00Z"
+        }
+      ],
+      "podium": [
+        {
+          "driverCode": "ANT",
+          "constructorId": "mercedes",
+          "time": "1:24:42.479"
+        },
+        {
+          "driverCode": "LEC",
+          "constructorId": "ferrari",
+          "time": "+1.952"
+        },
+        {
+          "driverCode": "VER",
+          "constructorId": "red-bull",
+          "time": "+11.586"
         }
       ]
     },
@@ -552,6 +722,23 @@
           "label": "Race",
           "startsAtUtc": "2026-07-26T13:00:00Z"
         }
+      ],
+      "podium": [
+        {
+          "driverCode": "NOR",
+          "constructorId": "mclaren",
+          "time": "1:39:56.180"
+        },
+        {
+          "driverCode": "VER",
+          "constructorId": "red-bull",
+          "time": "+15.080"
+        },
+        {
+          "driverCode": "ANT",
+          "constructorId": "mercedes",
+          "time": "+18.728"
+        }
       ]
     },
     {
@@ -602,7 +789,8 @@
           "label": "Race",
           "startsAtUtc": "2026-08-23T13:00:00Z"
         }
-      ]
+      ],
+      "podium": []
     },
     {
       "round": 13,
@@ -652,7 +840,8 @@
           "label": "Race",
           "startsAtUtc": "2026-09-06T13:00:00Z"
         }
-      ]
+      ],
+      "podium": []
     },
     {
       "round": 14,
@@ -702,7 +891,8 @@
           "label": "Race",
           "startsAtUtc": "2026-09-13T13:00:00Z"
         }
-      ]
+      ],
+      "podium": []
     },
     {
       "round": 15,
@@ -752,7 +942,8 @@
           "label": "Race",
           "startsAtUtc": "2026-09-26T11:00:00Z"
         }
-      ]
+      ],
+      "podium": []
     },
     {
       "round": 16,
@@ -802,7 +993,8 @@
           "label": "Race",
           "startsAtUtc": "2026-10-11T12:00:00Z"
         }
-      ]
+      ],
+      "podium": []
     },
     {
       "round": 17,
@@ -852,7 +1044,8 @@
           "label": "Race",
           "startsAtUtc": "2026-10-25T20:00:00Z"
         }
-      ]
+      ],
+      "podium": []
     },
     {
       "round": 18,
@@ -902,7 +1095,8 @@
           "label": "Race",
           "startsAtUtc": "2026-11-01T20:00:00Z"
         }
-      ]
+      ],
+      "podium": []
     },
     {
       "round": 19,
@@ -952,7 +1146,8 @@
           "label": "Race",
           "startsAtUtc": "2026-11-08T17:00:00Z"
         }
-      ]
+      ],
+      "podium": []
     },
     {
       "round": 20,
@@ -1002,7 +1197,8 @@
           "label": "Race",
           "startsAtUtc": "2026-11-22T04:00:00Z"
         }
-      ]
+      ],
+      "podium": []
     },
     {
       "round": 21,
@@ -1052,7 +1248,8 @@
           "label": "Race",
           "startsAtUtc": "2026-11-29T16:00:00Z"
         }
-      ]
+      ],
+      "podium": []
     },
     {
       "round": 22,
@@ -1102,7 +1299,8 @@
           "label": "Race",
           "startsAtUtc": "2026-12-06T13:00:00Z"
         }
-      ]
+      ],
+      "podium": []
     }
   ]
 }

@@ -20,6 +20,7 @@ export interface RaceSummary {
   circuitName: string;
   circuitPlace: string;
   sessions: RaceSession[];
+  podium: PodiumEntry[];
   winnerName: string | null;
   winnerCode: string | null;
   winnerDriverId: string | null;
@@ -34,6 +35,13 @@ export interface RaceSession {
   key: string;
   label: string;
   startsAtUtc: string;
+}
+
+export interface PodiumEntry {
+  driverCode: string | null;
+  constructorId: string | null;
+  // 第 1 名为完赛时间（如 1:23:06.801）；第 2/3 名为对第 1 名的秒差（如 +2.974）
+  time: string | null;
 }
 
 export interface RaceMeta {
@@ -175,6 +183,18 @@ export const RACE_TAB_FIELDS: Record<RaceTabKey, keyof RacePage["tabs"]> = {
   "practice-3": "practice3",
 };
 
+// 前三名（正赛 1/2/3）：独立查询减轻 calendar SQL 的 join 负担，
+// 返回后在 JS 侧按 (year, round) 并进 RaceSummary.podium
+const podiumSql = `SELECT ra.round, ra.grand_prix_id AS slug,
+       rr.position_number, d.abbreviation AS driver_code, ct.id AS constructor_id,
+       CASE WHEN rr.position_number = 1 THEN rr.time ELSE rr.gap END AS display_time
+FROM race_result rr
+JOIN race ra ON rr.race_id = ra.id
+JOIN driver d ON rr.driver_id = d.id
+JOIN constructor ct ON rr.constructor_id = ct.id
+WHERE ra.year = ?1 AND rr.position_number IN (1, 2, 3)
+ORDER BY ra.round, rr.position_number`;
+
 export interface RaceResultsDatabase {
   batch(
     statements: { sql: string; values: readonly unknown[] }[],
@@ -245,6 +265,7 @@ function mapRaceSummary(row: unknown): RaceSummary {
     circuitName: asString(r.circuit_name, "circuit name"),
     circuitPlace: asString(r.circuit_place, "circuit place"),
     sessions: buildSessions(r),
+    podium: [],
     winnerName:
       r.winner_name === null ? null : asString(r.winner_name, "winner name"),
     winnerCode:
@@ -578,12 +599,35 @@ export function createRaceResultsRepository(
       );
       return (fixture as { races: RaceSummary[] }).races;
     }
-    const [rows] = await db.batch([{ sql: seasonCalendarSql, values: [year] }]);
+    const [rows, podiumRows] = await db.batch([
+      { sql: seasonCalendarSql, values: [year] },
+      { sql: podiumSql, values: [year] },
+    ]);
     // SQL 已挑定并列 P1 中的一行；这里按 round 去重兜底，共享冠军只出一条
     const byRound = new Map<number, RaceSummary>();
     for (const row of rows.results) {
       const race = mapRaceSummary(row);
       if (!byRound.has(race.round)) byRound.set(race.round, race);
+    }
+    for (const row of podiumRows.results) {
+      const r = asRecord(row, "podium row");
+      const race = byRound.get(asNumber(r.round, "round"));
+      if (!race) continue;
+      const position = asNumber(r.position_number, "position");
+      race.podium[position - 1] = {
+        driverCode:
+          r.driver_code === null
+            ? null
+            : asString(r.driver_code, "driver code"),
+        constructorId:
+          r.constructor_id === null
+            ? null
+            : asString(r.constructor_id, "constructor id"),
+        time:
+          r.display_time === null
+            ? null
+            : asString(r.display_time, "display time"),
+      };
     }
     return [...byRound.values()];
   };

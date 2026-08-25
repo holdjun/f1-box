@@ -1,6 +1,7 @@
 ---
 import type { RaceSummary } from "../lib/race-results-repository.js";
 import { formatWeekendRange } from "../lib/time.js";
+import { colorForYear, vendorIndexes } from "../lib/vendor.js";
 
 interface Props {
   race: RaceSummary;
@@ -10,6 +11,7 @@ interface Props {
 
 const { race, href, status } = Astro.props;
 const round = String(race.round).padStart(2, "0");
+const year = Number(race.date.slice(0, 4));
 const startsAt = `${race.date}T${race.time ?? "00:00"}:00Z`;
 // 周末范围 = 首练（或最早 session）→ 正赛；无 session 数据时回退单日
 const weekendStart = race.sessions[0]?.startsAtUtc ?? startsAt;
@@ -19,7 +21,11 @@ const placeLine =
   race.circuitName && race.circuitName !== race.circuitPlace
     ? `${race.circuitPlace} · ${race.circuitName}`
     : race.circuitPlace;
-const labels = { complete: "COMPLETE", next: "NEXT", upcoming: "UPCOMING" };
+// 斜杠名次标记：第 N 名 N 条斜杠，填充该名次车手所在车队当年主色
+const teamColor = (constructorId: string | null): string | undefined =>
+  constructorId
+    ? (colorForYear(vendorIndexes, constructorId, year) ?? undefined)
+    : undefined;
 ---
 
 <article class="race-card min-w-0">
@@ -35,56 +41,53 @@ const labels = { complete: "COMPLETE", next: "NEXT", upcoming: "UPCOMING" };
         : "border-line light:shadow-panel",
     ]}
   >
-    <div class="flex items-center gap-2.5">
+    <div class="flex items-end gap-2.5">
       <span
         class="font-display text-[2.6rem] leading-none font-semibold text-transparent [-webkit-text-stroke:1px_var(--ink-muted)]"
         aria-hidden="true">{round}</span>
       <img
         src={`/vendor/country-flags/${race.alpha2Code.toLowerCase()}.svg`}
         alt=""
-        class="vendor-cell__flag"
+        class="vendor-cell__flag mb-1.5"
         loading="lazy"
       />
-      <span class:list={["status-label ml-auto", status === "next" && "status-label--accent"]}>
-        {labels[status]}
-      </span>
-    </div>
-    <div class="mt-4 pr-24">
-      <h3 class="font-display text-[1.9rem] leading-[1.02] font-semibold uppercase">{race.name}</h3>
-      <time class="mt-2.5 flex items-center gap-1.5 text-[0.76rem] tabular-nums text-ink-strong" datetime={race.date}>
+      <time
+        class="ml-auto flex items-center gap-1 pb-1 text-[0.72rem] tabular-nums text-ink-strong"
+        datetime={race.date}
+      >
         <span aria-hidden="true">🏁</span>
         {weekendRange}
       </time>
+    </div>
+    <div class="mt-4 pr-8">
+      <h3 class="font-display text-[1.9rem] leading-[1.02] font-semibold uppercase">{race.name}</h3>
       <p class="mt-1 text-[0.78rem] text-ink-muted">{placeLine}</p>
-      {status === "complete" && (
-        <dl class="mt-5 grid grid-cols-2 gap-4 border-t border-line pt-4">
-          <div>
-            <dt class="text-[0.65rem] tracking-[0.08em] uppercase text-ink-muted">Pole</dt>
-            <dd class="mt-1 text-[0.78rem]">{race.poleName ?? "—"}</dd>
-          </div>
-          <div>
-            <dt class="text-[0.65rem] tracking-[0.08em] uppercase text-ink-muted">Winner</dt>
-            <dd class="mt-1 text-[0.78rem]">{race.winnerName}</dd>
-          </div>
-        </dl>
+      {status === "complete" && race.podium.length > 0 && (
+        <ol class="mt-5 flex flex-col gap-2 border-t border-line pt-4">
+          {race.podium.map((entry, index) => (
+            <li class="flex items-baseline gap-2.5">
+              <span
+                aria-hidden="true"
+                class="podium-mark w-7 font-display text-[1.4rem] leading-none font-bold [-webkit-text-stroke:1.5px_currentColor]"
+                style={teamColor(entry.constructorId) ? { color: teamColor(entry.constructorId) } : undefined}
+              >
+                {"/".repeat(index + 1)}
+              </span>
+              <span class="font-display text-[0.85rem] font-semibold tracking-[0.12em]">{entry.driverCode ?? "—"}</span>
+              <span class="ml-auto text-[0.78rem] tabular-nums text-ink-strong">{entry.time ?? "—"}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+      {status === "complete" && race.podium.length === 0 && (
+        <p class="mt-5 border-t border-line pt-4 text-[0.78rem] text-ink-muted">{race.winnerName}</p>
       )}
     </div>
     <img
       src={`/vendor/circuits/${race.circuitLayoutId}.svg`}
       alt=""
       loading="lazy"
-      class="pointer-events-none absolute top-1/2 right-4 h-24 w-28 -translate-y-1/2 object-contain opacity-40 transition-opacity duration-200 group-hover:opacity-70 light:invert"
+      class="pointer-events-none absolute right-3 bottom-6 h-16 w-20 object-contain opacity-30 transition-opacity duration-200 group-hover:opacity-60 light:invert"
     />
-    <svg
-      class="absolute right-5 bottom-5 w-7 text-ink-muted transition-colors group-hover:text-accent"
-      viewBox="0 0 28 16"
-      fill="none"
-      stroke="currentColor"
-      stroke-linecap="square"
-      stroke-width="1.5"
-      aria-hidden="true"
-    >
-      <path d="M1 8h24M18 1l7 7-7 7" />
-    </svg>
   </a>
 </article>

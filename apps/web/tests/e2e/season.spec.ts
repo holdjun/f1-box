@@ -27,11 +27,16 @@ test("@desktop racing calendar links every round to its results page", async ({
   await page.goto("/racing/2026");
   const cards = page.locator("main .race-card");
   await expect(cards).toHaveCount(22);
-  // 卡面标题不含 Grand Prix 后缀；周末显示为日期范围
+  // 卡面标题不含 Grand Prix 后缀；顶部为周末日期范围；完成卡显示前三名
   await expect(cards.first()).toContainText("Australia");
   await expect(cards.first()).toContainText("🏁");
   await expect(cards.first()).toContainText("06-08 MAR");
   await expect(cards.first()).toContainText("Melbourne");
+  await expect(cards.first()).toContainText("RUS");
+  await expect(cards.first()).toContainText("1:23:06.801");
+  await expect(cards.first()).not.toContainText("Grand Prix");
+  await expect(cards.first()).not.toContainText("Pole");
+  await expect(cards.first()).not.toContainText("COMPLETE");
   await expect(cards.first().locator("img:visible")).toHaveCount(2); // 国旗 + 赛道
   const raceLinks = page.locator('main a[href^="/results/2026/races/"]');
   await expect(raceLinks).toHaveCount(22);
