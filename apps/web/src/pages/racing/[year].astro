@@ -51,7 +51,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
         </p>
       </div>
       {next && (
-        <div class="rounded-md border border-line bg-surface-raised p-6 light:shadow-panel">
+        <div class="relative overflow-hidden rounded-md border border-line bg-surface-raised p-6 light:shadow-panel">
           <p class="status-label status-label--accent">
             Next · Round {String(next.round).padStart(2, "0")}
           </p>
@@ -68,6 +68,12 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
             {nextLine}
           </p>
           <a class="button button--text mt-5" href={cardHref(next)}>View weekend</a>
+          <img
+            src={`/vendor/circuits/${next.circuitLayoutId}.svg`}
+            alt=""
+            loading="lazy"
+            class="pointer-events-none absolute top-1/2 right-5 h-20 w-24 -translate-y-1/2 object-contain opacity-15 light:invert"
+          />
         </div>
       )}
     </div>

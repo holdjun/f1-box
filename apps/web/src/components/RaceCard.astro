@@ -52,7 +52,7 @@ const teamColor = (constructorId: string | null): string | undefined =>
         loading="lazy"
       />
       <time
-        class="ml-auto flex items-center gap-1.5 pb-1 text-[0.72rem] tracking-[0.08em] tabular-nums text-ink-muted"
+        class="ml-auto flex items-center gap-1.5 self-start pt-1 text-[0.72rem] tracking-[0.08em] tabular-nums text-ink-muted"
         datetime={race.date}
       >
         <span aria-hidden="true">🏁</span>
@@ -61,18 +61,18 @@ const teamColor = (constructorId: string | null): string | undefined =>
     </div>
     <!-- 标题区 flex-1 吸收同行卡片的高差，等高分布在标题与领奖台之间；赛道图水印居中在右侧空带，不再与领奖台抢右下角 -->
     <div class="relative mt-5 flex-1">
-      <h3 class="font-display text-[2.05rem] leading-[1.05] font-semibold uppercase md:pr-24">{race.name}</h3>
-      <p class="mt-1.5 text-[0.78rem] text-ink-muted md:pr-24">{placeLine}</p>
+      <h3 class="font-display text-[2.05rem] leading-[1.05] font-semibold uppercase md:pr-28">{race.name}</h3>
+      <p class="mt-1.5 text-[0.78rem] text-ink-muted md:pr-28">{placeLine}</p>
       <img
         src={`/vendor/circuits/${race.circuitLayoutId}.svg`}
         alt=""
         loading="lazy"
         // 移动端标题常占满整行，水印底对齐避开标题、贴近较短的地点行；桌面标题带 pr-24 留白，可垂直居中
-        class="pointer-events-none absolute right-0 bottom-0 h-12 w-14 max-h-full object-contain opacity-20 transition-opacity duration-200 group-hover:opacity-45 md:top-1/2 md:bottom-auto md:h-16 md:w-20 md:-translate-y-1/2 light:invert"
+        class="pointer-events-none absolute right-0 bottom-0 h-14 w-16 max-h-full object-contain opacity-20 transition-opacity duration-200 group-hover:opacity-45 md:top-1/2 md:bottom-auto md:h-20 md:w-24 md:-translate-y-1/2 light:invert"
       />
     </div>
     {status === "complete" && race.podium.length > 0 && (
-      <ol class="mt-5 grid grid-cols-3 gap-2 border-t border-line pt-4 md:gap-4">
+      <ol class="mt-5 grid grid-cols-3 justify-items-center gap-2 border-t border-line pt-4 md:gap-4">
         {race.podium.map((entry, index) => (
           <li class="flex min-w-0 items-center gap-2 md:gap-2.5">
             <span
