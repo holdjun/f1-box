@@ -14,7 +14,7 @@ const round = String(meta.round).padStart(2, "0");
 <!-- isolate: 让 -z-1 的描边数字压到正文之下, 又不至于沉到 body 背景后面 -->
 <header class="shell relative isolate min-h-[clamp(34rem,70vw,52rem)] overflow-hidden pb-20 pt-6 md:pt-8">
   <a
-    class="race-hero__map absolute right-0 top-8 w-[clamp(14rem,24vw,22rem)] opacity-85 transition-opacity hover:opacity-100 max-md:static max-md:mx-auto max-md:mb-6 max-md:w-[min(60%,13rem)] max-md:opacity-100"
+    class="race-hero__map absolute right-0 top-8 w-[clamp(14rem,24vw,22rem)] opacity-85 transition-opacity hover:opacity-100 max-md:static max-md:mx-auto max-md:mb-6 max-md:block max-md:w-[min(60%,13rem)] max-md:opacity-100"
     href={`/circuits/${meta.circuitId}`}
     aria-label={`View ${meta.circuitName} circuit details`}
   >
