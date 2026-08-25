@@ -63,18 +63,20 @@ const teamColor = (constructorId: string | null): string | undefined =>
       <h3 class="font-display text-[1.9rem] leading-[1.02] font-semibold uppercase">{race.name}</h3>
       <p class="mt-1 text-[0.78rem] text-ink-muted">{placeLine}</p>
       {status === "complete" && race.podium.length > 0 && (
-        <ol class="mt-5 flex flex-col gap-2 border-t border-line pt-4">
+        <ol class="mt-5 grid grid-cols-3 gap-3 border-t border-line pt-4">
           {race.podium.map((entry, index) => (
-            <li class="flex items-baseline gap-2.5">
+            <li class="flex min-w-0 items-center gap-2.5">
               <span
                 aria-hidden="true"
-                class="podium-mark w-7 font-display text-[1.4rem] leading-none font-bold [-webkit-text-stroke:1.5px_currentColor]"
+                class="podium-mark w-6 shrink-0 font-display text-[1.5rem] leading-none font-bold [-webkit-text-stroke:1.5px_currentColor]"
                 style={teamColor(entry.constructorId) ? { color: teamColor(entry.constructorId) } : undefined}
               >
                 {"/".repeat(index + 1)}
               </span>
-              <span class="font-display text-[0.85rem] font-semibold tracking-[0.12em]">{entry.driverCode ?? "—"}</span>
-              <span class="ml-auto text-[0.78rem] tabular-nums text-ink-strong">{entry.time ?? "—"}</span>
+              <span class="flex min-w-0 flex-col">
+                <span class="font-display text-[0.8rem] font-semibold tracking-[0.12em]">{entry.driverCode ?? "—"}</span>
+                <span class="text-[0.72rem] tabular-nums text-ink-strong">{entry.time ?? "—"}</span>
+              </span>
             </li>
           ))}
         </ol>
@@ -87,7 +89,7 @@ const teamColor = (constructorId: string | null): string | undefined =>
       src={`/vendor/circuits/${race.circuitLayoutId}.svg`}
       alt=""
       loading="lazy"
-      class="pointer-events-none absolute right-3 bottom-6 h-16 w-20 object-contain opacity-30 transition-opacity duration-200 group-hover:opacity-60 light:invert"
+      class="pointer-events-none absolute right-2 bottom-2 h-14 w-16 object-contain opacity-20 transition-opacity duration-200 group-hover:opacity-45 light:invert"
     />
   </a>
 </article>
