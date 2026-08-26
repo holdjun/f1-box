@@ -2,7 +2,7 @@
 import ThemeToggle from "./ThemeToggle.svelte";
 
 interface Props {
-  active?: "racing" | "results" | "circuits" | "drivers" | "teams";
+  active?: "racing" | "results" | "drivers" | "teams";
   year?: number;
 }
 
@@ -11,7 +11,6 @@ const { active = "racing", year } = Astro.props;
 const links = [
   { key: "racing", label: "Racing", href: year ? `/racing/${year}` : "/" },
   { key: "results", label: "Results", href: year ? `/results/${year}/races` : "/results" },
-  { key: "circuits", label: "Circuits", href: "/circuits" },
   { key: "drivers", label: "Drivers", href: "/drivers" },
   { key: "teams", label: "Teams", href: "/teams" },
 ] as const;
@@ -27,7 +26,7 @@ const links = [
       <span class="text-accent">F1</span> Box
     </a>
     <div class="flex min-w-0 items-center gap-3 lg:gap-6">
-      <nav aria-label="Primary navigation" class="flex min-w-0 items-center gap-3 overflow-x-auto lg:gap-10">
+      <nav aria-label="Primary navigation" class="flex min-w-0 items-center gap-3 overflow-x-clip lg:gap-10">
         {links.map((link) => (
           <a
             href={link.href}
