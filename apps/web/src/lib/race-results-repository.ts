@@ -184,8 +184,9 @@ export const RACE_TAB_FIELDS: Record<RaceTabKey, keyof RacePage["tabs"]> = {
 };
 
 // 前三名（正赛 1/2/3）：独立查询减轻 calendar SQL 的 join 负担，
-// 返回后在 JS 侧按 (year, round) 并进 RaceSummary.podium
-const podiumSql = `SELECT ra.round, ra.grand_prix_id AS slug,
+// 返回后在 JS 侧按 (year, round) 并进 RaceSummary.podium；
+// position_display_order 次级排序：共享冠军站（1951 法国等）有两条 P1 行，行序固定才不反复
+const podiumSql = `SELECT ra.round,
        rr.position_number, d.abbreviation AS driver_code, ct.id AS constructor_id,
        CASE WHEN rr.position_number = 1 THEN rr.time ELSE rr.gap END AS display_time
 FROM race_result rr
@@ -193,7 +194,7 @@ JOIN race ra ON rr.race_id = ra.id
 JOIN driver d ON rr.driver_id = d.id
 JOIN constructor ct ON rr.constructor_id = ct.id
 WHERE ra.year = ?1 AND rr.position_number IN (1, 2, 3)
-ORDER BY ra.round, rr.position_number`;
+ORDER BY ra.round, rr.position_number, rr.position_display_order`;
 
 export interface RaceResultsDatabase {
   batch(
@@ -295,7 +296,13 @@ const raceIdSubquery = `(SELECT id FROM race WHERE year = ?1 AND grand_prix_id =
 const raceMetaSql = `SELECT ra.year, ra.round, ra.grand_prix_id AS slug, gp.name,
        ra.official_name, ra.date, ra.time, ra.laps, ra.course_length,
        ra.circuit_id, ra.circuit_layout_id, ci.name AS circuit_name, ci.place_name AS circuit_place,
-       cc.name AS country_name, cc.alpha2_code
+       cc.name AS country_name, cc.alpha2_code,
+       ra.free_practice_1_date, ra.free_practice_1_time,
+       ra.free_practice_2_date, ra.free_practice_2_time,
+       ra.free_practice_3_date, ra.free_practice_3_time,
+       ra.qualifying_date, ra.qualifying_time,
+       ra.sprint_qualifying_date, ra.sprint_qualifying_time,
+       ra.sprint_race_date, ra.sprint_race_time
 FROM race ra
 JOIN grand_prix gp ON ra.grand_prix_id = gp.id
 JOIN circuit ci ON ra.circuit_id = ci.id

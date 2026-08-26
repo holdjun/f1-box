@@ -35,9 +35,17 @@ export function formatWeekendRange(
   };
   const first = new Date(firstStartsAtUtc);
   const last = new Date(lastStartsAtUtc);
+  // 老赛季无练习赛数据：首尾同日的周末只显示单日，不重复 "06-06 MAR"；
+  // getTime() 对 invalid 输入返回 NaN（NaN===NaN 为 false），诊断仍由 formatPart 抛出
+  const sameDay =
+    first.getTime() === last.getTime() && Number.isFinite(first.getTime());
   const sameMonth =
     first.getUTCFullYear() === last.getUTCFullYear() &&
     first.getUTCMonth() === last.getUTCMonth();
+  // 老赛季无练习赛数据：首尾同日的周末只显示单日，不重复 "06-06 MAR"
+  if (sameDay) {
+    return `${formatPart(firstStartsAtUtc, "day")} ${formatPart(firstStartsAtUtc, "month").toUpperCase()}`;
+  }
   return sameMonth
     ? `${formatPart(firstStartsAtUtc, "day")}-${formatPart(lastStartsAtUtc, "day")} ${formatPart(lastStartsAtUtc, "month").toUpperCase()}`
     : `${formatPart(firstStartsAtUtc, "day")} ${formatPart(firstStartsAtUtc, "month").toUpperCase()} - ${formatPart(lastStartsAtUtc, "day")} ${formatPart(lastStartsAtUtc, "month").toUpperCase()}`;

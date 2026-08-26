@@ -45,17 +45,17 @@ const teamColor = (constructorId: string | null): string | undefined =>
       <span
         class="font-display text-[2.25rem] leading-none font-semibold text-transparent [-webkit-text-stroke:1px_var(--ink-muted)]"
         aria-hidden="true">{round}</span>
-      <!-- 圆角和轮廓加在国旗图像本身，ring 会外扩一圈比国旗大；
-           国旗 SVG 为 4:3，盒同比例轮廓才贴合图案，3:2 盒会 letterbox 出一圈缝 -->
+      <!-- 圆角和轮廓加在国旗图像本身；国旗 SVG 为 4:3，4:3 盒同比例；
+           border 挤占内容盒（1.381 非 4:3），contain 填不满会悬空一圈 —— cover 放大填满、紧贴边框 -->
       <img
         src={`/vendor/country-flags/${race.alpha2Code.toLowerCase()}.svg`}
         alt=""
-        class="vendor-cell__flag mb-1 h-4 w-auto aspect-4/3 rounded-[2px] border border-ink/25"
+        class="vendor-cell__flag mb-1 h-4 w-auto aspect-4/3 rounded-[2px] border border-ink/25 object-cover"
         loading="lazy"
       />
       <time
         class="ml-auto flex items-center gap-1.5 self-start pt-1 text-[0.72rem] tracking-[0.08em] tabular-nums text-ink-muted"
-        datetime={race.date}
+        datetime={weekendStart.slice(0, 10)}
       >
         <span aria-hidden="true">🏁</span>
         {weekendRange}
@@ -77,12 +77,15 @@ const teamColor = (constructorId: string | null): string | undefined =>
     </div>
     {status === "complete" && race.podium.length > 0 && (
       <ol class="mt-5 grid grid-cols-3 justify-items-center gap-2 border-t border-line pt-4 md:gap-4">
-        {race.podium.map((entry, index) => (
+        {race.podium.map((entry, index) => {
+          // 斜杠名次标记填充该名次车手所在车队当年主色；查表一次即可
+          const color = teamColor(entry.constructorId);
+          return (
           <li class="flex min-w-0 items-center gap-2 md:gap-2.5">
             <span
               aria-hidden="true"
               class="podium-mark shrink-0 font-display text-[1.35rem] leading-none font-bold [-webkit-text-stroke:1.5px_currentColor]"
-              style={teamColor(entry.constructorId) ? { color: teamColor(entry.constructorId) } : undefined}
+              style={color ? { color } : undefined}
             >
               {"/".repeat(index + 1)}
             </span>
@@ -91,7 +94,8 @@ const teamColor = (constructorId: string | null): string | undefined =>
               <span class="mt-0.5 text-[0.72rem] tabular-nums text-ink-strong">{entry.time ?? "—"}</span>
             </span>
           </li>
-        ))}
+          );
+        })}
       </ol>
     )}
     {status === "complete" && race.podium.length === 0 && (

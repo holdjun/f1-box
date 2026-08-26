@@ -385,6 +385,18 @@ const metaRow = {
   sprint_race_time: null,
 };
 
+// 模拟 raceMetaSql 缺 session 字段的退化输入：详情页 Weekend schedule 只剩 race 一项
+// （生产 SQL 曾在 D1 路径漏选 practice/qualifying/sprint 列，回归保护）
+const metaRowNoSessions = {
+  ...metaRow,
+  free_practice_1_date: null,
+  free_practice_2_date: null,
+  free_practice_3_date: null,
+  qualifying_date: null,
+  sprint_qualifying_date: null,
+  sprint_race_date: null,
+};
+
 // getRacePage 一次 batch 9 条语句；未登记的语句抛错，用本助手把其余 tab 置空
 function tabFragments(
   extra: Record<string, unknown[]>,
@@ -490,6 +502,18 @@ describe("createRaceResultsRepository getRacePage", () => {
     // 有名次但被套圈：time 为空时视图回退到 gap
     expect(page?.tabs.raceResult[2].time).toBeNull();
     expect(page?.tabs.raceResult[2].gap).toBe("+26.874");
+  });
+
+  it("degrades to race-only sessions when meta lacks session columns", async () => {
+    // raceMetaSql 漏选 session 列时（生产 D1 曾犯过），Weekend schedule 只应有 race 一项而非崩溃
+    const db = fakeDbBySql(tabFragments({ circuit_name: [metaRowNoSessions] }));
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2026,
+      "australia",
+    );
+    expect(page?.meta.sessions).toEqual([
+      { key: "race", label: "Race", startsAtUtc: "2026-03-08T04:00:00Z" },
+    ]);
   });
 
   it("returns null for unknown slug", async () => {
