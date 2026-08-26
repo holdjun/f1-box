@@ -155,7 +155,9 @@
           [...selected].sort((a, b) => a - b).join(","),
         );
       }
-      window.history.replaceState(null, "", url);
+      // state 必须原样透传：Astro ClientRouter 在 history.state 里存 index/scroll
+      // 用于 popstate 方向判断与滚动恢复；传 null 会抹掉它，浏览器后退将被忽略
+      window.history.replaceState(window.history.state, "", url);
     } catch {
       // window.location.href 恒为合法 URL，仅异常环境（jsdom 等）会走到这里
     }
