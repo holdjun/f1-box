@@ -68,6 +68,12 @@ test("@desktop browser back from race detail returns to the calendar", async ({
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "2026 Season",
   );
+  // ClientRouter popstate 恢复滚动的 scrollTo 不带 behavior，
+  // 全局 smooth 会把它放大成从页首飞回原位的长滚动动画；必须保持 auto
+  const scrollBehavior = await page.evaluate(
+    () => getComputedStyle(document.documentElement).scrollBehavior,
+  );
+  expect(scrollBehavior).toBe("auto");
 });
 
 test("@desktop browser back still works after switching race tabs", async ({
