@@ -66,12 +66,13 @@ const teamColor = (constructorId: string | null): string | undefined =>
       <h3 class="font-display text-[2.05rem] leading-[1.05] font-semibold uppercase md:pr-24">{race.name}</h3>
       <p class="mt-1.5 text-[0.78rem] text-ink-muted md:pr-24">{placeLine}</p>
       <!-- vendor SVG 为 500×500 方框：等比方形盒、不钳制高度放大才可见；右缘钉死 right-0，
-           桌面顶对齐标题带向下延伸——右上有日期，往下才是空区（领奖台居中让出右侧） -->
+           桌面顶对齐标题带向下延伸——右上有日期，往下才是空区（领奖台居中让出右侧）；
+           移动端标题带矮（~70px），贴底（bottom-0）顶部会顶进日期行，下移 12px 保持与桌面同款空隙 -->
       <img
         src={`/vendor/circuits/${race.circuitLayoutId}.svg`}
         alt=""
         loading="lazy"
-        class="pointer-events-none absolute right-0 bottom-0 h-24 w-auto object-contain opacity-20 transition-opacity duration-200 group-hover:opacity-45 md:-top-6 md:bottom-auto light:invert"
+        class="pointer-events-none absolute right-0 -bottom-3 h-24 w-auto object-contain opacity-20 transition-opacity duration-200 group-hover:opacity-45 md:-top-6 md:bottom-auto light:invert"
       />
     </div>
     {status === "complete" && race.podium.length > 0 && (
