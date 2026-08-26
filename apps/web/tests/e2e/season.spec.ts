@@ -27,8 +27,17 @@ test("@desktop racing calendar links every round to its results page", async ({
   await page.goto("/racing/2026");
   const cards = page.locator("main .race-card");
   await expect(cards).toHaveCount(22);
-  await expect(cards.first()).toContainText("Australian Grand Prix");
+  // 卡面标题不含 Grand Prix 后缀；顶部为周末日期范围；完成卡显示前三名
+  await expect(cards.first()).toContainText("Australia");
+  await expect(cards.first()).toContainText("🏁");
+  await expect(cards.first()).toContainText("06-08 MAR");
   await expect(cards.first()).toContainText("Melbourne");
+  await expect(cards.first()).toContainText("RUS");
+  await expect(cards.first()).toContainText("1:23:06.801");
+  await expect(cards.first()).not.toContainText("Grand Prix");
+  await expect(cards.first()).not.toContainText("Pole");
+  await expect(cards.first()).not.toContainText("COMPLETE");
+  await expect(cards.first().locator("img:visible")).toHaveCount(2); // 国旗 + 赛道
   const raceLinks = page.locator('main a[href^="/results/2026/races/"]');
   await expect(raceLinks).toHaveCount(22);
   await expect(raceLinks.first()).toHaveAttribute(
@@ -44,6 +53,25 @@ test("@desktop racing calendar links every round to its results page", async ({
     page.locator('.season-filter__panel a[href="/racing/2025"]'),
   ).toBeVisible();
   await expect(page.locator(".year-selector")).toHaveCount(0);
+});
+
+test("@desktop next round shows a live countdown to the next session", async ({
+  page,
+}) => {
+  await page.goto("/racing/2026");
+  // Next 面板倒计时指向下一个未开始 session；若周末已全部开始则显示 in progress
+  const ticking = page.locator("[data-countdown-id]");
+  const over = page.locator("[data-countdown-over]");
+  await expect(ticking.or(over).first()).toBeVisible();
+  if (await ticking.isVisible()) {
+    const text = await ticking.textContent();
+    expect(text).toMatch(/^(\d+d )?\d{2}:\d{2}:\d{2}$/);
+    // 每秒跳动：两次采样间隔 1.2s，文本应变化
+    await page.waitForTimeout(1200);
+    const after = await ticking.textContent();
+    expect(after).toMatch(/^(\d+d )?\d{2}:\d{2}:\d{2}$/);
+    expect(after).not.toBe(text);
+  }
 });
 
 test("@desktop legacy racing route redirects to new", async ({ page }) => {

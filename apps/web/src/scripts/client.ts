@@ -1,24 +1,3 @@
-const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-function enhanceLocalTimes(root: ParentNode = document): void {
-  root.querySelectorAll<HTMLElement>("[data-local-time]").forEach((element) => {
-    const timestamp = element.dataset.timestamp;
-    if (!timestamp) return;
-
-    const date = new Date(timestamp);
-    if (!Number.isFinite(date.getTime())) return;
-
-    element.textContent = `Your time · ${dateTimeFormatter.format(date)}`;
-    element.hidden = false;
-  });
-}
-
 // 比赛详情页各 tab 的表格已在服务端全部渲染；JS 可用时点击 tab 就地切换
 // 面板并同步地址栏，省掉视图过渡与回页首。必须在捕获阶段拦截，
 // 否则 ClientRouter 会先行接管链接做换页。无对应面板（如年份页的 tab）
@@ -63,7 +42,6 @@ function enhanceRaceTabs(): void {
 }
 
 function enhancePage(): void {
-  enhanceLocalTimes();
   enhanceRaceTabs();
 }
 

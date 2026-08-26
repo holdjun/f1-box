@@ -17,6 +17,40 @@ export function formatUtcDate(value: Timestamp, locale = "en-GB"): string {
   }).format(date);
 }
 
+// 周末日期范围（首练 → 正赛）：同月缩成 "06-08 MAR"，跨月 "27 FEB - 01 MAR"
+export function formatWeekendRange(
+  firstStartsAtUtc: string,
+  lastStartsAtUtc: string,
+  locale = "en-GB",
+): string {
+  const formatPart = (value: string, part: "day" | "month") => {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) {
+      throw new TypeError(`Invalid timestamp: ${String(value)}`);
+    }
+    return new Intl.DateTimeFormat(locale, {
+      [part]: part === "day" ? "2-digit" : "short",
+      timeZone: "UTC",
+    }).format(date);
+  };
+  const first = new Date(firstStartsAtUtc);
+  const last = new Date(lastStartsAtUtc);
+  // 老赛季无练习赛数据：首尾同日的周末只显示单日，不重复 "06-06 MAR"；
+  // getTime() 对 invalid 输入返回 NaN（NaN===NaN 为 false），诊断仍由 formatPart 抛出
+  const sameDay =
+    first.getTime() === last.getTime() && Number.isFinite(first.getTime());
+  const sameMonth =
+    first.getUTCFullYear() === last.getUTCFullYear() &&
+    first.getUTCMonth() === last.getUTCMonth();
+  // 老赛季无练习赛数据：首尾同日的周末只显示单日，不重复 "06-06 MAR"
+  if (sameDay) {
+    return `${formatPart(firstStartsAtUtc, "day")} ${formatPart(firstStartsAtUtc, "month").toUpperCase()}`;
+  }
+  return sameMonth
+    ? `${formatPart(firstStartsAtUtc, "day")}-${formatPart(lastStartsAtUtc, "day")} ${formatPart(lastStartsAtUtc, "month").toUpperCase()}`
+    : `${formatPart(firstStartsAtUtc, "day")} ${formatPart(firstStartsAtUtc, "month").toUpperCase()} - ${formatPart(lastStartsAtUtc, "day")} ${formatPart(lastStartsAtUtc, "month").toUpperCase()}`;
+}
+
 // 生日等"某日"展示：长月份名、无时间，UTC 防时区偏移
 export function formatUtcLongDate(value: Timestamp, locale = "en-GB"): string {
   const date = value instanceof Date ? value : new Date(value);

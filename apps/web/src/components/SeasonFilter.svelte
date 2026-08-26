@@ -74,7 +74,6 @@
       ? hrefPattern.replace("{year}", String(year))
       : `${baseHref}?year=${year}`;
 
-  const decadeOf = (year: number) => Math.floor(year / 10) * 10;
   const isDecadeFullySelected = (group: DecadeGroup): boolean =>
     group.years.length > 0 && group.years.every((year) => selected.has(year));
 
@@ -83,9 +82,13 @@
     const triggerBox = triggerEl.getBoundingClientRect();
     const spaceBelow = window.innerHeight - triggerBox.bottom;
     const spaceAbove = triggerBox.top;
-    expandingUp = spaceBelow < spaceAbove;
+    // 向上展开至少要放下几行（160px）；空间不够仍向下，避免面板顶出视口
+    expandingUp = spaceAbove >= 160 && spaceBelow < spaceAbove;
     const available = expandingUp ? spaceAbove : spaceBelow;
-    panelEl.style.maxHeight = `${Math.max(Math.min(available - 16, 480), 160)}px`;
+    const maxHeight = expandingUp
+      ? Math.min(available - 16, 480)
+      : Math.max(Math.min(available - 16, 480), 160);
+    panelEl.style.maxHeight = `${maxHeight}px`;
   }
 
   function openPanel(): void {
@@ -290,8 +293,9 @@
     background-color: var(--accent);
     color: var(--on-accent);
   }
-  /* 顶部导航 sticky（min-h-16 / lg:min-h-18），粘顶位置需避开导航 */
-  :global(.season-filter--sticky) { position: sticky; z-index: 5; top: 4.5rem; }
+  /* 顶部导航 sticky z-10；本条目也 sticky 且 z-20 > z-10：粘顶时紧贴导航下方,
+     面板向上展开时能盖过导航（下拉在上层可点击），不会出现最高年份被遮住 */
+  :global(.season-filter--sticky) { position: sticky; z-index: 20; top: 4.5rem; }
   @media (min-width: 61.25rem) { :global(.season-filter--sticky) { top: 5rem; } }
   :global(.season-filter__panel--up) { top: auto; bottom: calc(100% + 0.4rem); }
   :global(.season-filter__trigger[aria-expanded="true"]) :global(.season-filter__caret) { transform: rotate(180deg); }

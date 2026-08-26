@@ -144,6 +144,28 @@ test.describe("standings", () => {
   });
 });
 
+test.describe("session time toggle", () => {
+  // 固定浏览器时区为非 UTC（CI runner 默认 UTC，切换前后本地时间文本相同）
+  test.use({ timezoneId: "Asia/Shanghai" });
+
+  test("@desktop session times toggle between UTC and local", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races/australia/race-result");
+    const toggle = page.locator("[data-time-toggle]");
+    const firstTime = page.locator("[data-session-time]").first();
+    // SSR 默认 UTC
+    await expect(toggle).toHaveText("UTC");
+    await expect(firstTime).toContainText("UTC");
+    await toggle.click();
+    await expect(toggle).toHaveText("Your time");
+    await expect(firstTime).toContainText("GMT+8");
+    expect(await firstTime.textContent()).not.toContain("UTC");
+    await toggle.click();
+    await expect(firstTime).toContainText("UTC");
+  });
+});
+
 test("@mobile results pages have no page overflow", async ({ page }) => {
   for (const path of [
     "/results/2026/races",

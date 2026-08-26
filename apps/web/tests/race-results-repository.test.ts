@@ -27,7 +27,7 @@ function fakeDbBySql(
 }
 
 describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
-  it("maps a completed race with winner and pole", async () => {
+  it("maps a completed race with winner, pole, layout, sessions and podium", async () => {
     const db = fakeDbBySql({
       circuit_place: [
         {
@@ -41,8 +41,21 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
           time: "04:00",
           laps: 58,
           circuit_id: "melbourne",
+          circuit_layout_id: "melbourne-2",
           circuit_name: "Melbourne",
           circuit_place: "Melbourne",
+          free_practice_1_date: "2026-03-06",
+          free_practice_1_time: "01:30",
+          free_practice_2_date: "2026-03-06",
+          free_practice_2_time: "05:00",
+          free_practice_3_date: "2026-03-07",
+          free_practice_3_time: "01:30",
+          qualifying_date: "2026-03-07",
+          qualifying_time: "05:00",
+          sprint_qualifying_date: null,
+          sprint_qualifying_time: null,
+          sprint_race_date: null,
+          sprint_race_time: null,
           winner_name: "George Russell",
           winner_code: "RUS",
           winner_driver_id: "george-russell",
@@ -51,6 +64,29 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
           winner_time: "1:23:06.801",
           pole_name: "George Russell",
           pole_code: "RUS",
+        },
+      ],
+      "JOIN race ra ON rr.race_id": [
+        {
+          round: 1,
+          position_number: 1,
+          driver_code: "RUS",
+          constructor_id: "mercedes",
+          display_time: "1:23:06.801",
+        },
+        {
+          round: 1,
+          position_number: 2,
+          driver_code: "ANT",
+          constructor_id: "mercedes",
+          display_time: "+2.974",
+        },
+        {
+          round: 1,
+          position_number: 3,
+          driver_code: "LEC",
+          constructor_id: "ferrari",
+          display_time: "+15.519",
         },
       ],
     });
@@ -67,8 +103,49 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
         time: "04:00",
         laps: 58,
         circuitId: "melbourne",
+        circuitLayoutId: "melbourne-2",
         circuitName: "Melbourne",
         circuitPlace: "Melbourne",
+        sessions: [
+          {
+            key: "practice-1",
+            label: "Practice 1",
+            startsAtUtc: "2026-03-06T01:30:00Z",
+          },
+          {
+            key: "practice-2",
+            label: "Practice 2",
+            startsAtUtc: "2026-03-06T05:00:00Z",
+          },
+          {
+            key: "practice-3",
+            label: "Practice 3",
+            startsAtUtc: "2026-03-07T01:30:00Z",
+          },
+          {
+            key: "qualifying",
+            label: "Qualifying",
+            startsAtUtc: "2026-03-07T05:00:00Z",
+          },
+          { key: "race", label: "Race", startsAtUtc: "2026-03-08T04:00:00Z" },
+        ],
+        podium: [
+          {
+            driverCode: "RUS",
+            constructorId: "mercedes",
+            time: "1:23:06.801",
+          },
+          {
+            driverCode: "ANT",
+            constructorId: "mercedes",
+            time: "+2.974",
+          },
+          {
+            driverCode: "LEC",
+            constructorId: "ferrari",
+            time: "+15.519",
+          },
+        ],
         winnerName: "George Russell",
         winnerCode: "RUS",
         winnerDriverId: "george-russell",
@@ -95,8 +172,21 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
           time: "13:00",
           laps: 72,
           circuit_id: "zandvoort",
+          circuit_layout_id: "zandvoort-1",
           circuit_name: "Zandvoort",
           circuit_place: "Zandvoort",
+          free_practice_1_date: null,
+          free_practice_1_time: null,
+          free_practice_2_date: null,
+          free_practice_2_time: null,
+          free_practice_3_date: null,
+          free_practice_3_time: null,
+          qualifying_date: null,
+          qualifying_time: null,
+          sprint_qualifying_date: null,
+          sprint_qualifying_time: null,
+          sprint_race_date: null,
+          sprint_race_time: null,
           winner_name: null,
           winner_code: null,
           winner_driver_id: null,
@@ -107,11 +197,64 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
           pole_code: null,
         },
       ],
+      "JOIN race ra ON rr.race_id": [],
     });
     const [row] = await createRaceResultsRepository(db).getSeasonCalendar(2026);
     expect(row.winnerName).toBeNull();
     expect(row.winnerDriverId).toBeNull();
     expect(row.poleName).toBeNull();
+  });
+
+  it("orders sprint-weekend sessions by start time", async () => {
+    const db = fakeDbBySql({
+      circuit_place: [
+        {
+          round: 2,
+          slug: "china",
+          name: "China",
+          race_name: "Chinese Grand Prix",
+          alpha2_code: "CN",
+          country_name: "China",
+          date: "2026-03-15",
+          time: "07:00",
+          laps: 56,
+          circuit_id: "shanghai",
+          circuit_layout_id: "shanghai-1",
+          circuit_name: "Shanghai",
+          circuit_place: "Shanghai",
+          free_practice_1_date: "2026-03-13",
+          free_practice_1_time: "03:30",
+          free_practice_2_date: null,
+          free_practice_2_time: null,
+          free_practice_3_date: null,
+          free_practice_3_time: null,
+          qualifying_date: "2026-03-14",
+          qualifying_time: "07:00",
+          sprint_qualifying_date: "2026-03-13",
+          sprint_qualifying_time: "07:30",
+          sprint_race_date: "2026-03-14",
+          sprint_race_time: "03:00",
+          winner_name: null,
+          winner_code: null,
+          winner_driver_id: null,
+          winner_team_id: null,
+          winner_team_name: null,
+          winner_time: null,
+          pole_name: null,
+          pole_code: null,
+        },
+      ],
+      "JOIN race ra ON rr.race_id": [],
+    });
+    const [row] = await createRaceResultsRepository(db).getSeasonCalendar(2026);
+    // Quali 在 Sprint 之后，不能按字段定义序排列
+    expect(row.sessions.map((s) => s.key)).toEqual([
+      "practice-1",
+      "sprint-qualifying",
+      "sprint",
+      "qualifying",
+      "race",
+    ]);
   });
 
   it("renders a shared-win race once, keeping the first P1 row", async () => {
@@ -129,8 +272,21 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
       time: "14:00",
       laps: 77,
       circuit_id: "reims",
+      circuit_layout_id: "reims-1",
       circuit_name: "Reims-Gueux",
       circuit_place: "Reims",
+      free_practice_1_date: null,
+      free_practice_1_time: null,
+      free_practice_2_date: null,
+      free_practice_2_time: null,
+      free_practice_3_date: null,
+      free_practice_3_time: null,
+      qualifying_date: null,
+      qualifying_time: null,
+      sprint_qualifying_date: null,
+      sprint_qualifying_time: null,
+      sprint_race_date: null,
+      sprint_race_time: null,
       winner_name,
       winner_code: null,
       winner_driver_id,
@@ -150,6 +306,7 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
               sharedWinRow("juan-manuel-fangio", "Juan Manuel Fangio"),
             ],
           },
+          { results: [] }, // podium：1951 共享冠军老数据无前三名补充
         ]);
       },
     };
@@ -160,13 +317,25 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
     expect(sqls[0]).toContain("MIN(x.position_display_order)");
   });
 
-  it("DEV fixture calendar has 22 rounds, list only completed", async () => {
+  it("DEV fixture calendar has 22 rounds with sessions and podium, list only completed", async () => {
     const repository = createRaceResultsRepository();
-    expect(await repository.getSeasonCalendar(2026)).toHaveLength(22);
+    const calendar = await repository.getSeasonCalendar(2026);
+    expect(calendar).toHaveLength(22);
+    expect(calendar.every((race) => race.sessions.length > 0)).toBe(true);
+    expect(calendar.every((race) => race.circuitLayoutId.length > 0)).toBe(
+      true,
+    );
     const completed = await repository.listRaces(2026);
     expect(completed).toHaveLength(11);
     expect(completed.every((race) => race.winnerName !== null)).toBe(true);
     expect(completed.every((race) => race.winnerDriverId !== null)).toBe(true);
+    // 完赛站都有前三名，且首站为 Russell/1:23:06.801
+    expect(completed.every((race) => race.podium.length === 3)).toBe(true);
+    expect(completed[0].podium[0]).toEqual({
+      driverCode: "RUS",
+      constructorId: "mercedes",
+      time: "1:23:06.801",
+    });
     expect(await repository.getSeasonCalendar(2025)).toEqual([]);
   });
 });
@@ -214,6 +383,18 @@ const metaRow = {
   sprint_qualifying_time: null,
   sprint_race_date: null,
   sprint_race_time: null,
+};
+
+// 模拟 raceMetaSql 缺 session 字段的退化输入：详情页 Weekend schedule 只剩 race 一项
+// （生产 SQL 曾在 D1 路径漏选 practice/qualifying/sprint 列，回归保护）
+const metaRowNoSessions = {
+  ...metaRow,
+  free_practice_1_date: null,
+  free_practice_2_date: null,
+  free_practice_3_date: null,
+  qualifying_date: null,
+  sprint_qualifying_date: null,
+  sprint_race_date: null,
 };
 
 // getRacePage 一次 batch 9 条语句；未登记的语句抛错，用本助手把其余 tab 置空
@@ -321,6 +502,18 @@ describe("createRaceResultsRepository getRacePage", () => {
     // 有名次但被套圈：time 为空时视图回退到 gap
     expect(page?.tabs.raceResult[2].time).toBeNull();
     expect(page?.tabs.raceResult[2].gap).toBe("+26.874");
+  });
+
+  it("degrades to race-only sessions when meta lacks session columns", async () => {
+    // raceMetaSql 漏选 session 列时（生产 D1 曾犯过），Weekend schedule 只应有 race 一项而非崩溃
+    const db = fakeDbBySql(tabFragments({ circuit_name: [metaRowNoSessions] }));
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2026,
+      "australia",
+    );
+    expect(page?.meta.sessions).toEqual([
+      { key: "race", label: "Race", startsAtUtc: "2026-03-08T04:00:00Z" },
+    ]);
   });
 
   it("returns null for unknown slug", async () => {

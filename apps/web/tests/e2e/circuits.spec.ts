@@ -54,9 +54,12 @@ test("@desktop race hero links to its circuit page", async ({ page }) => {
   );
 });
 
-test("@desktop header navigation includes circuits", async ({ page }) => {
+test("@desktop header navigation drops circuits entry", async ({ page }) => {
+  // 导航精简为 4 项：circuits 页面仍存在（由详情页电路链接进入），但不在主导航
   await page.goto("/");
-  await expect(page.locator('header nav a[href="/circuits"]')).toBeVisible();
+  await expect(page.locator('header nav a[href="/circuits"]')).toHaveCount(0);
+  const navLinks = page.locator("header nav a");
+  await expect(navLinks).toHaveText(["Racing", "Results", "Drivers", "Teams"]);
 });
 
 test("@mobile 375px circuit detail has no page overflow", async ({ page }) => {

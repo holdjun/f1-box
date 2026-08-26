@@ -11,7 +11,7 @@ if (!circuit) Astro.response.status = 404;
 ---
 
 {circuit ? (
-  <BaseLayout title={circuit.name} active="circuits">
+  <BaseLayout title={circuit.name}>
     <main id="main-content" class="shell pt-12 pb-section">
       <div class="circuit-hero grid grid-cols-1 items-end gap-8 lg:grid-cols-[3fr_2fr]">
         <div>
@@ -79,7 +79,7 @@ if (!circuit) Astro.response.status = 404;
     </main>
   </BaseLayout>
 ) : (
-  <BaseLayout title="Circuit not found" active="circuits">
+  <BaseLayout title="Circuit not found">
     <StatusPage code="404" title="Circuit not found" message="This circuit is not available yet." />
   </BaseLayout>
 )}

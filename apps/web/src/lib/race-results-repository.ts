@@ -16,8 +16,11 @@ export interface RaceSummary {
   time: string | null;
   laps: number;
   circuitId: string;
+  circuitLayoutId: string;
   circuitName: string;
   circuitPlace: string;
+  sessions: RaceSession[];
+  podium: PodiumEntry[];
   winnerName: string | null;
   winnerCode: string | null;
   winnerDriverId: string | null;
@@ -32,6 +35,13 @@ export interface RaceSession {
   key: string;
   label: string;
   startsAtUtc: string;
+}
+
+export interface PodiumEntry {
+  driverCode: string | null;
+  constructorId: string | null;
+  // 第 1 名为完赛时间（如 1:23:06.801）；第 2/3 名为对第 1 名的秒差（如 +2.974）
+  time: string | null;
 }
 
 export interface RaceMeta {
@@ -173,6 +183,19 @@ export const RACE_TAB_FIELDS: Record<RaceTabKey, keyof RacePage["tabs"]> = {
   "practice-3": "practice3",
 };
 
+// 前三名（正赛 1/2/3）：独立查询减轻 calendar SQL 的 join 负担，
+// 返回后在 JS 侧按 (year, round) 并进 RaceSummary.podium；
+// position_display_order 次级排序：共享冠军站（1951 法国等）有两条 P1 行，行序固定才不反复
+const podiumSql = `SELECT ra.round,
+       rr.position_number, d.abbreviation AS driver_code, ct.id AS constructor_id,
+       CASE WHEN rr.position_number = 1 THEN rr.time ELSE rr.gap END AS display_time
+FROM race_result rr
+JOIN race ra ON rr.race_id = ra.id
+JOIN driver d ON rr.driver_id = d.id
+JOIN constructor ct ON rr.constructor_id = ct.id
+WHERE ra.year = ?1 AND rr.position_number IN (1, 2, 3)
+ORDER BY ra.round, rr.position_number, rr.position_display_order`;
+
 export interface RaceResultsDatabase {
   batch(
     statements: { sql: string; values: readonly unknown[] }[],
@@ -200,7 +223,13 @@ export function createD1RaceResultsDatabase(
 const seasonCalendarSql = `SELECT ra.round, ra.grand_prix_id AS slug, gp.name,
        gp.full_name AS race_name, c.alpha2_code, c.name AS country_name,
        ra.date, ra.time, ra.laps,
-       ci.id AS circuit_id, ci.name AS circuit_name, ci.place_name AS circuit_place,
+       ra.circuit_layout_id, ci.id AS circuit_id, ci.name AS circuit_name, ci.place_name AS circuit_place,
+       ra.free_practice_1_date, ra.free_practice_1_time,
+       ra.free_practice_2_date, ra.free_practice_2_time,
+       ra.free_practice_3_date, ra.free_practice_3_time,
+       ra.qualifying_date, ra.qualifying_time,
+       ra.sprint_qualifying_date, ra.sprint_qualifying_time,
+       ra.sprint_race_date, ra.sprint_race_time,
        wd.id AS winner_driver_id, wd.name AS winner_name, wd.abbreviation AS winner_code,
        wct.id AS winner_team_id, wct.name AS winner_team_name, wrr.time AS winner_time,
        pd.name AS pole_name, pd.abbreviation AS pole_code
@@ -233,8 +262,11 @@ function mapRaceSummary(row: unknown): RaceSummary {
     time: r.time === null ? null : asString(r.time, "race time"),
     laps: asNumber(r.laps, "laps"),
     circuitId: asString(r.circuit_id, "circuit id"),
+    circuitLayoutId: asString(r.circuit_layout_id, "circuit layout id"),
     circuitName: asString(r.circuit_name, "circuit name"),
     circuitPlace: asString(r.circuit_place, "circuit place"),
+    sessions: buildSessions(r),
+    podium: [],
     winnerName:
       r.winner_name === null ? null : asString(r.winner_name, "winner name"),
     winnerCode:
@@ -264,7 +296,13 @@ const raceIdSubquery = `(SELECT id FROM race WHERE year = ?1 AND grand_prix_id =
 const raceMetaSql = `SELECT ra.year, ra.round, ra.grand_prix_id AS slug, gp.name,
        ra.official_name, ra.date, ra.time, ra.laps, ra.course_length,
        ra.circuit_id, ra.circuit_layout_id, ci.name AS circuit_name, ci.place_name AS circuit_place,
-       cc.name AS country_name, cc.alpha2_code
+       cc.name AS country_name, cc.alpha2_code,
+       ra.free_practice_1_date, ra.free_practice_1_time,
+       ra.free_practice_2_date, ra.free_practice_2_time,
+       ra.free_practice_3_date, ra.free_practice_3_time,
+       ra.qualifying_date, ra.qualifying_time,
+       ra.sprint_qualifying_date, ra.sprint_qualifying_time,
+       ra.sprint_race_date, ra.sprint_race_time
 FROM race ra
 JOIN grand_prix gp ON ra.grand_prix_id = gp.id
 JOIN circuit ci ON ra.circuit_id = ci.id
@@ -422,7 +460,8 @@ function buildSessions(r: Record<string, unknown>): RaceSession[] {
     const time = r[timeKey] ?? "00:00";
     sessions.push({ key, label, startsAtUtc: `${date}T${time}:00Z` });
   }
-  return sessions;
+  // defs 顺序是字段映射序；sprint 周末 Quali 在 Sprint 之后，按开始时间排回真实顺序
+  return sessions.sort((a, b) => a.startsAtUtc.localeCompare(b.startsAtUtc));
 }
 
 function mapRaceMeta(row: unknown): RaceMeta {
@@ -567,12 +606,35 @@ export function createRaceResultsRepository(
       );
       return (fixture as { races: RaceSummary[] }).races;
     }
-    const [rows] = await db.batch([{ sql: seasonCalendarSql, values: [year] }]);
+    const [rows, podiumRows] = await db.batch([
+      { sql: seasonCalendarSql, values: [year] },
+      { sql: podiumSql, values: [year] },
+    ]);
     // SQL 已挑定并列 P1 中的一行；这里按 round 去重兜底，共享冠军只出一条
     const byRound = new Map<number, RaceSummary>();
     for (const row of rows.results) {
       const race = mapRaceSummary(row);
       if (!byRound.has(race.round)) byRound.set(race.round, race);
+    }
+    for (const row of podiumRows.results) {
+      const r = asRecord(row, "podium row");
+      const race = byRound.get(asNumber(r.round, "round"));
+      if (!race) continue;
+      const position = asNumber(r.position_number, "position");
+      race.podium[position - 1] = {
+        driverCode:
+          r.driver_code === null
+            ? null
+            : asString(r.driver_code, "driver code"),
+        constructorId:
+          r.constructor_id === null
+            ? null
+            : asString(r.constructor_id, "constructor id"),
+        time:
+          r.display_time === null
+            ? null
+            : asString(r.display_time, "display time"),
+      };
     }
     return [...byRound.values()];
   };

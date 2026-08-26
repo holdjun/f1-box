@@ -1,6 +1,7 @@
 ---
 import type { RaceSummary } from "../lib/race-results-repository.js";
-import { formatUtcDateTime } from "../lib/time.js";
+import { formatWeekendRange } from "../lib/time.js";
+import { colorForYear, vendorIndexes } from "../lib/vendor.js";
 
 interface Props {
   race: RaceSummary;
@@ -10,13 +11,21 @@ interface Props {
 
 const { race, href, status } = Astro.props;
 const round = String(race.round).padStart(2, "0");
+const year = Number(race.date.slice(0, 4));
 const startsAt = `${race.date}T${race.time ?? "00:00"}:00Z`;
+// 周末范围 = 首练（或最早 session）→ 正赛；无 session 数据时回退单日
+const weekendStart = race.sessions[0]?.startsAtUtc ?? startsAt;
+const weekendRange = formatWeekendRange(weekendStart, startsAt);
 // 部分赛道与地点字段同值（Suzuka/Suzuka），去重后只展示一次
 const placeLine =
   race.circuitName && race.circuitName !== race.circuitPlace
     ? `${race.circuitPlace} · ${race.circuitName}`
     : race.circuitPlace;
-const labels = { complete: "COMPLETE", next: "NEXT", upcoming: "UPCOMING" };
+// 斜杠名次标记：第 N 名 N 条斜杠，填充该名次车手所在车队当年主色
+const teamColor = (constructorId: string | null): string | undefined =>
+  constructorId
+    ? (colorForYear(vendorIndexes, constructorId, year) ?? undefined)
+    : undefined;
 ---
 
 <article class="race-card min-w-0">
@@ -24,7 +33,7 @@ const labels = { complete: "COMPLETE", next: "NEXT", upcoming: "UPCOMING" };
     href={href}
     aria-label={`Round ${round}: ${race.raceName}, ${race.countryName}`}
     class:list={[
-      "group relative flex h-full flex-col overflow-hidden rounded-md border bg-surface-raised p-5 transition-[background-color,transform,border-color] duration-200 hover:z-1 hover:-translate-y-1 hover:bg-surface-overlay focus-visible:z-1",
+      "group relative flex h-full flex-col overflow-hidden rounded-md border bg-surface-raised p-5 transition-[background-color,transform,border-color] duration-200 hover:z-1 hover:-translate-y-1 hover:bg-surface-overlay focus-visible:z-1 md:p-6",
       // border-line 与 border-accent 互斥：并列时编译顺序会让 border-line 覆盖 accent；
       // 同理 light:shadow-panel 会盖掉 next 的 inset 顶栏，只给非 next 卡
       status === "next"
@@ -32,49 +41,65 @@ const labels = { complete: "COMPLETE", next: "NEXT", upcoming: "UPCOMING" };
         : "border-line light:shadow-panel",
     ]}
   >
-    <div class="flex items-center gap-2.5">
+    <div class="flex items-end gap-3">
       <span
-        class="font-display text-[2.6rem] leading-none font-semibold text-transparent [-webkit-text-stroke:1px_var(--ink-muted)]"
+        class="font-display text-[2.25rem] leading-none font-semibold text-transparent [-webkit-text-stroke:1px_var(--ink-muted)]"
         aria-hidden="true">{round}</span>
+      <!-- 圆角和轮廓加在国旗图像本身；国旗 SVG 为 4:3，4:3 盒同比例；
+           border 挤占内容盒（1.381 非 4:3），contain 填不满会悬空一圈 —— cover 放大填满、紧贴边框 -->
       <img
         src={`/vendor/country-flags/${race.alpha2Code.toLowerCase()}.svg`}
         alt=""
-        class="vendor-cell__flag"
+        class="vendor-cell__flag mb-1 h-4 w-auto aspect-4/3 rounded-[2px] border border-ink/25 object-cover"
         loading="lazy"
       />
-      <span class:list={["status-label ml-auto", status === "next" && "status-label--accent"]}>
-        {labels[status]}
-      </span>
-    </div>
-    <div class="mt-4 pr-8">
-      <h3 class="font-display text-[1.9rem] leading-[1.02] font-semibold uppercase">{race.raceName}</h3>
-      <time class="mt-2.5 block text-[0.76rem] text-ink-strong" datetime={startsAt}>
-        {formatUtcDateTime(startsAt)}
+      <time
+        class="ml-auto flex items-center gap-1.5 self-start pt-1 text-[0.72rem] tracking-[0.08em] tabular-nums text-ink-muted"
+        datetime={weekendStart.slice(0, 10)}
+      >
+        <span aria-hidden="true">🏁</span>
+        {weekendRange}
       </time>
-      <p class="mt-1 text-[0.78rem] text-ink-muted">{placeLine}</p>
-      {status === "complete" && (
-        <dl class="mt-5 grid grid-cols-2 gap-4 border-t border-line pt-4">
-          <div>
-            <dt class="text-[0.65rem] tracking-[0.08em] uppercase text-ink-muted">Pole</dt>
-            <dd class="mt-1 text-[0.78rem]">{race.poleName ?? "—"}</dd>
-          </div>
-          <div>
-            <dt class="text-[0.65rem] tracking-[0.08em] uppercase text-ink-muted">Winner</dt>
-            <dd class="mt-1 text-[0.78rem]">{race.winnerName}</dd>
-          </div>
-        </dl>
-      )}
     </div>
-    <svg
-      class="absolute right-5 bottom-5 w-7 text-ink-muted transition-colors group-hover:text-accent"
-      viewBox="0 0 28 16"
-      fill="none"
-      stroke="currentColor"
-      stroke-linecap="square"
-      stroke-width="1.5"
-      aria-hidden="true"
-    >
-      <path d="M1 8h24M18 1l7 7-7 7" />
-    </svg>
+    <!-- 标题区 flex-1 吸收同行卡片的高差，等高分布在标题与领奖台之间；赛道图水印居中在右侧空带，不再与领奖台抢右下角 -->
+    <div class="relative mt-5 flex-1">
+      <h3 class="font-display text-[2.05rem] leading-[1.05] font-semibold uppercase md:pr-24">{race.name}</h3>
+      <p class="mt-1.5 text-[0.78rem] text-ink-muted md:pr-24">{placeLine}</p>
+      <!-- vendor SVG 为 500×500 方框：等比方形盒、不钳制高度放大才可见；右缘钉死 right-0，
+           桌面顶对齐标题带向下延伸——右上有日期，往下才是空区（领奖台居中让出右侧）；
+           移动端标题带矮（~70px），贴底（bottom-0）顶部会顶进日期行，下移 12px 保持与桌面同款空隙 -->
+      <img
+        src={`/vendor/circuits/${race.circuitLayoutId}.svg`}
+        alt=""
+        loading="lazy"
+        class="pointer-events-none absolute right-0 -bottom-3 h-24 w-auto object-contain opacity-20 transition-opacity duration-200 group-hover:opacity-45 md:-top-6 md:bottom-auto light:invert"
+      />
+    </div>
+    {status === "complete" && race.podium.length > 0 && (
+      <ol class="mt-5 grid grid-cols-3 justify-items-center gap-2 border-t border-line pt-4 md:gap-4">
+        {race.podium.map((entry, index) => {
+          // 斜杠名次标记填充该名次车手所在车队当年主色；查表一次即可
+          const color = teamColor(entry.constructorId);
+          return (
+          <li class="flex min-w-0 items-center gap-2 md:gap-2.5">
+            <span
+              aria-hidden="true"
+              class="podium-mark shrink-0 font-display text-[1.35rem] leading-none font-bold [-webkit-text-stroke:1.5px_currentColor]"
+              style={color ? { color } : undefined}
+            >
+              {"/".repeat(index + 1)}
+            </span>
+            <span class="flex min-w-0 flex-col">
+              <span class="font-display text-[0.78rem] font-semibold tracking-[0.12em]">{entry.driverCode ?? "—"}</span>
+              <span class="mt-0.5 text-[0.72rem] tabular-nums text-ink-strong">{entry.time ?? "—"}</span>
+            </span>
+          </li>
+          );
+        })}
+      </ol>
+    )}
+    {status === "complete" && race.podium.length === 0 && (
+      <p class="mt-5 border-t border-line pt-4 text-[0.78rem] text-ink-muted">{race.winnerName}</p>
+    )}
   </a>
 </article>
