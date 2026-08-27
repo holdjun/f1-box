@@ -101,3 +101,38 @@ describe("middleware 默认缓存", () => {
     expect(cache.set).not.toHaveBeenCalled();
   });
 });
+
+describe("middleware 浏览器缓存头", () => {
+  // ClientRouter 后退导航用普通 fetch 重拉整页 HTML，只认浏览器可见的
+  // Cache-Control；只设 Cloudflare-CDN-Cache-Control 时该 fetch 每次走网络，
+  // 后退体感是"刷新出来的"。边缘命中时 Worker 不执行，浏览器头必须在
+  // cache.set 同一分支内直接写进响应，不能依赖 middleware 的后处理
+  it("opt-in 同时给浏览器可见的 Cache-Control", async () => {
+    const { response } = await run("/racing/2026");
+    expect(response.headers.get("Cache-Control")).toBe(
+      "public, max-age=60, stale-while-revalidate=300",
+    );
+  });
+
+  it("no-store 等显式头页面不覆盖", async () => {
+    const { response } = await run("/racing/2026", {
+      headers: { "Cache-Control": "no-store" },
+    });
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+  });
+
+  it("API、重定向、非 2xx 均不带浏览器缓存头", async () => {
+    for (const opts of [
+      { method: "POST" },
+      { method: "GET", path: "/api/health" },
+      { status: 302 },
+      { status: 404 },
+    ]) {
+      const { response } = await run(
+        opts.path ?? "/racing/2026",
+        opts.status ? { status: opts.status, method: opts.method } : opts,
+      );
+      expect(response.headers.get("Cache-Control")).toBeNull();
+    }
+  });
+});
