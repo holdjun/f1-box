@@ -8,13 +8,22 @@ vi.mock("astro:middleware", () => ({
 }));
 
 const getAppData = vi.hoisted(() => vi.fn());
+const getF1dbVersion = vi.hoisted(() => vi.fn());
 vi.mock("../src/lib/repositories.js", () => ({
   getAppData,
+  getF1dbVersion,
 }));
 
 import { onRequest } from "../src/middleware.js";
 
-const CACHE_OPTIONS = { maxAge: 300, swr: 600, tags: ["f1db"] };
+const F1DB_VERSION = 42;
+// 测试环境无 vite.define 注入，import.meta.env.F1BOX_BUILD_ID 回落 "dev"
+const CACHE_OPTIONS = {
+  maxAge: 300,
+  swr: 600,
+  tags: ["f1db"],
+  etag: `"${F1DB_VERSION}-dev"`,
+};
 
 // context 只构造 middleware 用到的最小形状；locals 由 middleware 写入 app
 function makeContext(
@@ -22,12 +31,18 @@ function makeContext(
   method = "GET",
   status = 200,
   headers: Record<string, string> = {},
+  cacheEnabled = true,
 ) {
   const request = new Request(`https://example.com${path}`, { method });
   const locals: { app?: unknown } = {};
-  const cache = { set: vi.fn() };
+  // 与运行时 CacheLike 对齐：AstroCache.enabled=true，dev 的 NoopAstroCache 为 false
+  const cache = { set: vi.fn(), enabled: cacheEnabled };
   const next = vi.fn(async () => new Response(null, { status, headers }));
-  return { context: { locals, request, cache } as never, next, cache };
+  return {
+    context: { locals, request, cache, url: new URL(request.url) } as never,
+    next,
+    cache,
+  };
 }
 
 async function run(
@@ -36,6 +51,7 @@ async function run(
     method?: string;
     status?: number;
     headers?: Record<string, string>;
+    cacheEnabled?: boolean;
   } = {},
 ) {
   const { context, next, cache } = makeContext(
@@ -43,6 +59,7 @@ async function run(
     opts.method,
     opts.status,
     opts.headers,
+    opts.cacheEnabled,
   );
   const result = await onRequest(context, next);
   // MiddlewareHandler 返回类型含 void，实际执行路径恒返回 Response
@@ -58,6 +75,8 @@ async function run(
 beforeEach(() => {
   getAppData.mockReset();
   getAppData.mockResolvedValue({ repositories: {}, askDb: {} });
+  getF1dbVersion.mockReset();
+  getF1dbVersion.mockResolvedValue(F1DB_VERSION);
 });
 
 describe("middleware 默认缓存", () => {
@@ -112,6 +131,28 @@ describe("middleware 浏览器缓存头", () => {
     expect(response.headers.get("Cache-Control")).toBe(
       "public, max-age=60, stale-while-revalidate=300",
     );
+  });
+
+  // 与 edge 缓存的 ETag 同源：过期后的条件请求命中返回 304，不再付整页往返
+  it("ETag 由 f1db 数据版本加构建 ID 组成", async () => {
+    const { response, cache } = await run("/racing/2026");
+    expect(response.headers.get("ETag")).toBe(`"${F1DB_VERSION}-dev"`);
+    // 浏览器与 edge 共用同一验证器，改一处必须两处同步
+    expect(cache.set).toHaveBeenCalledWith(
+      expect.objectContaining({ etag: `"${F1DB_VERSION}-dev"` }),
+    );
+  });
+
+  // dev 的 NoopAstroCache 不做边缘缓存；此时也不该给浏览器写缓存头，
+  // 否则本地改完 .astro 后 60s 内刷新拿不到新页面，e2e（跑 dev server）
+  // 验证的也不是生产行为
+  it("缓存禁用（dev/e2e）时不写浏览器缓存头", async () => {
+    const { cache, response } = await run("/racing/2026", {
+      cacheEnabled: false,
+    });
+    expect(cache.set).not.toHaveBeenCalled();
+    expect(response.headers.get("Cache-Control")).toBeNull();
+    expect(response.headers.get("ETag")).toBeNull();
   });
 
   it("no-store 等显式头页面不覆盖", async () => {
