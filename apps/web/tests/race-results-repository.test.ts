@@ -697,33 +697,6 @@ describe("createRaceResultsRepository getRacePage", () => {
   });
 });
 
-describe("createRaceResultsRepository getLatestRaceByCircuit", () => {
-  it("returns the most recent race of a circuit", async () => {
-    const db = fakeDbBySql({
-      "ORDER BY ra.year DESC": [{ year: 2026, slug: "australia" }],
-    });
-    expect(
-      await createRaceResultsRepository(db).getLatestRaceByCircuit("melbourne"),
-    ).toEqual({ year: 2026, slug: "australia" });
-  });
-
-  it("returns null when the circuit has no race", async () => {
-    const db = fakeDbBySql({ "ORDER BY ra.year DESC": [] });
-    expect(
-      await createRaceResultsRepository(db).getLatestRaceByCircuit("nope"),
-    ).toBeNull();
-  });
-
-  it("DEV fixture resolves melbourne only", async () => {
-    const repository = createRaceResultsRepository();
-    expect(await repository.getLatestRaceByCircuit("melbourne")).toEqual({
-      year: 2026,
-      slug: "australia",
-    });
-    expect(await repository.getLatestRaceByCircuit("jeddah")).toBeNull();
-  });
-});
-
 describe("createRaceResultsRepository standings", () => {
   it("maps driver standings with aggregated wins", async () => {
     const db = fakeDbBySql({

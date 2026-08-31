@@ -15,7 +15,7 @@
 - 赛道信息卡内容（数据缺失显示 "—"）：赛道全名（full_name，作卡片标题）、Circuit Length（本场 course_length，km 三位小数）、Number of Laps（本场 laps）、Race Distance（本场 distance，km）、方向与弯数（本场 direction/turns）、First Grand Prix（该赛道最早办赛年份）、Races Held（该赛道累计办赛场次）、Fastest Lap（该赛道历史最快圈：时间 + 车手 + 年份，口径同原赛道详情页）。
 - 赛道 SVG 保持现状（优先注解版地图，无注解回落 f1db 轮廓），不再是链接；与赛道信息卡相邻展示（桌面并排、移动端堆叠）。
 - Weekend schedule：每个 session 同时显示两个时间——My time（访客本地时区）与 Track time（赛道当地时区），不再提供 UTC/Your time 切换按钮。无 JS 时 My time 显示 UTC 时间（保留现有渐进增强方式，客户端水合后转为访客时区），Track time 由服务端直接渲染、无需 JS 即正确。无 session 的老比赛整块隐藏（同现状）。
-- `/circuits` 与 `/circuits/:id` 页面移除：`/circuits/:id` 301 到该赛道最近一场比赛的分站详情页（`/results/{year}/races/{slug}/race-result`），未知赛道 404；`/circuits` 301 到最新赛季比赛列表 `/results/:year/races`。
+- `/circuits` 与 `/circuits/:id` 页面移除：地址自然 404，不保留任何重定向。
 - 原指向 `/circuits/:id` 的站内链接全部改为分站页链接：车手/车队页赛季矩阵的回合代号链接指向该年份对应分站（`/results/{year}/races/{slug}/race-result`）；分站页自身的赛道图与赛道名不再外链。
 
 ## 验收标准
@@ -23,7 +23,7 @@
 - `pnpm check`、`pnpm test`、`pnpm -r build` 全绿；`pnpm --filter @f1-box/web test:e2e` 全绿（桌面 / 375px / reduced-motion / 双主题 axe）。
 - 抽查分站页：Australia 2026（副行 `08 Mar 2026 · Melbourne · Australia`）、Las Vegas 2026（副行日期为 `21 Nov 2026`，Track time 为当地 20:00 口径）、一场历史老赛（如 1995 Adelaide）区块齐全、缺数据显示 "—" 不报错。
 - 无 time 的历史比赛（如 1995 Adelaide）副行日期保持 UTC 日期，不因时区换算偏移。
-- `/circuits/melbourne` 301 到 `/results/2026/races/australia/race-result`；`/circuits/nope` 404；`/circuits` 301 到最新赛季比赛列表。
+- `/circuits/melbourne` 与 `/circuits` 均返回 404（页面已移除，无重定向）。
 - 车手页与车队页赛季矩阵回合代号链接指向对应年份分站页。
 - Weekend schedule 每个 session 同时渲染 My time 与 Track time；切换浏览器时区（或 Playwright timezoneId）后 My time 随之变化，Track time 不变。
 - 新增赛道时区映射覆盖 f1db 全部赛道（当前 78 条），无遗漏。

@@ -333,13 +333,6 @@ WHERE ra.circuit_id = (SELECT ra2.circuit_id FROM race ra2 WHERE ra2.year = ?1 A
 ORDER BY fl.time_millis
 LIMIT 1`;
 
-// 重定向用：赛道最近一站
-const latestRaceByCircuitSql = `SELECT ra.year, ra.grand_prix_id AS slug
-FROM race ra
-WHERE ra.circuit_id = ?1
-ORDER BY ra.year DESC, ra.round DESC
-LIMIT 1`;
-
 const raceResultSql = `SELECT rr.position_number, rr.position_text, rr.driver_number,
        d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
        ct.id AS constructor_id, ct.name AS constructor_name,
@@ -662,9 +655,6 @@ export interface RaceResultsRepository {
   getRacePage(year: number, slug: string): Promise<RacePage | null>;
   getDriverStandings(year: number): Promise<DriverStandingRow[]>;
   getConstructorStandings(year: number): Promise<TeamStandingRow[]>;
-  getLatestRaceByCircuit(
-    circuitId: string,
-  ): Promise<{ year: number; slug: string } | null>;
 }
 
 export function createRaceResultsRepository(
@@ -813,23 +803,6 @@ export function createRaceResultsRepository(
         { sql: constructorStandingsSql, values: [year] },
       ]);
       return rows.results.map(mapTeamStandingRow);
-    },
-
-    async getLatestRaceByCircuit(circuitId) {
-      if (!db) {
-        return circuitId === "melbourne"
-          ? { year: 2026, slug: "australia" }
-          : null;
-      }
-      const [rows] = await db.batch([
-        { sql: latestRaceByCircuitSql, values: [circuitId] },
-      ]);
-      if (rows.results.length === 0) return null;
-      const r = asRecord(rows.results[0], "latest race row");
-      return {
-        year: asNumber(r.year, "latest race year"),
-        slug: asString(r.slug, "latest race slug"),
-      };
     },
   };
 }

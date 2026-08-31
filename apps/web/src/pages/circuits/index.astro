@@ -1,7 +1,0 @@
----
-const { raceResults } = Astro.locals.app.repositories;
-const years = await raceResults.getSeasonYears();
-const latestYear = years[0];
-// 无任何赛季（空库）时回首页而不是渲染残页
-return Astro.redirect(latestYear ? `/results/${latestYear}/races` : "/", 301);
----
