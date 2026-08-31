@@ -19,13 +19,13 @@
 - `src/data/circuit-maps.json` 共 10 条注解赛道（key 为 `{circuitId}-{layout}`），字段：sectors（三段点数组）、corners（{x,y,n,letter}）、drs（当前全部为空数组）。无注解时 `CircuitMap.astro` 回落 `<img src=/vendor/circuits/{layoutId}.svg>`。
 - sector 三色在 `src/components/CircuitMap.astro` 的 `SECTOR_COLORS`（#ec008c / #ffd400 / #00a3e0，数据语义色）。
 - 图例范式现成：`src/components/SeasonMatrix.astro` 约 57-81 行的 `section.legend` + `span.key` + `i` 色块写法。
-- 徽标核心：`src/lib/tokens.ts` 的 `monogram`（两字母回落）与 `monogramStyle`（--monogram-bg/fg，按亮度选黑白字）；圆形样式 `.vendor-cell__monogram` 在 `src/styles/components.css` 约 304-317 行（1.75rem、字号 0.6rem）。
+- 徽标核心：`src/lib/tokens.ts` 的 `monogram`（两字母）与 `monogramStyle`（--monogram-bg/fg，按亮度选黑白字）；圆形样式 `.vendor-cell__monogram` 是 `src/styles/components.css` 约 304-317 行的真 CSS 规则（1.75rem、字号 0.6rem，改字号改这里）。任务 3 会把 `monogram()` 的全部调用点换成三字码，届时它成为零调用死代码，连同 `tests/tokens.test.ts` 的 monogram describe 块一并删除；`monogramStyle` 仍被 RaceTable/冠军列使用，保留。
 - 车手徽标使用点与可用字段：
   - `src/components/RaceTable.astro` 六个 tab 各一处（`monogram(row.driverName)` + name + `<small>{row.driverCode}</small>` 三件套，首处约 63-67 行）——`row.driverCode` 已有。
   - `src/components/StandingsTable.astro` 约 42-44 行——`row.driverCode` 已有。
   - `src/pages/results/[year]/races/index.astro` 约 67-71 行冠军列——`race.winnerCode` 已有。
   - `src/pages/drivers/index.astro` 约 41-46 行与 `src/pages/drivers/[id].astro` 约 96-98 行是"无车号回落"位——`DriverSummary`（driver-repository.ts:15）与 `DriverPage`（:86）当前无 code 字段，需新增。
-- `monogram()` 仍被车队卡回落使用（`tests/e2e/team.spec.ts:166` 覆盖），不得删除；`tests/tokens.test.ts` 不动。
+- 车队卡回落不走 `monogram()`，用内联 `team.name.slice(0, 2).toUpperCase()`（`pages/teams/index.astro:56-57`、`pages/teams/[slug].astro:86-87`）；`team.spec.ts:166` 断言的 `.card-monogram` 元素内容即该 slice 结果，与函数无关。`monogram()` 现有调用点全部是车手徽标（上方清单），任务 3 后无调用者，属应删死代码。
 - /circuits 删除面已核净：页面存根 2 文件、`latestRaceByCircuitSql` 与 `getLatestRaceByCircuit`（race-results-repository.ts 约 336-341 / 665-667 / 818-833，唯一调用方就是存根页）、`tests/e2e/redirects.spec.ts` 整文件、`tests/race-results-repository.test.ts` 的 `getLatestRaceByCircuit` describe 块（约 700-725）。路由/中间件/导航无其他引用；`/vendor/circuits/` 静态资产路径保留。
 
 ## 任务 1：删除 /circuits 存根
@@ -56,10 +56,10 @@
 
 ## 任务 3：车手徽标改三字码
 
-1. 三处现成数据的使用点：`RaceTable.astro` 六 tab、`StandingsTable.astro`、`results/[year]/races/index.astro` 冠军列——徽标文本由 `monogram(name)` 改为 `driverCode` / `winnerCode`，同时删除徽标后冗余的 `<small>{code}</small>`（徽标本身已是码）。
+1. 三处现成数据的使用点：`RaceTable.astro` 六 tab、`StandingsTable.astro`、`results/[year]/races/index.astro` 冠军列——徽标文本由 `monogram(name)` 改为 `driverCode` / `winnerCode`，同时删除徽标后冗余的 `<small>{code}</small>`（徽标本身已是码）。注意冠军列 `race.winnerCode` 类型是 `string | null`（RaceSummary 为兼容无冠军行而可空），现有守卫只查了 `winnerDriverId && winnerName`；把守卫扩成 `race.winnerDriverId && race.winnerName && race.winnerCode`，让类型收窄成 `string`，避免偶发空圆。
 2. 车手页两处回落位：`DriverSummary` 与 `DriverPage` 新增 `code: string`（SQL 增 `d.abbreviation`，`mapDriverRow` 与 `parseIdentity` 同步）；目录卡与详情 hero 的 `monogram(name)` 回落改为 `code`。三个 DEV fixture 补 `code` 字段：`fixtures/drivers.json`（32 条，建议脚本批量补，取值与 f1db `driver.abbreviation` 一致）、`fixtures/driver-george-russell.json`、`fixtures/driver-max-verstappen.json`。
-3. 字号适配三字符：`.vendor-cell__monogram` 0.6rem 起步按渲染效果微调（可能 0.55rem 或收紧 letter-spacing）；目录卡 `card-monogram`（1.2rem）与详情 `driver-monogram`（1.6rem）的字号相应缩小到三字符可读且不溢盒（约 1rem / 1.15rem 起步，目视定）。深浅两主题都要看（--monogram-fg 黑白字逻辑不动）。
-4. `monogram()` 保留（车队卡回落仍在用），`tokens.test.ts` 不动。
+3. 字号适配三字符，注意三处字号位置不同：`.vendor-cell__monogram` 的字号在 `components.css` 约 315 行（0.6rem，改 CSS）；目录卡 `card-monogram` 与详情 `driver-monogram` 是 .astro 里的内联 `text-[1.2rem]` / `text-[1.6rem]` 工具类（改 utility 值）。三字码比两字母宽，按渲染收紧到不溢盒（表格徽标或降 0.55rem / 收 letter-spacing，目录卡约 1rem、详情约 1.15rem 起步，目视定）。深浅两主题都要看（--monogram-fg 黑白字逻辑不动）。
+4. 全部调用点切换完成后删除 `src/lib/tokens.ts` 的 `monogram()`（届时零调用），并删 `tests/tokens.test.ts` 的 monogram import 与 describe 块（保留 alpha2Flag 用例）。`monogramStyle` 保留。
 
 验收：`pnpm check`、`pnpm test` 过；目视各使用点徽标清晰可读。
 
