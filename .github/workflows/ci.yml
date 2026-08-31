@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+# 所有 CI 构建都盖构建 ID 戳（middleware 拼进 ETag）：数据同步或代码部署任一变化
+# 都会让 edge/浏览器缓存的验证器失效，而不是 304 固化旧页面。本地构建回落 "dev"
+env:
+  F1BOX_BUILD_ID: ${{ github.sha }}
+
 # PR 连续 push 取消过时流水线；main 排队而非取消，避免打断进行中的生产部署。
 # verify 与部署合并在一条流水线里，生产部署由 verify 结构性门禁
 concurrency:
