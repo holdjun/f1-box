@@ -28,6 +28,7 @@ const pointsAttr = (pts: [number, number][]) =>
 ---
 
 {map ? (
+  <>
   <svg class="circuit-map text-ink-strong" viewBox="0 0 500 500" role="img" aria-label={alt}>
     {map.sectors.map((pts) => (
       <polyline class="circuit-map__outline" points={pointsAttr(pts)} />
@@ -52,7 +53,17 @@ const pointsAttr = (pts: [number, number][]) =>
       </g>
     ))}
   </svg>
-) : fallbackSrc ? (
+    <div class="circuit-map__legend" aria-hidden="true">
+      <span class="legend"><i class="legend-line legend-line--s1"></i>Sector 1</span>
+      <span class="legend"><i class="legend-line legend-line--s2"></i>Sector 2</span>
+      <span class="legend"><i class="legend-line legend-line--s3"></i>Sector 3</span>
+      <span class="legend"><i class="legend-corner">1</i>Corner</span>
+      {map.drs.length > 0 ? (
+        <span class="legend"><i class="legend-drs"></i>DRS</span>
+      ) : null}
+    </div>
+  </>
+  ) : fallbackSrc ? (
   /* f1db 轮廓 SVG 描边固定白色，亮色主题反相成深色 */
   <img class="circuit-map light:invert" src={fallbackSrc} alt={alt} />
 ) : null}
@@ -83,5 +94,47 @@ const pointsAttr = (pts: [number, number][]) =>
     font-weight: 700;
     text-anchor: middle;
     dominant-baseline: central;
+  }
+
+  /* 图例（仅注解地图）：Sector 三色为数据语义色，与图上 sector 着色一致 */
+  .circuit-map__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.1rem;
+    margin-top: 0.75rem;
+    font-size: 0.72rem;
+    color: var(--ink-muted);
+  }
+  .circuit-map__legend .legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .legend-line {
+    width: 0.9rem;
+    height: 3px;
+    border-radius: 2px;
+  }
+  .legend-line--s1 { background: #ec008c; }
+  .legend-line--s2 { background: #ffd400; }
+  .legend-line--s3 { background: #00a3e0; }
+  .legend-corner {
+    display: grid;
+    place-items: center;
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 50%;
+    background: currentColor;
+    color: var(--surface);
+    font-family: var(--font-sans);
+    font-size: 0.5rem;
+    font-weight: 700;
+    font-style: normal;
+  }
+  .legend-drs {
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 50%;
+    background: var(--highlight);
   }
 </style>

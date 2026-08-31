@@ -34,7 +34,7 @@ const raceDate = formatRaceDate(meta.date, meta.raceTime, timeZone);
   </div>
   <!-- 赛道图与信息卡同区块：桌面两列并排、375px 堆叠（对齐需求"相邻展示"） -->
   <div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-[2fr_3fr]">
-    <div class="mx-auto w-[min(100%,24rem)]">
+    <div class="circuit-map-panel mx-auto w-[min(100%,24rem)]">
       <CircuitMap
         layoutId={meta.circuitLayoutId}
         fallbackSrc={`/vendor/circuits/${meta.circuitLayoutId}.svg`}
