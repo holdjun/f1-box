@@ -70,7 +70,9 @@ function enhanceCalendarDialog(): void {
   const trigger = document.querySelector<HTMLButtonElement>(
     "[data-calendar-trigger]",
   );
-  if (!dialog || !trigger) return;
+  // 初次加载时模块顶层调用与 ClientRouter 首次 astro:page-load 都会跑，幂等标记防重复接线
+  if (!dialog || !trigger || dialog.dataset.calendarWired) return;
+  dialog.dataset.calendarWired = "true";
   // 有 JS 时升级为"触发按钮 + 弹窗"，无 JS 的内联降级行隐藏
   document
     .querySelector("[data-calendar-fallback]")

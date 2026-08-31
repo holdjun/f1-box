@@ -120,6 +120,21 @@ test("@desktop next round shows a live countdown to the next session", async ({
 test("@desktop header calendar button opens a dialog with subscribe links", async ({
   page,
 }) => {
+  const pageErrors: Error[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error));
+  // 统计 showModal 调用次数：双重接线时单击触发按钮会调两次
+  // （规范上第二次对已打开弹窗抛 InvalidStateError，内置 Chromium 149 实际不抛，
+  // 故用计数兜底断言）
+  await page.addInitScript(() => {
+    const counter = window as unknown as { __showModalCalls: number };
+    counter.__showModalCalls = 0;
+    const original = HTMLDialogElement.prototype.showModal;
+    HTMLDialogElement.prototype.showModal = function () {
+      counter.__showModalCalls += 1;
+      return original.call(this);
+    };
+  });
+
   await page.goto("/racing/2026");
   const { host, origin } = new URL(page.url());
   // 有 JS 时降级行被增强脚本隐藏，只显示触发按钮
@@ -161,6 +176,17 @@ test("@desktop header calendar button opens a dialog with subscribe links", asyn
   await expect(dialog).toBeVisible();
   await dialog.click({ position: { x: 4, y: 4 } });
   await expect(dialog).toBeHidden();
+
+  // 双重接线回归：初次加载时模块顶层调用与 ClientRouter 首次 astro:page-load
+  // 都会跑，重复监听会让一次点击触发两次 showModal()（规范上第二次对已打开
+  // 弹窗抛 InvalidStateError）；用例共点开 3 次，调用必须恰好 3 次
+  expect(pageErrors).toEqual([]);
+  expect(
+    await page.evaluate(
+      () =>
+        (window as unknown as { __showModalCalls: number }).__showModalCalls,
+    ),
+  ).toBe(3);
 });
 
 test("@desktop server HTML ships no-JS calendar fallback", async ({
