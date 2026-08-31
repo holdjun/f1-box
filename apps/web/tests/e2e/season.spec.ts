@@ -55,6 +55,49 @@ test("@desktop racing calendar links every round to its results page", async ({
   await expect(page.locator(".year-selector")).toHaveCount(0);
 });
 
+test("@desktop browser back from race detail returns to the calendar", async ({
+  page,
+}) => {
+  await page.goto("/racing/2026");
+  await page.locator('main a[href^="/results/2026/races/"]').first().click();
+  await page.waitForURL(/\/races\//);
+
+  await page.goBack();
+  await expect(page).toHaveURL(/\/racing\/2026$/);
+  // 内容必须真的换回日历页，而不只是 URL 变化（popstate 被忽略时 DOM 不动）
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "2026 Season",
+  );
+  // ClientRouter popstate 恢复滚动的 scrollTo 不带 behavior，
+  // 全局 smooth 会把它放大成从页首飞回原位的长滚动动画；必须保持 auto
+  const scrollBehavior = await page.evaluate(
+    () => getComputedStyle(document.documentElement).scrollBehavior,
+  );
+  expect(scrollBehavior).toBe("auto");
+});
+
+test("@desktop browser back still works after switching race tabs", async ({
+  page,
+}) => {
+  await page.goto("/racing/2026");
+  await page.locator('main a[href^="/results/2026/races/"]').first().click();
+  await page.waitForURL(/\/races\//);
+  const secondTab = page.locator("[data-tab-anchor] a").nth(1);
+  await secondTab.click();
+  await expect(secondTab).toHaveAttribute("aria-current", "page");
+
+  await page.goBack();
+  await expect(page).toHaveURL(/\/racing\/2026$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "2026 Season",
+  );
+
+  // 前进同理：state 被抹时 forward popstate 也会被忽略
+  await page.goForward();
+  await expect(page).toHaveURL(/\/results\/2026\/races\//);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Australia");
+});
+
 test("@desktop next round shows a live countdown to the next session", async ({
   page,
 }) => {

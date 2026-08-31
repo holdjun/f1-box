@@ -3,7 +3,6 @@
   html {
     min-width: 320px;
     background: var(--surface);
-    scroll-behavior: smooth;
   }
 
   body {
@@ -121,6 +120,13 @@
   animation: page-in 240ms ease both;
 }
 
+/* 后退/前进恢复历史时禁止位移动画：ClientRouter 会把滚动恢复到离开前的位置，
+   内容必须原地出现；从右滑入的方向感只对前进导航有意义 */
+[data-astro-transition="back"]::view-transition-old(root),
+[data-astro-transition="back"]::view-transition-new(root) {
+  animation: none;
+}
+
 @keyframes page-out {
   to {
     opacity: 0;
@@ -135,9 +141,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
   *,
   *::before,
   *::after {

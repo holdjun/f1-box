@@ -136,8 +136,11 @@
   });
 
   // toggle 模式的筛选状态应用（跨组件 data-season-block 是唯一例外：
-  // 目标元素在纯展示组件 SeasonMatrix 内，保留文档级查询）
+  // 目标元素在纯展示组件 SeasonMatrix 内，保留文档级查询）。
+  // link 模式直接 return：页面没有 data-season-block，唯一效果是把 SSR
+  // 已带筛选的 URL ?year= 抹掉，与页面内容不一致且白费一次全文档查询
   function applyFilter(): void {
+    if (mode === "link") return;
     document
       .querySelectorAll<HTMLElement>("[data-season-block]")
       .forEach((block) => {
@@ -155,7 +158,9 @@
           [...selected].sort((a, b) => a - b).join(","),
         );
       }
-      window.history.replaceState(null, "", url);
+      // state 必须原样透传：Astro ClientRouter 在 history.state 里存 index/scroll
+      // 用于 popstate 方向判断与滚动恢复；传 null 会抹掉它，浏览器后退将被忽略
+      window.history.replaceState(window.history.state, "", url);
     } catch {
       // window.location.href 恒为合法 URL，仅异常环境（jsdom 等）会走到这里
     }

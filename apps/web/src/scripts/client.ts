@@ -35,7 +35,9 @@ function enhanceRaceTabs(): void {
         if (el === link) el.setAttribute("aria-current", "page");
         else el.removeAttribute("aria-current");
       }
-      history.replaceState(null, "", link.href);
+      // 透传现有 history.state：ClientRouter 靠它做 popstate 方向判断，
+      // 传 null 会让浏览器后退被 Astro 忽略（页面无反应）
+      history.replaceState(history.state, "", link.href);
     },
     true,
   );

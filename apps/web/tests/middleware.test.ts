@@ -22,12 +22,18 @@ function makeContext(
   method = "GET",
   status = 200,
   headers: Record<string, string> = {},
+  cacheEnabled = true,
 ) {
   const request = new Request(`https://example.com${path}`, { method });
   const locals: { app?: unknown } = {};
-  const cache = { set: vi.fn() };
+  // 与运行时 CacheLike 对齐：AstroCache.enabled=true，dev 的 NoopAstroCache 为 false
+  const cache = { set: vi.fn(), enabled: cacheEnabled };
   const next = vi.fn(async () => new Response(null, { status, headers }));
-  return { context: { locals, request, cache } as never, next, cache };
+  return {
+    context: { locals, request, cache, url: new URL(request.url) } as never,
+    next,
+    cache,
+  };
 }
 
 async function run(
@@ -36,6 +42,7 @@ async function run(
     method?: string;
     status?: number;
     headers?: Record<string, string>;
+    cacheEnabled?: boolean;
   } = {},
 ) {
   const { context, next, cache } = makeContext(
@@ -43,6 +50,7 @@ async function run(
     opts.method,
     opts.status,
     opts.headers,
+    opts.cacheEnabled,
   );
   const result = await onRequest(context, next);
   // MiddlewareHandler 返回类型含 void，实际执行路径恒返回 Response
@@ -99,5 +107,60 @@ describe("middleware 默认缓存", () => {
   it("404 不 opt-in", async () => {
     const { cache } = await run("/results/2026/drivers", { status: 404 });
     expect(cache.set).not.toHaveBeenCalled();
+  });
+});
+
+describe("middleware 浏览器缓存头", () => {
+  // ClientRouter 后退导航用普通 fetch 重拉整页 HTML，只认浏览器可见的
+  // Cache-Control；只设 Cloudflare-CDN-Cache-Control 时该 fetch 每次走网络，
+  // 后退体感是"刷新出来的"。边缘命中时 Worker 不执行，浏览器头必须在
+  // cache.set 同一分支内直接写进响应，不能依赖 middleware 的后处理
+  it("opt-in 同时给浏览器可见的 Cache-Control", async () => {
+    const { response } = await run("/racing/2026");
+    expect(response.headers.get("Cache-Control")).toBe(
+      "public, max-age=60, stale-while-revalidate=300",
+    );
+  });
+
+  // 不设 ETag：Cloudflare 边缘对大体积 HTML 做压缩/缓存管线处理时会把强
+  // 验证器弱化或整个剥掉（实测），浏览器永远拿不到，304 再验证在这套托管上
+  // 不可行。写它纯属无效 D1 点查，回归测试防止再被加回来
+  it("不写 ETag 验证器", async () => {
+    const { response } = await run("/racing/2026");
+    expect(response.headers.get("ETag")).toBeNull();
+  });
+
+  // dev 的 NoopAstroCache 不做边缘缓存；此时也不该给浏览器写缓存头，
+  // 否则本地改完 .astro 后 60s 内刷新拿不到新页面，e2e（跑 dev server）
+  // 验证的也不是生产行为
+  it("缓存禁用（dev/e2e）时不写浏览器缓存头", async () => {
+    const { cache, response } = await run("/racing/2026", {
+      cacheEnabled: false,
+    });
+    expect(cache.set).not.toHaveBeenCalled();
+    expect(response.headers.get("Cache-Control")).toBeNull();
+    expect(response.headers.get("ETag")).toBeNull();
+  });
+
+  it("no-store 等显式头页面不覆盖", async () => {
+    const { response } = await run("/racing/2026", {
+      headers: { "Cache-Control": "no-store" },
+    });
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+  });
+
+  it("API、重定向、非 2xx 均不带浏览器缓存头", async () => {
+    for (const opts of [
+      { method: "POST" },
+      { method: "GET", path: "/api/health" },
+      { status: 302 },
+      { status: 404 },
+    ]) {
+      const { response } = await run(
+        opts.path ?? "/racing/2026",
+        opts.status ? { status: opts.status, method: opts.method } : opts,
+      );
+      expect(response.headers.get("Cache-Control")).toBeNull();
+    }
   });
 });
