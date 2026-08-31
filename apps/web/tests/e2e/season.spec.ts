@@ -117,28 +117,60 @@ test("@desktop next round shows a live countdown to the next session", async ({
   }
 });
 
-test("@desktop next panel exposes calendar subscribe/download links", async ({
+test("@desktop header calendar button opens a dialog with subscribe links", async ({
   page,
 }) => {
   await page.goto("/racing/2026");
-  const box = page.locator("[data-calendar-box]");
-  await expect(box).toBeVisible();
-  // details 原生开合：无 JS 也能展开操作列表
-  await box.locator("summary").click();
-  const { host } = new URL(page.url());
+  const { host, origin } = new URL(page.url());
+  // 有 JS 时降级行被增强脚本隐藏，只显示触发按钮
+  await expect(page.locator("[data-calendar-fallback]")).toBeHidden();
+  const trigger = page.locator("[data-calendar-trigger]");
+  await expect(trigger).toBeVisible();
+
+  await trigger.click();
+  const dialog = page.locator("[data-calendar-dialog]");
+  await expect(dialog).toBeVisible();
   // webcal 断言用正则：scheme 必须恰为 webcal://（防 webcals:// 回归），不耦合页面协议
-  await expect(box.locator("[data-calendar-subscribe]")).toHaveAttribute(
+  await expect(dialog.locator("[data-calendar-subscribe]")).toHaveAttribute(
     "href",
     new RegExp(
       `^webcal://${host.replace(/\./g, "\\.")}/api/calendar\\.ics\\?year=2026$`,
     ),
   );
-  await expect(box.locator("[data-calendar-download]")).toHaveAttribute(
+  await expect(dialog.locator("[data-calendar-download]")).toHaveAttribute(
     "href",
     new RegExp(
       `^https?://${host.replace(/\./g, "\\.")}/api/calendar\\.ics\\?year=2026$`,
     ),
   );
+  await expect(dialog.locator("[data-calendar-copy]")).toHaveAttribute(
+    "data-calendar-copy",
+    `${origin}/api/calendar.ics?year=2026`,
+  );
+
+  // 关闭三路径：✕ 按钮、Esc、点击弹窗自身（遮罩/内边距区）
+  await dialog.locator("[data-calendar-close]").click();
+  await expect(dialog).toBeHidden();
+
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await dialog.click({ position: { x: 4, y: 4 } });
+  await expect(dialog).toBeHidden();
+});
+
+test("@desktop server HTML ships no-JS calendar fallback", async ({
+  request,
+}) => {
+  // 无 JS 降级直接看服务端产物：降级行存在、触发按钮带 hidden
+  const res = await request.get("/racing/2026");
+  const html = await res.text();
+  expect(html).toContain("data-calendar-fallback");
+  expect(html).toMatch(/data-calendar-trigger[^>]*hidden/);
 });
 
 test("@desktop calendar.ics endpoint serves a valid ICS snapshot", async ({
