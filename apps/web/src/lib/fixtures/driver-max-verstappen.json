@@ -140,6 +140,11 @@
      "circuitId": "baku"
     },
     {
+     "code": "BHR",
+     "name": "Bahrain",
+     "circuitId": "sepang"
+    },
+    {
      "code": "SGP",
      "name": "Singapore",
      "circuitId": "marina-bay"

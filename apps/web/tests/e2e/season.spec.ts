@@ -26,7 +26,7 @@ test("@desktop racing calendar links every round to its results page", async ({
 }) => {
   await page.goto("/racing/2026");
   const cards = page.locator("main .race-card");
-  await expect(cards).toHaveCount(22);
+  await expect(cards).toHaveCount(23);
   // 卡面标题不含 Grand Prix 后缀；顶部为周末日期范围；完成卡显示前三名
   await expect(cards.first()).toContainText("Australia");
   await expect(cards.first()).toContainText("🏁");
@@ -39,7 +39,7 @@ test("@desktop racing calendar links every round to its results page", async ({
   await expect(cards.first()).not.toContainText("COMPLETE");
   await expect(cards.first().locator("img:visible")).toHaveCount(2); // 国旗 + 赛道
   const raceLinks = page.locator('main a[href^="/results/2026/races/"]');
-  await expect(raceLinks).toHaveCount(22);
+  await expect(raceLinks).toHaveCount(23);
   await expect(raceLinks.first()).toHaveAttribute(
     "href",
     "/results/2026/races/australia/race-result",
@@ -115,6 +115,107 @@ test("@desktop next round shows a live countdown to the next session", async ({
     expect(after).toMatch(/^(\d+d )?\d{2}:\d{2}:\d{2}$/);
     expect(after).not.toBe(text);
   }
+});
+
+test("@desktop header calendar button opens a dialog with subscribe links", async ({
+  page,
+}) => {
+  const pageErrors: Error[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error));
+  // 统计 showModal 调用次数：双重接线时单击触发按钮会调两次
+  // （规范上第二次对已打开弹窗抛 InvalidStateError，内置 Chromium 149 实际不抛，
+  // 故用计数兜底断言）
+  await page.addInitScript(() => {
+    const counter = window as unknown as { __showModalCalls: number };
+    counter.__showModalCalls = 0;
+    const original = HTMLDialogElement.prototype.showModal;
+    HTMLDialogElement.prototype.showModal = function () {
+      counter.__showModalCalls += 1;
+      return original.call(this);
+    };
+  });
+
+  await page.goto("/racing/2026");
+  const { host, origin } = new URL(page.url());
+  // 有 JS 时降级行被增强脚本隐藏，只显示触发按钮
+  await expect(page.locator("[data-calendar-fallback]")).toBeHidden();
+  const trigger = page.locator("[data-calendar-trigger]");
+  await expect(trigger).toBeVisible();
+
+  await trigger.click();
+  const dialog = page.locator("[data-calendar-dialog]");
+  await expect(dialog).toBeVisible();
+  // webcal 断言用正则：scheme 必须恰为 webcal://（防 webcals:// 回归），不耦合页面协议
+  await expect(dialog.locator("[data-calendar-subscribe]")).toHaveAttribute(
+    "href",
+    new RegExp(
+      `^webcal://${host.replace(/\./g, "\\.")}/api/calendar\\.ics\\?year=2026$`,
+    ),
+  );
+  await expect(dialog.locator("[data-calendar-download]")).toHaveAttribute(
+    "href",
+    new RegExp(
+      `^https?://${host.replace(/\./g, "\\.")}/api/calendar\\.ics\\?year=2026$`,
+    ),
+  );
+  await expect(dialog.locator("[data-calendar-copy]")).toHaveAttribute(
+    "data-calendar-copy",
+    `${origin}/api/calendar.ics?year=2026`,
+  );
+
+  // 关闭三路径：✕ 按钮、Esc、点击弹窗自身（遮罩/内边距区）
+  await dialog.locator("[data-calendar-close]").click();
+  await expect(dialog).toBeHidden();
+
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await dialog.click({ position: { x: 4, y: 4 } });
+  await expect(dialog).toBeHidden();
+
+  // 双重接线回归：初次加载时模块顶层调用与 ClientRouter 首次 astro:page-load
+  // 都会跑，重复监听会让一次点击触发两次 showModal()（规范上第二次对已打开
+  // 弹窗抛 InvalidStateError）；用例共点开 3 次，调用必须恰好 3 次
+  expect(pageErrors).toEqual([]);
+  expect(
+    await page.evaluate(
+      () =>
+        (window as unknown as { __showModalCalls: number }).__showModalCalls,
+    ),
+  ).toBe(3);
+});
+
+test("@desktop server HTML ships no-JS calendar fallback", async ({
+  request,
+}) => {
+  // 无 JS 降级直接看服务端产物：降级行存在、触发按钮带 hidden
+  const res = await request.get("/racing/2026");
+  const html = await res.text();
+  expect(html).toContain("data-calendar-fallback");
+  expect(html).toMatch(/data-calendar-trigger[^>]*hidden/);
+});
+
+test("@desktop calendar.ics endpoint serves a valid ICS snapshot", async ({
+  request,
+}) => {
+  const res = await request.get("/api/calendar.ics?year=2026");
+  expect(res.status()).toBe(200);
+  expect(res.headers()["content-type"]).toContain("text/calendar");
+  const body = await res.text();
+  expect(body.startsWith("BEGIN:VCALENDAR\r\n")).toBe(true);
+  // 23 站 × 每站 5 session；bahrain(Sepang) 为普通周末
+  expect((body.match(/BEGIN:VEVENT/g) ?? []).length).toBe(115);
+  expect(body).toContain("UID:race-bahrain-2026@f1-box.com\r\n");
+  expect(body.endsWith("END:VCALENDAR\r\n")).toBe(true);
+
+  // year 缺失、非法、空赛季一律 404
+  expect((await request.get("/api/calendar.ics")).status()).toBe(404);
+  expect((await request.get("/api/calendar.ics?year=abc")).status()).toBe(404);
+  expect((await request.get("/api/calendar.ics?year=2019")).status()).toBe(404);
 });
 
 test("@desktop legacy racing route redirects to new", async ({ page }) => {

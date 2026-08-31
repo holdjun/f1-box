@@ -2,12 +2,7 @@
 // 面板并同步地址栏，省掉视图过渡与回页首。必须在捕获阶段拦截，
 // 否则 ClientRouter 会先行接管链接做换页。无对应面板（如年份页的 tab）
 // 或无 JS 时退化为正常导航
-let raceTabsBound = false;
-
 function enhanceRaceTabs(): void {
-  if (raceTabsBound) return;
-  raceTabsBound = true;
-
   document.addEventListener(
     "click",
     (event) => {
@@ -43,8 +38,67 @@ function enhanceRaceTabs(): void {
   );
 }
 
+function enhanceCalendarCopy(): void {
+  document.addEventListener("click", async (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const button = target.closest<HTMLButtonElement>("[data-calendar-copy]");
+    if (!button) return;
+    const url = button.dataset.calendarCopy ?? "";
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      return; // 剪贴板不可用时保持原文案，URL 文本仍可手动复制
+    }
+    // 原文案存 dataset：连点时 textContent 已是反馈文案，直接读会把它当原文案永久卡住
+    let label = button.dataset.copyLabel;
+    if (label === undefined) {
+      label = button.textContent ?? "";
+      button.dataset.copyLabel = label;
+    }
+    button.textContent = "Copied!";
+    setTimeout(() => {
+      button.textContent = label;
+    }, 2000);
+  });
+}
+
+function enhanceCalendarDialog(): void {
+  const dialog = document.querySelector<HTMLDialogElement>(
+    "[data-calendar-dialog]",
+  );
+  const trigger = document.querySelector<HTMLButtonElement>(
+    "[data-calendar-trigger]",
+  );
+  // 初次加载时模块顶层调用与 ClientRouter 首次 astro:page-load 都会跑，幂等标记防重复接线
+  if (!dialog || !trigger || dialog.dataset.calendarWired) return;
+  dialog.dataset.calendarWired = "true";
+  // 有 JS 时升级为"触发按钮 + 弹窗"，无 JS 的内联降级行隐藏
+  document
+    .querySelector("[data-calendar-fallback]")
+    ?.setAttribute("hidden", "");
+  trigger.hidden = false;
+  trigger.addEventListener("click", () => dialog.showModal());
+  dialog
+    .querySelector("[data-calendar-close]")
+    ?.addEventListener("click", () => dialog.close());
+  // 点击落在弹窗自身（内边距区/遮罩回退目标）即关闭；内容区点击冒泡时 target 是子节点
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+}
+
+let enhanced = false;
+
 function enhancePage(): void {
-  enhanceRaceTabs();
+  // document 级委托只需绑定一次；astro:page-load 后 DOM 已换但监听仍在
+  if (!enhanced) {
+    enhanced = true;
+    enhanceRaceTabs();
+    enhanceCalendarCopy();
+  }
+  // 弹窗是节点级接线，ClientRouter 换页后 DOM 全新，每次加载都要重跑
+  enhanceCalendarDialog();
 }
 
 enhancePage();

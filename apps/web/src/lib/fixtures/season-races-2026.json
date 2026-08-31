@@ -947,6 +947,57 @@
     },
     {
       "round": 16,
+      "slug": "bahrain",
+      "name": "Bahrain",
+      "raceName": "Bahrain Grand Prix",
+      "alpha2Code": "BH",
+      "countryName": "Bahrain",
+      "date": "2026-10-04",
+      "time": "07:00",
+      "laps": 56,
+      "circuitId": "sepang",
+      "circuitName": "Sepang",
+      "circuitPlace": "Sepang",
+      "winnerName": null,
+      "winnerCode": null,
+      "winnerDriverId": null,
+      "winnerTeamId": null,
+      "winnerTeamName": null,
+      "winnerTime": null,
+      "poleName": null,
+      "poleCode": null,
+      "circuitLayoutId": "sepang-1",
+      "sessions": [
+        {
+          "key": "practice-1",
+          "label": "Practice 1",
+          "startsAtUtc": "2026-10-02T04:30:00Z"
+        },
+        {
+          "key": "practice-2",
+          "label": "Practice 2",
+          "startsAtUtc": "2026-10-02T08:00:00Z"
+        },
+        {
+          "key": "practice-3",
+          "label": "Practice 3",
+          "startsAtUtc": "2026-10-03T04:30:00Z"
+        },
+        {
+          "key": "qualifying",
+          "label": "Qualifying",
+          "startsAtUtc": "2026-10-03T08:00:00Z"
+        },
+        {
+          "key": "race",
+          "label": "Race",
+          "startsAtUtc": "2026-10-04T07:00:00Z"
+        }
+      ],
+      "podium": []
+    },
+    {
+      "round": 17,
       "slug": "singapore",
       "name": "Singapore",
       "raceName": "Singapore Grand Prix",
@@ -997,7 +1048,7 @@
       "podium": []
     },
     {
-      "round": 17,
+      "round": 18,
       "slug": "united-states",
       "name": "United States",
       "raceName": "United States Grand Prix",
@@ -1048,7 +1099,7 @@
       "podium": []
     },
     {
-      "round": 18,
+      "round": 19,
       "slug": "mexico",
       "name": "Mexico",
       "raceName": "Mexican Grand Prix",
@@ -1099,7 +1150,7 @@
       "podium": []
     },
     {
-      "round": 19,
+      "round": 20,
       "slug": "sao-paulo",
       "name": "São Paulo",
       "raceName": "São Paulo Grand Prix",
@@ -1150,7 +1201,7 @@
       "podium": []
     },
     {
-      "round": 20,
+      "round": 21,
       "slug": "las-vegas",
       "name": "Las Vegas",
       "raceName": "Las Vegas Grand Prix",
@@ -1201,7 +1252,7 @@
       "podium": []
     },
     {
-      "round": 21,
+      "round": 22,
       "slug": "qatar",
       "name": "Qatar",
       "raceName": "Qatar Grand Prix",
@@ -1252,7 +1303,7 @@
       "podium": []
     },
     {
-      "round": 22,
+      "round": 23,
       "slug": "abu-dhabi",
       "name": "Abu Dhabi",
       "raceName": "Abu Dhabi Grand Prix",

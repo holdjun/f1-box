@@ -317,10 +317,10 @@ describe("createRaceResultsRepository getSeasonCalendar / listRaces", () => {
     expect(sqls[0]).toContain("MIN(x.position_display_order)");
   });
 
-  it("DEV fixture calendar has 22 rounds with sessions and podium, list only completed", async () => {
+  it("DEV fixture calendar has 23 rounds with sessions and podium, list only completed", async () => {
     const repository = createRaceResultsRepository();
     const calendar = await repository.getSeasonCalendar(2026);
-    expect(calendar).toHaveLength(22);
+    expect(calendar).toHaveLength(23);
     expect(calendar.every((race) => race.sessions.length > 0)).toBe(true);
     expect(calendar.every((race) => race.circuitLayoutId.length > 0)).toBe(
       true,

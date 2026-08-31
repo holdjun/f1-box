@@ -599,7 +599,7 @@ export function createRaceResultsRepository(
 ): RaceResultsRepository {
   const calendar = async (year: number): Promise<RaceSummary[]> => {
     if (!db) {
-      // fixture 含全部 22 站（DEV）；生产同一条 SQL
+      // fixture 含全部 23 站（DEV）；生产同一条 SQL
       if (year !== 2026) return [];
       const { default: fixture } = await import(
         "./fixtures/season-races-2026.json"
