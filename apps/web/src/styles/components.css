@@ -66,18 +66,78 @@
     color: var(--highlight);
   }
 
-  /* racing 页 Next 面板的日历订阅入口：details 原生开合保证无 JS 可用；
-     面板外观走 utility 类（与 SeasonFilter 下拉一致），这里只处理 details 特有部分 */
-  .calendar-box__summary {
-    list-style: none;
-    cursor: pointer;
+  /* 日历订阅入口：触发按钮收敛 .button 的大按钮尺寸，进统计行；
+     弹窗用原生 <dialog> modal——焦点圈闭/Esc 关闭免费，样式只管外观与入场 */
+  .calendar-entry-trigger {
+    min-height: 0;
+    gap: 0.5rem;
+    padding: 0.1rem 0;
+    font-size: 0.82rem;
   }
-  .calendar-box__summary::-webkit-details-marker {
+  .calendar-entry-trigger svg {
+    width: 16px;
+    height: 16px;
+  }
+  /* UA 的 [hidden]{display:none} 会被作者层 .button{display:inline-flex} 盖过，
+     不显式兜底则无 JS 时按钮照常出现（死按钮） */
+  .calendar-entry-trigger[hidden] {
     display: none;
   }
-  .calendar-box[open] > .calendar-box__summary {
-    background: var(--highlight);
-    color: var(--on-highlight);
+  .calendar-entry-fallback {
+    margin-top: 0.6rem;
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+    overflow-wrap: anywhere;
+  }
+  .calendar-dialog {
+    /* Tailwind v4 preflight 把 margin 清零，盖过 UA 的 margin: auto，
+       弹窗会贴左上角；补回 auto 是居中依赖的最小修正 */
+    margin: auto;
+    width: min(100vw - 2rem, 24rem);
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface-overlay);
+    color: var(--ink);
+    box-shadow: var(--shadow-panel);
+  }
+  .calendar-dialog[open] {
+    animation: calendar-dialog-in 150ms ease;
+  }
+  .calendar-dialog::backdrop {
+    background: rgb(0 0 0 / 55%);
+  }
+  .calendar-dialog__close {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    color: var(--ink-muted);
+    cursor: pointer;
+    transition: color 150ms ease;
+  }
+  .calendar-dialog__close:hover {
+    color: var(--highlight);
+  }
+  .calendar-dialog__close svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+  @keyframes calendar-dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .calendar-dialog[open] {
+      animation: none;
+    }
   }
 
   .status-label {
