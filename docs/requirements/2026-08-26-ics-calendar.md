@@ -39,5 +39,4 @@ F1 官方在 racing 页提供 "Add F1 calendar"（calendar.formula1.com 订阅�
 
 - Google Calendar 一键添加（OAuth/event link），仅提供"复制 URL"手动订阅路径
 - session 时长精确值（f1db 无此数据，固定估算）
-- 2026 之外年份的 UI 入口（端点支持 year 参数，但入口只做当前赛季）
 - 提醒设置（REMINDER/VALARM），由用户日历应用自行管理
