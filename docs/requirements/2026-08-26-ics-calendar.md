@@ -9,13 +9,13 @@ F1 官方在 racing 页提供 "Add F1 calendar"（calendar.formula1.com 订阅�
 
 ## 用户可见行为
 
-- racing 页（/racing/2026）Next 面板内新增 "Add to calendar" 入口，点开后三个操作：
+- racing 页（/racing/{year}）头部统计行提供 "Add to calendar" 按钮（所有赛季页一致可见，含无 Next 卡片的历史赛季），点击打开居中模态弹窗，三个操作：
   - 订阅日历：`webcal://f1-box.com/api/calendar.ics?year=2026`（Apple Calendar 等原生唤起，订阅后赛程变更自动更新）
   - 下载 .ics：`https://f1-box.com/api/calendar.ics?year=2026`（静态快照，一次性导入）
   - 复制日历 URL：同 https 链接，给 Google Calendar 网页版用户"从网址添加"用
 - ICS 内容：当年每站每个已排定的 session 一个事件（Practice 1/2/3、Qualifying、Sprint Qualifying、Sprint、Race），UTC 时间戳由日历应用自动转用户本地时区
 - 事件命名如 "Practice 1 · Australia"；每个事件带 URL 字段回链对应赛果页（f1-box.com/results/2026/races/italy/race-result）
-- 无 JS 可用（订阅/下载都是纯链接）
+- 无 JS 可用：头部显示内联 Subscribe / Download .ics / URL 文本行；有 JS 时升级为按钮 + 弹窗（原生 <dialog>，✕/Esc/遮罩三路径关闭）
 
 ## 技术要点
 
@@ -31,7 +31,7 @@ F1 官方在 racing 页提供 "Add F1 calendar"（calendar.formula1.com 订阅�
 
 - `GET /api/calendar.ics?year=2026` 返回合法 ICS：VCALENDAR 头、VEVENT 集合与 `getSeasonCalendar(year)` 经 `T00:00:00Z` 兜底过滤后的 session 集合一致（动态断言，不写死站数；参考值：当前 D1 23 站 × 每站 5 session = 115 个 VEVENT，随未来未公布时间的站次浮动）、UTC DTSTART/DTEND、UID 由 key+slug+year 构成且稳定
 - 单测：ICS 生成器（事件数与字段完整性、CRLF、75 octet 行折叠、SUMMARY 等文本字段的 `,`/`;`/`\\` 转义、UID 稳定性、`T00:00:00Z` 兜底过滤、老年份无 session 退化、year 缺失/非法/空赛季/无可渲染事件返回 404）
-- e2e：Next 面板日历入口存在、webcal 与 https 链接正确；ICS 端点 Content-Type 正确
+- e2e：服务端 HTML 含无 JS 降级行且触发按钮带 hidden；有 JS 时头部按钮 → 弹窗内订阅/下载/复制链接正确、✕/Esc/遮罩三路径关闭；ICS 端点 Content-Type 正确
 - `pnpm check`、`pnpm test`、`pnpm -r build`、`pnpm --filter @f1-box/web test:e2e` 全绿
 - 深亮双主题 + 375px 不回归（a11y axe 基线）
 
