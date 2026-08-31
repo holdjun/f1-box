@@ -123,10 +123,10 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
                 class:list={[calendarItemClass, "w-full cursor-pointer"]}
                 data-calendar-copy={icsHref}
               >Copy calendar URL</button>
-              <code
-                class="block min-w-0 truncate px-3 pt-1.5 text-[0.72rem] text-ink-muted"
-                title={icsHref}
-              >{icsHref}</code>
+              <!-- Google/Outlook 网页版没有一键订阅深链，从网址添加是唯一可行路径 -->
+              <p class="px-3 pt-1.5 text-[0.72rem] text-ink-muted">
+                Google or Outlook: paste via "Add calendar → From URL"
+              </p>
             </div>
           </div>
         </dialog>

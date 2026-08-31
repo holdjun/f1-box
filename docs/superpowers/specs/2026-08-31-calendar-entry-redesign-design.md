@@ -31,7 +31,7 @@ ICS 日历功能首版把入口做成 Next 卡片内的 `<details>` 下拉：面
 - 内容沿用现版三项操作，完整行样式复用现有 `calendarItemClass` hover 语言：
   - Subscribe — Apple Calendar（`webcal://`，`data-calendar-subscribe`）
   - Download .ics file（https + `download` 属性，`data-calendar-download`）
-  - 分隔线下：Copy calendar URL 按钮（`data-calendar-copy`）+ 可截断的 URL `<code>` 展示
+  - 分隔线下：Copy calendar URL 按钮（`data-calendar-copy`）+ 一行浅色提示（Google/Outlook 无一键订阅深链，指引用户粘贴到"从网址添加"）
 - 标题：`Add F1 {year} to your calendar`，`h2` + `aria-labelledby` 关联。
 - 右上角 ✕ 关闭按钮（`data-calendar-close`，`aria-label="Close"`）。
 - 样式令牌：`bg-surface-overlay`、`border border-line`、`shadow-panel`、圆角、`max-w-sm`；`::backdrop` 半透明黑（双主题通用）。

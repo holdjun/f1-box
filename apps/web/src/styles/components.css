@@ -73,6 +73,7 @@
     gap: 0.5rem;
     padding: 0.1rem 0;
     font-size: 0.82rem;
+    cursor: pointer;
   }
   .calendar-entry-trigger svg {
     width: 16px;
@@ -112,8 +113,8 @@
     flex: none;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: 2.75rem;
+    height: 2.75rem;
     color: var(--ink-muted);
     cursor: pointer;
     transition: color 150ms ease;
