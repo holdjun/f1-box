@@ -17,12 +17,14 @@ vi.mock("../src/lib/repositories.js", () => ({
 import { onRequest } from "../src/middleware.js";
 
 const F1DB_VERSION = 42;
-// 测试环境无 vite.define 注入，import.meta.env.F1BOX_BUILD_ID 回落 "dev"
+// vitest 把 process.env 并入 import.meta.env：CI 盖了 sha 戳时期望值随之变化，
+// 本地（未设 F1BOX_BUILD_ID）与 middleware 一同回落 "dev"
+const BUILD_ID = process.env.F1BOX_BUILD_ID ?? "dev";
 const CACHE_OPTIONS = {
   maxAge: 300,
   swr: 600,
   tags: ["f1db"],
-  etag: `"${F1DB_VERSION}-dev"`,
+  etag: `"${F1DB_VERSION}-${BUILD_ID}"`,
 };
 
 // context 只构造 middleware 用到的最小形状；locals 由 middleware 写入 app
@@ -136,10 +138,10 @@ describe("middleware 浏览器缓存头", () => {
   // 与 edge 缓存的 ETag 同源：过期后的条件请求命中返回 304，不再付整页往返
   it("ETag 由 f1db 数据版本加构建 ID 组成", async () => {
     const { response, cache } = await run("/racing/2026");
-    expect(response.headers.get("ETag")).toBe(`"${F1DB_VERSION}-dev"`);
+    expect(response.headers.get("ETag")).toBe(`"${F1DB_VERSION}-${BUILD_ID}"`);
     // 浏览器与 edge 共用同一验证器，改一处必须两处同步
     expect(cache.set).toHaveBeenCalledWith(
-      expect.objectContaining({ etag: `"${F1DB_VERSION}-dev"` }),
+      expect.objectContaining({ etag: `"${F1DB_VERSION}-${BUILD_ID}"` }),
     );
   });
 
