@@ -11,7 +11,6 @@ const pages = [
   "/results/2026/teams",
   "/drivers",
   "/teams",
-  "/circuits",
   "/drivers/max-verstappen",
   "/teams/ferrari",
 ];

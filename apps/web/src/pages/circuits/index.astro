@@ -1,61 +1,17 @@
 ---
-import SeasonFilter from "../../components/SeasonFilter.svelte";
+import StatusPage from "../../components/StatusPage.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { gridFillers } from "../../lib/layout.js";
-import { resolveCatalogYear } from "../../lib/routing.js";
 
-const { circuit: circuitRepository } = Astro.locals.app.repositories;
-const years = await circuitRepository.getSeasonYears();
-const year = resolveCatalogYear(Astro.url.searchParams.get("year"), years);
-const circuits =
-  year === null
-    ? await circuitRepository.getCircuits()
-    : await circuitRepository.getCircuitsByYear(year);
-
-const cardClasses =
-  "circuit-card group relative flex flex-col items-center gap-1.5 rounded-md bg-surface-raised p-5 px-4 transition-[background-color,transform] duration-200 [content-visibility:auto] [contain-intrinsic-size:auto_13rem] hover:-translate-y-1 hover:bg-surface-overlay hover:z-1";
+const { raceResults } = Astro.locals.app.repositories;
+const years = await raceResults.getSeasonYears();
+const latestYear = years[0];
+// 无任何赛季（空库）时回首页而不是渲染残页
+return Astro.redirect(
+  latestYear ? `/results/${latestYear}/races` : "/",
+  301,
+);
 ---
 
-<BaseLayout title="Circuits">
-  <main id="main-content" class="shell pt-12 pb-section">
-    <h1 class="title-page">Circuits</h1>
-    <SeasonFilter
-      years={years}
-      mode="link"
-      baseHref="/circuits"
-      current={year}
-      label="Filter by season"
-      sticky
-      client:load
-    />
-    <div class="grid grid-cols-1 gap-px rounded-md bg-line light:shadow-panel md:grid-cols-2 lg:grid-cols-3">
-      {circuits.map((circuit) => (
-        <a class={cardClasses} href={`/circuits/${circuit.id}`}>
-          <span class="circuit-card__map grid size-[6.5rem] flex-none place-items-center">
-            {circuit.layoutId ? (
-              /* f1db 轮廓 SVG 描边固定白色，亮色主题反相成深色 */
-              <img
-                class="size-full light:invert"
-                src={`/vendor/circuits/${circuit.layoutId}.svg`}
-                alt=""
-                loading="lazy"
-              />
-            ) : (
-              <span class="circuit-card__no-map text-[1.5rem] text-ink-muted" aria-hidden="true">—</span>
-            )}
-          </span>
-          <span class="circuit-card__name mt-1 text-center text-base font-semibold">{circuit.name}</span>
-          <span class="circuit-card__meta text-center text-[0.78rem] text-ink-muted">
-            {circuit.placeName}, {circuit.countryName}
-          </span>
-          <span class="circuit-card__meta text-center text-[0.78rem] text-ink-muted">
-            {circuit.length.toFixed(3)} km · {circuit.totalRacesHeld} races
-          </span>
-        </a>
-      ))}
-      {gridFillers(circuits.length).map((classes) => (
-        <div class={`${classes} bg-surface`} aria-hidden="true" />
-      ))}
-    </div>
-  </main>
+<BaseLayout title="Circuits not found">
+  <StatusPage code="404" title="Circuits not found" message="No races available." />
 </BaseLayout>

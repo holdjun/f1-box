@@ -68,6 +68,7 @@ const db = fakeDb({
       round: 1,
       code: "AUS",
       name: "Australian Grand Prix",
+      slug: "australia",
       circuit_id: "albert-park",
     },
     {
@@ -75,6 +76,7 @@ const db = fakeDb({
       round: 2,
       code: "CHN",
       name: "Chinese Grand Prix",
+      slug: "china",
       circuit_id: "shanghai",
     },
     {
@@ -82,6 +84,7 @@ const db = fakeDb({
       round: 1,
       code: "ARG",
       name: "Argentine Grand Prix",
+      slug: "argentina",
       circuit_id: "buenos-aires",
     },
     {
@@ -89,6 +92,7 @@ const db = fakeDb({
       round: 1,
       code: "GBR",
       name: "British Grand Prix",
+      slug: "great-britain",
       circuit_id: "silverstone",
     },
     {
@@ -96,6 +100,7 @@ const db = fakeDb({
       round: 3,
       code: "JPN",
       name: "Japanese Grand Prix",
+      slug: "japan",
       circuit_id: "suzuka",
     },
   ],
@@ -417,6 +422,7 @@ describe("createTeamRepository with database", () => {
           round: 1,
           code: "AUS",
           name: "Australian Grand Prix",
+          slug: "australia",
           circuit_id: "albert-park",
         },
       ],

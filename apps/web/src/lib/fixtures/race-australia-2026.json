@@ -6,14 +6,25 @@
     "name": "Australia",
     "officialName": "Formula 1 Qatar Airways Australian Grand Prix 2026",
     "date": "2026-03-08",
+    "raceTime": "04:00",
     "laps": 58,
     "courseLength": 5.278,
+    "distance": 306.124,
+    "turns": 14,
+    "direction": "Clockwise",
     "circuitId": "melbourne",
     "circuitLayoutId": "melbourne-2",
-    "circuitName": "Melbourne",
+    "circuitFullName": "Melbourne Grand Prix Circuit",
     "circuitPlace": "Melbourne",
     "countryName": "Australia",
     "alpha2Code": "AU",
+    "totalRacesHeld": 29,
+    "firstGrandPrix": 1996,
+    "recordLap": {
+      "time": "1:19.813",
+      "driverName": "Charles Leclerc",
+      "year": 2024
+    },
     "sessions": [
       {
         "key": "practice-1",

@@ -232,7 +232,7 @@ ORDER BY ra.year, MIN(ra.round)`;
 
 // 年份取正式阵容与实际结果的并集：当前季未出赛也有空矩阵块，将来轮次保留空列
 const roundsSql = `
-SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, ra.circuit_id
+SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, gp.id AS slug, ra.circuit_id
 FROM race ra
 JOIN grand_prix gp ON gp.id = ra.grand_prix_id
 WHERE ra.year IN (
@@ -630,7 +630,13 @@ function mergeDriverSeasons(
   const seasons = new Map<number, DriverSeason>();
   const rawRounds = new Map<
     number,
-    { round: number; code: string; name: string; circuitId: string }[]
+    {
+      round: number;
+      code: string;
+      name: string;
+      slug: string;
+      circuitId: string;
+    }[]
   >();
   for (const row of roundRows) {
     const record = asRecord(row, "round row");
@@ -640,6 +646,7 @@ function mergeDriverSeasons(
       round: asNumber(record.round, "round row round"),
       code: asString(record.code, "round code"),
       name: asString(record.name, "round name"),
+      slug: asString(record.slug, "round slug"),
       circuitId: asString(record.circuit_id, "round circuit"),
     });
     rawRounds.set(year, list);

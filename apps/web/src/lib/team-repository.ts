@@ -37,6 +37,7 @@ export interface TeamSeasonDriver {
 export interface SeasonRound {
   code: string;
   name: string;
+  slug: string;
   circuitId: string;
 }
 
@@ -166,7 +167,7 @@ WHERE sec.constructor_id = ?1
 GROUP BY sec.year`;
 
 const roundsSql = `
-SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, ra.circuit_id
+SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, gp.id AS slug, ra.circuit_id
 FROM race ra
 JOIN grand_prix gp ON gp.id = ra.grand_prix_id
 WHERE ra.year IN (
@@ -605,7 +606,13 @@ function mergeSeasons(
 
   const rawRounds = new Map<
     number,
-    { round: number; code: string; name: string; circuitId: string }[]
+    {
+      round: number;
+      code: string;
+      name: string;
+      slug: string;
+      circuitId: string;
+    }[]
   >();
   for (const row of roundRows) {
     const record = asRecord(row, "round row");
@@ -615,6 +622,7 @@ function mergeSeasons(
       round: asNumber(record.round, "round row round"),
       code: asString(record.code, "round code"),
       name: asString(record.name, "round name"),
+      slug: asString(record.slug, "round slug"),
       circuitId: asString(record.circuit_id, "round circuit"),
     });
     rawRounds.set(year, list);
@@ -659,10 +667,11 @@ function mergeSeasons(
       year,
       rounds.map((r) => r.round),
     );
-    season.rounds = rounds.map(({ code, name, circuitId }) => ({
+    season.rounds = rounds.map(({ code, name, circuitId, slug }) => ({
       code,
       name,
       circuitId,
+      slug,
     }));
   }
 

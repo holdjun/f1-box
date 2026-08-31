@@ -73,13 +73,30 @@ test.describe("race detail", () => {
     await expect(schedule).toContainText("Qualifying");
   });
 
-  test("@desktop hero shows the circuit map linking to its circuit page", async ({
+  test("@desktop hero shows the circuit map as plain content", async ({
     page,
   }) => {
     await page.goto("/results/2026/races/australia/race-result");
-    const map = page.locator(".race-hero__map");
-    await expect(map).toHaveAttribute("href", "/circuits/melbourne");
-    await expect(map.locator("svg.circuit-map")).toBeVisible();
+    const svg = page.locator("svg.circuit-map");
+    await expect(svg).toBeVisible();
+    // 赛道图不再是链接（指向 /circuits 的 <a> 已移除）
+    await expect(svg.locator("xpath=ancestor::a")).toHaveCount(0);
+  });
+
+  test("@desktop header shows local race date and circuit card", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races/australia/race-result");
+    await expect(page.locator(".race-hero__subtitle")).toHaveText(
+      "08 Mar 2026 · Melbourne · Australia",
+    );
+    const card = page.locator(".info-panel");
+    await expect(card).toContainText("Melbourne Grand Prix Circuit");
+    await expect(card).toContainText("5.278 km");
+    await expect(card).toContainText("306.124 km");
+    await expect(card).toContainText("29");
+    await expect(card).toContainText("1:19.813");
+    await expect(card).toContainText("Charles Leclerc (2024)");
   });
 
   test("@desktop bare slug redirects to race-result", async ({ page }) => {
@@ -144,26 +161,24 @@ test.describe("standings", () => {
   });
 });
 
-test.describe("session time toggle", () => {
-  // 固定浏览器时区为非 UTC（CI runner 默认 UTC，切换前后本地时间文本相同）
-  test.use({ timezoneId: "Asia/Shanghai" });
-
-  test("@desktop session times toggle between UTC and local", async ({
-    page,
-  }) => {
-    await page.goto("/results/2026/races/australia/race-result");
-    const toggle = page.locator("[data-time-toggle]");
-    const firstTime = page.locator("[data-session-time]").first();
-    // SSR 默认 UTC
-    await expect(toggle).toHaveText("UTC");
-    await expect(firstTime).toContainText("UTC");
-    await toggle.click();
-    await expect(toggle).toHaveText("Your time");
-    await expect(firstTime).toContainText("GMT+8");
-    expect(await firstTime.textContent()).not.toContain("UTC");
-    await toggle.click();
-    await expect(firstTime).toContainText("UTC");
-  });
+test.describe("session dual times", () => {
+  // 固定浏览器时区为非 UTC，验证 My time 随浏览器时区变化、Track time（赛道当地）恒定
+  for (const tz of ["Asia/Tokyo", "America/New_York"]) {
+    test.use({ timezoneId: tz });
+    test(`@desktop ${tz} shows my time in browser tz and track time in circuit tz`, async ({
+      page,
+    }) => {
+      await page.goto("/results/2026/races/australia/race-result");
+      const myTime = page.locator("[data-my-time]").first();
+      const trackTime = page.locator("[data-track-time]").first();
+      await expect(myTime).toBeVisible();
+      await expect(trackTime).toBeVisible();
+      // Track time 按赛道当地（Melbourne AEDT UTC+11）渲染，SSR 即正确
+      await expect(trackTime).toContainText("GMT+11");
+      // My time 水合后转浏览器时区，不再是 SSR 阶段输出的 UTC
+      await expect(myTime).not.toContainText("04:00 UTC");
+    });
+  }
 });
 
 test("@mobile results pages have no page overflow", async ({ page }) => {

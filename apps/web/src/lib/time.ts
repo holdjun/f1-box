@@ -5,6 +5,37 @@ export function formatUtcDateTime(value: Timestamp, locale = "en-GB"): string {
 }
 
 export function formatUtcDate(value: Timestamp, locale = "en-GB"): string {
+  return formatDate(value, locale, "UTC");
+}
+
+// 按指定时区渲染某日（与 formatUtcDate 同格式，用于赛道当地比赛日）
+export function formatLocalDate(
+  value: Timestamp,
+  timeZone: string,
+  locale = "en-GB",
+): string {
+  return formatDate(value, locale, timeZone);
+}
+
+// 副行日期渲染的唯一入口：仅当发车时刻与赛道时区均存在时按赛道时区渲染当地比赛日，
+// 否则回退 UTC 日期。空 time 的历史赛绝不能按合成 00:00 做时区换算（负偏移时区会退一天）。
+export function formatRaceDate(
+  date: string,
+  time: string | null,
+  timeZone: string | null,
+): string {
+  if (time !== null && timeZone !== null) {
+    return formatLocalDate(`${date}T${time}:00Z`, timeZone);
+  }
+  return formatUtcDate(date);
+}
+
+// Intl 同一选项：两位日/短月/四位年 + 指定时区
+function formatDate(
+  value: Timestamp,
+  locale: string,
+  timeZone: string,
+): string {
   const date = value instanceof Date ? value : new Date(value);
   if (!Number.isFinite(date.getTime())) {
     throw new TypeError(`Invalid timestamp: ${String(value)}`);
@@ -13,7 +44,7 @@ export function formatUtcDate(value: Timestamp, locale = "en-GB"): string {
     day: "2-digit",
     month: "short",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone,
   }).format(date);
 }
 

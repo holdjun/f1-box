@@ -1,85 +1,19 @@
 ---
-import CircuitMap from "../../components/CircuitMap.astro";
 import StatusPage from "../../components/StatusPage.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
-const { circuit: circuitRepository } = Astro.locals.app.repositories;
+const { raceResults } = Astro.locals.app.repositories;
 const id = (Astro.params.id ?? "").toLowerCase();
-const circuit = await circuitRepository.getCircuit(id);
-// 赛道全名常含长词 (International), 小屏降到 display-md 防整词溢出
-if (!circuit) Astro.response.status = 404;
+const latest = await raceResults.getLatestRaceByCircuit(id);
+if (latest) {
+  return Astro.redirect(
+    `/results/${latest.year}/races/${latest.slug}/race-result`,
+    301,
+  );
+}
+Astro.response.status = 404;
 ---
 
-{circuit ? (
-  <BaseLayout title={circuit.name}>
-    <main id="main-content" class="shell pt-12 pb-section">
-      <div class="circuit-hero grid grid-cols-1 items-end gap-8 lg:grid-cols-[3fr_2fr]">
-        <div>
-          <h1 class="max-w-[10ch] text-display-lg uppercase max-md:text-display-md">
-            {circuit.fullName}
-          </h1>
-          <p class="mt-4 text-ink-muted">
-            {circuit.placeName}, {circuit.countryName} · {circuit.direction} · {circuit.turns} turns
-          </p>
-          <p class="circuit-hero__length mt-8 font-display text-[clamp(3rem,6vw,4.5rem)] font-bold leading-none">
-            {circuit.length.toFixed(3)}<span class="ml-1 text-[0.4em]">km</span>
-          </p>
-          <p class="circuit-hero__length-label mt-2 text-[0.8rem] uppercase tracking-[0.08em] text-ink-strong">
-            Circuit Length
-          </p>
-        </div>
-        <div class="circuit-hero__map mx-auto w-[min(100%,30rem)] max-w-full">
-          {circuit.layoutId ? (
-            <CircuitMap
-              layoutId={circuit.layoutId}
-              fallbackSrc={`/vendor/circuits/${circuit.layoutId}.svg`}
-              alt={`${circuit.fullName} layout map`}
-            />
-          ) : (
-            <p class="text-ink-muted">No layout map available.</p>
-          )}
-        </div>
-      </div>
-
-      <section class="info-panels">
-        <div class="info-panel">
-          <dl class="circuit-stats grid grid-cols-2 gap-x-8 gap-y-6">
-            <div>
-              <dt class="text-[0.8rem] uppercase tracking-[0.08em]">First Grand Prix</dt>
-              <dd class="mt-1.5 font-display text-[1.6rem] font-semibold">{circuit.firstGrandPrix ?? "—"}</dd>
-            </div>
-            <div>
-              <dt class="text-[0.8rem] uppercase tracking-[0.08em]">Number of Laps</dt>
-              <dd class="mt-1.5 font-display text-[1.6rem] font-semibold">{circuit.laps ?? "—"}</dd>
-            </div>
-            <div>
-              <dt class="text-[0.8rem] uppercase tracking-[0.08em]">Race Distance</dt>
-              <dd class="mt-1.5 font-display text-[1.6rem] font-semibold">
-                {circuit.distance === null ? "—" : `${circuit.distance.toFixed(3)}km`}
-              </dd>
-            </div>
-            <div>
-              <dt class="text-[0.8rem] uppercase tracking-[0.08em]">Races Held</dt>
-              <dd class="mt-1.5 font-display text-[1.6rem] font-semibold">{circuit.totalRacesHeld}</dd>
-            </div>
-            <div class="circuit-stats__wide col-span-full">
-              <dt class="text-[0.8rem] uppercase tracking-[0.08em]">Fastest Lap</dt>
-              <dd class="mt-1.5 font-display text-[1.6rem] font-semibold">
-                {circuit.recordLap ? circuit.recordLap.time : "—"}
-                {circuit.recordLap && (
-                  <span class="ml-2 font-sans text-[0.9rem] text-ink-muted">
-                    {circuit.recordLap.driverName} ({circuit.recordLap.year})
-                  </span>
-                )}
-              </dd>
-            </div>
-          </dl>
-        </div>
-      </section>
-    </main>
-  </BaseLayout>
-) : (
-  <BaseLayout title="Circuit not found">
-    <StatusPage code="404" title="Circuit not found" message="This circuit is not available yet." />
-  </BaseLayout>
-)}
+<BaseLayout title="Circuit not found">
+  <StatusPage code="404" title="Circuit not found" message="This circuit is not available yet." />
+</BaseLayout>
