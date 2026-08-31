@@ -1,17 +1,7 @@
 ---
-import StatusPage from "../../components/StatusPage.astro";
-import BaseLayout from "../../layouts/BaseLayout.astro";
-
 const { raceResults } = Astro.locals.app.repositories;
 const years = await raceResults.getSeasonYears();
 const latestYear = years[0];
 // 无任何赛季（空库）时回首页而不是渲染残页
-return Astro.redirect(
-  latestYear ? `/results/${latestYear}/races` : "/",
-  301,
-);
+return Astro.redirect(latestYear ? `/results/${latestYear}/races` : "/", 301);
 ---
-
-<BaseLayout title="Circuits not found">
-  <StatusPage code="404" title="Circuits not found" message="No races available." />
-</BaseLayout>
