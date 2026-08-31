@@ -63,14 +63,40 @@ function enhanceCalendarCopy(): void {
   });
 }
 
+function enhanceCalendarDialog(): void {
+  const dialog = document.querySelector<HTMLDialogElement>(
+    "[data-calendar-dialog]",
+  );
+  const trigger = document.querySelector<HTMLButtonElement>(
+    "[data-calendar-trigger]",
+  );
+  if (!dialog || !trigger) return;
+  // 有 JS 时升级为"触发按钮 + 弹窗"，无 JS 的内联降级行隐藏
+  document
+    .querySelector("[data-calendar-fallback]")
+    ?.setAttribute("hidden", "");
+  trigger.hidden = false;
+  trigger.addEventListener("click", () => dialog.showModal());
+  dialog
+    .querySelector("[data-calendar-close]")
+    ?.addEventListener("click", () => dialog.close());
+  // 点击落在弹窗自身（内边距区/遮罩回退目标）即关闭；内容区点击冒泡时 target 是子节点
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+}
+
 let enhanced = false;
 
 function enhancePage(): void {
   // document 级委托只需绑定一次；astro:page-load 后 DOM 已换但监听仍在
-  if (enhanced) return;
-  enhanced = true;
-  enhanceRaceTabs();
-  enhanceCalendarCopy();
+  if (!enhanced) {
+    enhanced = true;
+    enhanceRaceTabs();
+    enhanceCalendarCopy();
+  }
+  // 弹窗是节点级接线，ClientRouter 换页后 DOM 全新，每次加载都要重跑
+  enhanceCalendarDialog();
 }
 
 enhancePage();
