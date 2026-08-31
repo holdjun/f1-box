@@ -71,13 +71,3 @@ export function getAppData(env: Env): Promise<AppData> {
   });
   return cached;
 }
-
-// f1db 数据版本（sync_state 自增 id），ETag 的数据侧组成部分。刻意不随
-// AppData memo：缓存 ETag 必须反映当前数据版本，同步重导后长活 worker
-// 隔离实例若持旧值会让过期页面持续 304，用户拿不到新数据。每次渲染一次点查
-export async function getF1dbVersion(d1: D1Database): Promise<number> {
-  const { results } = await d1
-    .prepare("SELECT id FROM sync_state")
-    .all<{ id: number }>();
-  return results[0]?.id ?? 0;
-}

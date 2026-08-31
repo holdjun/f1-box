@@ -8,24 +8,13 @@ vi.mock("astro:middleware", () => ({
 }));
 
 const getAppData = vi.hoisted(() => vi.fn());
-const getF1dbVersion = vi.hoisted(() => vi.fn());
 vi.mock("../src/lib/repositories.js", () => ({
   getAppData,
-  getF1dbVersion,
 }));
 
 import { onRequest } from "../src/middleware.js";
 
-const F1DB_VERSION = 42;
-// vitest 把 process.env 并入 import.meta.env：CI 盖了 sha 戳时期望值随之变化，
-// 本地（未设 F1BOX_BUILD_ID）与 middleware 一同回落 "dev"
-const BUILD_ID = process.env.F1BOX_BUILD_ID ?? "dev";
-const CACHE_OPTIONS = {
-  maxAge: 300,
-  swr: 600,
-  tags: ["f1db"],
-  etag: `"${F1DB_VERSION}-${BUILD_ID}"`,
-};
+const CACHE_OPTIONS = { maxAge: 300, swr: 600, tags: ["f1db"] };
 
 // context 只构造 middleware 用到的最小形状；locals 由 middleware 写入 app
 function makeContext(
@@ -77,8 +66,6 @@ async function run(
 beforeEach(() => {
   getAppData.mockReset();
   getAppData.mockResolvedValue({ repositories: {}, askDb: {} });
-  getF1dbVersion.mockReset();
-  getF1dbVersion.mockResolvedValue(F1DB_VERSION);
 });
 
 describe("middleware 默认缓存", () => {
@@ -135,14 +122,12 @@ describe("middleware 浏览器缓存头", () => {
     );
   });
 
-  // 与 edge 缓存的 ETag 同源：过期后的条件请求命中返回 304，不再付整页往返
-  it("ETag 由 f1db 数据版本加构建 ID 组成", async () => {
-    const { response, cache } = await run("/racing/2026");
-    expect(response.headers.get("ETag")).toBe(`"${F1DB_VERSION}-${BUILD_ID}"`);
-    // 浏览器与 edge 共用同一验证器，改一处必须两处同步
-    expect(cache.set).toHaveBeenCalledWith(
-      expect.objectContaining({ etag: `"${F1DB_VERSION}-${BUILD_ID}"` }),
-    );
+  // 不设 ETag：Cloudflare 边缘对大体积 HTML 做压缩/缓存管线处理时会把强
+  // 验证器弱化或整个剥掉（实测），浏览器永远拿不到，304 再验证在这套托管上
+  // 不可行。写它纯属无效 D1 点查，回归测试防止再被加回来
+  it("不写 ETag 验证器", async () => {
+    const { response } = await run("/racing/2026");
+    expect(response.headers.get("ETag")).toBeNull();
   });
 
   // dev 的 NoopAstroCache 不做边缘缓存；此时也不该给浏览器写缓存头，
