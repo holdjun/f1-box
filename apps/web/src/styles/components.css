@@ -333,11 +333,6 @@
     border-radius: 0.25rem;
     background: var(--ink);
   }
-  .vendor-cell small {
-    color: var(--ink-muted);
-    font-size: 0.65rem;
-    letter-spacing: 0.08em;
-  }
   @media (width < 40rem) {
     .vendor-cell--driver .vendor-cell__name {
       display: none;

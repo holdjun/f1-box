@@ -1,5 +1,4 @@
-// 国旗 emoji 用区域指示符拼成；队色作 monogram 背景时的对比度选择已随车手改三字码
-// 不再有名字首字母组合，monogram() 随调用点移除。
+// 国旗用公共领域 emoji（区域指示符拼成），SVG 资产另走 /vendor/country-flags/。
 export function alpha2Flag(alpha2: string): string {
   return String.fromCodePoint(
     ...[...alpha2.toUpperCase()].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65),
