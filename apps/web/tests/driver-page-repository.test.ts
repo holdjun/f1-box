@@ -141,6 +141,7 @@ describe("createDriverRepository with database", () => {
       {
         id: "test-driver",
         name: "Test Driver",
+        code: "TDR",
         full_name: "Test A. Driver",
         country_name: "United Kingdom",
         alpha2_code: "GB",

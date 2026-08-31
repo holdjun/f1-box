@@ -64,6 +64,10 @@ test.describe("race detail", () => {
     await expect(table.locator("tbody tr").first()).toContainText(
       "1:23:06.801",
     );
+    // 徽标改三字码：George Russell 为 RUS（不再是名字首字母 GR）
+    await expect(
+      table.locator("tbody tr").first().locator(".vendor-cell__monogram"),
+    ).toHaveText("RUS");
   });
 
   test("@desktop hero lists the weekend sessions", async ({ page }) => {
@@ -81,6 +85,14 @@ test.describe("race detail", () => {
     await expect(svg).toBeVisible();
     // 赛道图不再是链接（指向 /circuits 的 <a> 已移除）
     await expect(svg.locator("xpath=ancestor::a")).toHaveCount(0);
+    // 注解地图渲染图例（melbourne-2 有 sectors/corners，DRS 数据为空故仅 4 项）
+    const legend = page.locator(".circuit-map__legend");
+    await expect(legend).toBeVisible();
+    await expect(legend.locator(".legend")).toHaveCount(4);
+    await expect(legend).toContainText("Sector 1");
+    await expect(legend).toContainText("Sector 2");
+    await expect(legend).toContainText("Sector 3");
+    await expect(legend).toContainText("Corner");
   });
 
   test("@desktop header shows local race date and circuit card", async ({

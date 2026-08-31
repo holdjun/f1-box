@@ -3,7 +3,7 @@ import ResultsNav from "../../../../components/ResultsNav.astro";
 import SeasonFilter from "../../../../components/SeasonFilter.svelte";
 import BaseLayout from "../../../../layouts/BaseLayout.astro";
 import { formatUtcDate } from "../../../../lib/time.js";
-import { monogram, monogramStyle as monogramStyleFor } from "../../../../lib/tokens.js";
+import { monogramStyle as monogramStyleFor } from "../../../../lib/tokens.js";
 import { colorForYear, logoSrcFor, logoVariantFor, vendorIndexes } from "../../../../lib/vendor.js";
 
 const year = Number(Astro.params.year);
@@ -63,11 +63,10 @@ const winnerStyle = (teamId: string | null) =>
                 </th>
                 <td>{formatUtcDate(race.date)}</td>
                 <td>
-                  {race.winnerDriverId && race.winnerName ? (
+                  {race.winnerDriverId && race.winnerName && race.winnerCode ? (
                     <a class="vendor-cell vendor-cell--driver" href={`/drivers/${race.winnerDriverId}`} style={winnerStyle(race.winnerTeamId)}>
-                      <span class="vendor-cell__monogram" aria-hidden="true">{monogram(race.winnerName)}</span>
+                      <span class="vendor-cell__monogram" aria-hidden="true">{race.winnerCode}</span>
                       <span class="vendor-cell__name">{race.winnerName}</span>
-                      <small>{race.winnerCode}</small>
                     </a>
                   ) : "—"}
                 </td>

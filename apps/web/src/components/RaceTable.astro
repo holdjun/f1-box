@@ -3,7 +3,7 @@ import type {
   FastestLapRow, GridRow, PitStopRow, PracticeRow, QualifyingRow,
   RaceResultRow, RaceTabKey,
 } from "../lib/race-results-repository.js";
-import { monogram, monogramStyle as monogramStyleFor } from "../lib/tokens.js";
+import { monogramStyle as monogramStyleFor } from "../lib/tokens.js";
 import { colorForYear, logoSrcFor, logoVariantFor, vendorIndexes } from "../lib/vendor.js";
 
 interface Props {
@@ -61,9 +61,8 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td>{row.driverNumber ?? "—"}</td>
                 <td>
                   <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`} style={monogramStyle(row.constructorId)}>
-                    <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
+                    <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
                     <span class="vendor-cell__name">{row.driverName}</span>
-                    <small>{row.driverCode}</small>
                   </a>
                 </td>
                 <td>
@@ -101,9 +100,8 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td>{row.driverNumber ?? "—"}</td>
                 <td>
                   <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`} style={monogramStyle(row.constructorId)}>
-                    <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
+                    <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
                     <span class="vendor-cell__name">{row.driverName}</span>
-                    <small>{row.driverCode}</small>
                   </a>
                 </td>
                 <td>
@@ -141,9 +139,8 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td>{row.driverNumber ?? "—"}</td>
                 <td>
                   <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`} style={monogramStyle(row.constructorId)}>
-                    <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
+                    <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
                     <span class="vendor-cell__name">{row.driverName}</span>
-                    <small>{row.driverCode}</small>
                   </a>
                 </td>
                 <td>
@@ -179,9 +176,8 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td>{row.driverNumber ?? "—"}</td>
                 <td>
                   <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`} style={monogramStyle(row.constructorId)}>
-                    <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
+                    <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
                     <span class="vendor-cell__name">{row.driverName}</span>
-                    <small>{row.driverCode}</small>
                   </a>
                 </td>
                 <td>
@@ -218,9 +214,8 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td>{row.driverNumber ?? "—"}</td>
                 <td>
                   <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`} style={monogramStyle(row.constructorId)}>
-                    <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
+                    <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
                     <span class="vendor-cell__name">{row.driverName}</span>
-                    <small>{row.driverCode}</small>
                   </a>
                 </td>
                 <td>
@@ -258,9 +253,8 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
                 <td>{row.driverNumber ?? "—"}</td>
                 <td>
                   <a class="vendor-cell vendor-cell--driver" href={`/drivers/${row.driverId}`} style={monogramStyle(row.constructorId)}>
-                    <span class="vendor-cell__monogram" aria-hidden="true">{monogram(row.driverName)}</span>
+                    <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
                     <span class="vendor-cell__name">{row.driverName}</span>
-                    <small>{row.driverCode}</small>
                   </a>
                 </td>
                 <td>

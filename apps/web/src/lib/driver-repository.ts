@@ -15,6 +15,7 @@ import {
 export interface DriverSummary {
   id: string;
   name: string;
+  code: string;
   number: string | null;
   flagCode: string | null;
   teamId: string | null;
@@ -86,6 +87,7 @@ export interface DriverSeason {
 export interface DriverPage {
   id: string;
   name: string;
+  code: string;
   fullName: string;
   countryName: string;
   alpha2Code: string;
@@ -155,7 +157,7 @@ last_race AS (
   )
   JOIN constructor c ON c.id = rd.constructor_id
 )
-SELECT d.id, d.name, COALESCE(lr.last_number, d.permanent_number) AS number,
+SELECT d.id, d.name, d.abbreviation AS code, COALESCE(lr.last_number, d.permanent_number) AS number,
   co.alpha2_code, lr.constructor_id AS team_id, lr.team_name,
   CASE WHEN cd.driver_id IS NULL THEN 0 ELSE 1 END AS is_current
 FROM driver d
@@ -188,7 +190,7 @@ last_race AS (
   )
   JOIN constructor c ON c.id = rd.constructor_id
 )
-SELECT d.id, d.name, COALESCE(lr.last_number, d.permanent_number) AS number,
+SELECT d.id, d.name, d.abbreviation AS code, COALESCE(lr.last_number, d.permanent_number) AS number,
   co.alpha2_code, lr.constructor_id AS team_id, lr.team_name,
   COALESCE(sds.points, 0) AS points
 FROM year_drivers yd
@@ -199,7 +201,7 @@ LEFT JOIN season_driver_standing sds ON sds.driver_id = d.id AND sds.year = ?1
 ORDER BY points DESC, d.name`;
 
 const identitySql = `
-SELECT d.id, d.name, d.full_name, co.name AS country_name, co.alpha2_code,
+SELECT d.id, d.name, d.abbreviation AS code, d.full_name, co.name AS country_name, co.alpha2_code,
   d.date_of_birth, d.date_of_death, d.place_of_birth, d.permanent_number,
   d.total_race_entries AS entries, d.total_race_starts AS starts,
   d.total_race_wins AS wins, d.total_podiums AS podiums,
@@ -506,6 +508,7 @@ function mapDriverRow(row: unknown): DriverSummary {
   return {
     id: asString(record.id, "driver id"),
     name: asString(record.name, "driver name"),
+    code: asString(record.code, "driver code"),
     number:
       record.number == null ? null : asString(record.number, "driver number"),
     // 国旗 SVG 以 alpha2 小写命名
@@ -540,6 +543,7 @@ function parseIdentity(
   return {
     id: asString(record.id, "driver id"),
     name: asString(record.name, "driver name"),
+    code: asString(record.code, "driver code"),
     fullName: asString(record.full_name, "driver full name"),
     countryName: asString(record.country_name, "driver country"),
     alpha2Code: asString(record.alpha2_code, "driver flag code"),

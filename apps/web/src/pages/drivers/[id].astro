@@ -5,7 +5,6 @@ import SeasonMatrix from "../../components/SeasonMatrix.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { resolveSeasonSelection } from "../../lib/routing.js";
 import { formatUtcLongDate } from "../../lib/time.js";
-import { monogram } from "../../lib/tokens.js";
 import { colorForYear, latestColor, vendorIndexes } from "../../lib/vendor.js";
 
 const { driver: driverRepository } = Astro.locals.app.repositories;
@@ -93,8 +92,8 @@ const stintYears = "number-years text-[0.68rem] text-ink-muted";
               {driverNumber}
             </span>
           ) : (
-            <span class="driver-monogram grid size-16 place-items-center rounded-[12px] bg-line font-display text-[1.6rem] font-bold text-ink-strong" aria-hidden="true">
-              {monogram(driver.name)}
+            <span class="driver-monogram grid size-16 place-items-center rounded-[12px] bg-line font-display text-[1.15rem] font-bold text-ink-strong" aria-hidden="true">
+              {driver.code}
             </span>
           )}
         </span>
