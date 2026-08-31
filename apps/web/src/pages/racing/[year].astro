@@ -30,6 +30,15 @@ const next =
 const nextLine = next
   ? `${formatUtcDateTime(`${next.date}T${next.time ?? "00:00"}:00Z`)} · ${next.circuitPlace}`
   : null;
+// 订阅/下载是纯链接无 JS 可用；复制 URL 由 client.ts 做剪贴板增强。
+// origin 取当前请求域，预览环境订阅的是预览端点而非生产
+const icsHref = `${Astro.url.origin}/api/calendar.ics?year=${year}`;
+// 整体替换 scheme（含 https 的 s）：生产 https 下若只替换 http 前缀会产出非法的 webcals://
+const webcalHref = icsHref.replace(/^https?:\/\//, "webcal://");
+// 日历菜单项与 SeasonFilter 下拉选项同一 hover 语言；面板底为 surface-overlay，
+// 在 Next 卡片（surface-raised）上有区分，hover 行反向用 raised
+const calendarItemClass =
+  "rounded px-3 py-2 text-left text-[0.82rem] text-ink-strong transition-colors hover:bg-surface-raised hover:text-ink";
 // 荧光只给下一站：焦点唯一，避免整页色条噪音
 const statusOf = (race: RaceSummary): "complete" | "next" | "upcoming" =>
   race.winnerName !== null ? "complete" : race === next ? "next" : "upcoming";
@@ -51,7 +60,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
         </p>
       </div>
       {next && (
-        <div class="rounded-md border border-line bg-surface-raised p-6 light:shadow-panel">
+        <div class="relative rounded-md border border-line bg-surface-raised p-6 light:shadow-panel">
           <p class="status-label status-label--accent">
             Next · Round {String(next.round).padStart(2, "0")}
           </p>
@@ -67,7 +76,36 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
             />
             {nextLine}
           </p>
-          <a class="button button--text mt-5" href={cardHref(next)}>View weekend</a>
+          <div class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <a class="button button--text" href={cardHref(next)}>View weekend</a>
+            <details class="calendar-box" data-calendar-box>
+              <summary class="button button--primary calendar-box__summary">Add to calendar</summary>
+              <div
+                class="calendar-box__panel absolute inset-x-4 bottom-3 z-30 grid gap-0.5 rounded-md border border-line bg-surface-overlay p-2 shadow-panel md:inset-x-auto md:right-4 md:w-88"
+              >
+                <a class={calendarItemClass} href={webcalHref} data-calendar-subscribe
+                  >Subscribe — Apple Calendar</a
+                >
+                <a
+                  class={calendarItemClass}
+                  href={icsHref}
+                  download={`f1-${year}.ics`}
+                  data-calendar-download
+                >Download .ics file</a>
+                <div class="mt-1 min-w-0 border-t border-line pt-2">
+                  <button
+                    type="button"
+                    class:list={[calendarItemClass, "w-full cursor-pointer"]}
+                    data-calendar-copy={icsHref}
+                  >Copy calendar URL</button>
+                  <code
+                    class="block min-w-0 truncate px-3 pt-1.5 text-[0.72rem] text-ink-muted"
+                    title={icsHref}
+                  >{icsHref}</code>
+                </div>
+              </div>
+            </details>
+          </div>
         </div>
       )}
     </div>

@@ -66,6 +66,20 @@
     color: var(--highlight);
   }
 
+  /* racing 页 Next 面板的日历订阅入口：details 原生开合保证无 JS 可用；
+     面板外观走 utility 类（与 SeasonFilter 下拉一致），这里只处理 details 特有部分 */
+  .calendar-box__summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  .calendar-box__summary::-webkit-details-marker {
+    display: none;
+  }
+  .calendar-box[open] > .calendar-box__summary {
+    background: var(--highlight);
+    color: var(--on-highlight);
+  }
+
   .status-label {
     display: inline-flex;
     align-items: center;

@@ -2,12 +2,7 @@
 // 面板并同步地址栏，省掉视图过渡与回页首。必须在捕获阶段拦截，
 // 否则 ClientRouter 会先行接管链接做换页。无对应面板（如年份页的 tab）
 // 或无 JS 时退化为正常导航
-let raceTabsBound = false;
-
 function enhanceRaceTabs(): void {
-  if (raceTabsBound) return;
-  raceTabsBound = true;
-
   document.addEventListener(
     "click",
     (event) => {
@@ -43,8 +38,39 @@ function enhanceRaceTabs(): void {
   );
 }
 
+function enhanceCalendarCopy(): void {
+  document.addEventListener("click", async (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const button = target.closest<HTMLButtonElement>("[data-calendar-copy]");
+    if (!button) return;
+    const url = button.dataset.calendarCopy ?? "";
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      return; // 剪贴板不可用时保持原文案，URL 文本仍可手动复制
+    }
+    // 原文案存 dataset：连点时 textContent 已是反馈文案，直接读会把它当原文案永久卡住
+    let label = button.dataset.copyLabel;
+    if (label === undefined) {
+      label = button.textContent ?? "";
+      button.dataset.copyLabel = label;
+    }
+    button.textContent = "Copied!";
+    setTimeout(() => {
+      button.textContent = label;
+    }, 2000);
+  });
+}
+
+let enhanced = false;
+
 function enhancePage(): void {
+  // document 级委托只需绑定一次；astro:page-load 后 DOM 已换但监听仍在
+  if (enhanced) return;
+  enhanced = true;
   enhanceRaceTabs();
+  enhanceCalendarCopy();
 }
 
 enhancePage();

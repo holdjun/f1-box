@@ -26,7 +26,7 @@ test("@desktop racing calendar links every round to its results page", async ({
 }) => {
   await page.goto("/racing/2026");
   const cards = page.locator("main .race-card");
-  await expect(cards).toHaveCount(22);
+  await expect(cards).toHaveCount(23);
   // 卡面标题不含 Grand Prix 后缀；顶部为周末日期范围；完成卡显示前三名
   await expect(cards.first()).toContainText("Australia");
   await expect(cards.first()).toContainText("🏁");
@@ -39,7 +39,7 @@ test("@desktop racing calendar links every round to its results page", async ({
   await expect(cards.first()).not.toContainText("COMPLETE");
   await expect(cards.first().locator("img:visible")).toHaveCount(2); // 国旗 + 赛道
   const raceLinks = page.locator('main a[href^="/results/2026/races/"]');
-  await expect(raceLinks).toHaveCount(22);
+  await expect(raceLinks).toHaveCount(23);
   await expect(raceLinks.first()).toHaveAttribute(
     "href",
     "/results/2026/races/australia/race-result",
@@ -115,6 +115,49 @@ test("@desktop next round shows a live countdown to the next session", async ({
     expect(after).toMatch(/^(\d+d )?\d{2}:\d{2}:\d{2}$/);
     expect(after).not.toBe(text);
   }
+});
+
+test("@desktop next panel exposes calendar subscribe/download links", async ({
+  page,
+}) => {
+  await page.goto("/racing/2026");
+  const box = page.locator("[data-calendar-box]");
+  await expect(box).toBeVisible();
+  // details 原生开合：无 JS 也能展开操作列表
+  await box.locator("summary").click();
+  const { host } = new URL(page.url());
+  // webcal 断言用正则：scheme 必须恰为 webcal://（防 webcals:// 回归），不耦合页面协议
+  await expect(box.locator("[data-calendar-subscribe]")).toHaveAttribute(
+    "href",
+    new RegExp(
+      `^webcal://${host.replace(/\./g, "\\.")}/api/calendar\\.ics\\?year=2026$`,
+    ),
+  );
+  await expect(box.locator("[data-calendar-download]")).toHaveAttribute(
+    "href",
+    new RegExp(
+      `^https?://${host.replace(/\./g, "\\.")}/api/calendar\\.ics\\?year=2026$`,
+    ),
+  );
+});
+
+test("@desktop calendar.ics endpoint serves a valid ICS snapshot", async ({
+  request,
+}) => {
+  const res = await request.get("/api/calendar.ics?year=2026");
+  expect(res.status()).toBe(200);
+  expect(res.headers()["content-type"]).toContain("text/calendar");
+  const body = await res.text();
+  expect(body.startsWith("BEGIN:VCALENDAR\r\n")).toBe(true);
+  // 23 站 × 每站 5 session；bahrain(Sepang) 为普通周末
+  expect((body.match(/BEGIN:VEVENT/g) ?? []).length).toBe(115);
+  expect(body).toContain("UID:race-bahrain-2026@f1-box.com\r\n");
+  expect(body.endsWith("END:VCALENDAR\r\n")).toBe(true);
+
+  // year 缺失、非法、空赛季一律 404
+  expect((await request.get("/api/calendar.ics")).status()).toBe(404);
+  expect((await request.get("/api/calendar.ics?year=abc")).status()).toBe(404);
+  expect((await request.get("/api/calendar.ics?year=2019")).status()).toBe(404);
 });
 
 test("@desktop legacy racing route redirects to new", async ({ page }) => {

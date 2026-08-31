@@ -464,7 +464,7 @@ describe("createTeamRepository without database (DEV fixture)", () => {
     expect(team?.currentSeason?.grandPrix.dnfs).toBeGreaterThanOrEqual(1);
     expect(team?.currentSeason?.sprint.points).toBe(39);
     const current = team?.seasons[0];
-    expect(current?.rounds).toHaveLength(22);
+    expect(current?.rounds).toHaveLength(23);
     expect(current?.drivers.map((d) => d.name)).toContain("Charles Leclerc");
   });
 
