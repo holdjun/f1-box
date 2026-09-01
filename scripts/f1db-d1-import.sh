@@ -34,4 +34,7 @@ until run_import; do
   attempt=$((attempt + 1))
   sleep 15
 done
+# 刷新统计信息：没有 sqlite_stat1 时规划器不选 race_data 复合索引，
+# 按 type 分区的视图查询退回全分区扫描
+"$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --command "ANALYZE;" > /dev/null
 echo "import complete"

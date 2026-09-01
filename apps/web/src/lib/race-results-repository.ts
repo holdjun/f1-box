@@ -323,8 +323,8 @@ const circuitInfoSql = `SELECT c.total_races_held,
 FROM circuit c
 WHERE c.id = (SELECT ra.circuit_id FROM race ra WHERE ra.year = ?1 AND ra.grand_prix_id = ?2)`;
 
-// 该赛道全场次最快圈（口径同原 circuit-repository：全局最小 millis）
-const recordLapSql = `SELECT fl.time, d.name AS driver_name, ra.year
+// 该赛道全场次最快圈（口径同原 circuit-repository：全局最小 millis）；export 供索引计划测试
+export const recordLapSql = `SELECT fl.time, d.name AS driver_name, ra.year
 FROM race ra
 JOIN fastest_lap fl ON fl.race_id = ra.id
 JOIN driver d ON d.id = fl.driver_id
