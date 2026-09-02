@@ -324,11 +324,16 @@ export const circuitInfoSql = `SELECT c.total_races_held,
 FROM circuit c
 WHERE c.id = (SELECT ra.circuit_id FROM race ra WHERE ra.year = ?1 AND ra.grand_prix_id = ?2)`;
 
-// 该赛道全场次最快圈（口径同原 circuit-repository：全局最小 millis）；export 供索引计划测试
+// 该赛道全场次最快圈（口径同原 circuit-repository：全局最小 millis）；export 供索引计划测试。
+// CROSS JOIN 不改语义，只禁止规划器重排连接顺序。上游 race_data 有 rcda_type_idx，
+// 缺 ANALYZE 统计时规划器会误从 type 分区起步：拉出整个 FASTEST_LAP 分区（真实数据
+// 17105 行）再逐行回表 race 与 driver，实测每次读 7.5 万行——2026-09-02 生产 D1 日读
+// 配额被这一条查询烧掉 722 万行。固定成从 ra 走 idx_race_circuit_year 后，最多只读该
+// 赛道场次数×每场最快圈行数（Monza 956 行）。
 export const recordLapSql = `SELECT fl.time, d.name AS driver_name, ra.year
 FROM race ra
-JOIN fastest_lap fl ON fl.race_id = ra.id
-JOIN driver d ON d.id = fl.driver_id
+CROSS JOIN fastest_lap fl ON fl.race_id = ra.id
+CROSS JOIN driver d ON d.id = fl.driver_id
 WHERE ra.circuit_id = (SELECT ra2.circuit_id FROM race ra2 WHERE ra2.year = ?1 AND ra2.grand_prix_id = ?2)
   AND fl.time_millis IS NOT NULL
 ORDER BY fl.time_millis
