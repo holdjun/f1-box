@@ -8,6 +8,8 @@ import {
   buildCurrentSeason,
   buildRaceCell,
   type CurrentSeason,
+  maxSeasonSql,
+  parseActiveSeason,
   type RaceCell,
   type SeasonRound,
 } from "./team-repository.js";
@@ -351,8 +353,6 @@ JOIN sprint_starting_grid_position ssg ON ssg.race_id = ra.id
 WHERE ssg.driver_id = ?1 AND ssg.position_number = 1
 GROUP BY ra.year`;
 
-const maxSeasonSql = `SELECT MAX(year) AS year FROM season`;
-
 export function createDriverRepository(db?: DriverDatabase): DriverRepository {
   return {
     async getDrivers() {
@@ -492,14 +492,7 @@ export function createDriverRepository(db?: DriverDatabase): DriverRepository {
           sprintPoleRows.results,
         ),
         seasons,
-        activeSeason: (() => {
-          // MAX() 恒返回一行；season 表为空时 year 为 NULL
-          const year = asRecord(
-            maxSeasonRows.results[0],
-            "max season row",
-          ).year;
-          return year == null ? null : asNumber(year, "max season");
-        })(),
+        activeSeason: parseActiveSeason(maxSeasonRows.results),
       };
     },
   };

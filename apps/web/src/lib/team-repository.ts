@@ -258,7 +258,15 @@ JOIN constructor oc ON oc.id = cc.other_constructor_id
 WHERE cc.constructor_id = ?1
 ORDER BY cc.position_display_order`;
 
-const maxSeasonSql = `SELECT MAX(year) AS year FROM season`;
+// MAX(year) 恒返回一行；season 表为空时 year 为 NULL。车手页与车队页共用
+export function parseActiveSeason(rows: unknown[]): number | null {
+  const row = rows[0];
+  if (row === undefined) return null;
+  const year = asRecord(row, "max season row").year;
+  return year == null ? null : asNumber(year, "max season");
+}
+
+export const maxSeasonSql = `SELECT MAX(year) AS year FROM season`;
 
 const constructorsSql = `
 SELECT c.id, c.name
@@ -340,13 +348,7 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
       return {
         ...base,
         firstEntry: seasons.at(-1)?.year ?? null,
-        activeSeason:
-          maxSeasonRows.results.length > 0
-            ? asNumber(
-                asRecord(maxSeasonRows.results[0], "max season row").year,
-                "max season",
-              )
-            : null,
+        activeSeason: parseActiveSeason(maxSeasonRows.results),
         lineage: withEarlyStint(
           base,
           seasons,
@@ -515,13 +517,13 @@ export function buildCurrentSeason(
   const gp = asRecord(
     gpStatRows.find(
       (row) => asRecord(row, "gp stats row").year === latest.year,
-    ) ?? emptyStats(),
+    ) ?? EMPTY_STATS,
     "gp stats row",
   );
   const sprint = asRecord(
     sprintStatRows.find(
       (row) => asRecord(row, "sprint stats row").year === latest.year,
-    ) ?? emptyStats(),
+    ) ?? EMPTY_STATS,
     "sprint stats row",
   );
   const sprintPoles = sprintPoleRows.find(
@@ -559,18 +561,17 @@ export function buildCurrentSeason(
   };
 }
 
-function emptyStats(): Record<string, unknown> {
-  return {
-    races: 0,
-    points: 0,
-    wins: 0,
-    podiums: 0,
-    poles: 0,
-    top10s: 0,
-    fastest_laps: 0,
-    dnfs: 0,
-  };
-}
+// gpStats/sprintStats 缺该年行时的零值底；字段与 SQL 聚合列一一对应
+const EMPTY_STATS = {
+  races: 0,
+  points: 0,
+  wins: 0,
+  podiums: 0,
+  poles: 0,
+  top10s: 0,
+  fastest_laps: 0,
+  dnfs: 0,
+} as const;
 
 function mergeSeasons(
   seasonRows: unknown[],
@@ -660,19 +661,10 @@ function mergeSeasons(
   }
 
   // 赛季未结束时将来轮次保留为空列，与 wiki 一致
-  const retainedRounds = new Map<number, number[]>();
   for (const [year, season] of seasons) {
-    const rounds = rawRounds.get(year) ?? [];
-    retainedRounds.set(
-      year,
-      rounds.map((r) => r.round),
+    season.rounds = (rawRounds.get(year) ?? []).map(
+      ({ code, name, circuitId, slug }) => ({ code, name, circuitId, slug }),
     );
-    season.rounds = rounds.map(({ code, name, circuitId, slug }) => ({
-      code,
-      name,
-      circuitId,
-      slug,
-    }));
   }
 
   // 全部赛季块一次渲染前，先标记车手冠军（名字金色）
@@ -700,8 +692,8 @@ function mergeSeasons(
           ? null
           : asString(record.alpha2_code, "driver flag"),
       champion: champions.has(`${year}:${driverId}`),
-      results: (retainedRounds.get(year) ?? []).map(
-        (round) => byRound?.get(round) ?? null,
+      results: (rawRounds.get(year) ?? []).map(
+        (r) => byRound?.get(r.round) ?? null,
       ),
     });
   }
