@@ -13,14 +13,6 @@ test("@desktop root redirects to active season racing page", async ({
   expect(browserRequests.some((url) => /jolpi|ergast/i.test(url))).toBe(false);
 });
 
-test("@desktop non-numeric year falls back home instead of chaining undefined", async ({
-  page,
-}) => {
-  await page.goto("/undefined");
-  await page.waitForURL(/\/racing\/2026$/);
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-});
-
 test("@desktop racing calendar links every round to its results page", async ({
   page,
 }) => {
@@ -218,22 +210,12 @@ test("@desktop calendar.ics endpoint serves a valid ICS snapshot", async ({
   expect((await request.get("/api/calendar.ics?year=2019")).status()).toBe(404);
 });
 
-test("@desktop legacy racing route redirects to new", async ({ page }) => {
-  await page.goto("/2026/racing");
-  await page.waitForURL(/\/racing\/2026$/);
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  // 垃圾年份不拼新路径，回首页再跳当季
-  await page.goto("/undefined/racing");
-  await page.waitForURL(/\/racing\/2026$/);
-});
-
 test("@desktop unknown year returns 404", async ({ page }) => {
   expect((await page.goto("/racing/1900"))?.status()).toBe(404);
-  expect((await page.goto("/1900/racing"))?.status()).toBe(404);
 });
 
-// Astro 的错误重路由会去请求 /500；没有 500.astro 时它落进 [year] catch-all，
-// 被当成垃圾年份 302 回首页——而首页同样查 D1，D1 一挂整站就无限重定向
+// Astro 的错误重路由会去请求 /500；没有 500.astro 时错误页本身会 404，
+// D1 一挂就看不到任何可用提示
 test("@desktop /500 renders the error page instead of redirecting home", async ({
   page,
 }) => {

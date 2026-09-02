@@ -37,7 +37,7 @@ export interface RaceSession {
   startsAtUtc: string;
 }
 
-export interface PodiumEntry {
+interface PodiumEntry {
   driverCode: string | null;
   constructorId: string | null;
   // 第 1 名为完赛时间（如 1:23:06.801）；第 2/3 名为对第 1 名的秒差（如 +2.974）
@@ -164,7 +164,7 @@ export interface TeamStandingRow {
   wins: number;
 }
 
-export interface RacePage {
+interface RacePage {
   meta: RaceMeta;
   tabs: {
     raceResult: RaceResultRow[];

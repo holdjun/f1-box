@@ -1,5 +1,5 @@
 // SSE 编码服务端用；解析器给面板客户端流式读取用（纯函数，两侧共用）
-export interface SseEvent {
+interface SseEvent {
   event: string;
   data: string;
 }

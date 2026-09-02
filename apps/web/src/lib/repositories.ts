@@ -15,7 +15,7 @@ import {
   type TeamRepository,
 } from "./team-repository.js";
 
-export interface AppRepositories {
+interface AppRepositories {
   raceResults: RaceResultsRepository;
   driver: DriverRepository;
   team: TeamRepository;
@@ -27,7 +27,7 @@ export interface AppData {
 }
 
 // DEV 夹具与 D1 分支都收敛在此处，页面与 API 路由零 import.meta.env 判定
-export async function createAppData(env: Env): Promise<AppData> {
+async function createAppData(env: Env): Promise<AppData> {
   if (import.meta.env.DEV) {
     const { createDevAskDatabase } = await import("./ask/fixtures/ask-dev.js");
     return {

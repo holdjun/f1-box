@@ -1,7 +1,0 @@
----
-// 旧路由 /:year/racing 迁移到 /racing/:year，保留 301 收旧链接；
-// 垃圾年份（/undefined 等）不拼新路径，直接回首页
-const year = Astro.params.year;
-if (!/^\d{4}$/.test(year ?? "")) return Astro.redirect("/");
-return Astro.redirect(`/racing/${year}`, 301);
----

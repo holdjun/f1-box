@@ -3,12 +3,12 @@ import { mergeStanding, type StandingTotal } from "../standings-merge.js";
 import { askAliases, resolveAlias } from "./aliases.js";
 import type { AskDatabase } from "./db.js";
 
-export interface EntityRef {
+interface EntityRef {
   id: string;
   name: string;
 }
 
-export type Resolution =
+type Resolution =
   | { status: "unique"; ref: EntityRef }
   | { status: "ambiguous"; candidates: EntityRef[] }
   | { status: "miss" };
@@ -102,7 +102,7 @@ export function resolveDriver(
   return resolveEntity(db, query, driverRefSql, askAliases.drivers);
 }
 
-export function resolveConstructor(
+function resolveConstructor(
   db: AskDatabase,
   query: string,
 ): Promise<Resolution> {

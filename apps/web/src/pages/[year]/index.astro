@@ -1,6 +1,0 @@
----
-const year = Astro.params.year;
-// 垃圾年份（/undefined 等旧链接、手滑输入）不拼 /racing，直接回首页走正确重定向
-if (!/^\d{4}$/.test(year ?? "")) return Astro.redirect("/");
-return Astro.redirect(`/racing/${year}`);
----

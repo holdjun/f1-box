@@ -9,7 +9,7 @@ export interface AskMessage {
   content: string;
 }
 
-export type AskBodyResult =
+type AskBodyResult =
   | { ok: true; messages: AskMessage[] }
   | { ok: false; message: string };
 

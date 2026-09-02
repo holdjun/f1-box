@@ -7,7 +7,7 @@ F1 比赛周末信息中心：为当前赛季提供结构化、易浏览的数�
 ## 目录结构
 
 - `apps/web`：Astro 站点，部署为 Cloudflare Worker。本地开发读 fixture，生产读 D1。
-- `docs`：设计文档、实施计划和历史 thread 记录。
+- `scripts`：f1db 数据导入与赛道图生成脚本。
 
 ## 本地开发
 
@@ -22,15 +22,13 @@ pnpm test                             # 单元测试（TS）
 pnpm --filter @f1-box/web test:e2e    # Playwright e2e（桌面 / 375px / reduced-motion / 双主题 axe 可访问性）
 ```
 
+本地开发与 e2e 不连 D1：`apps/web/src/lib/fixtures/` 是一份冻结的 2026 赛季数据，让 e2e 断言可以写成确定值。覆盖范围有意收窄——赛历全 23 站，但分站详情只有 australia、车队页只有 ferrari、车手页只有 Russell 与 Verstappen。
+
 ## 数据流
 
-f1db（CC-BY-4.0）→ `data-sync.yml` 按上游发布节奏轮询 release tag（周日晚到周二每 2 小时、其余每天一次），有变化时全量导入 D1 → Astro Worker 读 D1；赛道轮廓 SVG、车队 logo、国旗存仓库 `public/vendor/`；本地开发读 fixture。访客请求不直接访问上游数据源。
+f1db（CC-BY-4.0）→ `data-sync.yml` 按上游发布节奏轮询 release tag（周日晚到周二每 2 小时、其余每天一次），有变化时全量导入 D1 → Astro Worker 读 D1。访客请求不直接访问上游数据源。
 
-实时与遥测数据后续以 FastF1 另立采集服务（静态 f1db + 动态 FastF1 双源架构，见 `docs/requirements/2026-08-24-remove-jolpica-r2.md`）。
-
-历史赛季数据（结果、车手、车队、赛道）来自 [f1db](https://github.com/f1db/f1db)（CC-BY-4.0）：`scripts/f1db-d1-dump.sh` 生成导入 SQL，data-sync 每周把 SQLite 全量导入 D1；赛道轮廓 SVG 用 `scripts/f1db-circuit-svg-sync.sh` 从 f1db 仓库同步到 `apps/web/public/vendor/circuits/`，新增布局时手动跑。
-
-设计细节见 `docs/superpowers/specs/2026-07-21-v1-season-hub-design.md`；样式架构与双主题见 `docs/requirements/2026-08-23-css-modernization.md`。
+`scripts/f1db-d1-dump.sh` 从 f1db 官方 SQLite release 生成按表拆分的导入 SQL，`scripts/f1db-d1-import.sh` 推进 D1。赛道轮廓 SVG、车队 logo、国旗存仓库 `apps/web/public/vendor/`；轮廓 SVG 用 `scripts/f1db-circuit-svg-sync.sh` 从 f1db 仓库同步，新增布局时手动跑。带遥测的注解赛道图由 `scripts/generate-circuit-maps.py` 离线生成到 `apps/web/src/data/circuit-maps.json`，无遥测的历史赛道回落轮廓 SVG。
 
 ## 样式系统
 
@@ -46,15 +44,9 @@ f1db（CC-BY-4.0）→ `data-sync.yml` 按上游发布节奏轮询 release tag�
 
 ## 开发与发布流程
 
-1. 需求写入 `docs/requirements/`（模板见 `docs/requirements/TEMPLATE.md`）。
-2. agent 建分支开发，开 PR；CI 自动验证（类型、测试、e2e、Python），preview worker 自动部署。
-3. 用户在 preview 页面验收后合并到 main。
-4. 合并到 main 后 deploy 工作流自动发布到 f1-box.com（预览验收已在合并前完成）。
-5. data-sync 工作流按 f1db 发布节奏轮询 release tag（周日晚到周二密集、其余每天兜底），有变化时全量导入 D1，也可手动触发。
+1. agent 从 main 建分支开发，开 PR；CI 自动验证（类型、单测、构建、e2e），preview worker 自动部署。
+2. 用户在 preview 页面验收后合并到 main。
+3. 合并到 main 后 deploy 工作流自动发布到 f1-box.com（预览验收已在合并前完成）。
+4. data-sync 工作流按 f1db 发布节奏轮询 release tag，有变化时全量导入 D1，也可手动触发。
 
 回滚：数据问题重跑 data-sync 或恢复旧 D1 导入；代码问题重新部署旧提交。
-
-## 当前状态
-
-- 已上线：站点（f1-box.com）、真实 2026 赛季数据（R2）、CI、定时采集、preview/生产部署流程、Tailwind v4 样式系统与深/亮双主题。
-- 待办：Biome lint/format 进 CI、部署切 Workers Versions（秒级回滚）、2025 dev fixture、Server Islands、Cloudflare 告警策略、真实比赛图片接入。

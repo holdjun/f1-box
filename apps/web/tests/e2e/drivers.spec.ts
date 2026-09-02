@@ -65,7 +65,7 @@ test("year drivers routes are retired @desktop", async ({ page }) => {
 test("racing page navigation points to the global drivers catalog @desktop", async ({
   page,
 }) => {
-  await page.goto("/2026/racing");
+  await page.goto("/racing/2026");
   await expect(page.getByRole("link", { name: "Drivers" })).toHaveAttribute(
     "href",
     "/drivers",

@@ -266,21 +266,9 @@ test("@desktop direct tab url still opens at page top", async ({ page }) => {
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
 });
 
-test.describe("legacy results redirects", () => {
-  test("@desktop old results paths redirect to new", async ({ page }) => {
-    await page.goto("/2026/results/races");
-    await page.waitForURL(/\/results\/2026\/races$/);
-    await page.goto("/2026/results");
-    await page.waitForURL(/\/results\/2026\/races$/);
-    await page.goto("/2026/results/drivers");
-    await page.waitForURL(/\/results\/2026\/drivers$/);
-    await page.goto("/2026/results/teams");
-    await page.waitForURL(/\/results\/2026\/teams$/);
-  });
-
-  test("@desktop old race detail path is gone", async ({ page }) => {
-    expect(
-      (await page.goto("/2026/racing/10-belgian-grand-prix"))?.status(),
-    ).toBe(404);
-  });
+test("@desktop retired flat race paths return 404", async ({ page }) => {
+  expect((await page.goto("/2026/results/races"))?.status()).toBe(404);
+  expect(
+    (await page.goto("/2026/racing/10-belgian-grand-prix"))?.status(),
+  ).toBe(404);
 });
