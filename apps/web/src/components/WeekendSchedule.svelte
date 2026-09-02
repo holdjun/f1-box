@@ -17,6 +17,10 @@
     hydrated = true;
   });
 
+  // 无时区映射（f1db 新增赛道尚未补进 circuit-timezones.json）时只能给 UTC，
+  // 标签必须跟着改——把 UTC 时刻标成 Track time 比不显示更糟
+  const trackLabel = $derived(timeZone === null ? "UTC" : "Track time");
+
   const trackTime = (session: RaceSession): string =>
     timeZone === null
       ? formatUtcDateTime(session.startsAtUtc)
@@ -57,7 +61,7 @@
             >{myTime(session)}</time>
           </div>
           <div>
-            <span class="block text-[0.68rem] uppercase tracking-[0.08em] text-ink-muted">Track time</span>
+            <span class="block text-[0.68rem] uppercase tracking-[0.08em] text-ink-muted">{trackLabel}</span>
             <time
               class="block text-[0.76rem] tabular-nums text-ink-strong"
               datetime={session.startsAtUtc}

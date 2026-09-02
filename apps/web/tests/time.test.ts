@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
 
 import {
-  formatLocalDate,
   formatLocalDateTime,
   formatRaceDate,
   formatUtcDateTime,
@@ -20,12 +19,6 @@ describe("time formatting", () => {
     expect(
       formatLocalDateTime("2026-03-08T04:00:00Z", "Asia/Shanghai", "en-GB"),
     ).toBe("08 Mar 2026, 12:00 GMT+8");
-  });
-
-  test("formats a date in an explicit local time zone", () => {
-    expect(formatLocalDate("2026-11-22T04:00:00Z", "America/Los_Angeles")).toBe(
-      "21 Nov 2026",
-    );
   });
 
   // 跨日夜赛：发车时刻 UTC 04:00，在负偏移时区落到前一天
@@ -74,6 +67,28 @@ describe("time formatting", () => {
     expect(
       formatWeekendRange("2026-06-26T12:00:00Z", "2026-07-05T14:00:00Z"),
     ).toBe("26 JUN - 05 JUL");
+  });
+
+  // 与 hero 日期同口径：负偏移夜赛的周末范围也按赛道当地日算
+  test("formats a weekend range in the circuit time zone", () => {
+    expect(
+      formatWeekendRange(
+        "2026-11-20T02:30:00Z",
+        "2026-11-22T04:00:00Z",
+        "America/Los_Angeles",
+      ),
+    ).toBe("19-21 NOV");
+  });
+
+  // 占位 00:00（session 无公布时间）不做换算，否则负偏移时区退一天
+  test("keeps placeholder weekend starts in UTC", () => {
+    expect(
+      formatWeekendRange(
+        "1995-03-26T00:00:00Z",
+        "1995-03-26T00:00:00Z",
+        "America/New_York",
+      ),
+    ).toBe("26 MAR");
   });
 
   test("rejects an invalid range timestamp", () => {

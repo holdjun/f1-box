@@ -318,7 +318,8 @@ JOIN country cc ON gp.country_id = cc.id
 WHERE ra.year = ?1 AND ra.grand_prix_id = ?2`;
 
 // 赛道维度静态字段：total_races_held 为累计办赛场次，first_gp 为历史首办年
-const circuitInfoSql = `SELECT c.total_races_held,
+// export 供索引计划测试：相关子查询按 circuit_id 取首次举办年份
+export const circuitInfoSql = `SELECT c.total_races_held,
   (SELECT MIN(ra2.year) FROM race ra2 WHERE ra2.circuit_id = c.id) AS first_gp
 FROM circuit c
 WHERE c.id = (SELECT ra.circuit_id FROM race ra WHERE ra.year = ?1 AND ra.grand_prix_id = ?2)`;
@@ -545,7 +546,12 @@ function mapRecordLapRow(value: unknown): {
 }
 
 function titleCase(value: string): string {
-  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+  // f1db 的枚举是 SCREAMING_SNAKE（CLOCKWISE / ANTI_CLOCKWISE），下划线要还原成连字符
+  const words = value.toLowerCase().split("_");
+  return [
+    words[0].charAt(0).toUpperCase() + words[0].slice(1),
+    ...words.slice(1),
+  ].join("-");
 }
 
 // 各 tab 行共有的车手/车队字段

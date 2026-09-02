@@ -4,17 +4,28 @@ export function formatUtcDateTime(value: Timestamp, locale = "en-GB"): string {
   return formatDateTime(value, locale, "UTC");
 }
 
-export function formatUtcDate(value: Timestamp, locale = "en-GB"): string {
+function formatUtcDate(value: Timestamp, locale = "en-GB"): string {
   return formatDate(value, locale, "UTC");
 }
 
 // 按指定时区渲染某日（与 formatUtcDate 同格式，用于赛道当地比赛日）
-export function formatLocalDate(
+function formatLocalDate(
   value: Timestamp,
   timeZone: string,
   locale = "en-GB",
 ): string {
   return formatDate(value, locale, timeZone);
+}
+
+// buildSessions 对未公布时间的 session 兜底 00:00，产生 T00:00:00Z 占位值。
+// 该字符串本身就是精确判据（F1 没有 00:00 UTC 开赛的时段），占位时刻绝不做时区换算：
+// 负偏移时区会把它推到前一天。
+const PLACEHOLDER_START = "T00:00:00Z";
+
+function displayZone(startsAtUtc: string, timeZone: string | null): string {
+  return timeZone !== null && !startsAtUtc.endsWith(PLACEHOLDER_START)
+    ? timeZone
+    : "UTC";
 }
 
 // 副行日期渲染的唯一入口：仅当发车时刻与赛道时区均存在时按赛道时区渲染当地比赛日，
@@ -48,38 +59,48 @@ function formatDate(
   }).format(date);
 }
 
-// 周末日期范围（首练 → 正赛）：同月缩成 "06-08 MAR"，跨月 "27 FEB - 01 MAR"
+// 周末日期范围（首练 → 正赛）：同月缩成 "06-08 MAR"，跨月 "27 FEB - 01 MAR"。
+// 日期口径与 hero 一致——有 timeZone 时按赛道当地日算，负偏移夜赛才不会比详情页多一天。
 export function formatWeekendRange(
   firstStartsAtUtc: string,
   lastStartsAtUtc: string,
+  timeZone: string | null = null,
   locale = "en-GB",
 ): string {
-  const formatPart = (value: string, part: "day" | "month") => {
-    const date = new Date(value);
-    if (!Number.isFinite(date.getTime())) {
-      throw new TypeError(`Invalid timestamp: ${String(value)}`);
-    }
-    return new Intl.DateTimeFormat(locale, {
-      [part]: part === "day" ? "2-digit" : "short",
-      timeZone: "UTC",
-    }).format(date);
-  };
-  const first = new Date(firstStartsAtUtc);
-  const last = new Date(lastStartsAtUtc);
-  // 老赛季无练习赛数据：首尾同日的周末只显示单日，不重复 "06-06 MAR"；
-  // getTime() 对 invalid 输入返回 NaN（NaN===NaN 为 false），诊断仍由 formatPart 抛出
-  const sameDay =
-    first.getTime() === last.getTime() && Number.isFinite(first.getTime());
-  const sameMonth =
-    first.getUTCFullYear() === last.getUTCFullYear() &&
-    first.getUTCMonth() === last.getUTCMonth();
+  const first = zonedParts(firstStartsAtUtc, timeZone, locale);
+  const last = zonedParts(lastStartsAtUtc, timeZone, locale);
+  const sameMonth = first.month === last.month && first.year === last.year;
   // 老赛季无练习赛数据：首尾同日的周末只显示单日，不重复 "06-06 MAR"
-  if (sameDay) {
-    return `${formatPart(firstStartsAtUtc, "day")} ${formatPart(firstStartsAtUtc, "month").toUpperCase()}`;
+  if (sameMonth && first.day === last.day) {
+    return `${first.day} ${first.month}`;
   }
   return sameMonth
-    ? `${formatPart(firstStartsAtUtc, "day")}-${formatPart(lastStartsAtUtc, "day")} ${formatPart(lastStartsAtUtc, "month").toUpperCase()}`
-    : `${formatPart(firstStartsAtUtc, "day")} ${formatPart(firstStartsAtUtc, "month").toUpperCase()} - ${formatPart(lastStartsAtUtc, "day")} ${formatPart(lastStartsAtUtc, "month").toUpperCase()}`;
+    ? `${first.day}-${last.day} ${last.month}`
+    : `${first.day} ${first.month} - ${last.day} ${last.month}`;
+}
+
+function zonedParts(
+  startsAtUtc: string,
+  timeZone: string | null,
+  locale: string,
+): { day: string; month: string; year: string } {
+  const date = new Date(startsAtUtc);
+  if (!Number.isFinite(date.getTime())) {
+    throw new TypeError(`Invalid timestamp: ${String(startsAtUtc)}`);
+  }
+  const parts = new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: displayZone(startsAtUtc, timeZone),
+  }).formatToParts(date);
+  const pick = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return {
+    day: pick("day"),
+    month: pick("month").toUpperCase(),
+    year: pick("year"),
+  };
 }
 
 // 生日等"某日"展示：长月份名、无时间，UTC 防时区偏移

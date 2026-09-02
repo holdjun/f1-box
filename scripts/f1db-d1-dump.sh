@@ -3,7 +3,7 @@
 # 用法: scripts/f1db-d1-dump.sh [输出目录]（默认 /tmp/f1db-d1）
 # 00-drop 反序清库后逐表重建（外键约束下无法逐表单独 drop），
 # 整库重导窗口存在，靠 data-sync 的 release tag 门禁收敛到每周一次；
-# race_data 的复合索引统一放 f1db-d1-indexes.sql，缺了按 type 分区的查询全表扫。
+# 索引统一放 f1db-d1-indexes.sql，附在 race_data（最后一张相关表）的 dump 之后。
 set -euo pipefail
 
 OUT="${1:-/tmp/f1db-d1}"
@@ -40,7 +40,7 @@ for name in "${TABLES[@]}"; do
   sqlite3 "$WORK/f1db.db" ".dump $name" \
     | grep -Ev '^(PRAGMA|BEGIN( TRANSACTION)?|COMMIT);$' \
     > "$OUT/$(printf '%02d' "$idx")-$name.sql"
-  # f1db 未给 race_data 建高频过滤列的复合索引，车队页/车手页/比赛页查询全靠它们
+  # f1db 只建主键/唯一约束索引，高频过滤列（constructor_id、driver_id、circuit_id）没有
   if [ "$name" = "race_data" ]; then
     cat "$(dirname "$0")/f1db-d1-indexes.sql" >> "$OUT/$(printf '%02d' "$idx")-$name.sql"
   fi

@@ -533,6 +533,19 @@ describe("createRaceResultsRepository getRacePage", () => {
     });
   });
 
+  it("renders the anti-clockwise direction without the raw underscore", async () => {
+    const db = fakeDbBySql(
+      tabFragments({
+        circuit_full_name: [{ ...metaRow, direction: "ANTI_CLOCKWISE" }],
+      }),
+    );
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2026,
+      "australia",
+    );
+    expect(page?.meta.direction).toBe("Anti-clockwise");
+  });
+
   it("degrades to race-only sessions when meta lacks session columns", async () => {
     // raceMetaSql 漏选 session 列时（生产 D1 曾犯过），Weekend schedule 只应有 race 一项而非崩溃
     const db = fakeDbBySql(

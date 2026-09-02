@@ -173,25 +173,27 @@ test.describe("standings", () => {
   });
 });
 
-test.describe("session dual times", () => {
-  // 固定浏览器时区为非 UTC，验证 My time 随浏览器时区变化、Track time（赛道当地）恒定
-  for (const tz of ["Asia/Tokyo", "America/New_York"]) {
+// test.use 作用于所在 describe 作用域而非单个 test：两个时区必须各自成组，
+// 否则循环里的第二次调用会覆盖第一次，两个用例都跑同一个时区
+for (const { tz, myTime } of [
+  { tz: "Asia/Tokyo", myTime: "06 Mar 2026, 10:30 GMT+9" },
+  { tz: "America/New_York", myTime: "05 Mar 2026, 20:30 GMT-5" },
+]) {
+  test.describe(`session dual times (${tz})`, () => {
     test.use({ timezoneId: tz });
-    test(`@desktop ${tz} shows my time in browser tz and track time in circuit tz`, async ({
+    test(`@desktop shows my time in ${tz} and track time in the circuit tz`, async ({
       page,
     }) => {
       await page.goto("/results/2026/races/australia/race-result");
-      const myTime = page.locator("[data-my-time]").first();
-      const trackTime = page.locator("[data-track-time]").first();
-      await expect(myTime).toBeVisible();
-      await expect(trackTime).toBeVisible();
-      // Track time 按赛道当地（Melbourne AEDT UTC+11）渲染，SSR 即正确
-      await expect(trackTime).toContainText("GMT+11");
-      // My time 水合后转浏览器时区，不再是 SSR 阶段输出的 UTC
-      await expect(myTime).not.toContainText("04:00 UTC");
+      // Track time 按赛道当地（Melbourne AEDT UTC+11）渲染，SSR 即正确、与浏览器时区无关
+      await expect(page.locator("[data-track-time]").first()).toHaveText(
+        "06 Mar 2026, 12:30 GMT+11",
+      );
+      // My time 水合后转浏览器时区；两个时区的期望值不同，任一时区没生效都会失败
+      await expect(page.locator("[data-my-time]").first()).toHaveText(myTime);
     });
-  }
-});
+  });
+}
 
 test("@mobile results pages have no page overflow", async ({ page }) => {
   for (const path of [
