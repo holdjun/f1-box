@@ -5,13 +5,6 @@ export function alpha2Flag(alpha2: string): string {
   );
 }
 
-// 无车号/无 logo 时的两字母回落标识：首尾 token 首字母
-export function monogram(name: string): string {
-  const tokens = name.split(" ").filter((token) => token.length > 0);
-  if (tokens.length < 2) return name.slice(0, 2).toUpperCase();
-  return `${tokens[0][0]}${tokens[tokens.length - 1][0]}`.toUpperCase();
-}
-
 // 队色作 monogram 背景时，文字按背景亮度取纯黑/纯白，
 // 保证小字号文本对比度 ≥ 4.5:1（主题色固定时部分队色两方向都不达标）
 export function monogramStyle(

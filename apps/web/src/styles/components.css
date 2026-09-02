@@ -247,6 +247,12 @@
     border-radius: 6px;
     background: var(--surface-raised);
   }
+  .circuit-map-panel {
+    padding: 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface-raised);
+  }
   .info-panel h2 {
     margin: 0 0 0.9rem;
     font-family: var(--font-display);
@@ -326,11 +332,6 @@
     padding: 0.15rem 0.35rem;
     border-radius: 0.25rem;
     background: var(--ink);
-  }
-  .vendor-cell small {
-    color: var(--ink-muted);
-    font-size: 0.65rem;
-    letter-spacing: 0.08em;
   }
   @media (width < 40rem) {
     .vendor-cell--driver .vendor-cell__name {

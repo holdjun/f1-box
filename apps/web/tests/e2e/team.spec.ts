@@ -59,16 +59,14 @@ test("substitute drivers appear in the matrix @desktop", async ({ page }) => {
   await expect(block2024).toContainText("Oliver Bearman");
 });
 
-test("round headers link to future circuit pages @desktop", async ({
+test("round headers link to the season race page @desktop", async ({
   page,
 }) => {
   await page.goto("/teams/ferrari");
-
-  const link = page.locator('a[href="/circuits/jeddah"]');
+  const link = page.locator(
+    'a[href="/results/2024/races/saudi-arabia/race-result"]',
+  );
   await expect(link.first()).toBeVisible();
-  // 赛道页尚未实现，先 404
-  const response = await page.goto("/circuits/jeddah");
-  expect(response?.status()).toBe(404);
 });
 
 test("drivers link to their global pages @desktop", async ({ page }) => {

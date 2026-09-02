@@ -1,5 +1,6 @@
 {
  "id": "max-verstappen",
+ "code": "VER",
  "name": "Max Verstappen",
  "fullName": "Max Emilian Verstappen",
  "countryName": "Netherlands",
@@ -67,117 +68,140 @@
     {
      "code": "AUS",
      "name": "Australia",
-     "circuitId": "melbourne"
+     "circuitId": "melbourne",
+     "slug": "australia"
     },
     {
      "code": "CHN",
      "name": "China",
-     "circuitId": "shanghai"
+     "circuitId": "shanghai",
+     "slug": "china"
     },
     {
      "code": "JPN",
      "name": "Japan",
-     "circuitId": "suzuka"
+     "circuitId": "suzuka",
+     "slug": "japan"
     },
     {
      "code": "MIA",
      "name": "Miami",
-     "circuitId": "miami"
+     "circuitId": "miami",
+     "slug": "miami"
     },
     {
      "code": "CAN",
      "name": "Canada",
-     "circuitId": "montreal"
+     "circuitId": "montreal",
+     "slug": "canada"
     },
     {
      "code": "MCO",
      "name": "Monaco",
-     "circuitId": "monaco"
+     "circuitId": "monaco",
+     "slug": "monaco"
     },
     {
      "code": "BAR",
      "name": "Barcelona-Catalunya",
-     "circuitId": "catalunya"
+     "circuitId": "catalunya",
+     "slug": "barcelona-catalunya"
     },
     {
      "code": "AUT",
      "name": "Austria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "austria"
     },
     {
      "code": "GBR",
      "name": "Great Britain",
-     "circuitId": "silverstone"
+     "circuitId": "silverstone",
+     "slug": "great-britain"
     },
     {
      "code": "BEL",
      "name": "Belgium",
-     "circuitId": "spa-francorchamps"
+     "circuitId": "spa-francorchamps",
+     "slug": "belgium"
     },
     {
      "code": "HUN",
      "name": "Hungary",
-     "circuitId": "hungaroring"
+     "circuitId": "hungaroring",
+     "slug": "hungary"
     },
     {
      "code": "NLD",
      "name": "Netherlands",
-     "circuitId": "zandvoort"
+     "circuitId": "zandvoort",
+     "slug": "netherlands"
     },
     {
      "code": "ITA",
      "name": "Italy",
-     "circuitId": "monza"
+     "circuitId": "monza",
+     "slug": "italy"
     },
     {
      "code": "ESP",
      "name": "Spain",
-     "circuitId": "madring"
+     "circuitId": "madring",
+     "slug": "spain"
     },
     {
      "code": "AZE",
      "name": "Azerbaijan",
-     "circuitId": "baku"
+     "circuitId": "baku",
+     "slug": "azerbaijan"
     },
     {
      "code": "BHR",
      "name": "Bahrain",
-     "circuitId": "sepang"
+     "circuitId": "sepang",
+     "slug": "bahrain"
     },
     {
      "code": "SGP",
      "name": "Singapore",
-     "circuitId": "marina-bay"
+     "circuitId": "marina-bay",
+     "slug": "singapore"
     },
     {
      "code": "USA",
      "name": "United States",
-     "circuitId": "austin"
+     "circuitId": "austin",
+     "slug": "united-states"
     },
     {
      "code": "MEX",
      "name": "Mexico",
-     "circuitId": "mexico-city"
+     "circuitId": "mexico-city",
+     "slug": "mexico"
     },
     {
      "code": "SAO",
      "name": "S\u00e3o Paulo",
-     "circuitId": "interlagos"
+     "circuitId": "interlagos",
+     "slug": "sao-paulo"
     },
     {
      "code": "LAS",
      "name": "Las Vegas",
-     "circuitId": "las-vegas"
+     "circuitId": "las-vegas",
+     "slug": "las-vegas"
     },
     {
      "code": "QAT",
      "name": "Qatar",
-     "circuitId": "lusail"
+     "circuitId": "lusail",
+     "slug": "qatar"
     },
     {
      "code": "ABD",
      "name": "Abu Dhabi",
-     "circuitId": "yas-marina"
+     "circuitId": "yas-marina",
+     "slug": "abu-dhabi"
     }
    ],
    "teams": [
@@ -384,122 +408,146 @@
     {
      "code": "AUS",
      "name": "Australia",
-     "circuitId": "melbourne"
+     "circuitId": "melbourne",
+     "slug": "australia"
     },
     {
      "code": "CHN",
      "name": "China",
-     "circuitId": "shanghai"
+     "circuitId": "shanghai",
+     "slug": "china"
     },
     {
      "code": "JPN",
      "name": "Japan",
-     "circuitId": "suzuka"
+     "circuitId": "suzuka",
+     "slug": "japan"
     },
     {
      "code": "BHR",
      "name": "Bahrain",
-     "circuitId": "bahrain"
+     "circuitId": "bahrain",
+     "slug": "bahrain"
     },
     {
      "code": "SAU",
      "name": "Saudi Arabia",
-     "circuitId": "jeddah"
+     "circuitId": "jeddah",
+     "slug": "saudi-arabia"
     },
     {
      "code": "MIA",
      "name": "Miami",
-     "circuitId": "miami"
+     "circuitId": "miami",
+     "slug": "miami"
     },
     {
      "code": "EMR",
      "name": "Emilia Romagna",
-     "circuitId": "imola"
+     "circuitId": "imola",
+     "slug": "emilia-romagna"
     },
     {
      "code": "MCO",
      "name": "Monaco",
-     "circuitId": "monaco"
+     "circuitId": "monaco",
+     "slug": "monaco"
     },
     {
      "code": "ESP",
      "name": "Spain",
-     "circuitId": "catalunya"
+     "circuitId": "catalunya",
+     "slug": "spain"
     },
     {
      "code": "CAN",
      "name": "Canada",
-     "circuitId": "montreal"
+     "circuitId": "montreal",
+     "slug": "canada"
     },
     {
      "code": "AUT",
      "name": "Austria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "austria"
     },
     {
      "code": "GBR",
      "name": "Great Britain",
-     "circuitId": "silverstone"
+     "circuitId": "silverstone",
+     "slug": "great-britain"
     },
     {
      "code": "BEL",
      "name": "Belgium",
-     "circuitId": "spa-francorchamps"
+     "circuitId": "spa-francorchamps",
+     "slug": "belgium"
     },
     {
      "code": "HUN",
      "name": "Hungary",
-     "circuitId": "hungaroring"
+     "circuitId": "hungaroring",
+     "slug": "hungary"
     },
     {
      "code": "NLD",
      "name": "Netherlands",
-     "circuitId": "zandvoort"
+     "circuitId": "zandvoort",
+     "slug": "netherlands"
     },
     {
      "code": "ITA",
      "name": "Italy",
-     "circuitId": "monza"
+     "circuitId": "monza",
+     "slug": "italy"
     },
     {
      "code": "AZE",
      "name": "Azerbaijan",
-     "circuitId": "baku"
+     "circuitId": "baku",
+     "slug": "azerbaijan"
     },
     {
      "code": "SGP",
      "name": "Singapore",
-     "circuitId": "marina-bay"
+     "circuitId": "marina-bay",
+     "slug": "singapore"
     },
     {
      "code": "USA",
      "name": "United States",
-     "circuitId": "austin"
+     "circuitId": "austin",
+     "slug": "united-states"
     },
     {
      "code": "MEX",
      "name": "Mexico",
-     "circuitId": "mexico-city"
+     "circuitId": "mexico-city",
+     "slug": "mexico"
     },
     {
      "code": "SAO",
      "name": "S\u00e3o Paulo",
-     "circuitId": "interlagos"
+     "circuitId": "interlagos",
+     "slug": "sao-paulo"
     },
     {
      "code": "LAS",
      "name": "Las Vegas",
-     "circuitId": "las-vegas"
+     "circuitId": "las-vegas",
+     "slug": "las-vegas"
     },
     {
      "code": "QAT",
      "name": "Qatar",
-     "circuitId": "lusail"
+     "circuitId": "lusail",
+     "slug": "qatar"
     },
     {
      "code": "ABD",
      "name": "Abu Dhabi",
-     "circuitId": "yas-marina"
+     "circuitId": "yas-marina",
+     "slug": "abu-dhabi"
     }
    ],
    "teams": [
@@ -897,122 +945,146 @@
     {
      "code": "BHR",
      "name": "Bahrain",
-     "circuitId": "bahrain"
+     "circuitId": "bahrain",
+     "slug": "bahrain"
     },
     {
      "code": "SAU",
      "name": "Saudi Arabia",
-     "circuitId": "jeddah"
+     "circuitId": "jeddah",
+     "slug": "saudi-arabia"
     },
     {
      "code": "AUS",
      "name": "Australia",
-     "circuitId": "melbourne"
+     "circuitId": "melbourne",
+     "slug": "australia"
     },
     {
      "code": "JPN",
      "name": "Japan",
-     "circuitId": "suzuka"
+     "circuitId": "suzuka",
+     "slug": "japan"
     },
     {
      "code": "CHN",
      "name": "China",
-     "circuitId": "shanghai"
+     "circuitId": "shanghai",
+     "slug": "china"
     },
     {
      "code": "MIA",
      "name": "Miami",
-     "circuitId": "miami"
+     "circuitId": "miami",
+     "slug": "miami"
     },
     {
      "code": "EMR",
      "name": "Emilia Romagna",
-     "circuitId": "imola"
+     "circuitId": "imola",
+     "slug": "emilia-romagna"
     },
     {
      "code": "MCO",
      "name": "Monaco",
-     "circuitId": "monaco"
+     "circuitId": "monaco",
+     "slug": "monaco"
     },
     {
      "code": "CAN",
      "name": "Canada",
-     "circuitId": "montreal"
+     "circuitId": "montreal",
+     "slug": "canada"
     },
     {
      "code": "ESP",
      "name": "Spain",
-     "circuitId": "catalunya"
+     "circuitId": "catalunya",
+     "slug": "spain"
     },
     {
      "code": "AUT",
      "name": "Austria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "austria"
     },
     {
      "code": "GBR",
      "name": "Great Britain",
-     "circuitId": "silverstone"
+     "circuitId": "silverstone",
+     "slug": "great-britain"
     },
     {
      "code": "HUN",
      "name": "Hungary",
-     "circuitId": "hungaroring"
+     "circuitId": "hungaroring",
+     "slug": "hungary"
     },
     {
      "code": "BEL",
      "name": "Belgium",
-     "circuitId": "spa-francorchamps"
+     "circuitId": "spa-francorchamps",
+     "slug": "belgium"
     },
     {
      "code": "NLD",
      "name": "Netherlands",
-     "circuitId": "zandvoort"
+     "circuitId": "zandvoort",
+     "slug": "netherlands"
     },
     {
      "code": "ITA",
      "name": "Italy",
-     "circuitId": "monza"
+     "circuitId": "monza",
+     "slug": "italy"
     },
     {
      "code": "AZE",
      "name": "Azerbaijan",
-     "circuitId": "baku"
+     "circuitId": "baku",
+     "slug": "azerbaijan"
     },
     {
      "code": "SGP",
      "name": "Singapore",
-     "circuitId": "marina-bay"
+     "circuitId": "marina-bay",
+     "slug": "singapore"
     },
     {
      "code": "USA",
      "name": "United States",
-     "circuitId": "austin"
+     "circuitId": "austin",
+     "slug": "united-states"
     },
     {
      "code": "MEX",
      "name": "Mexico",
-     "circuitId": "mexico-city"
+     "circuitId": "mexico-city",
+     "slug": "mexico"
     },
     {
      "code": "SAO",
      "name": "S\u00e3o Paulo",
-     "circuitId": "interlagos"
+     "circuitId": "interlagos",
+     "slug": "sao-paulo"
     },
     {
      "code": "LAS",
      "name": "Las Vegas",
-     "circuitId": "las-vegas"
+     "circuitId": "las-vegas",
+     "slug": "las-vegas"
     },
     {
      "code": "QAT",
      "name": "Qatar",
-     "circuitId": "lusail"
+     "circuitId": "lusail",
+     "slug": "qatar"
     },
     {
      "code": "ABD",
      "name": "Abu Dhabi",
-     "circuitId": "yas-marina"
+     "circuitId": "yas-marina",
+     "slug": "abu-dhabi"
     }
    ],
    "teams": [
@@ -1379,112 +1451,134 @@
     {
      "code": "BHR",
      "name": "Bahrain",
-     "circuitId": "bahrain"
+     "circuitId": "bahrain",
+     "slug": "bahrain"
     },
     {
      "code": "SAU",
      "name": "Saudi Arabia",
-     "circuitId": "jeddah"
+     "circuitId": "jeddah",
+     "slug": "saudi-arabia"
     },
     {
      "code": "AUS",
      "name": "Australia",
-     "circuitId": "melbourne"
+     "circuitId": "melbourne",
+     "slug": "australia"
     },
     {
      "code": "AZE",
      "name": "Azerbaijan",
-     "circuitId": "baku"
+     "circuitId": "baku",
+     "slug": "azerbaijan"
     },
     {
      "code": "MIA",
      "name": "Miami",
-     "circuitId": "miami"
+     "circuitId": "miami",
+     "slug": "miami"
     },
     {
      "code": "MCO",
      "name": "Monaco",
-     "circuitId": "monaco"
+     "circuitId": "monaco",
+     "slug": "monaco"
     },
     {
      "code": "ESP",
      "name": "Spain",
-     "circuitId": "catalunya"
+     "circuitId": "catalunya",
+     "slug": "spain"
     },
     {
      "code": "CAN",
      "name": "Canada",
-     "circuitId": "montreal"
+     "circuitId": "montreal",
+     "slug": "canada"
     },
     {
      "code": "AUT",
      "name": "Austria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "austria"
     },
     {
      "code": "GBR",
      "name": "Great Britain",
-     "circuitId": "silverstone"
+     "circuitId": "silverstone",
+     "slug": "great-britain"
     },
     {
      "code": "HUN",
      "name": "Hungary",
-     "circuitId": "hungaroring"
+     "circuitId": "hungaroring",
+     "slug": "hungary"
     },
     {
      "code": "BEL",
      "name": "Belgium",
-     "circuitId": "spa-francorchamps"
+     "circuitId": "spa-francorchamps",
+     "slug": "belgium"
     },
     {
      "code": "NLD",
      "name": "Netherlands",
-     "circuitId": "zandvoort"
+     "circuitId": "zandvoort",
+     "slug": "netherlands"
     },
     {
      "code": "ITA",
      "name": "Italy",
-     "circuitId": "monza"
+     "circuitId": "monza",
+     "slug": "italy"
     },
     {
      "code": "SGP",
      "name": "Singapore",
-     "circuitId": "marina-bay"
+     "circuitId": "marina-bay",
+     "slug": "singapore"
     },
     {
      "code": "JPN",
      "name": "Japan",
-     "circuitId": "suzuka"
+     "circuitId": "suzuka",
+     "slug": "japan"
     },
     {
      "code": "QAT",
      "name": "Qatar",
-     "circuitId": "lusail"
+     "circuitId": "lusail",
+     "slug": "qatar"
     },
     {
      "code": "USA",
      "name": "United States",
-     "circuitId": "austin"
+     "circuitId": "austin",
+     "slug": "united-states"
     },
     {
      "code": "MEX",
      "name": "Mexico",
-     "circuitId": "mexico-city"
+     "circuitId": "mexico-city",
+     "slug": "mexico"
     },
     {
      "code": "SAO",
      "name": "S\u00e3o Paulo",
-     "circuitId": "interlagos"
+     "circuitId": "interlagos",
+     "slug": "sao-paulo"
     },
     {
      "code": "LAS",
      "name": "Las Vegas",
-     "circuitId": "las-vegas"
+     "circuitId": "las-vegas",
+     "slug": "las-vegas"
     },
     {
      "code": "ABD",
      "name": "Abu Dhabi",
-     "circuitId": "yas-marina"
+     "circuitId": "yas-marina",
+     "slug": "abu-dhabi"
     }
    ],
    "teams": [
@@ -1823,112 +1917,134 @@
     {
      "code": "BHR",
      "name": "Bahrain",
-     "circuitId": "bahrain"
+     "circuitId": "bahrain",
+     "slug": "bahrain"
     },
     {
      "code": "SAU",
      "name": "Saudi Arabia",
-     "circuitId": "jeddah"
+     "circuitId": "jeddah",
+     "slug": "saudi-arabia"
     },
     {
      "code": "AUS",
      "name": "Australia",
-     "circuitId": "melbourne"
+     "circuitId": "melbourne",
+     "slug": "australia"
     },
     {
      "code": "EMR",
      "name": "Emilia Romagna",
-     "circuitId": "imola"
+     "circuitId": "imola",
+     "slug": "emilia-romagna"
     },
     {
      "code": "MIA",
      "name": "Miami",
-     "circuitId": "miami"
+     "circuitId": "miami",
+     "slug": "miami"
     },
     {
      "code": "ESP",
      "name": "Spain",
-     "circuitId": "catalunya"
+     "circuitId": "catalunya",
+     "slug": "spain"
     },
     {
      "code": "MCO",
      "name": "Monaco",
-     "circuitId": "monaco"
+     "circuitId": "monaco",
+     "slug": "monaco"
     },
     {
      "code": "AZE",
      "name": "Azerbaijan",
-     "circuitId": "baku"
+     "circuitId": "baku",
+     "slug": "azerbaijan"
     },
     {
      "code": "CAN",
      "name": "Canada",
-     "circuitId": "montreal"
+     "circuitId": "montreal",
+     "slug": "canada"
     },
     {
      "code": "GBR",
      "name": "Great Britain",
-     "circuitId": "silverstone"
+     "circuitId": "silverstone",
+     "slug": "great-britain"
     },
     {
      "code": "AUT",
      "name": "Austria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "austria"
     },
     {
      "code": "FRA",
      "name": "France",
-     "circuitId": "paul-ricard"
+     "circuitId": "paul-ricard",
+     "slug": "france"
     },
     {
      "code": "HUN",
      "name": "Hungary",
-     "circuitId": "hungaroring"
+     "circuitId": "hungaroring",
+     "slug": "hungary"
     },
     {
      "code": "BEL",
      "name": "Belgium",
-     "circuitId": "spa-francorchamps"
+     "circuitId": "spa-francorchamps",
+     "slug": "belgium"
     },
     {
      "code": "NLD",
      "name": "Netherlands",
-     "circuitId": "zandvoort"
+     "circuitId": "zandvoort",
+     "slug": "netherlands"
     },
     {
      "code": "ITA",
      "name": "Italy",
-     "circuitId": "monza"
+     "circuitId": "monza",
+     "slug": "italy"
     },
     {
      "code": "SGP",
      "name": "Singapore",
-     "circuitId": "marina-bay"
+     "circuitId": "marina-bay",
+     "slug": "singapore"
     },
     {
      "code": "JPN",
      "name": "Japan",
-     "circuitId": "suzuka"
+     "circuitId": "suzuka",
+     "slug": "japan"
     },
     {
      "code": "USA",
      "name": "United States",
-     "circuitId": "austin"
+     "circuitId": "austin",
+     "slug": "united-states"
     },
     {
      "code": "MEX",
      "name": "Mexico",
-     "circuitId": "mexico-city"
+     "circuitId": "mexico-city",
+     "slug": "mexico"
     },
     {
      "code": "SAO",
      "name": "S\u00e3o Paulo",
-     "circuitId": "interlagos"
+     "circuitId": "interlagos",
+     "slug": "sao-paulo"
     },
     {
      "code": "ABD",
      "name": "Abu Dhabi",
-     "circuitId": "yas-marina"
+     "circuitId": "yas-marina",
+     "slug": "abu-dhabi"
     }
    ],
    "teams": [
@@ -2267,112 +2383,134 @@
     {
      "code": "BHR",
      "name": "Bahrain",
-     "circuitId": "bahrain"
+     "circuitId": "bahrain",
+     "slug": "bahrain"
     },
     {
      "code": "EMR",
      "name": "Emilia Romagna",
-     "circuitId": "imola"
+     "circuitId": "imola",
+     "slug": "emilia-romagna"
     },
     {
      "code": "PRT",
      "name": "Portugal",
-     "circuitId": "portimao"
+     "circuitId": "portimao",
+     "slug": "portugal"
     },
     {
      "code": "ESP",
      "name": "Spain",
-     "circuitId": "catalunya"
+     "circuitId": "catalunya",
+     "slug": "spain"
     },
     {
      "code": "MCO",
      "name": "Monaco",
-     "circuitId": "monaco"
+     "circuitId": "monaco",
+     "slug": "monaco"
     },
     {
      "code": "AZE",
      "name": "Azerbaijan",
-     "circuitId": "baku"
+     "circuitId": "baku",
+     "slug": "azerbaijan"
     },
     {
      "code": "FRA",
      "name": "France",
-     "circuitId": "paul-ricard"
+     "circuitId": "paul-ricard",
+     "slug": "france"
     },
     {
      "code": "STE",
      "name": "Styria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "styria"
     },
     {
      "code": "AUT",
      "name": "Austria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "austria"
     },
     {
      "code": "GBR",
      "name": "Great Britain",
-     "circuitId": "silverstone"
+     "circuitId": "silverstone",
+     "slug": "great-britain"
     },
     {
      "code": "HUN",
      "name": "Hungary",
-     "circuitId": "hungaroring"
+     "circuitId": "hungaroring",
+     "slug": "hungary"
     },
     {
      "code": "BEL",
      "name": "Belgium",
-     "circuitId": "spa-francorchamps"
+     "circuitId": "spa-francorchamps",
+     "slug": "belgium"
     },
     {
      "code": "NLD",
      "name": "Netherlands",
-     "circuitId": "zandvoort"
+     "circuitId": "zandvoort",
+     "slug": "netherlands"
     },
     {
      "code": "ITA",
      "name": "Italy",
-     "circuitId": "monza"
+     "circuitId": "monza",
+     "slug": "italy"
     },
     {
      "code": "RUS",
      "name": "Russia",
-     "circuitId": "sochi"
+     "circuitId": "sochi",
+     "slug": "russia"
     },
     {
      "code": "TUR",
      "name": "Turkey",
-     "circuitId": "istanbul"
+     "circuitId": "istanbul",
+     "slug": "turkey"
     },
     {
      "code": "USA",
      "name": "United States",
-     "circuitId": "austin"
+     "circuitId": "austin",
+     "slug": "united-states"
     },
     {
      "code": "MEX",
      "name": "Mexico",
-     "circuitId": "mexico-city"
+     "circuitId": "mexico-city",
+     "slug": "mexico"
     },
     {
      "code": "SAO",
      "name": "S\u00e3o Paulo",
-     "circuitId": "interlagos"
+     "circuitId": "interlagos",
+     "slug": "sao-paulo"
     },
     {
      "code": "QAT",
      "name": "Qatar",
-     "circuitId": "lusail"
+     "circuitId": "lusail",
+     "slug": "qatar"
     },
     {
      "code": "SAU",
      "name": "Saudi Arabia",
-     "circuitId": "jeddah"
+     "circuitId": "jeddah",
+     "slug": "saudi-arabia"
     },
     {
      "code": "ABD",
      "name": "Abu Dhabi",
-     "circuitId": "yas-marina"
+     "circuitId": "yas-marina",
+     "slug": "abu-dhabi"
     }
    ],
    "teams": [
@@ -2711,87 +2849,104 @@
     {
      "code": "AUT",
      "name": "Austria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "austria"
     },
     {
      "code": "STE",
      "name": "Styria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "styria"
     },
     {
      "code": "HUN",
      "name": "Hungary",
-     "circuitId": "hungaroring"
+     "circuitId": "hungaroring",
+     "slug": "hungary"
     },
     {
      "code": "GBR",
      "name": "Great Britain",
-     "circuitId": "silverstone"
+     "circuitId": "silverstone",
+     "slug": "great-britain"
     },
     {
      "code": "70A",
      "name": "70th Anniversary",
-     "circuitId": "silverstone"
+     "circuitId": "silverstone",
+     "slug": "70th-anniversary"
     },
     {
      "code": "ESP",
      "name": "Spain",
-     "circuitId": "catalunya"
+     "circuitId": "catalunya",
+     "slug": "spain"
     },
     {
      "code": "BEL",
      "name": "Belgium",
-     "circuitId": "spa-francorchamps"
+     "circuitId": "spa-francorchamps",
+     "slug": "belgium"
     },
     {
      "code": "ITA",
      "name": "Italy",
-     "circuitId": "monza"
+     "circuitId": "monza",
+     "slug": "italy"
     },
     {
      "code": "TUS",
      "name": "Tuscany",
-     "circuitId": "mugello"
+     "circuitId": "mugello",
+     "slug": "tuscany"
     },
     {
      "code": "RUS",
      "name": "Russia",
-     "circuitId": "sochi"
+     "circuitId": "sochi",
+     "slug": "russia"
     },
     {
      "code": "EIF",
      "name": "Eifel",
-     "circuitId": "nurburgring"
+     "circuitId": "nurburgring",
+     "slug": "eifel"
     },
     {
      "code": "PRT",
      "name": "Portugal",
-     "circuitId": "portimao"
+     "circuitId": "portimao",
+     "slug": "portugal"
     },
     {
      "code": "EMR",
      "name": "Emilia Romagna",
-     "circuitId": "imola"
+     "circuitId": "imola",
+     "slug": "emilia-romagna"
     },
     {
      "code": "TUR",
      "name": "Turkey",
-     "circuitId": "istanbul"
+     "circuitId": "istanbul",
+     "slug": "turkey"
     },
     {
      "code": "BHR",
      "name": "Bahrain",
-     "circuitId": "bahrain"
+     "circuitId": "bahrain",
+     "slug": "bahrain"
     },
     {
      "code": "SAK",
      "name": "Sakhir",
-     "circuitId": "bahrain"
+     "circuitId": "bahrain",
+     "slug": "sakhir"
     },
     {
      "code": "ABD",
      "name": "Abu Dhabi",
-     "circuitId": "yas-marina"
+     "circuitId": "yas-marina",
+     "slug": "abu-dhabi"
     }
    ],
    "teams": [
@@ -3060,107 +3215,128 @@
     {
      "code": "AUS",
      "name": "Australia",
-     "circuitId": "melbourne"
+     "circuitId": "melbourne",
+     "slug": "australia"
     },
     {
      "code": "BHR",
      "name": "Bahrain",
-     "circuitId": "bahrain"
+     "circuitId": "bahrain",
+     "slug": "bahrain"
     },
     {
      "code": "CHN",
      "name": "China",
-     "circuitId": "shanghai"
+     "circuitId": "shanghai",
+     "slug": "china"
     },
     {
      "code": "AZE",
      "name": "Azerbaijan",
-     "circuitId": "baku"
+     "circuitId": "baku",
+     "slug": "azerbaijan"
     },
     {
      "code": "ESP",
      "name": "Spain",
-     "circuitId": "catalunya"
+     "circuitId": "catalunya",
+     "slug": "spain"
     },
     {
      "code": "MCO",
      "name": "Monaco",
-     "circuitId": "monaco"
+     "circuitId": "monaco",
+     "slug": "monaco"
     },
     {
      "code": "CAN",
      "name": "Canada",
-     "circuitId": "montreal"
+     "circuitId": "montreal",
+     "slug": "canada"
     },
     {
      "code": "FRA",
      "name": "France",
-     "circuitId": "paul-ricard"
+     "circuitId": "paul-ricard",
+     "slug": "france"
     },
     {
      "code": "AUT",
      "name": "Austria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "austria"
     },
     {
      "code": "GBR",
      "name": "Great Britain",
-     "circuitId": "silverstone"
+     "circuitId": "silverstone",
+     "slug": "great-britain"
     },
     {
      "code": "DEU",
      "name": "Germany",
-     "circuitId": "hockenheimring"
+     "circuitId": "hockenheimring",
+     "slug": "germany"
     },
     {
      "code": "HUN",
      "name": "Hungary",
-     "circuitId": "hungaroring"
+     "circuitId": "hungaroring",
+     "slug": "hungary"
     },
     {
      "code": "BEL",
      "name": "Belgium",
-     "circuitId": "spa-francorchamps"
+     "circuitId": "spa-francorchamps",
+     "slug": "belgium"
     },
     {
      "code": "ITA",
      "name": "Italy",
-     "circuitId": "monza"
+     "circuitId": "monza",
+     "slug": "italy"
     },
     {
      "code": "SGP",
      "name": "Singapore",
-     "circuitId": "marina-bay"
+     "circuitId": "marina-bay",
+     "slug": "singapore"
     },
     {
      "code": "RUS",
      "name": "Russia",
-     "circuitId": "sochi"
+     "circuitId": "sochi",
+     "slug": "russia"
     },
     {
      "code": "JPN",
      "name": "Japan",
-     "circuitId": "suzuka"
+     "circuitId": "suzuka",
+     "slug": "japan"
     },
     {
      "code": "MEX",
      "name": "Mexico",
-     "circuitId": "mexico-city"
+     "circuitId": "mexico-city",
+     "slug": "mexico"
     },
     {
      "code": "USA",
      "name": "United States",
-     "circuitId": "austin"
+     "circuitId": "austin",
+     "slug": "united-states"
     },
     {
      "code": "BRA",
      "name": "Brazil",
-     "circuitId": "interlagos"
+     "circuitId": "interlagos",
+     "slug": "brazil"
     },
     {
      "code": "ABD",
      "name": "Abu Dhabi",
-     "circuitId": "yas-marina"
+     "circuitId": "yas-marina",
+     "slug": "abu-dhabi"
     }
    ],
    "teams": [
@@ -3513,107 +3689,128 @@
     {
      "code": "AUS",
      "name": "Australia",
-     "circuitId": "melbourne"
+     "circuitId": "melbourne",
+     "slug": "australia"
     },
     {
      "code": "BHR",
      "name": "Bahrain",
-     "circuitId": "bahrain"
+     "circuitId": "bahrain",
+     "slug": "bahrain"
     },
     {
      "code": "CHN",
      "name": "China",
-     "circuitId": "shanghai"
+     "circuitId": "shanghai",
+     "slug": "china"
     },
     {
      "code": "AZE",
      "name": "Azerbaijan",
-     "circuitId": "baku"
+     "circuitId": "baku",
+     "slug": "azerbaijan"
     },
     {
      "code": "ESP",
      "name": "Spain",
-     "circuitId": "catalunya"
+     "circuitId": "catalunya",
+     "slug": "spain"
     },
     {
      "code": "MCO",
      "name": "Monaco",
-     "circuitId": "monaco"
+     "circuitId": "monaco",
+     "slug": "monaco"
     },
     {
      "code": "CAN",
      "name": "Canada",
-     "circuitId": "montreal"
+     "circuitId": "montreal",
+     "slug": "canada"
     },
     {
      "code": "FRA",
      "name": "France",
-     "circuitId": "paul-ricard"
+     "circuitId": "paul-ricard",
+     "slug": "france"
     },
     {
      "code": "AUT",
      "name": "Austria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "austria"
     },
     {
      "code": "GBR",
      "name": "Great Britain",
-     "circuitId": "silverstone"
+     "circuitId": "silverstone",
+     "slug": "great-britain"
     },
     {
      "code": "DEU",
      "name": "Germany",
-     "circuitId": "hockenheimring"
+     "circuitId": "hockenheimring",
+     "slug": "germany"
     },
     {
      "code": "HUN",
      "name": "Hungary",
-     "circuitId": "hungaroring"
+     "circuitId": "hungaroring",
+     "slug": "hungary"
     },
     {
      "code": "BEL",
      "name": "Belgium",
-     "circuitId": "spa-francorchamps"
+     "circuitId": "spa-francorchamps",
+     "slug": "belgium"
     },
     {
      "code": "ITA",
      "name": "Italy",
-     "circuitId": "monza"
+     "circuitId": "monza",
+     "slug": "italy"
     },
     {
      "code": "SGP",
      "name": "Singapore",
-     "circuitId": "marina-bay"
+     "circuitId": "marina-bay",
+     "slug": "singapore"
     },
     {
      "code": "RUS",
      "name": "Russia",
-     "circuitId": "sochi"
+     "circuitId": "sochi",
+     "slug": "russia"
     },
     {
      "code": "JPN",
      "name": "Japan",
-     "circuitId": "suzuka"
+     "circuitId": "suzuka",
+     "slug": "japan"
     },
     {
      "code": "USA",
      "name": "United States",
-     "circuitId": "austin"
+     "circuitId": "austin",
+     "slug": "united-states"
     },
     {
      "code": "MEX",
      "name": "Mexico",
-     "circuitId": "mexico-city"
+     "circuitId": "mexico-city",
+     "slug": "mexico"
     },
     {
      "code": "BRA",
      "name": "Brazil",
-     "circuitId": "interlagos"
+     "circuitId": "interlagos",
+     "slug": "brazil"
     },
     {
      "code": "ABD",
      "name": "Abu Dhabi",
-     "circuitId": "yas-marina"
+     "circuitId": "yas-marina",
+     "slug": "abu-dhabi"
     }
    ],
    "teams": [
@@ -3938,102 +4135,122 @@
     {
      "code": "AUS",
      "name": "Australia",
-     "circuitId": "melbourne"
+     "circuitId": "melbourne",
+     "slug": "australia"
     },
     {
      "code": "CHN",
      "name": "China",
-     "circuitId": "shanghai"
+     "circuitId": "shanghai",
+     "slug": "china"
     },
     {
      "code": "BHR",
      "name": "Bahrain",
-     "circuitId": "bahrain"
+     "circuitId": "bahrain",
+     "slug": "bahrain"
     },
     {
      "code": "RUS",
      "name": "Russia",
-     "circuitId": "sochi"
+     "circuitId": "sochi",
+     "slug": "russia"
     },
     {
      "code": "ESP",
      "name": "Spain",
-     "circuitId": "catalunya"
+     "circuitId": "catalunya",
+     "slug": "spain"
     },
     {
      "code": "MCO",
      "name": "Monaco",
-     "circuitId": "monaco"
+     "circuitId": "monaco",
+     "slug": "monaco"
     },
     {
      "code": "CAN",
      "name": "Canada",
-     "circuitId": "montreal"
+     "circuitId": "montreal",
+     "slug": "canada"
     },
     {
      "code": "AZE",
      "name": "Azerbaijan",
-     "circuitId": "baku"
+     "circuitId": "baku",
+     "slug": "azerbaijan"
     },
     {
      "code": "AUT",
      "name": "Austria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "austria"
     },
     {
      "code": "GBR",
      "name": "Great Britain",
-     "circuitId": "silverstone"
+     "circuitId": "silverstone",
+     "slug": "great-britain"
     },
     {
      "code": "HUN",
      "name": "Hungary",
-     "circuitId": "hungaroring"
+     "circuitId": "hungaroring",
+     "slug": "hungary"
     },
     {
      "code": "BEL",
      "name": "Belgium",
-     "circuitId": "spa-francorchamps"
+     "circuitId": "spa-francorchamps",
+     "slug": "belgium"
     },
     {
      "code": "ITA",
      "name": "Italy",
-     "circuitId": "monza"
+     "circuitId": "monza",
+     "slug": "italy"
     },
     {
      "code": "SGP",
      "name": "Singapore",
-     "circuitId": "marina-bay"
+     "circuitId": "marina-bay",
+     "slug": "singapore"
     },
     {
      "code": "MYS",
      "name": "Malaysia",
-     "circuitId": "sepang"
+     "circuitId": "sepang",
+     "slug": "malaysia"
     },
     {
      "code": "JPN",
      "name": "Japan",
-     "circuitId": "suzuka"
+     "circuitId": "suzuka",
+     "slug": "japan"
     },
     {
      "code": "USA",
      "name": "United States",
-     "circuitId": "austin"
+     "circuitId": "austin",
+     "slug": "united-states"
     },
     {
      "code": "MEX",
      "name": "Mexico",
-     "circuitId": "mexico-city"
+     "circuitId": "mexico-city",
+     "slug": "mexico"
     },
     {
      "code": "BRA",
      "name": "Brazil",
-     "circuitId": "interlagos"
+     "circuitId": "interlagos",
+     "slug": "brazil"
     },
     {
      "code": "ABD",
      "name": "Abu Dhabi",
-     "circuitId": "yas-marina"
+     "circuitId": "yas-marina",
+     "slug": "abu-dhabi"
     }
    ],
    "teams": [
@@ -4344,107 +4561,128 @@
     {
      "code": "AUS",
      "name": "Australia",
-     "circuitId": "melbourne"
+     "circuitId": "melbourne",
+     "slug": "australia"
     },
     {
      "code": "BHR",
      "name": "Bahrain",
-     "circuitId": "bahrain"
+     "circuitId": "bahrain",
+     "slug": "bahrain"
     },
     {
      "code": "CHN",
      "name": "China",
-     "circuitId": "shanghai"
+     "circuitId": "shanghai",
+     "slug": "china"
     },
     {
      "code": "RUS",
      "name": "Russia",
-     "circuitId": "sochi"
+     "circuitId": "sochi",
+     "slug": "russia"
     },
     {
      "code": "ESP",
      "name": "Spain",
-     "circuitId": "catalunya"
+     "circuitId": "catalunya",
+     "slug": "spain"
     },
     {
      "code": "MCO",
      "name": "Monaco",
-     "circuitId": "monaco"
+     "circuitId": "monaco",
+     "slug": "monaco"
     },
     {
      "code": "CAN",
      "name": "Canada",
-     "circuitId": "montreal"
+     "circuitId": "montreal",
+     "slug": "canada"
     },
     {
      "code": "EUR",
      "name": "Europe",
-     "circuitId": "baku"
+     "circuitId": "baku",
+     "slug": "europe"
     },
     {
      "code": "AUT",
      "name": "Austria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "austria"
     },
     {
      "code": "GBR",
      "name": "Great Britain",
-     "circuitId": "silverstone"
+     "circuitId": "silverstone",
+     "slug": "great-britain"
     },
     {
      "code": "HUN",
      "name": "Hungary",
-     "circuitId": "hungaroring"
+     "circuitId": "hungaroring",
+     "slug": "hungary"
     },
     {
      "code": "DEU",
      "name": "Germany",
-     "circuitId": "hockenheimring"
+     "circuitId": "hockenheimring",
+     "slug": "germany"
     },
     {
      "code": "BEL",
      "name": "Belgium",
-     "circuitId": "spa-francorchamps"
+     "circuitId": "spa-francorchamps",
+     "slug": "belgium"
     },
     {
      "code": "ITA",
      "name": "Italy",
-     "circuitId": "monza"
+     "circuitId": "monza",
+     "slug": "italy"
     },
     {
      "code": "SGP",
      "name": "Singapore",
-     "circuitId": "marina-bay"
+     "circuitId": "marina-bay",
+     "slug": "singapore"
     },
     {
      "code": "MYS",
      "name": "Malaysia",
-     "circuitId": "sepang"
+     "circuitId": "sepang",
+     "slug": "malaysia"
     },
     {
      "code": "JPN",
      "name": "Japan",
-     "circuitId": "suzuka"
+     "circuitId": "suzuka",
+     "slug": "japan"
     },
     {
      "code": "USA",
      "name": "United States",
-     "circuitId": "austin"
+     "circuitId": "austin",
+     "slug": "united-states"
     },
     {
      "code": "MEX",
      "name": "Mexico",
-     "circuitId": "mexico-city"
+     "circuitId": "mexico-city",
+     "slug": "mexico"
     },
     {
      "code": "BRA",
      "name": "Brazil",
-     "circuitId": "interlagos"
+     "circuitId": "interlagos",
+     "slug": "brazil"
     },
     {
      "code": "ABD",
      "name": "Abu Dhabi",
-     "circuitId": "yas-marina"
+     "circuitId": "yas-marina",
+     "slug": "abu-dhabi"
     }
    ],
    "teams": [
@@ -5135,97 +5373,116 @@
     {
      "code": "AUS",
      "name": "Australia",
-     "circuitId": "melbourne"
+     "circuitId": "melbourne",
+     "slug": "australia"
     },
     {
      "code": "MYS",
      "name": "Malaysia",
-     "circuitId": "sepang"
+     "circuitId": "sepang",
+     "slug": "malaysia"
     },
     {
      "code": "CHN",
      "name": "China",
-     "circuitId": "shanghai"
+     "circuitId": "shanghai",
+     "slug": "china"
     },
     {
      "code": "BHR",
      "name": "Bahrain",
-     "circuitId": "bahrain"
+     "circuitId": "bahrain",
+     "slug": "bahrain"
     },
     {
      "code": "ESP",
      "name": "Spain",
-     "circuitId": "catalunya"
+     "circuitId": "catalunya",
+     "slug": "spain"
     },
     {
      "code": "MCO",
      "name": "Monaco",
-     "circuitId": "monaco"
+     "circuitId": "monaco",
+     "slug": "monaco"
     },
     {
      "code": "CAN",
      "name": "Canada",
-     "circuitId": "montreal"
+     "circuitId": "montreal",
+     "slug": "canada"
     },
     {
      "code": "AUT",
      "name": "Austria",
-     "circuitId": "spielberg"
+     "circuitId": "spielberg",
+     "slug": "austria"
     },
     {
      "code": "GBR",
      "name": "Great Britain",
-     "circuitId": "silverstone"
+     "circuitId": "silverstone",
+     "slug": "great-britain"
     },
     {
      "code": "HUN",
      "name": "Hungary",
-     "circuitId": "hungaroring"
+     "circuitId": "hungaroring",
+     "slug": "hungary"
     },
     {
      "code": "BEL",
      "name": "Belgium",
-     "circuitId": "spa-francorchamps"
+     "circuitId": "spa-francorchamps",
+     "slug": "belgium"
     },
     {
      "code": "ITA",
      "name": "Italy",
-     "circuitId": "monza"
+     "circuitId": "monza",
+     "slug": "italy"
     },
     {
      "code": "SGP",
      "name": "Singapore",
-     "circuitId": "marina-bay"
+     "circuitId": "marina-bay",
+     "slug": "singapore"
     },
     {
      "code": "JPN",
      "name": "Japan",
-     "circuitId": "suzuka"
+     "circuitId": "suzuka",
+     "slug": "japan"
     },
     {
      "code": "RUS",
      "name": "Russia",
-     "circuitId": "sochi"
+     "circuitId": "sochi",
+     "slug": "russia"
     },
     {
      "code": "USA",
      "name": "United States",
-     "circuitId": "austin"
+     "circuitId": "austin",
+     "slug": "united-states"
     },
     {
      "code": "MEX",
      "name": "Mexico",
-     "circuitId": "mexico-city"
+     "circuitId": "mexico-city",
+     "slug": "mexico"
     },
     {
      "code": "BRA",
      "name": "Brazil",
-     "circuitId": "interlagos"
+     "circuitId": "interlagos",
+     "slug": "brazil"
     },
     {
      "code": "ABD",
      "name": "Abu Dhabi",
-     "circuitId": "yas-marina"
+     "circuitId": "yas-marina",
+     "slug": "abu-dhabi"
     }
    ],
    "teams": [

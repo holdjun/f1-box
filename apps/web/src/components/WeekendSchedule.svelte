@@ -1,17 +1,33 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import type { RaceSession } from "../lib/race-results-repository.js";
   import { formatLocalDateTime, formatUtcDateTime } from "../lib/time.js";
 
   interface Props {
     sessions: RaceSession[];
+    timeZone: string | null;
   }
 
-  // 水合前 SSR 输出 UTC 时间，无 JS 也可读；按钮切换用户本地时区
-  let { sessions }: Props = $props();
-  let useLocal = $state(false);
+  let { sessions, timeZone }: Props = $props();
 
-  const format = (session: RaceSession): string =>
-    useLocal
+  // 渐进增强：SSR 渲染 UTC，水合后 My time 用浏览器时区重排；
+  // Track time 服务端即正确，无需 JS。
+  let hydrated = $state(false);
+  onMount(() => {
+    hydrated = true;
+  });
+
+  // 无时区映射（f1db 新增赛道尚未补进 circuit-timezones.json）时只能给 UTC，
+  // 标签必须跟着改——把 UTC 时刻标成 Track time 比不显示更糟
+  const trackLabel = $derived(timeZone === null ? "UTC" : "Track time");
+
+  const trackTime = (session: RaceSession): string =>
+    timeZone === null
+      ? formatUtcDateTime(session.startsAtUtc)
+      : formatLocalDateTime(session.startsAtUtc, timeZone);
+
+  const myTime = (session: RaceSession): string =>
+    hydrated
       ? formatLocalDateTime(session.startsAtUtc)
       : formatUtcDateTime(session.startsAtUtc);
 </script>
@@ -22,16 +38,6 @@
   <h2 class="text-[0.72rem] font-semibold tracking-[0.09em] uppercase text-ink-muted">
     Weekend schedule
   </h2>
-  <button
-    type="button"
-    class="cursor-pointer rounded-sm border border-line px-2.5 py-1 text-[0.68rem] font-semibold tracking-[0.08em] uppercase text-ink-strong transition-colors hover:border-accent"
-    aria-pressed={useLocal}
-    onclick={() => (useLocal = !useLocal)}
-    aria-label="Toggle session times between UTC and your local time"
-    data-time-toggle
-  >
-    {useLocal ? "Your time" : "UTC"}
-  </button>
 </div>
 <ol class="weekend-schedule list-none p-0">
   {#each sessions as session, index (session.key)}
@@ -45,11 +51,24 @@
       >
       <div>
         <h3 class="mb-1.5 text-[1.75rem]">{session.label}</h3>
-        <time
-          class="block text-[0.76rem] tabular-nums text-ink-strong"
-          datetime={session.startsAtUtc}
-          data-session-time
-        >{format(session)}</time>
+        <div class="flex flex-wrap items-baseline gap-x-8 gap-y-1">
+          <div>
+            <span class="block text-[0.68rem] uppercase tracking-[0.08em] text-ink-muted">My time</span>
+            <time
+              class="block text-[0.76rem] tabular-nums text-ink-strong"
+              datetime={session.startsAtUtc}
+              data-my-time
+            >{myTime(session)}</time>
+          </div>
+          <div>
+            <span class="block text-[0.68rem] uppercase tracking-[0.08em] text-ink-muted">{trackLabel}</span>
+            <time
+              class="block text-[0.76rem] tabular-nums text-ink-strong"
+              datetime={session.startsAtUtc}
+              data-track-time
+            >{trackTime(session)}</time>
+          </div>
+        </div>
       </div>
     </li>
   {/each}

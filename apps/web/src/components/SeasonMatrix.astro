@@ -7,6 +7,7 @@ import SeasonFilter from "./SeasonFilter.svelte";
 interface MatrixRound {
   code: string;
   name: string;
+  slug: string;
   circuitId: string;
 }
 interface MatrixRow {
@@ -164,7 +165,7 @@ const cellClasses =
                   <th scope="col" class="driver-col min-w-44 rounded-[5px] border-b-0 px-2 py-1.5">{rowLabel}</th>
                   {season.rounds.map((round) => (
                     <th scope="col" class="rounded-[5px] border-b-0 px-[0.45rem] py-1.5 text-[0.6rem]" title={round.name}>
-                      <a class="round-link hover:text-accent" href={`/circuits/${round.circuitId}`}>
+                      <a class="round-link hover:text-accent" href={`/results/${season.year}/races/${round.slug}/race-result`}>
                         {round.code}
                       </a>
                     </th>

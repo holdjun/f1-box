@@ -1,10 +1,5 @@
 import { type AskDatabase, createD1AskDatabase } from "./ask/db.js";
 import {
-  type CircuitRepository,
-  createCircuitRepository,
-  createD1CircuitDatabase,
-} from "./circuit-repository.js";
-import {
   createD1DriverDatabase,
   createDriverRepository,
   type DriverRepository,
@@ -24,7 +19,6 @@ export interface AppRepositories {
   raceResults: RaceResultsRepository;
   driver: DriverRepository;
   team: TeamRepository;
-  circuit: CircuitRepository;
 }
 
 export interface AppData {
@@ -41,7 +35,6 @@ export async function createAppData(env: Env): Promise<AppData> {
         raceResults: createRaceResultsRepository(),
         driver: createDriverRepository(),
         team: createTeamRepository(),
-        circuit: createCircuitRepository(),
       },
       askDb: await createDevAskDatabase(),
     };
@@ -53,7 +46,6 @@ export async function createAppData(env: Env): Promise<AppData> {
       ),
       driver: createDriverRepository(createD1DriverDatabase(env.F1_DB)),
       team: createTeamRepository(createD1TeamDatabase(env.F1_DB)),
-      circuit: createCircuitRepository(createD1CircuitDatabase(env.F1_DB)),
     },
     askDb: createD1AskDatabase(env.F1_DB),
   };

@@ -365,9 +365,12 @@ const metaRow = {
   time: "04:00",
   laps: 58,
   course_length: 5.278,
+  distance: 306.124,
+  turns: 14,
+  direction: "CLOCKWISE",
   circuit_id: "melbourne",
   circuit_layout_id: "melbourne-2",
-  circuit_name: "Melbourne",
+  circuit_full_name: "Melbourne Grand Prix Circuit",
   circuit_place: "Melbourne",
   country_name: "Australia",
   alpha2_code: "AU",
@@ -385,6 +388,17 @@ const metaRow = {
   sprint_race_time: null,
 };
 
+const circuitInfoRow = {
+  total_races_held: 29,
+  first_gp: 1996,
+};
+
+const recordLapRow = {
+  time: "1:19.813",
+  driver_name: "Charles Leclerc",
+  year: 2024,
+};
+
 // 模拟 raceMetaSql 缺 session 字段的退化输入：详情页 Weekend schedule 只剩 race 一项
 // （生产 SQL 曾在 D1 路径漏选 practice/qualifying/sprint 列，回归保护）
 const metaRowNoSessions = {
@@ -397,12 +411,14 @@ const metaRowNoSessions = {
   sprint_race_date: null,
 };
 
-// getRacePage 一次 batch 9 条语句；未登记的语句抛错，用本助手把其余 tab 置空
+// getRacePage 一次 batch 11 条语句；未登记的语句抛错，用本助手把其余 tab 置空
 function tabFragments(
   extra: Record<string, unknown[]>,
 ): Record<string, unknown[]> {
   return {
-    circuit_name: [metaRow],
+    circuit_full_name: [metaRow],
+    total_races_held: [circuitInfoRow],
+    "time_millis IS NOT NULL": [recordLapRow],
     "FROM race_result rr": [],
     "FROM qualifying_result": [],
     "FROM starting_grid_position": [],
@@ -502,11 +518,39 @@ describe("createRaceResultsRepository getRacePage", () => {
     // 有名次但被套圈：time 为空时视图回退到 gap
     expect(page?.tabs.raceResult[2].time).toBeNull();
     expect(page?.tabs.raceResult[2].gap).toBe("+26.874");
+    // 新增赛道维度字段（行程字段来自电路信息批处理）
+    expect(page?.meta.circuitFullName).toBe("Melbourne Grand Prix Circuit");
+    expect(page?.meta.raceTime).toBe("04:00");
+    expect(page?.meta.distance).toBe(306.124);
+    expect(page?.meta.turns).toBe(14);
+    expect(page?.meta.direction).toBe("Clockwise");
+    expect(page?.meta.totalRacesHeld).toBe(29);
+    expect(page?.meta.firstGrandPrix).toBe(1996);
+    expect(page?.meta.recordLap).toEqual({
+      time: "1:19.813",
+      driverName: "Charles Leclerc",
+      year: 2024,
+    });
+  });
+
+  it("renders the anti-clockwise direction without the raw underscore", async () => {
+    const db = fakeDbBySql(
+      tabFragments({
+        circuit_full_name: [{ ...metaRow, direction: "ANTI_CLOCKWISE" }],
+      }),
+    );
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2026,
+      "australia",
+    );
+    expect(page?.meta.direction).toBe("Anti-clockwise");
   });
 
   it("degrades to race-only sessions when meta lacks session columns", async () => {
     // raceMetaSql 漏选 session 列时（生产 D1 曾犯过），Weekend schedule 只应有 race 一项而非崩溃
-    const db = fakeDbBySql(tabFragments({ circuit_name: [metaRowNoSessions] }));
+    const db = fakeDbBySql(
+      tabFragments({ circuit_full_name: [metaRowNoSessions] }),
+    );
     const page = await createRaceResultsRepository(db).getRacePage(
       2026,
       "australia",
@@ -517,7 +561,7 @@ describe("createRaceResultsRepository getRacePage", () => {
   });
 
   it("returns null for unknown slug", async () => {
-    const db = fakeDbBySql(tabFragments({ circuit_name: [] }));
+    const db = fakeDbBySql(tabFragments({ circuit_full_name: [] }));
     expect(
       await createRaceResultsRepository(db).getRacePage(2026, "nope"),
     ).toBeNull();

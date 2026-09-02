@@ -34,4 +34,6 @@ until run_import; do
   attempt=$((attempt + 1))
   sleep 15
 done
+# 刷新统计信息：没有 sqlite_stat1 时规划器会挑错驱动表（实测退回全扫 race_data 18 万行）
+"$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --command "ANALYZE;" > /dev/null
 echo "import complete"

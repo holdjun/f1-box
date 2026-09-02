@@ -28,6 +28,7 @@ describe("createDriverRepository with database", () => {
       {
         id: "george-russell",
         name: "George Russell",
+        code: "RUS",
         number: "63",
         alpha2_code: "GB",
         team_id: "mercedes",
@@ -37,6 +38,7 @@ describe("createDriverRepository with database", () => {
       {
         id: "ayrton-senna",
         name: "Ayrton Senna",
+        code: "SEN",
         number: "2",
         alpha2_code: "BR",
         team_id: "senna",
@@ -46,6 +48,7 @@ describe("createDriverRepository with database", () => {
       {
         id: "no-team-driver",
         name: "No Team Driver",
+        code: "NTD",
         number: null,
         alpha2_code: null,
         team_id: null,
@@ -59,6 +62,7 @@ describe("createDriverRepository with database", () => {
       {
         id: "george-russell",
         name: "George Russell",
+        code: "RUS",
         number: "63",
         flagCode: "gb",
         teamId: "mercedes",
@@ -68,6 +72,7 @@ describe("createDriverRepository with database", () => {
       {
         id: "ayrton-senna",
         name: "Ayrton Senna",
+        code: "SEN",
         number: "2",
         flagCode: "br",
         teamId: "senna",
@@ -77,6 +82,7 @@ describe("createDriverRepository with database", () => {
       {
         id: "no-team-driver",
         name: "No Team Driver",
+        code: "NTD",
         number: null,
         flagCode: null,
         teamId: null,
@@ -166,6 +172,7 @@ describe("getDriversByYear", () => {
               {
                 id: "michael-schumacher",
                 name: "Michael Schumacher",
+                code: "SCH",
                 number: "5",
                 alpha2_code: "DE",
                 team_id: "ferrari",
@@ -174,6 +181,7 @@ describe("getDriversByYear", () => {
               {
                 id: "no-team",
                 name: "No Team",
+                code: "NTE",
                 number: null,
                 alpha2_code: null,
                 team_id: null,
@@ -190,6 +198,7 @@ describe("getDriversByYear", () => {
       {
         id: "michael-schumacher",
         name: "Michael Schumacher",
+        code: "SCH",
         number: "5",
         flagCode: "de",
         teamId: "ferrari",
@@ -199,6 +208,7 @@ describe("getDriversByYear", () => {
       {
         id: "no-team",
         name: "No Team",
+        code: "NTE",
         number: null,
         flagCode: null,
         teamId: null,

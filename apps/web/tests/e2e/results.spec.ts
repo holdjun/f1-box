@@ -64,6 +64,10 @@ test.describe("race detail", () => {
     await expect(table.locator("tbody tr").first()).toContainText(
       "1:23:06.801",
     );
+    // 徽标改三字码：George Russell 为 RUS（不再是名字首字母 GR）
+    await expect(
+      table.locator("tbody tr").first().locator(".vendor-cell__monogram"),
+    ).toHaveText("RUS");
   });
 
   test("@desktop hero lists the weekend sessions", async ({ page }) => {
@@ -73,13 +77,38 @@ test.describe("race detail", () => {
     await expect(schedule).toContainText("Qualifying");
   });
 
-  test("@desktop hero shows the circuit map linking to its circuit page", async ({
+  test("@desktop hero shows the circuit map as plain content", async ({
     page,
   }) => {
     await page.goto("/results/2026/races/australia/race-result");
-    const map = page.locator(".race-hero__map");
-    await expect(map).toHaveAttribute("href", "/circuits/melbourne");
-    await expect(map.locator("svg.circuit-map")).toBeVisible();
+    const svg = page.locator("svg.circuit-map");
+    await expect(svg).toBeVisible();
+    // 赛道图不再是链接（指向 /circuits 的 <a> 已移除）
+    await expect(svg.locator("xpath=ancestor::a")).toHaveCount(0);
+    // 注解地图渲染图例（melbourne-2 有 sectors/corners，DRS 数据为空故仅 4 项）
+    const legend = page.locator(".circuit-map__legend");
+    await expect(legend).toBeVisible();
+    await expect(legend.locator(".legend")).toHaveCount(4);
+    await expect(legend).toContainText("Sector 1");
+    await expect(legend).toContainText("Sector 2");
+    await expect(legend).toContainText("Sector 3");
+    await expect(legend).toContainText("Corner");
+  });
+
+  test("@desktop header shows local race date and circuit card", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races/australia/race-result");
+    await expect(page.locator(".race-hero__subtitle")).toHaveText(
+      "08 Mar 2026 · Melbourne · Australia",
+    );
+    const card = page.locator(".info-panel");
+    await expect(card).toContainText("Melbourne Grand Prix Circuit");
+    await expect(card).toContainText("5.278 km");
+    await expect(card).toContainText("306.124 km");
+    await expect(card).toContainText("29");
+    await expect(card).toContainText("1:19.813");
+    await expect(card).toContainText("Charles Leclerc (2024)");
   });
 
   test("@desktop bare slug redirects to race-result", async ({ page }) => {
@@ -144,27 +173,27 @@ test.describe("standings", () => {
   });
 });
 
-test.describe("session time toggle", () => {
-  // 固定浏览器时区为非 UTC（CI runner 默认 UTC，切换前后本地时间文本相同）
-  test.use({ timezoneId: "Asia/Shanghai" });
-
-  test("@desktop session times toggle between UTC and local", async ({
-    page,
-  }) => {
-    await page.goto("/results/2026/races/australia/race-result");
-    const toggle = page.locator("[data-time-toggle]");
-    const firstTime = page.locator("[data-session-time]").first();
-    // SSR 默认 UTC
-    await expect(toggle).toHaveText("UTC");
-    await expect(firstTime).toContainText("UTC");
-    await toggle.click();
-    await expect(toggle).toHaveText("Your time");
-    await expect(firstTime).toContainText("GMT+8");
-    expect(await firstTime.textContent()).not.toContain("UTC");
-    await toggle.click();
-    await expect(firstTime).toContainText("UTC");
+// test.use 作用于所在 describe 作用域而非单个 test：两个时区必须各自成组，
+// 否则循环里的第二次调用会覆盖第一次，两个用例都跑同一个时区
+for (const { tz, myTime } of [
+  { tz: "Asia/Tokyo", myTime: "06 Mar 2026, 10:30 GMT+9" },
+  { tz: "America/New_York", myTime: "05 Mar 2026, 20:30 GMT-5" },
+]) {
+  test.describe(`session dual times (${tz})`, () => {
+    test.use({ timezoneId: tz });
+    test(`@desktop shows my time in ${tz} and track time in the circuit tz`, async ({
+      page,
+    }) => {
+      await page.goto("/results/2026/races/australia/race-result");
+      // Track time 按赛道当地（Melbourne AEDT UTC+11）渲染，SSR 即正确、与浏览器时区无关
+      await expect(page.locator("[data-track-time]").first()).toHaveText(
+        "06 Mar 2026, 12:30 GMT+11",
+      );
+      // My time 水合后转浏览器时区；两个时区的期望值不同，任一时区没生效都会失败
+      await expect(page.locator("[data-my-time]").first()).toHaveText(myTime);
+    });
   });
-});
+}
 
 test("@mobile results pages have no page overflow", async ({ page }) => {
   for (const path of [

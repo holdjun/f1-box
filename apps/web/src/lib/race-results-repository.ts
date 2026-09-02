@@ -51,14 +51,21 @@ export interface RaceMeta {
   name: string;
   officialName: string;
   date: string;
+  raceTime: string | null;
   laps: number;
   courseLength: number;
+  distance: number;
+  turns: number;
+  direction: string;
   circuitId: string;
   circuitLayoutId: string;
-  circuitName: string;
+  circuitFullName: string;
   circuitPlace: string;
   countryName: string;
   alpha2Code: string;
+  totalRacesHeld: number;
+  firstGrandPrix: number | null;
+  recordLap: { time: string; driverName: string; year: number } | null;
   sessions: RaceSession[];
 }
 
@@ -295,7 +302,8 @@ const raceIdSubquery = `(SELECT id FROM race WHERE year = ?1 AND grand_prix_id =
 
 const raceMetaSql = `SELECT ra.year, ra.round, ra.grand_prix_id AS slug, gp.name,
        ra.official_name, ra.date, ra.time, ra.laps, ra.course_length,
-       ra.circuit_id, ra.circuit_layout_id, ci.name AS circuit_name, ci.place_name AS circuit_place,
+       ra.circuit_id, ra.circuit_layout_id, ci.full_name AS circuit_full_name, ci.place_name AS circuit_place,
+       ra.distance, ra.turns, ra.direction,
        cc.name AS country_name, cc.alpha2_code,
        ra.free_practice_1_date, ra.free_practice_1_time,
        ra.free_practice_2_date, ra.free_practice_2_time,
@@ -308,6 +316,23 @@ JOIN grand_prix gp ON ra.grand_prix_id = gp.id
 JOIN circuit ci ON ra.circuit_id = ci.id
 JOIN country cc ON gp.country_id = cc.id
 WHERE ra.year = ?1 AND ra.grand_prix_id = ?2`;
+
+// 赛道维度静态字段：total_races_held 为累计办赛场次，first_gp 为历史首办年
+// export 供索引计划测试：相关子查询按 circuit_id 取首次举办年份
+export const circuitInfoSql = `SELECT c.total_races_held,
+  (SELECT MIN(ra2.year) FROM race ra2 WHERE ra2.circuit_id = c.id) AS first_gp
+FROM circuit c
+WHERE c.id = (SELECT ra.circuit_id FROM race ra WHERE ra.year = ?1 AND ra.grand_prix_id = ?2)`;
+
+// 该赛道全场次最快圈（口径同原 circuit-repository：全局最小 millis）；export 供索引计划测试
+export const recordLapSql = `SELECT fl.time, d.name AS driver_name, ra.year
+FROM race ra
+JOIN fastest_lap fl ON fl.race_id = ra.id
+JOIN driver d ON d.id = fl.driver_id
+WHERE ra.circuit_id = (SELECT ra2.circuit_id FROM race ra2 WHERE ra2.year = ?1 AND ra2.grand_prix_id = ?2)
+  AND fl.time_millis IS NOT NULL
+ORDER BY fl.time_millis
+LIMIT 1`;
 
 const raceResultSql = `SELECT rr.position_number, rr.position_text, rr.driver_number,
        d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
@@ -464,7 +489,11 @@ function buildSessions(r: Record<string, unknown>): RaceSession[] {
   return sessions.sort((a, b) => a.startsAtUtc.localeCompare(b.startsAtUtc));
 }
 
-function mapRaceMeta(row: unknown): RaceMeta {
+// 不含赛道维度派生字段（totalRacesHeld/firstGrandPrix/recordLap 来自第二条 batch），
+// 由 getRacePage 合并成完整 RaceMeta
+function mapRaceMeta(
+  row: unknown,
+): Omit<RaceMeta, "totalRacesHeld" | "firstGrandPrix" | "recordLap"> {
   const r = asRecord(row, "race meta");
   return {
     year: asNumber(r.year, "race year"),
@@ -473,16 +502,56 @@ function mapRaceMeta(row: unknown): RaceMeta {
     name: asString(r.name, "race name"),
     officialName: asString(r.official_name, "race official name"),
     date: asString(r.date, "race date"),
+    raceTime: r.time === null ? null : asString(r.time, "race time"),
     laps: asNumber(r.laps, "race laps"),
     courseLength: asNumber(r.course_length, "course length"),
+    distance: asNumber(r.distance, "race distance"),
+    turns: asNumber(r.turns, "race turns"),
+    direction: titleCase(asString(r.direction, "race direction")),
     circuitId: asString(r.circuit_id, "circuit id"),
     circuitLayoutId: asString(r.circuit_layout_id, "circuit layout"),
-    circuitName: asString(r.circuit_name, "circuit name"),
+    circuitFullName: asString(r.circuit_full_name, "circuit full name"),
     circuitPlace: asString(r.circuit_place, "circuit place"),
     countryName: asString(r.country_name, "country name"),
     alpha2Code: asString(r.alpha2_code, "alpha2 code"),
     sessions: buildSessions(r),
   };
+}
+
+// 赛道维度静态字段（total_races_held/first_gp + 全场次最快圈）
+function mapCircuitInfo(
+  circuitRow: unknown,
+  recordLapRow: unknown,
+): Pick<RaceMeta, "totalRacesHeld" | "firstGrandPrix" | "recordLap"> {
+  const r = asRecord(circuitRow, "circuit info row");
+  return {
+    totalRacesHeld: asNumber(r.total_races_held, "races held"),
+    firstGrandPrix:
+      r.first_gp == null ? null : asNumber(r.first_gp, "first grand prix"),
+    recordLap: recordLapRow == null ? null : mapRecordLapRow(recordLapRow),
+  };
+}
+
+function mapRecordLapRow(value: unknown): {
+  time: string;
+  driverName: string;
+  year: number;
+} {
+  const record = asRecord(value, "record lap row");
+  return {
+    time: asString(record.time, "record lap time"),
+    driverName: asString(record.driver_name, "record lap driver"),
+    year: asNumber(record.year, "record lap year"),
+  };
+}
+
+function titleCase(value: string): string {
+  // f1db 的枚举是 SCREAMING_SNAKE（CLOCKWISE / ANTI_CLOCKWISE），下划线要还原成连字符
+  const words = value.toLowerCase().split("_");
+  return [
+    words[0].charAt(0).toUpperCase() + words[0].slice(1),
+    ...words.slice(1),
+  ].join("-");
 }
 
 // 各 tab 行共有的车手/车队字段
@@ -677,6 +746,8 @@ export function createRaceResultsRepository(
         practice1Rows,
         practice2Rows,
         practice3Rows,
+        circuitInfoRows,
+        recordLapRows,
       ] = await db.batch([
         { sql: raceMetaSql, values },
         { sql: raceResultSql, values },
@@ -687,9 +758,14 @@ export function createRaceResultsRepository(
         { sql: practiceSql(1), values },
         { sql: practiceSql(2), values },
         { sql: practiceSql(3), values },
+        { sql: circuitInfoSql, values },
+        { sql: recordLapSql, values },
       ]);
       if (metaRows.results.length === 0) return null;
-      const meta = mapRaceMeta(metaRows.results[0]);
+      const meta: RaceMeta = {
+        ...mapRaceMeta(metaRows.results[0]),
+        ...mapCircuitInfo(circuitInfoRows.results[0], recordLapRows.results[0]),
+      };
       return {
         meta,
         tabs: {

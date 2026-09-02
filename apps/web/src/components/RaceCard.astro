@@ -1,4 +1,5 @@
 ---
+import { circuitTimeZone } from "../lib/circuit-time.js";
 import type { RaceSummary } from "../lib/race-results-repository.js";
 import { formatWeekendRange } from "../lib/time.js";
 import { colorForYear, vendorIndexes } from "../lib/vendor.js";
@@ -13,9 +14,14 @@ const { race, href, status } = Astro.props;
 const round = String(race.round).padStart(2, "0");
 const year = Number(race.date.slice(0, 4));
 const startsAt = `${race.date}T${race.time ?? "00:00"}:00Z`;
-// 周末范围 = 首练（或最早 session）→ 正赛；无 session 数据时回退单日
+// 周末范围 = 首练（或最早 session）→ 正赛；无 session 数据时回退单日。
+// 与比赛详情页 hero 同口径按赛道当地日渲染，负偏移夜赛两处才不会差一天
 const weekendStart = race.sessions[0]?.startsAtUtc ?? startsAt;
-const weekendRange = formatWeekendRange(weekendStart, startsAt);
+const weekendRange = formatWeekendRange(
+  weekendStart,
+  startsAt,
+  circuitTimeZone(race.circuitId),
+);
 // 部分赛道与地点字段同值（Suzuka/Suzuka），去重后只展示一次
 const placeLine =
   race.circuitName && race.circuitName !== race.circuitPlace
@@ -55,7 +61,7 @@ const teamColor = (constructorId: string | null): string | undefined =>
       />
       <time
         class="ml-auto flex items-center gap-1.5 self-start pt-1 text-[0.72rem] tracking-[0.08em] tabular-nums text-ink-muted"
-        datetime={weekendStart.slice(0, 10)}
+        datetime={weekendStart}
       >
         <span aria-hidden="true">🏁</span>
         {weekendRange}

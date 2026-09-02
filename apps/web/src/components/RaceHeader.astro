@@ -1,6 +1,8 @@
 ---
+import { circuitTimeZone } from "../lib/circuit-time.js";
 import type { RaceMeta } from "../lib/race-results-repository.js";
-import { formatUtcDate } from "../lib/time.js";
+import { formatRaceDate } from "../lib/time.js";
+import CircuitCard from "./CircuitCard.astro";
 import CircuitMap from "./CircuitMap.astro";
 import WeekendSchedule from "./WeekendSchedule.svelte";
 
@@ -9,39 +11,43 @@ interface Props {
 }
 const { meta } = Astro.props;
 const round = String(meta.round).padStart(2, "0");
+const timeZone = circuitTimeZone(meta.circuitId);
+// 副行日期在 formatRaceDate 内回退：空 time 或无时区映射的历史赛保持 UTC，不做时区换算
+const raceDate = formatRaceDate(meta.date, meta.raceTime, timeZone);
 ---
 
 <!-- isolate: 让 -z-1 的描边数字压到正文之下, 又不至于沉到 body 背景后面 -->
-<header class="shell relative isolate min-h-[clamp(34rem,70vw,52rem)] overflow-hidden pb-20 pt-6 md:pt-8">
-  <a
-    class="race-hero__map absolute right-0 top-8 w-[clamp(14rem,24vw,22rem)] opacity-85 transition-opacity hover:opacity-100 max-md:static max-md:mx-auto max-md:mb-6 max-md:block max-md:w-[min(60%,13rem)] max-md:opacity-100"
-    href={`/circuits/${meta.circuitId}`}
-    aria-label={`View ${meta.circuitName} circuit details`}
-  >
-    <CircuitMap
-      layoutId={meta.circuitLayoutId}
-      fallbackSrc={`/vendor/circuits/${meta.circuitLayoutId}.svg`}
-      alt={`${meta.circuitName} layout map`}
-    />
-  </a>
+<header class="shell relative isolate overflow-hidden pb-20 pt-6 md:pt-8">
   <!-- 描边巨型回合号: -z-1 沉到文字下方 (旧 z-index:-1 布局的等价表达) -->
   <p
     class="absolute -top-8 -left-[0.05em] -z-1 font-display text-[clamp(13rem,29vw,17rem)] leading-[0.7] font-bold text-transparent [-webkit-text-stroke:1px_var(--line)] max-md:text-[17rem]"
     aria-hidden="true"
   >{round}</p>
-  <div class="grid grid-cols-1 items-end gap-8 lg:grid-cols-[3fr_7fr]">
+  <div class="grid grid-cols-1 items-end gap-12 lg:grid-cols-[3fr_7fr]">
     <div>
       <h1 class="max-w-[10ch] text-display-xl">{meta.name}</h1>
-      <p class="mt-6 text-[1.1rem]">
-        {formatUtcDate(meta.date)} · <a
-          class="race-hero__circuit-link underline decoration-line underline-offset-3 hover:decoration-current"
-          href={`/circuits/${meta.circuitId}`}>{meta.circuitName}</a
-        >, {meta.circuitPlace} · {meta.countryName}
+      <p class="race-hero__subtitle mt-6 text-[1.1rem]">
+        {raceDate} · {meta.circuitPlace} · {meta.countryName}
       </p>
       <p class="mt-1 text-ink-muted">{meta.officialName}</p>
     </div>
   </div>
+  <!-- 赛道图与信息卡同区块：桌面两列并排、375px 堆叠（对齐需求"相邻展示"） -->
+  <div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-[2fr_3fr]">
+    <div class="circuit-map-panel mx-auto w-[min(100%,24rem)]">
+      <CircuitMap
+        layoutId={meta.circuitLayoutId}
+        fallbackSrc={`/vendor/circuits/${meta.circuitLayoutId}.svg`}
+        alt={`${meta.circuitFullName} layout map`}
+      />
+    </div>
+    <CircuitCard meta={meta} />
+  </div>
   {meta.sessions.length > 0 ? (
-    <WeekendSchedule sessions={meta.sessions} client:load />
+    <WeekendSchedule
+      sessions={meta.sessions}
+      timeZone={timeZone}
+      client:load
+    />
   ) : null}
 </header>

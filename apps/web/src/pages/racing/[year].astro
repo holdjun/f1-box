@@ -3,8 +3,9 @@ import RaceCard from "../../components/RaceCard.astro";
 import RaceCountdown from "../../components/RaceCountdown.svelte";
 import SeasonFilter from "../../components/SeasonFilter.svelte";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { circuitTimeZone } from "../../lib/circuit-time.js";
 import type { RaceSummary } from "../../lib/race-results-repository.js";
-import { formatUtcDateTime } from "../../lib/time.js";
+import { formatLocalDateTime } from "../../lib/time.js";
 
 const year = Number(Astro.params.year);
 const { raceResults } = Astro.locals.app.repositories;
@@ -27,8 +28,12 @@ const next =
   upcoming.find((race) =>
     race.sessions.some((s) => new Date(s.startsAtUtc).getTime() > now),
   ) ?? upcoming[0];
+// 开赛时刻按赛道当地时区渲染（时区缩写自带在输出里，与卡片日期同口径）；
+// 未公布时刻或无时区映射时回退 UTC，不把 UTC 冒充成当地时间
+const nextZone =
+  next?.time != null ? (circuitTimeZone(next.circuitId) ?? "UTC") : "UTC";
 const nextLine = next
-  ? `${formatUtcDateTime(`${next.date}T${next.time ?? "00:00"}:00Z`)} · ${next.circuitPlace}`
+  ? `${formatLocalDateTime(`${next.date}T${next.time ?? "00:00"}:00Z`, nextZone)} · ${next.circuitPlace}`
   : null;
 // 订阅/下载是纯链接无 JS 可用；复制 URL 由 client.ts 做剪贴板增强。
 // origin 取当前请求域，预览环境订阅的是预览端点而非生产

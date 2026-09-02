@@ -232,6 +232,17 @@ test("@desktop unknown year returns 404", async ({ page }) => {
   expect((await page.goto("/1900/racing"))?.status()).toBe(404);
 });
 
+// Astro 的错误重路由会去请求 /500；没有 500.astro 时它落进 [year] catch-all，
+// 被当成垃圾年份 302 回首页——而首页同样查 D1，D1 一挂整站就无限重定向
+test("@desktop /500 renders the error page instead of redirecting home", async ({
+  page,
+}) => {
+  const response = await page.goto("/500");
+  expect(response?.status()).toBe(500);
+  expect(new URL(page.url()).pathname).toBe("/500");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Red flag");
+});
+
 test("@mobile 375px layout has no page overflow", async ({ page }) => {
   await page.goto("/racing/2026");
 

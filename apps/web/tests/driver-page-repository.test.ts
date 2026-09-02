@@ -141,6 +141,7 @@ describe("createDriverRepository with database", () => {
       {
         id: "test-driver",
         name: "Test Driver",
+        code: "TDR",
         full_name: "Test A. Driver",
         country_name: "United Kingdom",
         alpha2_code: "GB",
@@ -169,6 +170,7 @@ describe("createDriverRepository with database", () => {
         round: 1,
         code: "AUS",
         name: "Australia",
+        slug: "australia",
         circuit_id: "melbourne",
       },
       {
@@ -176,6 +178,7 @@ describe("createDriverRepository with database", () => {
         round: 2,
         code: "CHN",
         name: "China",
+        slug: "china",
         circuit_id: "shanghai",
       },
       {
@@ -183,6 +186,7 @@ describe("createDriverRepository with database", () => {
         round: 3,
         code: "BHR",
         name: "Bahrain",
+        slug: "bahrain",
         circuit_id: "sakhir",
       },
       {
@@ -190,6 +194,7 @@ describe("createDriverRepository with database", () => {
         round: 4,
         code: "RUS",
         name: "Russia",
+        slug: "russia",
         circuit_id: "sochi",
       },
     ],

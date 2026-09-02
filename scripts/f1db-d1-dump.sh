@@ -3,7 +3,7 @@
 # 用法: scripts/f1db-d1-dump.sh [输出目录]（默认 /tmp/f1db-d1）
 # 00-drop 反序清库后逐表重建（外键约束下无法逐表单独 drop），
 # 整库重导窗口存在，靠 data-sync 的 release tag 门禁收敛到每周一次；
-# race_data 追加 constructor 索引，否则按 constructor_id 的查询全表扫 18 万行。
+# 索引统一放 f1db-d1-indexes.sql，附在 race_data（最后一张相关表）的 dump 之后。
 set -euo pipefail
 
 OUT="${1:-/tmp/f1db-d1}"
@@ -40,12 +40,9 @@ for name in "${TABLES[@]}"; do
   sqlite3 "$WORK/f1db.db" ".dump $name" \
     | grep -Ev '^(PRAGMA|BEGIN( TRANSACTION)?|COMMIT);$' \
     > "$OUT/$(printf '%02d' "$idx")-$name.sql"
-  # f1db 未给 race_data 建 constructor/driver 索引，车队页与车手页查询全靠它们过滤
+  # f1db 只建主键/唯一约束索引，高频过滤列（constructor_id、driver_id、circuit_id）没有
   if [ "$name" = "race_data" ]; then
-    echo "CREATE INDEX IF NOT EXISTS idx_rd_constructor_type ON race_data (constructor_id, type);" \
-      >> "$OUT/$(printf '%02d' "$idx")-$name.sql"
-    echo "CREATE INDEX IF NOT EXISTS idx_rd_driver_type ON race_data (driver_id, type);" \
-      >> "$OUT/$(printf '%02d' "$idx")-$name.sql"
+    cat "$(dirname "$0")/f1db-d1-indexes.sql" >> "$OUT/$(printf '%02d' "$idx")-$name.sql"
   fi
   idx=$((idx + 1))
 done

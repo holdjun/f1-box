@@ -15,6 +15,7 @@ import {
 export interface DriverSummary {
   id: string;
   name: string;
+  code: string;
   number: string | null;
   flagCode: string | null;
   teamId: string | null;
@@ -86,6 +87,7 @@ export interface DriverSeason {
 export interface DriverPage {
   id: string;
   name: string;
+  code: string;
   fullName: string;
   countryName: string;
   alpha2Code: string;
@@ -155,7 +157,7 @@ last_race AS (
   )
   JOIN constructor c ON c.id = rd.constructor_id
 )
-SELECT d.id, d.name, COALESCE(lr.last_number, d.permanent_number) AS number,
+SELECT d.id, d.name, d.abbreviation AS code, COALESCE(lr.last_number, d.permanent_number) AS number,
   co.alpha2_code, lr.constructor_id AS team_id, lr.team_name,
   CASE WHEN cd.driver_id IS NULL THEN 0 ELSE 1 END AS is_current
 FROM driver d
@@ -188,7 +190,7 @@ last_race AS (
   )
   JOIN constructor c ON c.id = rd.constructor_id
 )
-SELECT d.id, d.name, COALESCE(lr.last_number, d.permanent_number) AS number,
+SELECT d.id, d.name, d.abbreviation AS code, COALESCE(lr.last_number, d.permanent_number) AS number,
   co.alpha2_code, lr.constructor_id AS team_id, lr.team_name,
   COALESCE(sds.points, 0) AS points
 FROM year_drivers yd
@@ -199,7 +201,7 @@ LEFT JOIN season_driver_standing sds ON sds.driver_id = d.id AND sds.year = ?1
 ORDER BY points DESC, d.name`;
 
 const identitySql = `
-SELECT d.id, d.name, d.full_name, co.name AS country_name, co.alpha2_code,
+SELECT d.id, d.name, d.abbreviation AS code, d.full_name, co.name AS country_name, co.alpha2_code,
   d.date_of_birth, d.date_of_death, d.place_of_birth, d.permanent_number,
   d.total_race_entries AS entries, d.total_race_starts AS starts,
   d.total_race_wins AS wins, d.total_podiums AS podiums,
@@ -232,7 +234,7 @@ ORDER BY ra.year, MIN(ra.round)`;
 
 // 年份取正式阵容与实际结果的并集：当前季未出赛也有空矩阵块，将来轮次保留空列
 const roundsSql = `
-SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, ra.circuit_id
+SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, gp.id AS slug, ra.circuit_id
 FROM race ra
 JOIN grand_prix gp ON gp.id = ra.grand_prix_id
 WHERE ra.year IN (
@@ -271,8 +273,11 @@ WHERE srr.driver_id = ?1 AND srr.position_number IS NOT NULL`;
 
 // 队友：与该车手同年同队实际参赛的其他车手。门槛用实际比赛结果推导的 stint，
 // 而非 season_entrant_driver——替补登场常无正式阵容行（如 Bearman 2024 代打），
-// 按阵容过滤会丢掉这些队友。结果按站取最佳
-const teammateResultsSql = `
+// 按阵容过滤会丢掉这些队友。结果按站取最佳。
+// CROSS JOIN 固定连接顺序（stint → 该年的 race → 该场该队的成绩）。规划器自己排时，
+// 只有跑过 ANALYZE 才排得对；没有统计信息就会先按 constructor_id 拉出该车队史上
+// 全部成绩再用年份过滤，Hamilton 一次要读 5 万行。export 供查询计划测试
+export const teammateResultsSql = `
 WITH stints AS (
   SELECT DISTINCT ra.year, rr.constructor_id
   FROM race ra
@@ -284,8 +289,8 @@ SELECT ra.year, ra.round, rr.driver_id, d.name, cn.alpha2_code,
   rr.position_text, rr.pole_position, rr.fastest_lap, rr.reason_retired,
   rr.position_number
 FROM stints s
-JOIN race ra ON ra.year = s.year
-JOIN race_result rr
+CROSS JOIN race ra ON ra.year = s.year
+CROSS JOIN race_result rr
   ON rr.race_id = ra.id AND rr.constructor_id = s.constructor_id
 JOIN driver d ON d.id = rr.driver_id
 LEFT JOIN country cn ON cn.id = d.nationality_country_id
@@ -301,8 +306,8 @@ WITH stints AS (
 )
 SELECT ra.year, ra.round, srr.driver_id, srr.position_number
 FROM stints s
-JOIN race ra ON ra.year = s.year
-JOIN sprint_race_result srr
+CROSS JOIN race ra ON ra.year = s.year
+CROSS JOIN sprint_race_result srr
   ON srr.race_id = ra.id AND srr.constructor_id = s.constructor_id
 WHERE srr.driver_id <> ?1 AND srr.position_number IS NOT NULL`;
 
@@ -506,6 +511,7 @@ function mapDriverRow(row: unknown): DriverSummary {
   return {
     id: asString(record.id, "driver id"),
     name: asString(record.name, "driver name"),
+    code: asString(record.code, "driver code"),
     number:
       record.number == null ? null : asString(record.number, "driver number"),
     // 国旗 SVG 以 alpha2 小写命名
@@ -540,6 +546,7 @@ function parseIdentity(
   return {
     id: asString(record.id, "driver id"),
     name: asString(record.name, "driver name"),
+    code: asString(record.code, "driver code"),
     fullName: asString(record.full_name, "driver full name"),
     countryName: asString(record.country_name, "driver country"),
     alpha2Code: asString(record.alpha2_code, "driver flag code"),
@@ -630,7 +637,13 @@ function mergeDriverSeasons(
   const seasons = new Map<number, DriverSeason>();
   const rawRounds = new Map<
     number,
-    { round: number; code: string; name: string; circuitId: string }[]
+    {
+      round: number;
+      code: string;
+      name: string;
+      slug: string;
+      circuitId: string;
+    }[]
   >();
   for (const row of roundRows) {
     const record = asRecord(row, "round row");
@@ -640,6 +653,7 @@ function mergeDriverSeasons(
       round: asNumber(record.round, "round row round"),
       code: asString(record.code, "round code"),
       name: asString(record.name, "round name"),
+      slug: asString(record.slug, "round slug"),
       circuitId: asString(record.circuit_id, "round circuit"),
     });
     rawRounds.set(year, list);

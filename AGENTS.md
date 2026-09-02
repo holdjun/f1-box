@@ -17,6 +17,7 @@
 - `gh` 已登录 holdjun 账号；仓库为 holdjun/f1-box。Cloudflare 资源（Worker、R2）操作前先用 `wrangler whoami` 确认登录状态，有问题找用户处理。
 - wrangler 的 `r2 object` / `kv key` 命令不带参数时默认操作本地模拟存储；操作真实云端必须加 `--remote`。
 - 地址：生产 https://f1-box.com，预览 https://f1-box-preview.rj7c4mhzcp.workers.dev（账号子域 rj7c4mhzcp）。
+- `wrangler dev --remote` 会把 D1/KV/AI/R2 全指向生产环境，且 dev server 响应请求时走真实生产库。用它调试等于用生产配额。用完立即停，否则孤儿进程（父进程退出后仍挂的）会一直连生产、持续烧 D1 每日配额。排查残留：`ps -ef | grep -E 'wrangler dev|workerd|--remote'`，确认 cwd 指向临时目录（如 `/private/tmp/*`）但目录已不存在的进程即孤儿，直接 kill，`lsof -iTCP:<port> -sTCP:LISTEN` 查端口占用。
 - 仓库目前为 public（Actions 免费）；用户 GitHub Pro 生效后改回 private。
 
 # 开发流程
@@ -27,7 +28,8 @@
 4. 验收与合并：用户在 preview 页面查看效果（桌面和 375px 移动端），检查 PR 改动后压缩合并（squash）。PR 作者无法 Approve 自己的 PR，所以不设强制 Approve；合并门槛是 CI 全绿 + 用户亲自点合并。main 是保护分支，禁止直接推送。
 5. 发布：合并到 main 后 deploy 工作流自动发布到 f1-box.com；预览验收已在合并前完成，不再二次审批。
 6. 数据：data-sync.yml 按 f1db 发布节奏轮询 release tag（周日晚到周二每 2 小时、其余每天一次），有变化时全量导入 D1（门禁状态存 D1 `sync_state` 表），也可手动触发；静态资产（logo/国旗/赛道 SVG）在仓库 `public/vendor/`。
-7. 回滚：数据问题重跑 data-sync 或恢复旧 D1 导入；代码问题重新部署旧提交。
+7. D1 每日读取配额（free 档 5M 行/天）极易被读放大撑爆。定位第 1 步用 `wrangler d1 insights f1db -c apps/web/wrangler.jsonc --time-period 12h --sort-by reads`，直接看哪条 SQL 被跑多少次、每次读多少行。两大惯例：`race_data` 去掉复合索引后按 type 分区查询会全表扫（单条约 20 万行），已由 `scripts/f1db-d1-indexes.sql` + 导入末尾 `ANALYZE` 兜底，缺了它会回退成扫全分区；`SELECT year FROM season`（seasonYearsSql）几乎所有页面渲染都会查，天然是高频小读写，若被跑到每秒 1 次的频率，说明有 bot/本地残留 dev server 在轮询，先查流量源再考虑加缓存。改 D1 配额前先杀本地 `wrangler dev --remote` 残留进程，再确认索引是否生效。
+8. 回滚：数据问题重跑 data-sync 或恢复旧 D1 导入；代码问题重新部署旧提交。
 
 # 提交与分支规范
 
