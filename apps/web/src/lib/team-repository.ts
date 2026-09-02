@@ -334,15 +334,15 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
       if (identityRows.results.length === 0) return null;
       const base = parseIdentityRow(identityRows.results[0]);
 
-      const seasons = mergeSeasons(
-        seasonRows.results,
-        roundRows.results,
-        driverRows.results,
-        resultRows.results,
-        sprintRankRows.results,
-        standingRows.results,
-        championRows.results,
-      );
+      const seasons = mergeSeasons({
+        seasons: seasonRows.results,
+        rounds: roundRows.results,
+        drivers: driverRows.results,
+        results: resultRows.results,
+        sprintRanks: sprintRankRows.results,
+        standings: standingRows.results,
+        champions: championRows.results,
+      });
 
       return {
         ...base,
@@ -566,18 +566,21 @@ const EMPTY_STATS = {
   dnfs: 0,
 } as const;
 
-function mergeSeasons(
-  seasonRows: unknown[],
-  roundRows: unknown[],
-  driverRows: unknown[],
-  resultRows: unknown[],
-  sprintRankRows: unknown[],
-  standingRows: unknown[],
-  championRows: unknown[],
-): TeamSeason[] {
+// 七组行全是 unknown[]，位置参数错位时类型系统沉默；具名入参把对齐交给编译器
+interface TeamSeasonRows {
+  seasons: unknown[];
+  rounds: unknown[];
+  drivers: unknown[];
+  results: unknown[];
+  sprintRanks: unknown[];
+  standings: unknown[];
+  champions: unknown[];
+}
+
+function mergeSeasons(rows: TeamSeasonRows): TeamSeason[] {
   const seasons = new Map<number, TeamSeason>();
 
-  for (const row of seasonRows) {
+  for (const row of rows.seasons) {
     const record = rowReader(row, "season row");
     const year = record.num("year");
     seasons.set(year, {
@@ -610,7 +613,7 @@ function mergeSeasons(
       circuitId: string;
     }[]
   >();
-  for (const row of roundRows) {
+  for (const row of rows.rounds) {
     const record = rowReader(row, "round row");
     const year = record.num("year");
     const list = rawRounds.get(year) ?? [];
@@ -625,7 +628,7 @@ function mergeSeasons(
   }
 
   const sprintRanks = new Map<string, number>();
-  for (const row of sprintRankRows) {
+  for (const row of rows.sprintRanks) {
     const record = rowReader(row, "sprint rank row");
     sprintRanks.set(
       `${record.num("year")}:${record.num("round")}:${record.str("driver_id")}`,
@@ -634,7 +637,7 @@ function mergeSeasons(
   }
 
   const results = new Map<string, Map<number, RaceCell>>();
-  for (const row of resultRows) {
+  for (const row of rows.results) {
     const record = rowReader(row, "result row");
     const year = record.num("year");
     const round = record.num("round");
@@ -664,12 +667,12 @@ function mergeSeasons(
 
   // 全部赛季块一次渲染前，先标记车手冠军（名字金色）
   const champions = new Set<string>();
-  for (const row of championRows) {
+  for (const row of rows.champions) {
     const record = rowReader(row, "champion row");
     champions.add(`${record.num("year")}:${record.str("driver_id")}`);
   }
 
-  for (const row of driverRows) {
+  for (const row of rows.drivers) {
     const record = rowReader(row, "driver row");
     const year = record.num("year");
     // 车手行年份必来自 entrants/结果表，与 seasons 同源，无缺口
@@ -687,7 +690,7 @@ function mergeSeasons(
       ),
     });
   }
-  applyStandingRows(seasons, standingRows);
+  applyStandingRows(seasons, rows.standings);
 
   return [...seasons.values()].sort((a, b) => b.year - a.year);
 }

@@ -102,60 +102,79 @@ export function resolveDriver(
   return resolveEntity(db, query, driverRefSql, askAliases.drivers);
 }
 
-function resolveConstructor(
-  db: AskDatabase,
-  query: string,
-): Promise<Resolution> {
-  return resolveEntity(db, query, constructorRefSql, askAliases.constructors);
+// 车手与车队的查询形状完全一致，只差词表与 SQL；加第三类实体时不应再拷一份
+interface EntityKind {
+  // 返回体里包裹统计的键（driver / constructor）
+  key: string;
+  noun: string;
+  identitySql: string;
+  championshipYearsSql: string;
+  pagePrefix: string;
+  aliases: Record<string, string>;
+  refSql: string;
+  missMessage: string;
+  // 车手多一个 starts；f1db 车队表无此列
+  extraColumns: string[];
 }
 
-const missDriver = {
-  found: false,
-  message: "未找到匹配车手，可尝试英文全名",
-} as const;
+const DRIVER_KIND: EntityKind = {
+  key: "driver",
+  noun: "车手",
+  identitySql: driverIdentitySql,
+  championshipYearsSql: driverChampionshipYearsSql,
+  pagePrefix: "/drivers",
+  aliases: askAliases.drivers,
+  refSql: driverRefSql,
+  missMessage: "未找到匹配车手，可尝试英文全名",
+  extraColumns: ["starts"],
+};
 
-const missConstructor = {
-  found: false,
-  message: "未找到匹配车队，可尝试英文名",
-} as const;
+const CONSTRUCTOR_KIND: EntityKind = {
+  key: "constructor",
+  noun: "车队",
+  identitySql: constructorIdentitySql,
+  championshipYearsSql: constructorChampionshipYearsSql,
+  pagePrefix: "/teams",
+  aliases: askAliases.constructors,
+  refSql: constructorRefSql,
+  missMessage: "未找到匹配车队，可尝试英文名",
+  extraColumns: [],
+};
 
-function candidateMessage(kind: string) {
-  return `匹配到多名${kind}，请用户确认是哪一位`;
-}
-
-export async function driverSummary(
+async function entitySummary(
   db: AskDatabase,
   query: string,
+  kind: EntityKind,
 ): Promise<Record<string, unknown>> {
-  const resolution = await resolveDriver(db, query);
-  if (resolution.status === "miss") return missDriver;
+  const miss = { found: false, message: kind.missMessage };
+  const resolution = await resolveEntity(db, query, kind.refSql, kind.aliases);
+  if (resolution.status === "miss") return miss;
   if (resolution.status === "ambiguous") {
     return {
       found: false,
       candidates: resolution.candidates,
-      message: candidateMessage("车手"),
+      message: `匹配到多名${kind.noun}，请用户确认是哪一位`,
     };
   }
-  const identityRows = await db.run(driverIdentitySql, [resolution.ref.id]);
-  if (identityRows.length === 0) return missDriver;
-  const record = rowReader(identityRows[0], "driver identity row");
-  const yearRows = await db.run(driverChampionshipYearsSql, [
-    resolution.ref.id,
-  ]);
-  const championshipYears = yearRows.map((row) =>
-    rowReader(row, "driver championship row").num("year"),
-  );
+  const identityRows = await db.run(kind.identitySql, [resolution.ref.id]);
+  if (identityRows.length === 0) return miss;
+  const record = rowReader(identityRows[0], `${kind.key} identity row`);
+  const yearRows = await db.run(kind.championshipYearsSql, [resolution.ref.id]);
   const id = record.str("id");
   return {
     found: true,
-    driver: {
+    [kind.key]: {
       id,
       name: record.str("name"),
       fullName: record.str("full_name"),
       country: record.str("country_name"),
-      championshipYears,
+      championshipYears: yearRows.map((row) =>
+        rowReader(row, `${kind.key} championship row`).num("year"),
+      ),
       entries: record.num("entries"),
-      starts: record.num("starts"),
+      ...Object.fromEntries(
+        kind.extraColumns.map((column) => [column, record.num(column)]),
+      ),
       wins: record.num("wins"),
       podiums: record.num("podiums"),
       poles: record.num("poles"),
@@ -163,53 +182,22 @@ export async function driverSummary(
       points: record.num("points"),
       bestChampionshipPosition: record.numOrNull("best_position"),
     },
-    pagePath: `/drivers/${id}`,
+    pagePath: `${kind.pagePrefix}/${id}`,
   };
 }
 
-export async function constructorSummary(
+export function driverSummary(
   db: AskDatabase,
   query: string,
 ): Promise<Record<string, unknown>> {
-  const resolution = await resolveConstructor(db, query);
-  if (resolution.status === "miss") return missConstructor;
-  if (resolution.status === "ambiguous") {
-    return {
-      found: false,
-      candidates: resolution.candidates,
-      message: candidateMessage("车队"),
-    };
-  }
-  const identityRows = await db.run(constructorIdentitySql, [
-    resolution.ref.id,
-  ]);
-  if (identityRows.length === 0) return missConstructor;
-  const record = rowReader(identityRows[0], "constructor identity row");
-  const yearRows = await db.run(constructorChampionshipYearsSql, [
-    resolution.ref.id,
-  ]);
-  const championshipYears = yearRows.map((row) =>
-    rowReader(row, "constructor championship row").num("year"),
-  );
-  const id = record.str("id");
-  return {
-    found: true,
-    constructor: {
-      id,
-      name: record.str("name"),
-      fullName: record.str("full_name"),
-      country: record.str("country_name"),
-      championshipYears,
-      entries: record.num("entries"),
-      wins: record.num("wins"),
-      podiums: record.num("podiums"),
-      poles: record.num("poles"),
-      fastestLaps: record.num("fastest_laps"),
-      points: record.num("points"),
-      bestChampionshipPosition: record.numOrNull("best_position"),
-    },
-    pagePath: `/teams/${id}`,
-  };
+  return entitySummary(db, query, DRIVER_KIND);
+}
+
+export function constructorSummary(
+  db: AskDatabase,
+  query: string,
+): Promise<Record<string, unknown>> {
+  return entitySummary(db, query, CONSTRUCTOR_KIND);
 }
 
 export const seasonCheckSql = "SELECT 1 AS ok FROM season WHERE year = ?1";
