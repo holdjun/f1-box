@@ -20,11 +20,12 @@ const INDEX_SQL = path.join(repoRoot, "scripts/f1db-d1-indexes.sql");
 const DUMP_SCRIPT = path.join(repoRoot, "scripts/f1db-d1-dump.sh");
 const IMPORT_SCRIPT = path.join(repoRoot, "scripts/f1db-d1-import.sh");
 
-// 复刻 f1db 上游 schema 的关键事实：只有主键/唯一约束索引，一条二级索引都没有。
-// race_data 主键 (race_id, type, position_display_order) 已覆盖按 race+type 的过滤，
-// 但 race.circuit_id 无索引，且 race_data 无 (race_id, type, constructor_id) 探针。
-// 夹具照抄这套约束，才能验证 scripts/f1db-d1-indexes.sql 与查询本身的连接顺序
-// 真的改变了生产上的查询计划。
+// 复刻 f1db 上游 schema 的关键事实：除主键/唯一约束外，每张表的每个外键列与
+// 大多数普通列上都有单列索引（race_data 10+ 条、race 11 条）。这些索引正是规划器
+// 退化的来源——rcda_type_idx 让它误以为可以从 type 分区驱动，从而扫满整个
+// FASTEST_LAP 分区。夹具必须带上它们，否则计划断言测的是生产上不存在的世界。
+// 核对方式：scripts/f1db-d1-dump.sh 拉的 f1db-sqlite.zip 里
+// SELECT sql FROM sqlite_master WHERE type='index' AND tbl_name='race_data'。
 const FIXTURE_SCHEMA = `
 CREATE TABLE race (
   id INTEGER NOT NULL, year INTEGER NOT NULL, round INTEGER NOT NULL,
@@ -32,12 +33,18 @@ CREATE TABLE race (
   CONSTRAINT race_pk PRIMARY KEY (id),
   CONSTRAINT race_year_round_uk UNIQUE (year, round)
 );
+CREATE INDEX race_year_idx ON race (year);
+CREATE INDEX race_round_idx ON race (round);
+CREATE INDEX race_grand_prix_id_idx ON race (grand_prix_id);
+CREATE INDEX race_circuit_id_idx ON race (circuit_id);
 CREATE TABLE circuit (id TEXT NOT NULL, total_races_held INTEGER NOT NULL, CONSTRAINT circuit_pk PRIMARY KEY (id));
 CREATE TABLE country (id TEXT NOT NULL, alpha2_code TEXT NOT NULL, CONSTRAINT country_pk PRIMARY KEY (id));
 CREATE TABLE driver (
   id TEXT NOT NULL, name TEXT NOT NULL, nationality_country_id TEXT NOT NULL,
   CONSTRAINT driver_pk PRIMARY KEY (id)
 );
+CREATE INDEX drvr_name_idx ON driver (name);
+CREATE INDEX drvr_nationality_country_id_idx ON driver (nationality_country_id);
 CREATE TABLE race_data (
   race_id INTEGER NOT NULL, type TEXT NOT NULL, position_display_order INTEGER NOT NULL,
   position_number INTEGER, position_text TEXT, driver_id TEXT, constructor_id TEXT,
@@ -45,6 +52,13 @@ CREATE TABLE race_data (
   fastest_lap_time TEXT, fastest_lap_time_millis INTEGER,
   CONSTRAINT rcda_pk PRIMARY KEY (race_id, type, position_display_order)
 );
+CREATE INDEX rcda_race_id_idx ON race_data (race_id);
+CREATE INDEX rcda_type_idx ON race_data (type);
+CREATE INDEX rcda_position_display_order_idx ON race_data (position_display_order);
+CREATE INDEX rcda_position_number_idx ON race_data (position_number);
+CREATE INDEX rcda_position_text_idx ON race_data (position_text);
+CREATE INDEX rcda_driver_id_idx ON race_data (driver_id);
+CREATE INDEX rcda_constructor_id_idx ON race_data (constructor_id);
 CREATE VIEW fastest_lap AS
 SELECT race_id, driver_id, fastest_lap_time AS time, fastest_lap_time_millis AS time_millis
 FROM race_data WHERE type = 'FASTEST_LAP';
@@ -136,21 +150,37 @@ describe("D1 查询计划", () => {
     expect(readFileSync(IMPORT_SCRIPT, "utf8")).toContain("ANALYZE;");
   });
 
-  it("race(circuit_id, year) 让比赛页的赛道查询不再全扫 race", () => {
-    // 基线：上游 schema 下两条查询都得扫遍 race
-    expect(basePlans.recordLap).toContain("SCAN ra");
+  it("race(circuit_id, year) 让比赛页的赛道查询走覆盖索引", () => {
+    // 基线：上游只有 race_circuit_id_idx（单列），取到 year 还要回表
+    expect(basePlans.recordLap).not.toContain("idx_race_circuit_year");
     expect(basePlans.circuitInfo).not.toContain("idx_race_circuit_year");
 
-    const recordLapPlan = plan(dbPath, recordLapSql);
-    expect(recordLapPlan).toContain(
-      "SEARCH ra USING COVERING INDEX idx_race_circuit_year",
-    );
-    expect(recordLapPlan).not.toContain("SCAN");
-    // race_data 按 (race_id, type) 的探针由上游主键自动索引提供，无需额外索引
-    expect(recordLapPlan).toContain("SEARCH race_data USING INDEX");
     expect(plan(dbPath, circuitInfoSql)).toContain(
       "SEARCH ra2 USING COVERING INDEX idx_race_circuit_year",
     );
+  });
+
+  // 生产退化的形态是规划器从 race_data 的 rcda_type_idx 起步，把整个 FASTEST_LAP
+  // 分区拉出来回表（2026-09-02 实测 75222 行/次，96 次调用烧掉 722 万行日配额）。
+  // 触发条件是缺 ANALYZE 统计，而合成夹具的数据分布复现不出真实规划器的这个决策——
+  // 别再试图让夹具"重现故障"，它做不到。这里锁定的是不依赖数据分布的结构性属性：
+  // CROSS JOIN 禁止重排连接顺序，所以计划恒定从 ra 起步、与统计信息无关。
+  // 真实数据上的验证（配额恢复后可重跑）：
+  //   curl -L github.com/f1db/f1db/releases/latest/download/f1db-sqlite.zip 解出 f1db.db，
+  //   套上 scripts/f1db-d1-indexes.sql 但不跑 ANALYZE，EXPLAIN QUERY PLAN 该查询。
+  //   改写前是 SEARCH race_data USING INDEX rcda_type_idx，改写后是
+  //   SEARCH ra USING COVERING INDEX idx_race_circuit_year。
+  it("纪录圈查询固定从 race 驱动，不随 ANALYZE 统计摇摆", () => {
+    for (const db of [dbPath, unanalyzedPath]) {
+      const recordLapPlan = plan(db, recordLapSql);
+      expect(recordLapPlan).toContain(
+        "SEARCH ra USING COVERING INDEX idx_race_circuit_year",
+      );
+      expect(recordLapPlan).not.toContain("rcda_type_idx");
+      expect(recordLapPlan).not.toContain("SCAN");
+      // race_data 按 (race_id, type) 的探针由上游主键自动索引提供，无需额外索引
+      expect(recordLapPlan).toContain("SEARCH race_data USING INDEX");
+    }
   });
 
   it("纪录圈查询取到全场次最快的一圈", () => {

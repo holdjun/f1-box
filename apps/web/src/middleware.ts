@@ -32,5 +32,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
       "public, max-age=60, stale-while-revalidate=300",
     );
   }
+  // 预览 worker 与本地跑的是和生产相同的内容，被收录即构成重复内容。
+  // robots.txt 的 Disallow 只拦抓取、拦不住索引，X-Robots-Tag 才是索引开关。
+  // 边缘命中时 Worker 不执行，故必须随响应一同写入缓存副本
+  if (context.url.hostname !== "f1-box.com") {
+    response.headers.set("X-Robots-Tag", "noindex");
+  }
   return response;
 });

@@ -23,8 +23,9 @@ function makeContext(
   status = 200,
   headers: Record<string, string> = {},
   cacheEnabled = true,
+  host = "f1-box.com",
 ) {
-  const request = new Request(`https://example.com${path}`, { method });
+  const request = new Request(`https://${host}${path}`, { method });
   const locals: { app?: unknown } = {};
   // 与运行时 CacheLike 对齐：AstroCache.enabled=true，dev 的 NoopAstroCache 为 false
   const cache = { set: vi.fn(), enabled: cacheEnabled };
@@ -43,6 +44,7 @@ async function run(
     status?: number;
     headers?: Record<string, string>;
     cacheEnabled?: boolean;
+    host?: string;
   } = {},
 ) {
   const { context, next, cache } = makeContext(
@@ -51,6 +53,7 @@ async function run(
     opts.status,
     opts.headers,
     opts.cacheEnabled,
+    opts.host,
   );
   const result = await onRequest(context, next);
   // MiddlewareHandler 返回类型含 void，实际执行路径恒返回 Response
@@ -161,6 +164,48 @@ describe("middleware 浏览器缓存头", () => {
         opts.status ? { status: opts.status, method: opts.method } : opts,
       );
       expect(response.headers.get("Cache-Control")).toBeNull();
+    }
+  });
+});
+
+// robots.txt 的 Disallow 只拦抓取，拦不住索引；预览 worker 与生产内容相同，
+// 被收录即构成重复内容。X-Robots-Tag 是唯一能拒绝索引的信号
+describe("middleware 非生产域名拒绝索引", () => {
+  it("预览 worker 域名带 noindex", async () => {
+    const { response } = await run("/racing/2026", {
+      host: "f1-box-preview.rj7c4mhzcp.workers.dev",
+    });
+    expect(response.headers.get("X-Robots-Tag")).toBe("noindex");
+  });
+
+  it("本地开发域名带 noindex", async () => {
+    const { response } = await run("/racing/2026", {
+      host: "localhost",
+      cacheEnabled: false,
+    });
+    expect(response.headers.get("X-Robots-Tag")).toBe("noindex");
+  });
+
+  it("生产域名不带 noindex", async () => {
+    const { response } = await run("/racing/2026", { host: "f1-box.com" });
+    expect(response.headers.get("X-Robots-Tag")).toBeNull();
+  });
+
+  // 边缘命中时 Worker 不执行，头必须随响应一同进缓存；API 与错误页同样适用
+  it("API 与非 2xx 响应也带 noindex", async () => {
+    for (const opts of [
+      { path: "/api/health", host: "f1-box-preview.rj7c4mhzcp.workers.dev" },
+      {
+        path: "/x",
+        status: 404,
+        host: "f1-box-preview.rj7c4mhzcp.workers.dev",
+      },
+    ]) {
+      const { response } = await run(opts.path, {
+        status: opts.status,
+        host: opts.host,
+      });
+      expect(response.headers.get("X-Robots-Tag")).toBe("noindex");
     }
   });
 });
