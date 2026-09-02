@@ -19,6 +19,7 @@
 - 地址：生产 https://f1-box.com，预览 https://f1-box-preview.rj7c4mhzcp.workers.dev（账号子域 rj7c4mhzcp）。
 - `wrangler dev --remote` 会把 D1/KV/AI/R2 全指向生产环境，且 dev server 响应请求时走真实生产库。用它调试等于用生产配额。用完立即停，否则孤儿进程（父进程退出后仍挂的）会一直连生产、持续烧 D1 每日配额。排查残留：`ps -ef | grep -E 'wrangler dev|workerd|--remote'`，确认 cwd 指向临时目录（如 `/private/tmp/*`）但目录已不存在的进程即孤儿，直接 kill，`lsof -iTCP:<port> -sTCP:LISTEN` 查端口占用。
 - 仓库目前为 public（Actions 免费）；用户 GitHub Pro 生效后改回 private。
+- `robots.txt` 不在仓库里，由 Cloudflare zone 的 managed robots.txt 开关生成（Security Settings → Bot traffic），名单随 Cloudflare 更新：训练型爬虫全拒，AI 搜索与用户触发型放行。要加自定义规则（如 Sitemap）就在 `apps/web/public/` 放回文件，Cloudflare 会把托管段前置拼接。预览 worker 在 workers.dev 上没有 zone、拿不到该文件，防收录靠 middleware 的 `X-Robots-Tag: noindex`。
 
 # 开发流程
 
