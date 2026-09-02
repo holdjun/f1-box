@@ -6,3 +6,6 @@ CREATE INDEX IF NOT EXISTS idx_rd_driver_type ON race_data (driver_id, type);
 -- race 上游只有 PK(id) 与 UNIQUE(year, round)：比赛页的赛道纪录圈与首次举办年份按
 -- circuit_id 过滤，缺索引时全扫 1171 行；带上 year 让两条查询都走覆盖索引，不再回表。
 CREATE INDEX IF NOT EXISTS idx_race_circuit_year ON race (circuit_id, year);
+-- 车手页队友对比按 (race_id, type, constructor_id) 探针取同场同队成绩；只有前两列时
+-- 每场要读满 20 行成绩再过滤车队，20 个赛季的车手一次多读近万行。
+CREATE INDEX IF NOT EXISTS idx_rd_race_type_constructor ON race_data (race_id, type, constructor_id);

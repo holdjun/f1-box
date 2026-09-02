@@ -273,8 +273,11 @@ WHERE srr.driver_id = ?1 AND srr.position_number IS NOT NULL`;
 
 // 队友：与该车手同年同队实际参赛的其他车手。门槛用实际比赛结果推导的 stint，
 // 而非 season_entrant_driver——替补登场常无正式阵容行（如 Bearman 2024 代打），
-// 按阵容过滤会丢掉这些队友。结果按站取最佳
-const teammateResultsSql = `
+// 按阵容过滤会丢掉这些队友。结果按站取最佳。
+// CROSS JOIN 固定连接顺序（stint → 该年的 race → 该场该队的成绩）。规划器自己排时，
+// 只有跑过 ANALYZE 才排得对；没有统计信息就会先按 constructor_id 拉出该车队史上
+// 全部成绩再用年份过滤，Hamilton 一次要读 5 万行。export 供查询计划测试
+export const teammateResultsSql = `
 WITH stints AS (
   SELECT DISTINCT ra.year, rr.constructor_id
   FROM race ra
@@ -286,8 +289,8 @@ SELECT ra.year, ra.round, rr.driver_id, d.name, cn.alpha2_code,
   rr.position_text, rr.pole_position, rr.fastest_lap, rr.reason_retired,
   rr.position_number
 FROM stints s
-JOIN race ra ON ra.year = s.year
-JOIN race_result rr
+CROSS JOIN race ra ON ra.year = s.year
+CROSS JOIN race_result rr
   ON rr.race_id = ra.id AND rr.constructor_id = s.constructor_id
 JOIN driver d ON d.id = rr.driver_id
 LEFT JOIN country cn ON cn.id = d.nationality_country_id
@@ -303,8 +306,8 @@ WITH stints AS (
 )
 SELECT ra.year, ra.round, srr.driver_id, srr.position_number
 FROM stints s
-JOIN race ra ON ra.year = s.year
-JOIN sprint_race_result srr
+CROSS JOIN race ra ON ra.year = s.year
+CROSS JOIN sprint_race_result srr
   ON srr.race_id = ra.id AND srr.constructor_id = s.constructor_id
 WHERE srr.driver_id <> ?1 AND srr.position_number IS NOT NULL`;
 
