@@ -1,4 +1,4 @@
-import { asNumber, asRecord, asString } from "./db-parse.js";
+import { type RowReader, rowReader } from "./db-parse.js";
 import type { RaceTabKey } from "./routing.js";
 import { mapSeasonYearRows, seasonYearsSql } from "./season-years.js";
 
@@ -257,43 +257,31 @@ WHERE ra.year = ?1
 ORDER BY ra.round`;
 
 function mapRaceSummary(row: unknown): RaceSummary {
-  const r = asRecord(row, "race summary");
+  const r = rowReader(row, "race summary");
   return {
-    round: asNumber(r.round, "round"),
-    slug: asString(r.slug, "slug"),
-    name: asString(r.name, "grand prix name"),
-    raceName: asString(r.race_name, "race name"),
-    alpha2Code: asString(r.alpha2_code, "alpha2 code"),
-    countryName: asString(r.country_name, "country name"),
-    date: asString(r.date, "race date"),
-    time: r.time === null ? null : asString(r.time, "race time"),
-    laps: asNumber(r.laps, "laps"),
-    circuitId: asString(r.circuit_id, "circuit id"),
-    circuitLayoutId: asString(r.circuit_layout_id, "circuit layout id"),
-    circuitName: asString(r.circuit_name, "circuit name"),
-    circuitPlace: asString(r.circuit_place, "circuit place"),
+    round: r.num("round"),
+    slug: r.str("slug"),
+    name: r.str("name"),
+    raceName: r.str("race_name"),
+    alpha2Code: r.str("alpha2_code"),
+    countryName: r.str("country_name"),
+    date: r.str("date"),
+    time: r.strOrNull("time"),
+    laps: r.num("laps"),
+    circuitId: r.str("circuit_id"),
+    circuitLayoutId: r.str("circuit_layout_id"),
+    circuitName: r.str("circuit_name"),
+    circuitPlace: r.str("circuit_place"),
     sessions: buildSessions(r),
     podium: [],
-    winnerName:
-      r.winner_name === null ? null : asString(r.winner_name, "winner name"),
-    winnerCode:
-      r.winner_code === null ? null : asString(r.winner_code, "winner code"),
-    winnerDriverId:
-      r.winner_driver_id === null
-        ? null
-        : asString(r.winner_driver_id, "winner driver id"),
-    winnerTeamId:
-      r.winner_team_id === null
-        ? null
-        : asString(r.winner_team_id, "winner team id"),
-    winnerTeamName:
-      r.winner_team_name === null
-        ? null
-        : asString(r.winner_team_name, "winner team name"),
-    winnerTime:
-      r.winner_time === null ? null : asString(r.winner_time, "winner time"),
-    poleName: r.pole_name === null ? null : asString(r.pole_name, "pole name"),
-    poleCode: r.pole_code === null ? null : asString(r.pole_code, "pole code"),
+    winnerName: r.strOrNull("winner_name"),
+    winnerCode: r.strOrNull("winner_code"),
+    winnerDriverId: r.strOrNull("winner_driver_id"),
+    winnerTeamId: r.strOrNull("winner_team_id"),
+    winnerTeamName: r.strOrNull("winner_team_name"),
+    winnerTime: r.strOrNull("winner_time"),
+    poleName: r.strOrNull("pole_name"),
+    poleCode: r.strOrNull("pole_code"),
   };
 }
 
@@ -423,37 +411,31 @@ WHERE scs.year = ?1
 ORDER BY scs.position_display_order`;
 
 function mapDriverStandingRow(row: unknown): DriverStandingRow {
-  const r = asRecord(row, "driver standing row");
+  const r = rowReader(row, "driver standing row");
   return {
-    position:
-      r.position_number === null
-        ? null
-        : asNumber(r.position_number, "standing position"),
-    positionText: asString(r.position_text, "standing position text"),
-    driverId: asString(r.driver_id, "driver id"),
-    driverName: asString(r.driver_name, "driver name"),
-    driverCode: asString(r.driver_code, "driver code"),
-    points: asNumber(r.points, "standing points"),
-    wins: asNumber(r.wins, "standing wins"),
+    position: r.numOrNull("position_number"),
+    positionText: r.str("position_text"),
+    driverId: r.str("driver_id"),
+    driverName: r.str("driver_name"),
+    driverCode: r.str("driver_code"),
+    points: r.num("points"),
+    wins: r.num("wins"),
   };
 }
 
 function mapTeamStandingRow(row: unknown): TeamStandingRow {
-  const r = asRecord(row, "team standing row");
+  const r = rowReader(row, "team standing row");
   return {
-    position:
-      r.position_number === null
-        ? null
-        : asNumber(r.position_number, "standing position"),
-    positionText: asString(r.position_text, "standing position text"),
-    teamId: asString(r.team_id, "team id"),
-    teamName: asString(r.team_name, "team name"),
-    points: asNumber(r.points, "standing points"),
-    wins: asNumber(r.wins, "standing wins"),
+    position: r.numOrNull("position_number"),
+    positionText: r.str("position_text"),
+    teamId: r.str("team_id"),
+    teamName: r.str("team_name"),
+    points: r.num("points"),
+    wins: r.num("wins"),
   };
 }
 
-function buildSessions(r: Record<string, unknown>): RaceSession[] {
+function buildSessions(r: RowReader): RaceSession[] {
   const defs: [string, string, string, string][] = [
     [
       "practice-1",
@@ -485,9 +467,9 @@ function buildSessions(r: Record<string, unknown>): RaceSession[] {
   ];
   const sessions: RaceSession[] = [];
   for (const [key, label, dateKey, timeKey] of defs) {
-    const date = r[dateKey];
-    if (date === null || date === undefined) continue;
-    const time = r[timeKey] ?? "00:00";
+    if (r.isNull(dateKey)) continue;
+    const date = r.str(dateKey);
+    const time = r.strOrNull(timeKey) ?? "00:00";
     sessions.push({ key, label, startsAtUtc: `${date}T${time}:00Z` });
   }
   // defs 顺序是字段映射序；sprint 周末 Quali 在 Sprint 之后，按开始时间排回真实顺序
@@ -499,26 +481,26 @@ function buildSessions(r: Record<string, unknown>): RaceSession[] {
 function mapRaceMeta(
   row: unknown,
 ): Omit<RaceMeta, "totalRacesHeld" | "firstGrandPrix" | "recordLap"> {
-  const r = asRecord(row, "race meta");
+  const r = rowReader(row, "race meta");
   return {
-    year: asNumber(r.year, "race year"),
-    round: asNumber(r.round, "race round"),
-    slug: asString(r.slug, "race slug"),
-    name: asString(r.name, "race name"),
-    officialName: asString(r.official_name, "race official name"),
-    date: asString(r.date, "race date"),
-    raceTime: r.time === null ? null : asString(r.time, "race time"),
-    laps: asNumber(r.laps, "race laps"),
-    courseLength: asNumber(r.course_length, "course length"),
-    distance: asNumber(r.distance, "race distance"),
-    turns: asNumber(r.turns, "race turns"),
-    direction: titleCase(asString(r.direction, "race direction")),
-    circuitId: asString(r.circuit_id, "circuit id"),
-    circuitLayoutId: asString(r.circuit_layout_id, "circuit layout"),
-    circuitFullName: asString(r.circuit_full_name, "circuit full name"),
-    circuitPlace: asString(r.circuit_place, "circuit place"),
-    countryName: asString(r.country_name, "country name"),
-    alpha2Code: asString(r.alpha2_code, "alpha2 code"),
+    year: r.num("year"),
+    round: r.num("round"),
+    slug: r.str("slug"),
+    name: r.str("name"),
+    officialName: r.str("official_name"),
+    date: r.str("date"),
+    raceTime: r.strOrNull("time"),
+    laps: r.num("laps"),
+    courseLength: r.num("course_length"),
+    distance: r.num("distance"),
+    turns: r.num("turns"),
+    direction: titleCase(r.str("direction")),
+    circuitId: r.str("circuit_id"),
+    circuitLayoutId: r.str("circuit_layout_id"),
+    circuitFullName: r.str("circuit_full_name"),
+    circuitPlace: r.str("circuit_place"),
+    countryName: r.str("country_name"),
+    alpha2Code: r.str("alpha2_code"),
     sessions: buildSessions(r),
   };
 }
@@ -528,11 +510,10 @@ function mapCircuitInfo(
   circuitRow: unknown,
   recordLapRow: unknown,
 ): Pick<RaceMeta, "totalRacesHeld" | "firstGrandPrix" | "recordLap"> {
-  const r = asRecord(circuitRow, "circuit info row");
+  const r = rowReader(circuitRow, "circuit info row");
   return {
-    totalRacesHeld: asNumber(r.total_races_held, "races held"),
-    firstGrandPrix:
-      r.first_gp == null ? null : asNumber(r.first_gp, "first grand prix"),
+    totalRacesHeld: r.num("total_races_held"),
+    firstGrandPrix: r.numOrNull("first_gp"),
     recordLap: recordLapRow == null ? null : mapRecordLapRow(recordLapRow),
   };
 }
@@ -542,11 +523,11 @@ function mapRecordLapRow(value: unknown): {
   driverName: string;
   year: number;
 } {
-  const record = asRecord(value, "record lap row");
+  const record = rowReader(value, "record lap row");
   return {
-    time: asString(record.time, "record lap time"),
-    driverName: asString(record.driver_name, "record lap driver"),
-    year: asNumber(record.year, "record lap year"),
+    time: record.str("time"),
+    driverName: record.str("driver_name"),
+    year: record.num("year"),
   };
 }
 
@@ -560,102 +541,86 @@ function titleCase(value: string): string {
 }
 
 // 各 tab 行共有的车手/车队字段
-function mapDriverFields(r: Record<string, unknown>) {
+function mapDriverFields(r: RowReader) {
   return {
-    driverNumber:
-      r.driver_number === null
-        ? null
-        : asString(r.driver_number, "driver number"),
-    driverId: asString(r.driver_id, "driver id"),
-    driverName: asString(r.driver_name, "driver name"),
-    driverCode: asString(r.driver_code, "driver code"),
-    constructorId: asString(r.constructor_id, "constructor id"),
-    constructorName: asString(r.constructor_name, "constructor name"),
+    driverNumber: r.strOrNull("driver_number"),
+    driverId: r.str("driver_id"),
+    driverName: r.str("driver_name"),
+    driverCode: r.str("driver_code"),
+    constructorId: r.str("constructor_id"),
+    constructorName: r.str("constructor_name"),
   };
 }
 
-function mapPositionFields(r: Record<string, unknown>) {
+function mapPositionFields(r: RowReader) {
   return {
-    position:
-      r.position_number === null
-        ? null
-        : asNumber(r.position_number, "position"),
-    positionText: asString(r.position_text, "position text"),
+    position: r.numOrNull("position_number"),
+    positionText: r.str("position_text"),
   };
 }
 
 function mapRaceResultRow(row: unknown): RaceResultRow {
-  const r = asRecord(row, "race result row");
+  const r = rowReader(row, "race result row");
   return {
     ...mapPositionFields(r),
     ...mapDriverFields(r),
-    laps: r.laps === null ? null : asNumber(r.laps, "laps"),
-    time: r.time === null ? null : asString(r.time, "time"),
-    retiredReason:
-      r.reason_retired === null
-        ? null
-        : asString(r.reason_retired, "retired reason"),
-    gap: r.gap === null ? null : asString(r.gap, "gap"),
-    points: r.points === null ? null : asNumber(r.points, "points"),
+    laps: r.numOrNull("laps"),
+    time: r.strOrNull("time"),
+    retiredReason: r.strOrNull("reason_retired"),
+    gap: r.strOrNull("gap"),
+    points: r.numOrNull("points"),
   };
 }
 
 function mapQualifyingRow(row: unknown): QualifyingRow {
-  const r = asRecord(row, "qualifying row");
+  const r = rowReader(row, "qualifying row");
   return {
     ...mapPositionFields(r),
     ...mapDriverFields(r),
-    q1: r.q1 === null ? null : asString(r.q1, "q1"),
-    q2: r.q2 === null ? null : asString(r.q2, "q2"),
-    q3: r.q3 === null ? null : asString(r.q3, "q3"),
-    laps: r.laps === null ? null : asNumber(r.laps, "laps"),
+    q1: r.strOrNull("q1"),
+    q2: r.strOrNull("q2"),
+    q3: r.strOrNull("q3"),
+    laps: r.numOrNull("laps"),
   };
 }
 
 function mapGridRow(row: unknown): GridRow {
-  const r = asRecord(row, "starting grid row");
+  const r = rowReader(row, "starting grid row");
   return {
     ...mapPositionFields(r),
     ...mapDriverFields(r),
-    time: r.time === null ? null : asString(r.time, "time"),
+    time: r.strOrNull("time"),
   };
 }
 
 function mapFastestLapRow(row: unknown, courseLength: number): FastestLapRow {
-  const r = asRecord(row, "fastest lap row");
+  const r = rowReader(row, "fastest lap row");
   return {
     ...mapPositionFields(r),
     ...mapDriverFields(r),
-    lap: r.lap === null ? null : asNumber(r.lap, "lap"),
-    time: r.time === null ? null : asString(r.time, "time"),
-    avgSpeedKph: formatAvgSpeedKph(
-      courseLength,
-      r.time_millis === null ? null : asNumber(r.time_millis, "lap millis"),
-    ),
+    lap: r.numOrNull("lap"),
+    time: r.strOrNull("time"),
+    avgSpeedKph: formatAvgSpeedKph(courseLength, r.numOrNull("time_millis")),
   };
 }
 
 function mapPitStopRow(row: unknown): PitStopRow {
-  const r = asRecord(row, "pit stop row");
+  const r = rowReader(row, "pit stop row");
   return {
     ...mapDriverFields(r),
-    stops: asNumber(r.stops, "stops"),
-    totalSeconds: formatSeconds(
-      r.total_millis === null
-        ? null
-        : asNumber(r.total_millis, "pit stop millis"),
-    ),
+    stops: r.num("stops"),
+    totalSeconds: formatSeconds(r.numOrNull("total_millis")),
   };
 }
 
 function mapPracticeRow(row: unknown): PracticeRow {
-  const r = asRecord(row, "practice row");
+  const r = rowReader(row, "practice row");
   return {
     ...mapPositionFields(r),
     ...mapDriverFields(r),
-    time: r.time === null ? null : asString(r.time, "time"),
-    gap: r.gap === null ? null : asString(r.gap, "gap"),
-    laps: r.laps === null ? null : asNumber(r.laps, "laps"),
+    time: r.strOrNull("time"),
+    gap: r.strOrNull("gap"),
+    laps: r.numOrNull("laps"),
   };
 }
 
@@ -691,23 +656,14 @@ export function createRaceResultsRepository(
       if (!byRound.has(race.round)) byRound.set(race.round, race);
     }
     for (const row of podiumRows.results) {
-      const r = asRecord(row, "podium row");
-      const race = byRound.get(asNumber(r.round, "round"));
+      const r = rowReader(row, "podium row");
+      const race = byRound.get(r.num("round"));
       if (!race) continue;
-      const position = asNumber(r.position_number, "position");
+      const position = r.num("position_number");
       race.podium[position - 1] = {
-        driverCode:
-          r.driver_code === null
-            ? null
-            : asString(r.driver_code, "driver code"),
-        constructorId:
-          r.constructor_id === null
-            ? null
-            : asString(r.constructor_id, "constructor id"),
-        time:
-          r.display_time === null
-            ? null
-            : asString(r.display_time, "display time"),
+        driverCode: r.strOrNull("driver_code"),
+        constructorId: r.strOrNull("constructor_id"),
+        time: r.strOrNull("display_time"),
       };
     }
     return [...byRound.values()];

@@ -1,4 +1,4 @@
-import { asNumber, asRecord, asString } from "../db-parse.js";
+import { rowReader } from "../db-parse.js";
 import { mergeStanding, type StandingTotal } from "../standings-merge.js";
 import { askAliases, resolveAlias } from "./aliases.js";
 import type { AskDatabase } from "./db.js";
@@ -60,10 +60,10 @@ ORDER BY year`;
 
 function mapRefs(rows: unknown[]): EntityRef[] {
   return rows.map((row) => {
-    const record = asRecord(row, "entity ref row");
+    const record = rowReader(row, "entity ref row");
     return {
-      id: asString(record.id, "entity ref id"),
-      name: asString(record.name, "entity ref name"),
+      id: record.str("id"),
+      name: record.str("name"),
     };
   });
 }
@@ -138,36 +138,30 @@ export async function driverSummary(
   }
   const identityRows = await db.run(driverIdentitySql, [resolution.ref.id]);
   if (identityRows.length === 0) return missDriver;
-  const record = asRecord(identityRows[0], "driver identity row");
+  const record = rowReader(identityRows[0], "driver identity row");
   const yearRows = await db.run(driverChampionshipYearsSql, [
     resolution.ref.id,
   ]);
   const championshipYears = yearRows.map((row) =>
-    asNumber(
-      asRecord(row, "driver championship row").year,
-      "championship year",
-    ),
+    rowReader(row, "driver championship row").num("year"),
   );
-  const id = asString(record.id, "driver id");
+  const id = record.str("id");
   return {
     found: true,
     driver: {
       id,
-      name: asString(record.name, "driver name"),
-      fullName: asString(record.full_name, "driver full name"),
-      country: asString(record.country_name, "driver country"),
+      name: record.str("name"),
+      fullName: record.str("full_name"),
+      country: record.str("country_name"),
       championshipYears,
-      entries: asNumber(record.entries, "driver entries"),
-      starts: asNumber(record.starts, "driver starts"),
-      wins: asNumber(record.wins, "driver wins"),
-      podiums: asNumber(record.podiums, "driver podiums"),
-      poles: asNumber(record.poles, "driver poles"),
-      fastestLaps: asNumber(record.fastest_laps, "driver fastest laps"),
-      points: asNumber(record.points, "driver points"),
-      bestChampionshipPosition:
-        record.best_position === null
-          ? null
-          : asNumber(record.best_position, "driver best position"),
+      entries: record.num("entries"),
+      starts: record.num("starts"),
+      wins: record.num("wins"),
+      podiums: record.num("podiums"),
+      poles: record.num("poles"),
+      fastestLaps: record.num("fastest_laps"),
+      points: record.num("points"),
+      bestChampionshipPosition: record.numOrNull("best_position"),
     },
     pagePath: `/drivers/${id}`,
   };
@@ -190,35 +184,29 @@ export async function constructorSummary(
     resolution.ref.id,
   ]);
   if (identityRows.length === 0) return missConstructor;
-  const record = asRecord(identityRows[0], "constructor identity row");
+  const record = rowReader(identityRows[0], "constructor identity row");
   const yearRows = await db.run(constructorChampionshipYearsSql, [
     resolution.ref.id,
   ]);
   const championshipYears = yearRows.map((row) =>
-    asNumber(
-      asRecord(row, "constructor championship row").year,
-      "championship year",
-    ),
+    rowReader(row, "constructor championship row").num("year"),
   );
-  const id = asString(record.id, "constructor id");
+  const id = record.str("id");
   return {
     found: true,
     constructor: {
       id,
-      name: asString(record.name, "constructor name"),
-      fullName: asString(record.full_name, "constructor full name"),
-      country: asString(record.country_name, "constructor country"),
+      name: record.str("name"),
+      fullName: record.str("full_name"),
+      country: record.str("country_name"),
       championshipYears,
-      entries: asNumber(record.entries, "constructor entries"),
-      wins: asNumber(record.wins, "constructor wins"),
-      podiums: asNumber(record.podiums, "constructor podiums"),
-      poles: asNumber(record.poles, "constructor poles"),
-      fastestLaps: asNumber(record.fastest_laps, "constructor fastest laps"),
-      points: asNumber(record.points, "constructor points"),
-      bestChampionshipPosition:
-        record.best_position === null
-          ? null
-          : asNumber(record.best_position, "constructor best position"),
+      entries: record.num("entries"),
+      wins: record.num("wins"),
+      podiums: record.num("podiums"),
+      poles: record.num("poles"),
+      fastestLaps: record.num("fastest_laps"),
+      points: record.num("points"),
+      bestChampionshipPosition: record.numOrNull("best_position"),
     },
     pagePath: `/teams/${id}`,
   };
@@ -278,17 +266,14 @@ export async function seasonDriverStandings(
   return {
     year,
     standings: rows.map((row) => {
-      const record = asRecord(row, "driver standing row");
-      const driverId = asString(record.driver_id, "standing driver id");
+      const record = rowReader(row, "driver standing row");
+      const driverId = record.str("driver_id");
       return {
-        position:
-          record.position_number === null
-            ? null
-            : asNumber(record.position_number, "standing position"),
-        driver: asString(record.driver_name, "standing driver name"),
+        position: record.numOrNull("position_number"),
+        driver: record.str("driver_name"),
         driverId,
-        points: asNumber(record.points, "standing points"),
-        champion: Boolean(record.championship_won),
+        points: record.num("points"),
+        champion: record.bool("championship_won"),
         pagePath: `/drivers/${driverId}`,
       };
     }),
@@ -306,16 +291,16 @@ export async function seasonConstructorStandings(
 
   const merged = new Map<string, StandingTotal & { team: string }>();
   for (const row of rows) {
-    const record = asRecord(row, "constructor standing row");
-    const teamId = asString(record.constructor_id, "standing constructor id");
+    const record = rowReader(row, "constructor standing row");
+    const teamId = record.str("constructor_id");
     const total = mergeStanding(merged.get(teamId), {
-      points: asNumber(record.points, "standing points"),
-      positionText: asString(record.position_text, "standing position text"),
-      championshipWon: Boolean(record.championship_won),
+      points: record.num("points"),
+      positionText: record.str("position_text"),
+      championshipWon: record.bool("championship_won"),
     });
     merged.set(teamId, {
       ...total,
-      team: asString(record.constructor_name, "standing constructor name"),
+      team: record.str("constructor_name"),
     });
   }
   return {
@@ -375,34 +360,29 @@ export async function raceResults(
   if (metaRows.length === 0) {
     return { found: false, message: "该年份未举办此大奖赛" };
   }
-  const meta = asRecord(metaRows[0], "race meta row");
-  const rows = await db.run(raceResultRowsSql, [
-    asNumber(meta.race_id, "race id"),
-  ]);
+  const meta = rowReader(metaRows[0], "race meta row");
+  const rows = await db.run(raceResultRowsSql, [meta.num("race_id")]);
 
   return {
     year,
-    round: asNumber(meta.round, "race round"),
-    grandPrix: asString(meta.grand_prix_name, "race grand prix name"),
-    date: asString(meta.date, "race date"),
+    round: meta.num("round"),
+    grandPrix: meta.str("grand_prix_name"),
+    date: meta.str("date"),
     results: rows.map((row) => {
-      const record = asRecord(row, "race result row");
-      const driverId = asString(record.driver_id, "result driver id");
+      const record = rowReader(row, "race result row");
+      const driverId = record.str("driver_id");
+      const time = record.strOrNull("time");
+      const retired = record.strOrNull("reason_retired");
       const status =
-        record.time !== null
-          ? asString(record.time, "result time")
-          : `${asString(record.position_text, "result position text")}${record.reason_retired ? `（${asString(record.reason_retired, "result reason")}）` : ""}`;
+        time ??
+        `${record.str("position_text")}${retired ? `（${retired}）` : ""}`;
       return {
-        position:
-          record.position_number === null
-            ? null
-            : asNumber(record.position_number, "result position"),
-        driver: asString(record.driver_name, "result driver name"),
+        position: record.numOrNull("position_number"),
+        driver: record.str("driver_name"),
         driverId,
-        team: asString(record.constructor_name, "result constructor name"),
+        team: record.str("constructor_name"),
         // f1db 未得分行的 points 为 NULL（实测 1.9 万行），语义上即 0 分
-        points:
-          record.points === null ? 0 : asNumber(record.points, "result points"),
+        points: record.numOrNull("points") ?? 0,
         status,
         pagePath: `/drivers/${driverId}`,
       };
