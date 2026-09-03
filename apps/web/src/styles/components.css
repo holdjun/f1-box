@@ -223,6 +223,12 @@
       padding-left: 0.75rem;
       background: var(--surface);
     }
+    /* 首列粘滞，它占多宽右侧就少看多宽：窄屏放开大奖赛名换行，
+       列宽从 12rem 定值回到内容自然宽度（实测 192px → 121px） */
+    .result-table tbody th[scope="row"] {
+      min-width: 0;
+      white-space: normal;
+    }
   }
 
   /* 选择器特异性压过 th/td:last-child 的右对齐，免用 !important */
@@ -338,6 +344,12 @@
      名字是链接唯一的可读内容（logo 是 alt="" 装饰），display:none 会造出无名链接，
      只能视觉隐藏、保留在可访问树里 */
   @media (width < 40rem) {
+    /* sr-only span 是 position:absolute：没有相对定位它就脱离 .table-scroll 的
+       overflow 裁剪、撑宽文档（races 表实测 sw 412 > 375），相对紧凑容器定位后
+       落在 anchor 内、仍被表容器裁剪，既隐藏又不溢出 */
+    .vendor-cell--compact {
+      position: relative;
+    }
     .vendor-cell--compact .vendor-cell__name {
       position: absolute;
       width: 1px;

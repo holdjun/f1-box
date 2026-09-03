@@ -22,6 +22,7 @@ if (races.length === 0) {
 // Winner monogram 底色用其当年车队配色，缺色不设变量，回落 components.css 的中性灰默认值
 const winnerStyle = (teamId: string | null) =>
   monogramStyleFor(teamId ? colorForYear(vendorIndexes, teamId, year) : null);
+const teamLogo = (teamId: string) => logoSrcFor(vendorIndexes, teamId);
 ---
 
 <BaseLayout title={`${year} Race Results`} active="results" year={year}>
@@ -73,17 +74,24 @@ const winnerStyle = (teamId: string | null) =>
                 </td>
                 <td>
                   {race.winnerTeamId && race.winnerTeamName ? (
-                    <a class="vendor-cell" href={`/teams/${race.winnerTeamId}`}>
-                      {logoSrcFor(vendorIndexes, race.winnerTeamId) ? (
+                    <a
+                      class:list={[
+                        "vendor-cell",
+                        // 无 logo 的老赛季车队窄屏不能收成纯 logo，否则单元格一片空白
+                        teamLogo(race.winnerTeamId) && "vendor-cell--compact",
+                      ]}
+                      href={`/teams/${race.winnerTeamId}`}
+                    >
+                      {teamLogo(race.winnerTeamId) ? (
                         <img
                           class:list={[
                             "vendor-cell__logo",
                             logoVariantFor(vendorIndexes, race.winnerTeamId) === "white" && "vendor-cell__logo--chip",
                           ]}
-                          src={logoSrcFor(vendorIndexes, race.winnerTeamId) ?? ""} alt="" loading="lazy"
+                          src={teamLogo(race.winnerTeamId) ?? ""} alt="" loading="lazy"
                         />
                       ) : null}
-                      {race.winnerTeamName}
+                      <span class="vendor-cell__name">{race.winnerTeamName}</span>
                     </a>
                   ) : "—"}
                 </td>

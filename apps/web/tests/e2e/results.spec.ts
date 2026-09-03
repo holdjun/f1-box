@@ -218,6 +218,28 @@ for (const { tz, myTime } of [
   });
 }
 
+// 首列是粘滞列，它占多宽右侧就少看多宽：12rem 定值曾吃掉可视宽的 56%，
+// 窄屏改为跟随内容并允许长名折行，名字一个字都不能少
+test("@mobile race list first column follows its content", async ({ page }) => {
+  await page.goto("/results/2026/races");
+  const rows = page
+    .getByRole("table", { name: "2026 race results" })
+    .locator("tbody tr");
+  const longest = rows.filter({ hasText: "Barcelona-Catalunya" });
+  const width = await longest
+    .locator("th")
+    .evaluate((el) => el.getBoundingClientRect().width);
+  const visible = await page
+    .locator(".table-scroll")
+    .evaluate((el) => el.clientWidth);
+  expect(width).toBeLessThan(visible / 2);
+  await expect(longest).toContainText("Barcelona-Catalunya");
+  // 主列（冠军车手）不跟着次要归属列一起收成徽标
+  await expect(
+    rows.first().locator(".vendor-cell__name").first(),
+  ).toBeVisible();
+});
+
 test("@mobile results pages have no page overflow", async ({ page }) => {
   for (const path of [
     "/results/2026/races",
