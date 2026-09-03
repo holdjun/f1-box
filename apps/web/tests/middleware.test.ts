@@ -102,9 +102,13 @@ describe("middleware 默认缓存", () => {
     expect(cache.set).not.toHaveBeenCalled();
   });
 
-  it("重定向（3xx）不 opt-in", async () => {
-    const { cache } = await run("/", { status: 302 });
-    expect(cache.set).not.toHaveBeenCalled();
+  // 首页 302 -> /racing/<当前赛季> 占生产总流量三分之一（2026-09-03 实测 23h
+  // 60203 次），不缓存时每次都要唤醒 Worker 并查一次 season 表定重定向目标
+  it("稳定重定向（301/302）opt-in 边缘缓存", async () => {
+    for (const status of [301, 302]) {
+      const { cache } = await run("/", { status });
+      expect(cache.set).toHaveBeenCalledWith(CACHE_OPTIONS);
+    }
   });
 
   it("404 不 opt-in", async () => {
@@ -152,12 +156,19 @@ describe("middleware 浏览器缓存头", () => {
     expect(response.headers.get("Cache-Control")).toBe("no-store");
   });
 
-  it("API、重定向、非 2xx 均不带浏览器缓存头", async () => {
+  it("重定向也带浏览器可见的 Cache-Control", async () => {
+    const { response } = await run("/", { status: 302 });
+    expect(response.headers.get("Cache-Control")).toBe(
+      "public, max-age=60, stale-while-revalidate=300",
+    );
+  });
+
+  it("API 与错误响应不带浏览器缓存头", async () => {
     for (const opts of [
       { method: "POST" },
       { method: "GET", path: "/api/health" },
-      { status: 302 },
       { status: 404 },
+      { status: 500 },
     ]) {
       const { response } = await run(
         opts.path ?? "/racing/2026",

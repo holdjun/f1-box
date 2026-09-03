@@ -6,8 +6,9 @@ import { getAppData } from "./lib/repositories.js";
 export const onRequest = defineMiddleware(async (context, next) => {
   context.locals.app = await getAppData(env);
   const response = await next();
-  // 默认缓存只对 GET 页面响应生效；API、重定向、错误、页面已显式设置
-  // （如列表页空数据时的 no-store 信号）一律不覆盖，与原逐页行为一致
+  // 默认缓存只对 GET 页面响应生效；API、错误、页面已显式设置（如列表页空数据时的
+  // no-store 信号）一律不覆盖。稳定重定向（301/302）同样 opt-in：首页 302 到当前
+  // 赛季占生产总流量三分之一，不缓存时每次都要唤醒 Worker 并查一次 season 表
   // cache.enabled 在 dev/e2e（NoopAstroCache）下为 false：不做边缘缓存，
   // 也不写浏览器头，否则本地改完 .astro 后 60s 内刷新拿不到新页面
   if (
@@ -15,7 +16,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     context.request.method === "GET" &&
     !context.url.pathname.startsWith("/api/") &&
     response.status >= 200 &&
-    response.status < 300 &&
+    response.status < 400 &&
     !response.headers.has("Cache-Control")
   ) {
     // opt-in 边缘缓存：provider 生成 Cloudflare-CDN-Cache-Control + Cache-Tag，
