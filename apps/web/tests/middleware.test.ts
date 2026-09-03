@@ -14,7 +14,7 @@ vi.mock("../src/lib/repositories.js", () => ({
 
 import { onRequest } from "../src/middleware.js";
 
-const CACHE_OPTIONS = { maxAge: 300, swr: 600, tags: ["f1db"] };
+const CACHE_OPTIONS = { maxAge: 3600, swr: 86400, tags: ["f1db"] };
 
 // context 只构造 middleware 用到的最小形状；locals 由 middleware 写入 app
 function makeContext(

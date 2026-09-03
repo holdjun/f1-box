@@ -65,8 +65,38 @@ jobs:
           ./scripts/f1db-d1-dump.sh f1db-d1
           ./scripts/f1db-d1-import.sh f1db-d1
 
+      # 上游改 schema 时查询计划夹具会跟着变，意味着索引可能失效。数据同步不因此中断，
+      # 但要在 summary 里留下痕迹，否则只能等下一次有人本地跑 dump 才发现
+      - name: Flag upstream schema drift
+        if: steps.release.outputs.changed == 'true'
+        run: |
+          if ! git diff --quiet -- apps/web/tests/fixtures/d1-schema.sql; then
+            cat >> "$GITHUB_STEP_SUMMARY" <<'MD'
+          ### f1db 上游 schema 变化
+
+          本地跑 scripts/f1db-d1-dump.sh 刷新夹具并提交，确认查询计划护栏仍为绿。
+          MD
+            git diff -- apps/web/tests/fixtures/d1-schema.sql | head -60 >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Record sync state
         if: steps.release.outputs.changed == 'true'
         run: |
           apps/web/node_modules/.bin/wrangler d1 execute f1db --remote -c apps/web/wrangler.jsonc --command \
             "INSERT OR REPLACE INTO sync_state (id, tag, fetched_at) VALUES (1, '$(cat f1db-tag.txt)', '$(date -u +%Y-%m-%dT%H:%M:%SZ)')"
+
+      # 边缘 TTL 按周更的数据节奏设，新数据靠这里主动推翻。清不掉只会让页面滑到
+      # SWR 窗口里取旧副本，不影响可用性，故不阻断同步
+      - name: Purge edge cache
+        if: steps.release.outputs.changed == 'true'
+        continue-on-error: true
+        run: |
+          zone=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/zones?name=f1-box.com" \
+            | node -p 'JSON.parse(require("fs").readFileSync(0)).result?.[0]?.id ?? ""')
+          [ -n "$zone" ] || { echo "zone lookup failed" >&2; exit 1; }
+          curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$zone/purge_cache" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"tags":["f1db"]}' \
+            | node -p 'JSON.parse(require("fs").readFileSync(0)).success ? "purged f1db" : (console.error(require("fs").readFileSync(0)), process.exit(1))'

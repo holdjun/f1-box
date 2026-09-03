@@ -20,8 +20,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
     !response.headers.has("Cache-Control")
   ) {
     // opt-in 边缘缓存：provider 生成 Cloudflare-CDN-Cache-Control + Cache-Tag，
-    // 命中时 Worker 完全不执行；列表页空数据 no-store 信号由上方条件跳过
-    context.cache.set({ maxAge: 300, swr: 600, tags: ["f1db"] });
+    // 命中时 Worker 完全不执行；列表页空数据 no-store 信号由上方条件跳过。
+    // TTL 按 f1db 的周更节奏设，不靠过期拉新数据：data-sync 导入完会按 f1db 标签
+    // 主动 purge。短 TTL 在这个流量量下几乎等于不缓存（2026-09-03 实测 23h 内
+    // 命中 198 次、未命中 41066 次）
+    context.cache.set({ maxAge: 3600, swr: 86400, tags: ["f1db"] });
     // ClientRouter 后退导航用普通 fetch 重拉整页 HTML，只认浏览器可见的
     // Cache-Control；必须在此写入（边缘命中时后续中间件不执行）。预算
     // max-age=60 + SWR=300：f1db 按周同步，分钟级新鲜度足够，后退可命中
