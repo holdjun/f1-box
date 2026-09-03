@@ -125,6 +125,31 @@ export function formatLocalDateTime(
   return formatDateTime(value, locale, timeZone);
 }
 
+// 未开赛场次的发车时刻：星期 + 时刻 + 时区缩写（"Sun 15:00 CEST"），
+// 与卡片周末日期同口径按赛道当地渲染；无时区映射时由调用方传 UTC，
+// 不留可选参数默认到服务端本地时区。Intl 输出带逗号，卡片行里是噪音，按部件拼装
+export function formatLocalWeekdayTime(
+  value: Timestamp,
+  timeZone: string,
+  locale = "en-GB",
+): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(date.getTime())) {
+    throw new TypeError(`Invalid timestamp: ${String(value)}`);
+  }
+  const parts = new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone,
+    timeZoneName: "short",
+  }).formatToParts(date);
+  const pick = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return `${pick("weekday")} ${pick("hour")}:${pick("minute")} ${pick("timeZoneName")}`;
+}
+
 function formatDateTime(
   value: Timestamp,
   locale: string,

@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import {
   formatLocalDateTime,
+  formatLocalWeekdayTime,
   formatRaceDate,
   formatUtcDateTime,
   formatUtcLongDate,
@@ -19,6 +20,30 @@ describe("time formatting", () => {
     expect(
       formatLocalDateTime("2026-03-08T04:00:00Z", "Asia/Shanghai", "en-GB"),
     ).toBe("08 Mar 2026, 12:00 GMT+8");
+  });
+
+  test("formats a start time as weekday, clock and zone", () => {
+    expect(
+      formatLocalWeekdayTime("2026-09-06T13:00:00Z", "Europe/Rome", "en-GB"),
+    ).toBe("Sun 15:00 CEST");
+  });
+
+  // 无时区映射时调用方回退 UTC，与 formatRaceDate 同口径
+  test("start time renders in UTC when the circuit has no zone", () => {
+    expect(formatLocalWeekdayTime("2026-11-22T04:00:00Z", "UTC", "en-GB")).toBe(
+      "Sun 04:00 UTC",
+    );
+  });
+
+  // 负偏移夜赛：UTC 周日 04:00 在赛道当地仍是周六晚
+  test("start time crosses back into the previous local day", () => {
+    expect(
+      formatLocalWeekdayTime(
+        "2026-11-22T04:00:00Z",
+        "America/Los_Angeles",
+        "en-GB",
+      ),
+    ).toBe("Sat 20:00 GMT-8");
   });
 
   // 跨日夜赛：发车时刻 UTC 04:00，在负偏移时区落到前一天

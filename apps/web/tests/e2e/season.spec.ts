@@ -29,6 +29,11 @@ test("@desktop racing calendar links every round to its results page", async ({
   await expect(cards.first()).not.toContainText("Grand Prix");
   await expect(cards.first()).not.toContainText("Pole");
   await expect(cards.first()).not.toContainText("COMPLETE");
+  // 完赛卡以领奖台收尾，未开赛卡以赛道当地发车时刻收尾
+  await expect(cards.first()).not.toContainText("Lights out");
+  const italy = cards.filter({ hasText: "Italy" });
+  await expect(italy).toContainText("Lights out");
+  await expect(italy).toContainText("Sun 15:00 CEST");
   await expect(cards.first().locator("img:visible")).toHaveCount(2); // 国旗 + 赛道
   const raceLinks = page.locator('main a[href^="/results/2026/races/"]');
   await expect(raceLinks).toHaveCount(23);

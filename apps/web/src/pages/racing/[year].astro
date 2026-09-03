@@ -51,10 +51,14 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
 
 <BaseLayout title={`${year} Season`} year={year}>
   <section aria-label={`${year} season overview`} class="relative overflow-hidden border-b border-line">
-    <p
-      class="pointer-events-none absolute -top-4 right-0 font-display text-[clamp(8rem,22vw,19rem)] leading-[0.8] font-bold text-transparent select-none [-webkit-text-stroke:1px_var(--line)]"
-      aria-hidden="true"
-    >{year}</p>
+    {/* 年份描边水印只填内容未占用的右侧空带：Next 卡会把字形遮掉大半只剩碎片，
+        窄屏下字形又会压到眼眉与标题，两种情况都不渲染 */}
+    {!next && (
+      <p
+        class="pointer-events-none absolute -top-4 right-0 hidden font-display text-[clamp(8rem,22vw,19rem)] leading-[0.8] font-bold text-transparent select-none lg:block [-webkit-text-stroke:1px_var(--line)]"
+        aria-hidden="true"
+      >{year}</p>
+    )}
     <div class="shell relative grid gap-10 py-12 md:py-16 lg:grid-cols-[7fr_5fr] lg:items-end">
       <div>
         <p class="status-label">Formula 1 calendar</p>
@@ -137,7 +141,15 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
         </dialog>
       </div>
       {next && (
-        <div class="rounded-md border border-line bg-surface-raised p-6 light:shadow-panel">
+        <div class="relative isolate overflow-hidden rounded-md border border-line bg-surface-raised p-6 light:shadow-panel">
+          {/* 赛道描边水印：与下方赛事卡同一手法，填住卡右侧的空带。
+              isolate + -z-10 把它压在所有文字（含倒计时 island）之下，且仍在卡面背景之上 */}
+          <img
+            src={`/vendor/circuits/${next.circuitLayoutId}.svg`}
+            alt=""
+            loading="lazy"
+            class="pointer-events-none absolute -right-6 -bottom-6 -z-10 h-32 w-auto opacity-15 light:invert md:-right-5 md:-bottom-7 md:h-40"
+          />
           <p class="status-label status-label--accent">
             Next · Round {String(next.round).padStart(2, "0")}
           </p>
@@ -161,7 +173,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
     </div>
   </section>
 
-  <main id="main-content" class="shell pt-10 pb-section">
+  <main id="main-content" class="shell pt-6 pb-section">
     <SeasonFilter
       years={availableYears}
       mode="link"
@@ -182,12 +194,14 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
     ) : (
       <>
         {completed.length > 0 && (
-          <section aria-label="Completed races" class="mt-10">
+          <section aria-label="Completed races" class="mt-8">
             <div class="flex items-baseline gap-3">
               <h2 class="font-display text-[2rem] leading-none font-semibold uppercase">Completed</h2>
               <span class="font-display text-[1.3rem] text-ink-muted">{completed.length}</span>
             </div>
-            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* ≥1440px 时卡面宽度足够开三列（约 437px），两列下卡内中部大片空白；
+                lg（980px）三列会把长国名挤换行，故单独取断点而不动全局 breakpoint */}
+            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 min-[90rem]:grid-cols-3">
               {completed.map((race) => (
                 <RaceCard race={race} href={cardHref(race)} status={statusOf(race)} />
               ))}
@@ -200,7 +214,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
               <h2 class="font-display text-[2rem] leading-none font-semibold uppercase">Upcoming</h2>
               <span class="font-display text-[1.3rem] text-ink-muted">{upcoming.length}</span>
             </div>
-            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 min-[90rem]:grid-cols-3">
               {upcoming.map((race) => (
                 <RaceCard race={race} href={cardHref(race)} status={statusOf(race)} />
               ))}
