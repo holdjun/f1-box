@@ -722,6 +722,8 @@ describe("createRaceResultsRepository standings", () => {
           driver_code: "ANT",
           points: 219,
           wins: 6,
+          team_id: "mercedes",
+          team_name: "Mercedes",
         },
       ],
     });
@@ -735,8 +737,33 @@ describe("createRaceResultsRepository standings", () => {
         driverCode: "ANT",
         points: 219,
         wins: 6,
+        teamId: "mercedes",
+        teamName: "Mercedes",
       },
     ]);
+  });
+
+  // 只有积分行、该年未上过正赛的车手无车队可归，归属列必须允许为空
+  it("maps a driver standing with no team entry", async () => {
+    const db = fakeDbBySql({
+      "FROM season_driver_standing": [
+        {
+          position_number: null,
+          position_text: "-",
+          driver_id: "nyck-de-vries",
+          driver_name: "Nyck de Vries",
+          driver_code: "DEV",
+          points: 0,
+          wins: 0,
+          team_id: null,
+          team_name: null,
+        },
+      ],
+    });
+    const [row] =
+      await createRaceResultsRepository(db).getDriverStandings(2026);
+    expect(row.teamId).toBeNull();
+    expect(row.teamName).toBeNull();
   });
 
   it("maps constructor standings", async () => {

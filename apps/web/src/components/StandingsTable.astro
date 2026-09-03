@@ -3,30 +3,46 @@ import type {
   DriverStandingRow,
   TeamStandingRow,
 } from "../lib/race-results-repository.js";
-import { logoSrcFor, logoVariantFor, vendorIndexes } from "../lib/vendor.js";
+import { monogramStyle as monogramStyleFor } from "../lib/tokens.js";
+import {
+  colorForYear,
+  logoSrcFor,
+  logoVariantFor,
+  vendorIndexes,
+} from "../lib/vendor.js";
 
 interface Props {
   kind: "drivers" | "constructors";
   rows: DriverStandingRow[] | TeamStandingRow[];
+  year: number;
 }
 
-const { kind, rows } = Astro.props;
+const { kind, rows, year } = Astro.props;
 const label = kind === "drivers" ? "Driver standings" : "Constructor standings";
 const emptyText = kind === "drivers"
   ? "Driver standings are not available yet."
   : "Constructor standings are not available yet.";
-// 积分榜行没有车队归属，monogram 走 CSS 中性灰回落（--monogram-bg 缺省）
+// 车手榜 monogram 底色用其该年车队配色，与比赛成绩表同款；无归属时不设变量，
+// 回落 components.css 里的中性灰默认值
+const monogramStyle = (teamId: string | null) =>
+  monogramStyleFor(teamId ? colorForYear(vendorIndexes, teamId, year) : null);
+const teamLogo = (teamId: string) => logoSrcFor(vendorIndexes, teamId);
+const teamLogoClass = (teamId: string) =>
+  logoVariantFor(vendorIndexes, teamId) === "white"
+    ? "vendor-cell__logo vendor-cell__logo--chip"
+    : "vendor-cell__logo";
 const positionLabel = (row: DriverStandingRow | TeamStandingRow) =>
   String(row.position ?? row.positionText).padStart(2, "0");
 ---
 
 <!-- biome-ignore lint/a11y/noNoninteractiveTabindex: 横滚表容器需要 tabindex，键盘用户才能滚动查看溢出列 -->
 <section class="table-scroll" aria-label={`${label}, scrollable`} tabindex="0">
-  <table class="result-table" aria-label={label}>
+  <table class="result-table result-table--standings" aria-label={label}>
     <thead>
       <tr>
         <th scope="col">Pos</th>
         <th scope="col">{kind === "drivers" ? "Driver" : "Constructor"}</th>
+        {kind === "drivers" && <th scope="col">Team</th>}
         <th scope="col">Points</th>
         <th scope="col">Wins</th>
       </tr>
@@ -36,23 +52,29 @@ const positionLabel = (row: DriverStandingRow | TeamStandingRow) =>
         <tr>
           <td class="w-14 font-display text-[1.35rem] text-ink-muted">{positionLabel(row)}</td>
           {"driverId" in row ? (
-            <td>
-              <a class="vendor-cell vendor-cell--driver transition-colors hover:text-accent" href={`/drivers/${row.driverId}`}>
-                <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
-                <span class="vendor-cell__name">{row.driverName}</span>
-              </a>
-            </td>
+            <>
+              <td>
+                <a class="vendor-cell transition-colors hover:text-accent" href={`/drivers/${row.driverId}`} style={monogramStyle(row.teamId)}>
+                  <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
+                  <span class="vendor-cell__name">{row.driverName}</span>
+                </a>
+              </td>
+              <td>
+                {row.teamId && row.teamName ? (
+                  <a class="vendor-cell vendor-cell--compact transition-colors hover:text-accent" href={`/teams/${row.teamId}`}>
+                    {teamLogo(row.teamId) ? (
+                      <img class={teamLogoClass(row.teamId)} src={teamLogo(row.teamId) ?? ""} alt="" loading="lazy" />
+                    ) : null}
+                    <span class="vendor-cell__name">{row.teamName}</span>
+                  </a>
+                ) : "—"}
+              </td>
+            </>
           ) : (
             <td>
               <a class="vendor-cell transition-colors hover:text-accent" href={`/teams/${row.teamId}`}>
-                {logoSrcFor(vendorIndexes, row.teamId) ? (
-                  <img
-                    class:list={[
-                      "vendor-cell__logo",
-                      logoVariantFor(vendorIndexes, row.teamId) === "white" && "vendor-cell__logo--chip",
-                    ]}
-                    src={logoSrcFor(vendorIndexes, row.teamId) ?? ""} alt="" loading="lazy"
-                  />
+                {teamLogo(row.teamId) ? (
+                  <img class={teamLogoClass(row.teamId)} src={teamLogo(row.teamId) ?? ""} alt="" loading="lazy" />
                 ) : null}
                 {row.teamName}
               </a>
@@ -63,7 +85,7 @@ const positionLabel = (row: DriverStandingRow | TeamStandingRow) =>
         </tr>
       )) : (
         <tr>
-          <td class="empty-cell" colspan="4">{emptyText}</td>
+          <td class="empty-cell" colspan={kind === "drivers" ? 5 : 4}>{emptyText}</td>
         </tr>
       )}
     </tbody>

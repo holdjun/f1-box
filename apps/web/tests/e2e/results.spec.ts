@@ -150,21 +150,44 @@ test.describe("standings", () => {
     await page.goto("/results/2026/drivers");
     const table = page.getByRole("table", { name: "Driver standings" });
     await expect(table).toBeVisible();
-    await expect(table).toHaveClass("result-table");
+    await expect(table).toHaveClass(/\bresult-table\b/);
     await expect(table.locator("tbody tr")).toHaveCount(22);
-    await expect(table.locator("tbody tr").first()).toContainText(
-      "Kimi Antonelli",
+    const first = table.locator("tbody tr").first();
+    await expect(first).toContainText("Kimi Antonelli");
+    await expect(first.getByRole("link").first()).toHaveAttribute(
+      "href",
+      "/drivers/kimi-antonelli",
     );
-    await expect(
-      table.locator("tbody tr").first().getByRole("link"),
-    ).toHaveAttribute("href", "/drivers/kimi-antonelli");
-    await expect(table.locator("tbody tr").first()).toContainText("219");
+    await expect(first).toContainText("219");
+    // 归队列指向车队页，头像底色用该年队色（不再是中性灰回落）
+    await expect(first.getByRole("link").nth(1)).toHaveAttribute(
+      "href",
+      "/teams/mercedes",
+    );
+    await expect(first).toContainText("Mercedes");
+    await expect(first.getByRole("link").first()).toHaveAttribute(
+      "style",
+      /--monogram-bg:/,
+    );
+  });
+
+  // 窄屏上车手名是主信息，不能像密列成绩表那样只剩三字码圆标
+  test("@mobile driver standings keeps the driver name visible", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/drivers");
+    const first = page
+      .getByRole("table", { name: "Driver standings" })
+      .locator("tbody tr")
+      .first();
+    await expect(first.locator(".vendor-cell__name").first()).toBeVisible();
+    await expect(first).toContainText("Kimi Antonelli");
   });
 
   test("@desktop constructor standings table from f1db", async ({ page }) => {
     await page.goto("/results/2026/teams");
     const table = page.getByRole("table", { name: "Constructor standings" });
-    await expect(table).toHaveClass("result-table");
+    await expect(table).toHaveClass(/\bresult-table\b/);
     await expect(table.locator("tbody tr")).toHaveCount(11);
     await expect(table.locator("tbody tr").first()).toContainText("Mercedes");
     await expect(

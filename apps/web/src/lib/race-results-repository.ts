@@ -154,6 +154,8 @@ export interface DriverStandingRow {
   driverCode: string;
   points: number;
   wins: number;
+  teamId: string | null;
+  teamName: string | null;
 }
 export interface TeamStandingRow {
   position: number | null;
@@ -394,19 +396,33 @@ ORDER BY p.position_display_order`;
 // 胜场数写成相关子查询时，积分榜每行都从车手分区起步：idx_rd_driver_type 里没有 year，
 // 只能先拉出该车手全生涯的成绩再回 race 表过滤（2026-09-03 实测 4166 行/次）。
 // 改成按赛季一次算完物化，读量只与该赛季的场次有关（同条件实测 389 行）
+// 归队取该年最后一场正赛的车队（与车手目录同口径，季中转会显示现东家）。
+// 每行一条相关子查询会从车手分区起步拉出全生涯成绩，改成与 season_wins 同形的
+// 按年份一次物化；constructor_id 是跟随 MAX(round) 的裸列——SQLite 明确保证单个
+// min/max 聚合时裸列取自命中的那一行。只有积分行、该年未上过正赛的车手无行可归
 const driverStandingsSql = `WITH season_wins AS (
   SELECT rr.driver_id, COUNT(*) AS wins
   FROM race ra
   CROSS JOIN race_result rr ON rr.race_id = ra.id
   WHERE ra.year = ?1 AND rr.position_number = 1
   GROUP BY rr.driver_id
+),
+last_team AS (
+  SELECT rr.driver_id, rr.constructor_id AS team_id, MAX(ra.round) AS last_round
+  FROM race ra
+  CROSS JOIN race_result rr ON rr.race_id = ra.id
+  WHERE ra.year = ?1
+  GROUP BY rr.driver_id
 )
 SELECT sds.position_number, sds.position_text,
        d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
-       sds.points, COALESCE(w.wins, 0) AS wins
+       sds.points, COALESCE(w.wins, 0) AS wins,
+       lt.team_id, ct.name AS team_name
 FROM season_driver_standing sds
 JOIN driver d ON sds.driver_id = d.id
 LEFT JOIN season_wins w ON w.driver_id = d.id
+LEFT JOIN last_team lt ON lt.driver_id = d.id
+LEFT JOIN constructor ct ON ct.id = lt.team_id
 WHERE sds.year = ?1
 ORDER BY sds.position_display_order`;
 
@@ -436,6 +452,8 @@ function mapDriverStandingRow(row: unknown): DriverStandingRow {
     driverCode: r.str("driver_code"),
     points: r.num("points"),
     wins: r.num("wins"),
+    teamId: r.strOrNull("team_id"),
+    teamName: r.strOrNull("team_name"),
   };
 }
 
