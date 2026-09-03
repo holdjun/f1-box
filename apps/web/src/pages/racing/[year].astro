@@ -63,7 +63,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
       <div>
         <p class="status-label">Formula 1 calendar</p>
         <h1 class="mt-3 text-display-lg uppercase">{year} Season</h1>
-        <div class="mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        <div class="mt-4 flex flex-wrap items-center gap-x-7 gap-y-3">
           <p class="text-[0.85rem] text-ink-strong">
             {races.length} rounds · {completed.length} completed
           </p>
@@ -141,15 +141,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
         </dialog>
       </div>
       {next && (
-        <div class="relative isolate overflow-hidden rounded-md border border-line bg-surface-raised p-6 light:shadow-panel">
-          {/* 赛道描边水印：与下方赛事卡同一手法，填住卡右侧的空带。
-              isolate + -z-10 把它压在所有文字（含倒计时 island）之下，且仍在卡面背景之上 */}
-          <img
-            src={`/vendor/circuits/${next.circuitLayoutId}.svg`}
-            alt=""
-            loading="lazy"
-            class="pointer-events-none absolute -right-6 -bottom-6 -z-10 h-32 w-auto opacity-15 light:invert md:-right-5 md:-bottom-7 md:h-40"
-          />
+        <div class="rounded-md border border-line bg-surface-raised p-6 light:shadow-panel">
           <p class="status-label status-label--accent">
             Next · Round {String(next.round).padStart(2, "0")}
           </p>
