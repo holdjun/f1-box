@@ -28,7 +28,7 @@
 3. 验收与合并：用户在 preview 页面查看效果（桌面和 375px 移动端），检查 PR 改动后压缩合并（squash）。PR 作者无法 Approve 自己的 PR，所以不设强制 Approve；合并门槛是 CI 全绿 + 用户亲自点合并。main 是保护分支，禁止直接推送。
 4. 发布：合并到 main 后 deploy 工作流自动发布到 f1-box.com；预览验收已在合并前完成，不再二次审批。
 5. 数据：data-sync.yml 按 f1db 发布节奏轮询 release tag（周日晚到周二每 2 小时、其余每天一次），有变化时全量导入 D1（门禁状态存 D1 `sync_state` 表），也可手动触发；静态资产（logo/国旗/赛道 SVG）在仓库 `public/vendor/`。
-6. D1 每日读取配额（free 档 5M 行/天）极易被读放大撑爆。定位第 1 步用 `wrangler d1 insights f1db -c apps/web/wrangler.jsonc --time-period 12h --sort-by reads`，直接看哪条 SQL 被跑多少次、每次读多少行。两大惯例：`race_data` 去掉复合索引后按 type 分区查询会全表扫（单条约 20 万行），已由 `scripts/f1db-d1-indexes.sql` + 导入末尾 `ANALYZE` 兜底，缺了它会回退成扫全分区；`SELECT year FROM season`（seasonYearsSql）几乎所有页面渲染都会查，天然是高频小读写，若被跑到每秒 1 次的频率，说明有 bot/本地残留 dev server 在轮询，先查流量源再考虑加缓存。改 D1 配额前先杀本地 `wrangler dev --remote` 残留进程，再确认索引是否生效。
+6. D1 每日读取配额极易被读放大撑爆。定位第 1 步用 `wrangler d1 insights f1db -c apps/web/wrangler.jsonc --time-period 12h --sort-by reads`，直接看哪条 SQL 被跑多少次、每次读多少行。索引全集在 `scripts/f1db-d1-indexes.sql`，按访问维度族设计而非逐条查询打补丁：逐表 `sqlite3 .dump` 只带 CREATE TABLE 与 INSERT，上游 f1db 那 164 条索引一条都进不了 D1，库里除主键自动索引外只有这个文件建的。`pnpm test` 的查询计划护栏会遍历全部仓储 SQL，在真实 schema 上验证没有无索引全表扫，新增查询漏配索引会直接变红。导入末尾的 `ANALYZE` 负责刷新 `sqlite_stat1`，缺了它规划器只能靠启发式。`SELECT year FROM season`（seasonYearsSql）几乎所有页面渲染都会查，天然是高频小读写，若被跑到每秒 1 次的频率，说明有 bot/本地残留 dev server 在轮询，先查流量源再考虑加缓存。改 D1 配额前先杀本地 `wrangler dev --remote` 残留进程。
 7. 回滚：数据问题重跑 data-sync 或恢复旧 D1 导入；代码问题重新部署旧提交。
 
 # 提交与分支规范

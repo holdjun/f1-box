@@ -307,7 +307,7 @@ WHERE ra.year = ?1 AND ra.grand_prix_id = ?2`;
 
 // 赛道维度静态字段：total_races_held 为累计办赛场次，first_gp 为历史首办年
 // export 供索引计划测试：相关子查询按 circuit_id 取首次举办年份
-export const circuitInfoSql = `SELECT c.total_races_held,
+const circuitInfoSql = `SELECT c.total_races_held,
   (SELECT MIN(ra2.year) FROM race ra2 WHERE ra2.circuit_id = c.id) AS first_gp
 FROM circuit c
 WHERE c.id = (SELECT ra.circuit_id FROM race ra WHERE ra.year = ?1 AND ra.grand_prix_id = ?2)`;
@@ -318,7 +318,7 @@ WHERE c.id = (SELECT ra.circuit_id FROM race ra WHERE ra.year = ?1 AND ra.grand_
 // 17105 行）再逐行回表 race 与 driver，实测每次读 7.5 万行——2026-09-02 生产 D1 日读
 // 配额被这一条查询烧掉 722 万行。固定成从 ra 走 idx_race_circuit_year 后，最多只读该
 // 赛道场次数×每场最快圈行数（Monza 956 行）。
-export const recordLapSql = `SELECT fl.time, d.name AS driver_name, ra.year
+const recordLapSql = `SELECT fl.time, d.name AS driver_name, ra.year
 FROM race ra
 CROSS JOIN fastest_lap fl ON fl.race_id = ra.id
 CROSS JOIN driver d ON d.id = fl.driver_id

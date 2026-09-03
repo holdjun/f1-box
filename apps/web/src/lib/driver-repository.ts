@@ -235,7 +235,7 @@ GROUP BY ra.year, rd.driver_number
 ORDER BY ra.year, MIN(ra.round)`;
 
 // 年份取正式阵容与实际结果的并集：当前季未出赛也有空矩阵块，将来轮次保留空列
-export const roundsSql = `
+const roundsSql = `
 SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, gp.id AS slug, ra.circuit_id
 FROM race ra
 JOIN grand_prix gp ON gp.id = ra.grand_prix_id
@@ -279,7 +279,7 @@ WHERE srr.driver_id = ?1 AND srr.position_number IS NOT NULL`;
 // CROSS JOIN 固定连接顺序（stint → 该年的 race → 该场该队的成绩）。规划器自己排时，
 // 只有跑过 ANALYZE 才排得对；没有统计信息就会先按 constructor_id 拉出该车队史上
 // 全部成绩再用年份过滤，Hamilton 一次要读 5 万行。export 供查询计划测试
-export const teammateResultsSql = `
+const teammateResultsSql = `
 WITH stints AS (
   SELECT DISTINCT ra.year, rr.constructor_id
   FROM race ra
@@ -314,7 +314,7 @@ CROSS JOIN sprint_race_result srr
 WHERE srr.driver_id <> ?1 AND srr.position_number IS NOT NULL`;
 
 // 逐年单行，无需变体合并
-export const standingsSql = `
+const standingsSql = `
 SELECT year, position_text, points, championship_won
 FROM season_driver_standing
 WHERE driver_id = ?1`;

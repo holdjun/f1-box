@@ -166,7 +166,7 @@ LEFT JOIN tyre_manufacturer tm ON tm.id = setm.tyre_manufacturer_id
 WHERE sec.constructor_id = ?1
 GROUP BY sec.year`;
 
-export const roundsSql = `
+const roundsSql = `
 SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, gp.id AS slug, ra.circuit_id
 FROM race ra
 JOIN grand_prix gp ON gp.id = ra.grand_prix_id
@@ -206,7 +206,7 @@ JOIN sprint_race_result srr ON srr.race_id = ra.id
 WHERE srr.constructor_id = ?1 AND srr.position_number IS NOT NULL`;
 
 // 积分榜按 车队×引擎供应商 分行（60 年代多引擎车队一年有多行），这里逐年取回，合并规则见 standings-merge.ts
-export const standingsSql = `
+const standingsSql = `
 SELECT year, position_text, points, championship_won
 FROM season_constructor_standing
 WHERE constructor_id = ?1`;
