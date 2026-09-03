@@ -46,9 +46,6 @@ jobs:
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -60,7 +57,12 @@ jobs:
       - run: pnpm --filter @f1-box/web build
         env:
           F1BOX_WRANGLER_CONFIG: ./wrangler.preview.jsonc
+      # 凭据只给真正要用的这一步：放在 job 级 env 上时，依赖安装与构建里跑的任意
+      # 第三方代码都能读到它
       - run: pnpm --filter @f1-box/web exec wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   production:
     # 显式锁定 main：部署生产的边界守卫，不依赖触发器配置的隐式保证
@@ -68,9 +70,6 @@ jobs:
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -81,3 +80,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @f1-box/web build
       - run: pnpm --filter @f1-box/web exec wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
