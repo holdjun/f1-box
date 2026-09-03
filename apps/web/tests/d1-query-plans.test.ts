@@ -289,4 +289,77 @@ describe("D1 查询计划的结构性属性", () => {
       { time: "1:19.000", driver_name: "Fast", year: 1991 },
     ]);
   });
+
+  // 季中转会：积分榜归队取该年最后一场正赛的车队。裸列跟随 MAX(round) 是
+  // SQLite 的特定语义，改写 CTE 时极易静默退化成“任意一场”，必须跑真 SQL 才拦得住
+  it("积分榜归队取该年最后一场正赛的车队", () => {
+    // country 的 name/alpha 列带 UNIQUE，靠 insertRow 的占位值会与前一用例撞车
+    insertRow("country", {
+      id: "'it'",
+      alpha2_code: "'IT'",
+      alpha3_code: "'ITA'",
+      name: "'Italy'",
+    });
+    insertRow("circuit", { id: "'circuit-b'", country_id: "'it'" });
+    insertRow("grand_prix", { id: "'gp-2'" });
+    insertRow("driver", {
+      id: "'driver-swap'",
+      name: "'Swap'",
+      abbreviation: "'SWP'",
+      country_of_birth_country_id: "'it'",
+      nationality_country_id: "'it'",
+    });
+    for (const [id, name] of [
+      ["team-old", "Old Team"],
+      ["team-new", "New Team"],
+    ] as const) {
+      insertRow("constructor", {
+        id: `'${id}'`,
+        name: `'${name}'`,
+        country_id: "'it'",
+      });
+    }
+    // 先插末场再插首场：插入顺序不能成为“取到最后一场”的隐式依据
+    for (const [id, round, team] of [
+      [21, 2, "team-new"],
+      [20, 1, "team-old"],
+    ] as const) {
+      insertRow("race", {
+        id,
+        year: 2030,
+        round,
+        grand_prix_id: "'gp-2'",
+        circuit_id: "'circuit-b'",
+        circuit_layout_id: "'layout-b'",
+      });
+      insertRow("race_data", {
+        race_id: id,
+        type: "'RACE_RESULT'",
+        position_display_order: 1,
+        driver_id: "'driver-swap'",
+        constructor_id: `'${team}'`,
+      });
+    }
+    insertRow("season_driver_standing", {
+      year: 2030,
+      position_display_order: 1,
+      position_number: 1,
+      position_text: "'1'",
+      driver_id: "'driver-swap'",
+      points: 10,
+    });
+
+    // 收集器把 ?1 统一归一化成 ?（为了 EXPLAIN），三处占位都是同一个年份
+    const standings = JSON.parse(
+      run(
+        query("race-results-repository.ts:driverStandingsSql").replaceAll(
+          "?",
+          "2030",
+        ),
+      ),
+    ) as { team_id: string; team_name: string }[];
+    expect(standings).toHaveLength(1);
+    expect(standings[0].team_id).toBe("team-new");
+    expect(standings[0].team_name).toBe("New Team");
+  });
 });

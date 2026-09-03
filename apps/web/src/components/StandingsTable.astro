@@ -61,7 +61,14 @@ const positionLabel = (row: DriverStandingRow | TeamStandingRow) =>
               </td>
               <td>
                 {row.teamId && row.teamName ? (
-                  <a class="vendor-cell vendor-cell--compact transition-colors hover:text-accent" href={`/teams/${row.teamId}`}>
+                  <a
+                    class:list={[
+                      "vendor-cell transition-colors hover:text-accent",
+                      // 无 logo 的老赛季车队窄屏不能收成纯 logo，否则单元格一片空白
+                      teamLogo(row.teamId) && "vendor-cell--compact",
+                    ]}
+                    href={`/teams/${row.teamId}`}
+                  >
                     {teamLogo(row.teamId) ? (
                       <img class={teamLogoClass(row.teamId)} src={teamLogo(row.teamId) ?? ""} alt="" loading="lazy" />
                     ) : null}
