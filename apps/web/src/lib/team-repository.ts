@@ -1,4 +1,4 @@
-import { asNumber, asRecord, asString } from "./db-parse.js";
+import { asRecord, type RowReader, rowReader } from "./db-parse.js";
 import {
   deriveSeasonYears,
   mapSeasonYearRows,
@@ -258,7 +258,14 @@ JOIN constructor oc ON oc.id = cc.other_constructor_id
 WHERE cc.constructor_id = ?1
 ORDER BY cc.position_display_order`;
 
-const maxSeasonSql = `SELECT MAX(year) AS year FROM season`;
+// MAX(year) 恒返回一行；season 表为空时 year 为 NULL。车手页与车队页共用
+export function parseActiveSeason(rows: unknown[]): number | null {
+  const row = rows[0];
+  if (row === undefined) return null;
+  return rowReader(row, "max season row").numOrNull("year");
+}
+
+export const maxSeasonSql = `SELECT MAX(year) AS year FROM season`;
 
 const constructorsSql = `
 SELECT c.id, c.name
@@ -327,39 +334,30 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
       if (identityRows.results.length === 0) return null;
       const base = parseIdentityRow(identityRows.results[0]);
 
-      const seasons = mergeSeasons(
-        seasonRows.results,
-        roundRows.results,
-        driverRows.results,
-        resultRows.results,
-        sprintRankRows.results,
-        standingRows.results,
-        championRows.results,
-      );
+      const seasons = mergeSeasons({
+        seasons: seasonRows.results,
+        rounds: roundRows.results,
+        drivers: driverRows.results,
+        results: resultRows.results,
+        sprintRanks: sprintRankRows.results,
+        standings: standingRows.results,
+        champions: championRows.results,
+      });
 
       return {
         ...base,
         firstEntry: seasons.at(-1)?.year ?? null,
-        activeSeason:
-          maxSeasonRows.results.length > 0
-            ? asNumber(
-                asRecord(maxSeasonRows.results[0], "max season row").year,
-                "max season",
-              )
-            : null,
+        activeSeason: parseActiveSeason(maxSeasonRows.results),
         lineage: withEarlyStint(
           base,
           seasons,
           lineageRows.results.map((row) => {
-            const record = asRecord(row, "lineage row");
+            const record = rowReader(row, "lineage row");
             return {
-              id: asString(record.id, "lineage id"),
-              name: asString(record.name, "lineage name"),
-              yearFrom: asNumber(record.year_from, "lineage year from"),
-              yearTo:
-                record.year_to == null
-                  ? null
-                  : asNumber(record.year_to, "lineage year to"),
+              id: record.str("id"),
+              name: record.str("name"),
+              yearFrom: record.num("year_from"),
+              yearTo: record.numOrNull("year_to"),
               segment: "continuity" as const,
             };
           }),
@@ -425,10 +423,10 @@ export function createTeamRepository(db?: TeamDatabase): TeamRepository {
 }
 
 function mapConstructorRef(row: unknown): ConstructorRef {
-  const record = asRecord(row, "constructor row");
+  const record = rowReader(row, "constructor row");
   return {
-    id: asString(record.id, "constructor id"),
-    name: asString(record.name, "constructor name"),
+    id: record.str("id"),
+    name: record.str("name"),
   };
 }
 
@@ -489,15 +487,15 @@ function withEarlyStint(
 
 // 结果格判定唯一来源：车队页与车手页共用（text/†/P/F/冲刺上标）
 export function buildRaceCell(
-  record: Record<string, unknown>,
+  record: RowReader,
   sprintRank: number | null,
 ): RaceCell {
   return {
-    text: asString(record.position_text, "result position"),
-    pole: Boolean(record.pole_position),
-    fastest: Boolean(record.fastest_lap),
+    text: record.str("position_text"),
+    pole: record.bool("pole_position"),
+    fastest: record.bool("fastest_lap"),
     classified:
-      record.reason_retired !== null && record.position_number !== null,
+      !record.isNull("reason_retired") && !record.isNull("position_number"),
     sprintRank,
   };
 }
@@ -512,16 +510,16 @@ export function buildCurrentSeason(
 ): CurrentSeason | null {
   if (!latest) return null;
 
-  const gp = asRecord(
+  const gp = rowReader(
     gpStatRows.find(
       (row) => asRecord(row, "gp stats row").year === latest.year,
-    ) ?? emptyStats(),
+    ) ?? EMPTY_STATS,
     "gp stats row",
   );
-  const sprint = asRecord(
+  const sprint = rowReader(
     sprintStatRows.find(
       (row) => asRecord(row, "sprint stats row").year === latest.year,
-    ) ?? emptyStats(),
+    ) ?? EMPTY_STATS,
     "sprint stats row",
   );
   const sprintPoles = sprintPoleRows.find(
@@ -533,67 +531,68 @@ export function buildCurrentSeason(
     position: latest.position,
     points: latest.points,
     grandPrix: {
-      races: asNumber(gp.races, "gp races"),
-      points: asNumber(gp.points, "gp points"),
-      wins: asNumber(gp.wins, "gp wins"),
-      podiums: asNumber(gp.podiums, "gp podiums"),
-      poles: asNumber(gp.poles, "gp poles"),
-      top10s: asNumber(gp.top10s, "gp top 10s"),
-      fastestLaps: asNumber(gp.fastest_laps, "gp fastest laps"),
-      dnfs: asNumber(gp.dnfs, "gp dnfs"),
+      races: gp.num("races"),
+      points: gp.num("points"),
+      wins: gp.num("wins"),
+      podiums: gp.num("podiums"),
+      poles: gp.num("poles"),
+      top10s: gp.num("top10s"),
+      fastestLaps: gp.num("fastest_laps"),
+      dnfs: gp.num("dnfs"),
     },
     sprint: {
-      races: asNumber(sprint.races, "sprint races"),
-      points: asNumber(sprint.points, "sprint points"),
-      wins: asNumber(sprint.wins, "sprint wins"),
-      podiums: asNumber(sprint.podiums, "sprint podiums"),
+      races: sprint.num("races"),
+      points: sprint.num("points"),
+      wins: sprint.num("wins"),
+      podiums: sprint.num("podiums"),
       poles:
         sprintPoles === undefined
           ? 0
-          : asNumber(
-              asRecord(sprintPoles, "sprint poles row").poles,
-              "sprint poles",
-            ),
-      top10s: asNumber(sprint.top10s, "sprint top 10s"),
+          : rowReader(sprintPoles, "sprint poles row").num("poles"),
+      top10s: sprint.num("top10s"),
     },
   };
 }
 
-function emptyStats(): Record<string, unknown> {
-  return {
-    races: 0,
-    points: 0,
-    wins: 0,
-    podiums: 0,
-    poles: 0,
-    top10s: 0,
-    fastest_laps: 0,
-    dnfs: 0,
-  };
+// gpStats/sprintStats 缺该年行时的零值底；字段与 SQL 聚合列一一对应
+const EMPTY_STATS = {
+  races: 0,
+  points: 0,
+  wins: 0,
+  podiums: 0,
+  poles: 0,
+  top10s: 0,
+  fastest_laps: 0,
+  dnfs: 0,
+} as const;
+
+// 七组行全是 unknown[]，位置参数错位时类型系统沉默；具名入参把对齐交给编译器
+interface TeamSeasonRows {
+  seasons: unknown[];
+  rounds: unknown[];
+  drivers: unknown[];
+  results: unknown[];
+  sprintRanks: unknown[];
+  standings: unknown[];
+  champions: unknown[];
 }
 
-function mergeSeasons(
-  seasonRows: unknown[],
-  roundRows: unknown[],
-  driverRows: unknown[],
-  resultRows: unknown[],
-  sprintRankRows: unknown[],
-  standingRows: unknown[],
-  championRows: unknown[],
-): TeamSeason[] {
+function mergeSeasons(rows: TeamSeasonRows): TeamSeason[] {
   const seasons = new Map<number, TeamSeason>();
 
-  for (const row of seasonRows) {
-    const record = asRecord(row, "season row");
-    const year = asNumber(record.year, "season row year");
+  for (const row of rows.seasons) {
+    const record = rowReader(row, "season row");
+    const year = record.num("year");
     seasons.set(year, {
       year,
-      chassis: splitNames(record.chassis),
-      engines: splitNames(record.engines),
-      powerUnits: splitNames(record.power_units),
+      chassis: splitNames(record.strOrNull("chassis")),
+      engines: splitNames(record.strOrNull("engines")),
+      powerUnits: splitNames(record.strOrNull("power_units")),
       tyres: [
         ...new Set(
-          splitNames(record.tyres).map((name) => name.charAt(0).toUpperCase()),
+          splitNames(record.strOrNull("tyres")).map((name) =>
+            name.charAt(0).toUpperCase(),
+          ),
         ),
       ].sort(),
       rounds: [],
@@ -614,35 +613,35 @@ function mergeSeasons(
       circuitId: string;
     }[]
   >();
-  for (const row of roundRows) {
-    const record = asRecord(row, "round row");
-    const year = asNumber(record.year, "round row year");
+  for (const row of rows.rounds) {
+    const record = rowReader(row, "round row");
+    const year = record.num("year");
     const list = rawRounds.get(year) ?? [];
     list.push({
-      round: asNumber(record.round, "round row round"),
-      code: asString(record.code, "round code"),
-      name: asString(record.name, "round name"),
-      slug: asString(record.slug, "round slug"),
-      circuitId: asString(record.circuit_id, "round circuit"),
+      round: record.num("round"),
+      code: record.str("code"),
+      name: record.str("name"),
+      slug: record.str("slug"),
+      circuitId: record.str("circuit_id"),
     });
     rawRounds.set(year, list);
   }
 
   const sprintRanks = new Map<string, number>();
-  for (const row of sprintRankRows) {
-    const record = asRecord(row, "sprint rank row");
+  for (const row of rows.sprintRanks) {
+    const record = rowReader(row, "sprint rank row");
     sprintRanks.set(
-      `${asNumber(record.year, "sprint year")}:${asNumber(record.round, "sprint round")}:${asString(record.driver_id, "sprint driver")}`,
-      asNumber(record.position_number, "sprint rank"),
+      `${record.num("year")}:${record.num("round")}:${record.str("driver_id")}`,
+      record.num("position_number"),
     );
   }
 
   const results = new Map<string, Map<number, RaceCell>>();
-  for (const row of resultRows) {
-    const record = asRecord(row, "result row");
-    const year = asNumber(record.year, "result row year");
-    const round = asNumber(record.round, "result row round");
-    const driverId = asString(record.driver_id, "result row driver");
+  for (const row of rows.results) {
+    const record = rowReader(row, "result row");
+    const year = record.num("year");
+    const round = record.num("round");
+    const driverId = record.str("driver_id");
     let byRound = results.get(`${year}:${driverId}`);
     if (!byRound) {
       byRound = new Map();
@@ -660,52 +659,38 @@ function mergeSeasons(
   }
 
   // 赛季未结束时将来轮次保留为空列，与 wiki 一致
-  const retainedRounds = new Map<number, number[]>();
   for (const [year, season] of seasons) {
-    const rounds = rawRounds.get(year) ?? [];
-    retainedRounds.set(
-      year,
-      rounds.map((r) => r.round),
+    season.rounds = (rawRounds.get(year) ?? []).map(
+      ({ code, name, circuitId, slug }) => ({ code, name, circuitId, slug }),
     );
-    season.rounds = rounds.map(({ code, name, circuitId, slug }) => ({
-      code,
-      name,
-      circuitId,
-      slug,
-    }));
   }
 
   // 全部赛季块一次渲染前，先标记车手冠军（名字金色）
   const champions = new Set<string>();
-  for (const row of championRows) {
-    const record = asRecord(row, "champion row");
-    champions.add(
-      `${asNumber(record.year, "champion year")}:${asString(record.driver_id, "champion driver")}`,
-    );
+  for (const row of rows.champions) {
+    const record = rowReader(row, "champion row");
+    champions.add(`${record.num("year")}:${record.str("driver_id")}`);
   }
 
-  for (const row of driverRows) {
-    const record = asRecord(row, "driver row");
-    const year = asNumber(record.year, "driver row year");
+  for (const row of rows.drivers) {
+    const record = rowReader(row, "driver row");
+    const year = record.num("year");
     // 车手行年份必来自 entrants/结果表，与 seasons 同源，无缺口
     const season = seasons.get(year);
     if (!season) continue;
-    const driverId = asString(record.id, "driver id");
+    const driverId = record.str("id");
     const byRound = results.get(`${year}:${driverId}`);
     season.drivers.push({
       id: driverId,
-      name: asString(record.name, "driver name"),
-      flagCode:
-        record.alpha2_code === null
-          ? null
-          : asString(record.alpha2_code, "driver flag"),
+      name: record.str("name"),
+      flagCode: record.strOrNull("alpha2_code"),
       champion: champions.has(`${year}:${driverId}`),
-      results: (retainedRounds.get(year) ?? []).map(
-        (round) => byRound?.get(round) ?? null,
+      results: (rawRounds.get(year) ?? []).map(
+        (r) => byRound?.get(r.round) ?? null,
       ),
     });
   }
-  applyStandingRows(seasons, standingRows);
+  applyStandingRows(seasons, rows.standings);
 
   return [...seasons.values()].sort((a, b) => b.year - a.year);
 }
@@ -716,8 +701,8 @@ function applyStandingRows(
   standingRows: unknown[],
 ): void {
   for (const row of standingRows) {
-    const record = asRecord(row, "standing row");
-    const season = seasons.get(asNumber(record.year, "standing row year"));
+    const record = rowReader(row, "standing row");
+    const season = seasons.get(record.num("year"));
     if (!season) continue;
     const merged = mergeStanding(
       {
@@ -726,9 +711,9 @@ function applyStandingRows(
         championshipWon: season.championshipWon,
       },
       {
-        points: asNumber(record.points, "standing points"),
-        positionText: asString(record.position_text, "standing position"),
-        championshipWon: Boolean(record.championship_won),
+        points: record.num("points"),
+        positionText: record.str("position_text"),
+        championshipWon: record.bool("championship_won"),
       },
     );
     season.points = merged.points;
@@ -743,25 +728,22 @@ function parseIdentityRow(
   TeamPage,
   "seasons" | "firstEntry" | "currentSeason" | "lineage" | "activeSeason"
 > {
-  const record = asRecord(row, "team identity row");
+  const record = rowReader(row, "team identity row");
   return {
-    id: asString(record.id, "team id"),
-    name: asString(record.name, "team name"),
-    fullName: asString(record.full_name, "team full name"),
-    countryName: asString(record.country_name, "team country name"),
-    alpha2Code: asString(record.alpha2_code, "team country alpha2 code"),
+    id: record.str("id"),
+    name: record.str("name"),
+    fullName: record.str("full_name"),
+    countryName: record.str("country_name"),
+    alpha2Code: record.str("alpha2_code"),
     totals: {
-      entries: asNumber(record.entries, "team entries"),
-      wins: asNumber(record.wins, "team wins"),
-      podiums: asNumber(record.podiums, "team podiums"),
-      poles: asNumber(record.poles, "team pole positions"),
-      fastestLaps: asNumber(record.fastest_laps, "team fastest laps"),
-      points: asNumber(record.points, "team points"),
-      championships: asNumber(record.championships, "team championships"),
-      bestChampionshipPosition:
-        record.best_position === null
-          ? null
-          : asNumber(record.best_position, "team best championship position"),
+      entries: record.num("entries"),
+      wins: record.num("wins"),
+      podiums: record.num("podiums"),
+      poles: record.num("poles"),
+      fastestLaps: record.num("fastest_laps"),
+      points: record.num("points"),
+      championships: record.num("championships"),
+      bestChampionshipPosition: record.numOrNull("best_position"),
     },
   };
 }

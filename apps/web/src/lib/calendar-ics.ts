@@ -73,7 +73,7 @@ function toIcsTimestamp(isoUtc: string): string {
   return formatIcsUtc(new Date(Date.parse(isoUtc)));
 }
 
-export interface SeasonIcs {
+interface SeasonIcs {
   ics: string;
   eventCount: number;
 }

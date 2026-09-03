@@ -1,13 +1,13 @@
 import rawLogos from "../data/logos.json";
 import rawTeamColors from "../data/team-colors.json";
 
-export interface TeamBranding {
+interface TeamBranding {
   colors: string[];
   logoSrc: string | null;
   logoVariant: LogoVariant | null;
 }
 
-export type LogoVariant = "color" | "white" | "mono";
+type LogoVariant = "color" | "white" | "mono";
 
 interface LogoAsset {
   file: string;
@@ -50,7 +50,7 @@ export function getTeamBranding(
   };
 }
 
-export function latestColors(indexes: VendorIndexes, teamId: string): string[] {
+function latestColors(indexes: VendorIndexes, teamId: string): string[] {
   return indexes.colors[teamId]?.colors ?? [];
 }
 

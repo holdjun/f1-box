@@ -1,6 +1,6 @@
 // 车队积分榜合并规则：1960 年代同一车队按引擎供应商分成多行——积分累加、
 // 名次取最好、任一夺冠即夺冠。车队页与 AI 问答共用，口径单一出处
-export interface StandingSlice {
+interface StandingSlice {
   points: number;
   positionText: string;
   championshipWon: boolean;

@@ -2,7 +2,7 @@ import { runAgent } from "./agent.js";
 import type { AskDatabase } from "./db.js";
 import { MAX_BODY_BYTES, validateAskBody } from "./request.js";
 
-export interface AskLimiter {
+interface AskLimiter {
   limit(options: { key: string }): Promise<{ success: boolean }>;
 }
 

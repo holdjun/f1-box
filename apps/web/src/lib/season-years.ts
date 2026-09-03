@@ -1,4 +1,4 @@
-import { asNumber, asRecord } from "./db-parse.js";
+import { rowReader } from "./db-parse.js";
 
 // driver/team 目录的年份列表共享：生产读 season 表；DEV 从 fixture 参赛年份推导
 export const seasonYearsSql = `SELECT year FROM season ORDER BY year DESC`;
@@ -14,7 +14,5 @@ export function deriveSeasonYears(
 }
 
 export function mapSeasonYearRows(rows: unknown[]): number[] {
-  return rows.map((row) =>
-    asNumber(asRecord(row, "season year").year, "season year"),
-  );
+  return rows.map((row) => rowReader(row, "season year").num("year"));
 }

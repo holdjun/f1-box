@@ -1,14 +1,14 @@
-import { asNumber, asRecord, asString } from "../db-parse.js";
+import { rowReader } from "../db-parse.js";
 import { mergeStanding, type StandingTotal } from "../standings-merge.js";
 import { askAliases, resolveAlias } from "./aliases.js";
 import type { AskDatabase } from "./db.js";
 
-export interface EntityRef {
+interface EntityRef {
   id: string;
   name: string;
 }
 
-export type Resolution =
+type Resolution =
   | { status: "unique"; ref: EntityRef }
   | { status: "ambiguous"; candidates: EntityRef[] }
   | { status: "miss" };
@@ -60,10 +60,10 @@ ORDER BY year`;
 
 function mapRefs(rows: unknown[]): EntityRef[] {
   return rows.map((row) => {
-    const record = asRecord(row, "entity ref row");
+    const record = rowReader(row, "entity ref row");
     return {
-      id: asString(record.id, "entity ref id"),
-      name: asString(record.name, "entity ref name"),
+      id: record.str("id"),
+      name: record.str("name"),
     };
   });
 }
@@ -102,126 +102,102 @@ export function resolveDriver(
   return resolveEntity(db, query, driverRefSql, askAliases.drivers);
 }
 
-export function resolveConstructor(
-  db: AskDatabase,
-  query: string,
-): Promise<Resolution> {
-  return resolveEntity(db, query, constructorRefSql, askAliases.constructors);
+// 车手与车队的查询形状完全一致，只差词表与 SQL；加第三类实体时不应再拷一份
+interface EntityKind {
+  // 返回体里包裹统计的键（driver / constructor）
+  key: string;
+  noun: string;
+  identitySql: string;
+  championshipYearsSql: string;
+  pagePrefix: string;
+  aliases: Record<string, string>;
+  refSql: string;
+  missMessage: string;
+  // 车手多一个 starts；f1db 车队表无此列
+  extraColumns: string[];
 }
 
-const missDriver = {
-  found: false,
-  message: "未找到匹配车手，可尝试英文全名",
-} as const;
+const DRIVER_KIND: EntityKind = {
+  key: "driver",
+  noun: "车手",
+  identitySql: driverIdentitySql,
+  championshipYearsSql: driverChampionshipYearsSql,
+  pagePrefix: "/drivers",
+  aliases: askAliases.drivers,
+  refSql: driverRefSql,
+  missMessage: "未找到匹配车手，可尝试英文全名",
+  extraColumns: ["starts"],
+};
 
-const missConstructor = {
-  found: false,
-  message: "未找到匹配车队，可尝试英文名",
-} as const;
+const CONSTRUCTOR_KIND: EntityKind = {
+  key: "constructor",
+  noun: "车队",
+  identitySql: constructorIdentitySql,
+  championshipYearsSql: constructorChampionshipYearsSql,
+  pagePrefix: "/teams",
+  aliases: askAliases.constructors,
+  refSql: constructorRefSql,
+  missMessage: "未找到匹配车队，可尝试英文名",
+  extraColumns: [],
+};
 
-function candidateMessage(kind: string) {
-  return `匹配到多名${kind}，请用户确认是哪一位`;
-}
-
-export async function driverSummary(
+async function entitySummary(
   db: AskDatabase,
   query: string,
+  kind: EntityKind,
 ): Promise<Record<string, unknown>> {
-  const resolution = await resolveDriver(db, query);
-  if (resolution.status === "miss") return missDriver;
+  const miss = { found: false, message: kind.missMessage };
+  const resolution = await resolveEntity(db, query, kind.refSql, kind.aliases);
+  if (resolution.status === "miss") return miss;
   if (resolution.status === "ambiguous") {
     return {
       found: false,
       candidates: resolution.candidates,
-      message: candidateMessage("车手"),
+      message: `匹配到多名${kind.noun}，请用户确认是哪一位`,
     };
   }
-  const identityRows = await db.run(driverIdentitySql, [resolution.ref.id]);
-  if (identityRows.length === 0) return missDriver;
-  const record = asRecord(identityRows[0], "driver identity row");
-  const yearRows = await db.run(driverChampionshipYearsSql, [
-    resolution.ref.id,
-  ]);
-  const championshipYears = yearRows.map((row) =>
-    asNumber(
-      asRecord(row, "driver championship row").year,
-      "championship year",
-    ),
-  );
-  const id = asString(record.id, "driver id");
+  const identityRows = await db.run(kind.identitySql, [resolution.ref.id]);
+  if (identityRows.length === 0) return miss;
+  const record = rowReader(identityRows[0], `${kind.key} identity row`);
+  const yearRows = await db.run(kind.championshipYearsSql, [resolution.ref.id]);
+  const id = record.str("id");
   return {
     found: true,
-    driver: {
+    [kind.key]: {
       id,
-      name: asString(record.name, "driver name"),
-      fullName: asString(record.full_name, "driver full name"),
-      country: asString(record.country_name, "driver country"),
-      championshipYears,
-      entries: asNumber(record.entries, "driver entries"),
-      starts: asNumber(record.starts, "driver starts"),
-      wins: asNumber(record.wins, "driver wins"),
-      podiums: asNumber(record.podiums, "driver podiums"),
-      poles: asNumber(record.poles, "driver poles"),
-      fastestLaps: asNumber(record.fastest_laps, "driver fastest laps"),
-      points: asNumber(record.points, "driver points"),
-      bestChampionshipPosition:
-        record.best_position === null
-          ? null
-          : asNumber(record.best_position, "driver best position"),
+      name: record.str("name"),
+      fullName: record.str("full_name"),
+      country: record.str("country_name"),
+      championshipYears: yearRows.map((row) =>
+        rowReader(row, `${kind.key} championship row`).num("year"),
+      ),
+      entries: record.num("entries"),
+      ...Object.fromEntries(
+        kind.extraColumns.map((column) => [column, record.num(column)]),
+      ),
+      wins: record.num("wins"),
+      podiums: record.num("podiums"),
+      poles: record.num("poles"),
+      fastestLaps: record.num("fastest_laps"),
+      points: record.num("points"),
+      bestChampionshipPosition: record.numOrNull("best_position"),
     },
-    pagePath: `/drivers/${id}`,
+    pagePath: `${kind.pagePrefix}/${id}`,
   };
 }
 
-export async function constructorSummary(
+export function driverSummary(
   db: AskDatabase,
   query: string,
 ): Promise<Record<string, unknown>> {
-  const resolution = await resolveConstructor(db, query);
-  if (resolution.status === "miss") return missConstructor;
-  if (resolution.status === "ambiguous") {
-    return {
-      found: false,
-      candidates: resolution.candidates,
-      message: candidateMessage("车队"),
-    };
-  }
-  const identityRows = await db.run(constructorIdentitySql, [
-    resolution.ref.id,
-  ]);
-  if (identityRows.length === 0) return missConstructor;
-  const record = asRecord(identityRows[0], "constructor identity row");
-  const yearRows = await db.run(constructorChampionshipYearsSql, [
-    resolution.ref.id,
-  ]);
-  const championshipYears = yearRows.map((row) =>
-    asNumber(
-      asRecord(row, "constructor championship row").year,
-      "championship year",
-    ),
-  );
-  const id = asString(record.id, "constructor id");
-  return {
-    found: true,
-    constructor: {
-      id,
-      name: asString(record.name, "constructor name"),
-      fullName: asString(record.full_name, "constructor full name"),
-      country: asString(record.country_name, "constructor country"),
-      championshipYears,
-      entries: asNumber(record.entries, "constructor entries"),
-      wins: asNumber(record.wins, "constructor wins"),
-      podiums: asNumber(record.podiums, "constructor podiums"),
-      poles: asNumber(record.poles, "constructor poles"),
-      fastestLaps: asNumber(record.fastest_laps, "constructor fastest laps"),
-      points: asNumber(record.points, "constructor points"),
-      bestChampionshipPosition:
-        record.best_position === null
-          ? null
-          : asNumber(record.best_position, "constructor best position"),
-    },
-    pagePath: `/teams/${id}`,
-  };
+  return entitySummary(db, query, DRIVER_KIND);
+}
+
+export function constructorSummary(
+  db: AskDatabase,
+  query: string,
+): Promise<Record<string, unknown>> {
+  return entitySummary(db, query, CONSTRUCTOR_KIND);
 }
 
 export const seasonCheckSql = "SELECT 1 AS ok FROM season WHERE year = ?1";
@@ -278,17 +254,14 @@ export async function seasonDriverStandings(
   return {
     year,
     standings: rows.map((row) => {
-      const record = asRecord(row, "driver standing row");
-      const driverId = asString(record.driver_id, "standing driver id");
+      const record = rowReader(row, "driver standing row");
+      const driverId = record.str("driver_id");
       return {
-        position:
-          record.position_number === null
-            ? null
-            : asNumber(record.position_number, "standing position"),
-        driver: asString(record.driver_name, "standing driver name"),
+        position: record.numOrNull("position_number"),
+        driver: record.str("driver_name"),
         driverId,
-        points: asNumber(record.points, "standing points"),
-        champion: Boolean(record.championship_won),
+        points: record.num("points"),
+        champion: record.bool("championship_won"),
         pagePath: `/drivers/${driverId}`,
       };
     }),
@@ -306,16 +279,16 @@ export async function seasonConstructorStandings(
 
   const merged = new Map<string, StandingTotal & { team: string }>();
   for (const row of rows) {
-    const record = asRecord(row, "constructor standing row");
-    const teamId = asString(record.constructor_id, "standing constructor id");
+    const record = rowReader(row, "constructor standing row");
+    const teamId = record.str("constructor_id");
     const total = mergeStanding(merged.get(teamId), {
-      points: asNumber(record.points, "standing points"),
-      positionText: asString(record.position_text, "standing position text"),
-      championshipWon: Boolean(record.championship_won),
+      points: record.num("points"),
+      positionText: record.str("position_text"),
+      championshipWon: record.bool("championship_won"),
     });
     merged.set(teamId, {
       ...total,
-      team: asString(record.constructor_name, "standing constructor name"),
+      team: record.str("constructor_name"),
     });
   }
   return {
@@ -375,34 +348,29 @@ export async function raceResults(
   if (metaRows.length === 0) {
     return { found: false, message: "该年份未举办此大奖赛" };
   }
-  const meta = asRecord(metaRows[0], "race meta row");
-  const rows = await db.run(raceResultRowsSql, [
-    asNumber(meta.race_id, "race id"),
-  ]);
+  const meta = rowReader(metaRows[0], "race meta row");
+  const rows = await db.run(raceResultRowsSql, [meta.num("race_id")]);
 
   return {
     year,
-    round: asNumber(meta.round, "race round"),
-    grandPrix: asString(meta.grand_prix_name, "race grand prix name"),
-    date: asString(meta.date, "race date"),
+    round: meta.num("round"),
+    grandPrix: meta.str("grand_prix_name"),
+    date: meta.str("date"),
     results: rows.map((row) => {
-      const record = asRecord(row, "race result row");
-      const driverId = asString(record.driver_id, "result driver id");
+      const record = rowReader(row, "race result row");
+      const driverId = record.str("driver_id");
+      const time = record.strOrNull("time");
+      const retired = record.strOrNull("reason_retired");
       const status =
-        record.time !== null
-          ? asString(record.time, "result time")
-          : `${asString(record.position_text, "result position text")}${record.reason_retired ? `（${asString(record.reason_retired, "result reason")}）` : ""}`;
+        time ??
+        `${record.str("position_text")}${retired ? `（${retired}）` : ""}`;
       return {
-        position:
-          record.position_number === null
-            ? null
-            : asNumber(record.position_number, "result position"),
-        driver: asString(record.driver_name, "result driver name"),
+        position: record.numOrNull("position_number"),
+        driver: record.str("driver_name"),
         driverId,
-        team: asString(record.constructor_name, "result constructor name"),
+        team: record.str("constructor_name"),
         // f1db 未得分行的 points 为 NULL（实测 1.9 万行），语义上即 0 分
-        points:
-          record.points === null ? 0 : asNumber(record.points, "result points"),
+        points: record.numOrNull("points") ?? 0,
         status,
         pagePath: `/drivers/${driverId}`,
       };

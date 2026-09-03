@@ -94,12 +94,10 @@
   function openPanel(): void {
     positionPanel();
     open = true;
-    triggerEl?.setAttribute("aria-expanded", "true");
   }
 
   function closePanel(): void {
     open = false;
-    triggerEl?.setAttribute("aria-expanded", "false");
   }
 
   // 外部点击（含滚动跟随重定位）监听只在面板展开期间注册，组件自洽，不依赖全局脚本
@@ -212,7 +210,7 @@
     type="button"
     bind:this={triggerEl}
     class="season-filter__trigger inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-line bg-surface-raised px-4 text-[0.72rem] font-semibold tracking-[0.09em] uppercase text-ink-strong transition-colors hover:border-ink-muted hover:text-ink"
-    aria-expanded="false"
+    aria-expanded={open}
     aria-label={label}
     onclick={() => (open ? closePanel() : openPanel())}
   >
