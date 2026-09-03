@@ -216,6 +216,22 @@ describe("D1 查询计划的结构性属性", () => {
     );
   });
 
+  // 积分榜每行算一次该赛季胜场。写成相关子查询时每行都从实体分区起步，索引里
+  // 没有 year，只能拉出该车手/车队全生涯的成绩再回表过滤（2026-09-03 实测车手榜
+  // 4166 行/次）。改成按年份一次算完物化，读量只与该赛季的场次有关
+  it("积分榜胜场按赛季算一次，不扫全生涯", () => {
+    for (const key of [
+      "race-results-repository.ts:driverStandingsSql",
+      "race-results-repository.ts:constructorStandingsSql",
+    ]) {
+      const standingsPlan = plan(query(key));
+      expect(standingsPlan, key).not.toContain("CORRELATED SCALAR SUBQUERY");
+      expect(standingsPlan, key).toContain(
+        "SEARCH ra USING COVERING INDEX sqlite_autoindex_race_1 (year=?)",
+      );
+    }
+  });
+
   it("纪录圈查询取到全场次最快的一圈", () => {
     insertRow("country", { id: "'gb'" });
     insertRow("circuit", { id: "'circuit-a'", country_id: "'gb'" });
