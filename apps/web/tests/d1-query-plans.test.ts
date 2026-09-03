@@ -6,11 +6,19 @@ import { fileURLToPath } from "node:url";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { teammateResultsSql } from "../src/lib/driver-repository.js";
+import {
+  roundsSql as driverRoundsSql,
+  standingsSql as driverStandingsSql,
+  teammateResultsSql,
+} from "../src/lib/driver-repository.js";
 import {
   circuitInfoSql,
   recordLapSql,
 } from "../src/lib/race-results-repository.js";
+import {
+  roundsSql as teamRoundsSql,
+  standingsSql as teamStandingsSql,
+} from "../src/lib/team-repository.js";
 
 const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -59,6 +67,30 @@ CREATE INDEX rcda_position_number_idx ON race_data (position_number);
 CREATE INDEX rcda_position_text_idx ON race_data (position_text);
 CREATE INDEX rcda_driver_id_idx ON race_data (driver_id);
 CREATE INDEX rcda_constructor_id_idx ON race_data (constructor_id);
+-- 赛季维度表：上游主键都以 year 打头，按 driver_id/constructor_id 过滤时无索引可用
+CREATE TABLE grand_prix (id TEXT NOT NULL, abbreviation TEXT, name TEXT, CONSTRAINT gp_pk PRIMARY KEY (id));
+CREATE TABLE season_driver_standing (
+  year INTEGER NOT NULL, position_display_order INTEGER NOT NULL,
+  position_text TEXT NOT NULL, driver_id TEXT NOT NULL,
+  points REAL NOT NULL, championship_won INTEGER NOT NULL,
+  CONSTRAINT ssds_pk PRIMARY KEY (year, position_display_order)
+);
+CREATE TABLE season_constructor_standing (
+  year INTEGER NOT NULL, position_display_order INTEGER NOT NULL,
+  position_text TEXT NOT NULL, constructor_id TEXT NOT NULL,
+  points REAL NOT NULL, championship_won INTEGER NOT NULL,
+  CONSTRAINT sscs_pk PRIMARY KEY (year, position_display_order)
+);
+CREATE TABLE season_entrant_driver (
+  year INTEGER NOT NULL, entrant_id TEXT NOT NULL, constructor_id TEXT NOT NULL,
+  engine_manufacturer_id TEXT NOT NULL, driver_id TEXT NOT NULL, test_driver INTEGER NOT NULL,
+  CONSTRAINT sedr_pk PRIMARY KEY (year, entrant_id, constructor_id, engine_manufacturer_id, driver_id)
+);
+CREATE TABLE season_entrant_constructor (
+  year INTEGER NOT NULL, entrant_id TEXT NOT NULL, constructor_id TEXT NOT NULL,
+  engine_manufacturer_id TEXT NOT NULL,
+  CONSTRAINT secn_pk PRIMARY KEY (year, entrant_id, constructor_id, engine_manufacturer_id)
+);
 CREATE VIEW fastest_lap AS
 SELECT race_id, driver_id, fastest_lap_time AS time, fastest_lap_time_millis AS time_millis
 FROM race_data WHERE type = 'FASTEST_LAP';
@@ -97,6 +129,30 @@ FROM seq;
 -- circuit-a 第 42 场埋一个全场最快圈，验证结果正确性
 INSERT INTO race_data (race_id, type, position_display_order, driver_id, fastest_lap_time, fastest_lap_time_millis)
 VALUES (42, 'FASTEST_LAP', 99, 'driver-7', '1:19.000', 79000);
+
+INSERT INTO grand_prix (id, abbreviation, name)
+SELECT DISTINCT grand_prix_id, 'GP', grand_prix_id FROM race;
+
+-- 76 个赛季 × 20 名车手/车队的积分榜与参赛登记
+WITH RECURSIVE seq(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM seq WHERE n < 1520)
+INSERT INTO season_driver_standing (year, position_display_order, position_text, driver_id, points, championship_won)
+SELECT 1950 + (n - 1) / 20, (n - 1) % 20 + 1, CAST((n - 1) % 20 + 1 AS TEXT),
+       'driver-' || ((n - 1) % 20 + 1), 100 - (n - 1) % 20, (n - 1) % 20 = 0 FROM seq;
+
+WITH RECURSIVE seq(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM seq WHERE n < 760)
+INSERT INTO season_constructor_standing (year, position_display_order, position_text, constructor_id, points, championship_won)
+SELECT 1950 + (n - 1) / 10, (n - 1) % 10 + 1, CAST((n - 1) % 10 + 1 AS TEXT),
+       'team-' || ((n - 1) % 10 + 1), 200 - (n - 1) % 10, (n - 1) % 10 = 0 FROM seq;
+
+WITH RECURSIVE seq(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM seq WHERE n < 1520)
+INSERT INTO season_entrant_driver (year, entrant_id, constructor_id, engine_manufacturer_id, driver_id, test_driver)
+SELECT 1950 + (n - 1) / 20, 'entrant-' || (((n - 1) % 20) / 2 + 1),
+       'team-' || (((n - 1) % 20) / 2 + 1), 'engine-1', 'driver-' || ((n - 1) % 20 + 1), 0 FROM seq;
+
+WITH RECURSIVE seq(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM seq WHERE n < 760)
+INSERT INTO season_entrant_constructor (year, entrant_id, constructor_id, engine_manufacturer_id)
+SELECT 1950 + (n - 1) / 10, 'entrant-' || ((n - 1) % 10 + 1),
+       'team-' || ((n - 1) % 10 + 1), 'engine-1' FROM seq;
 ANALYZE;
 `;
 
@@ -124,6 +180,10 @@ let basePlans: { recordLap: string; circuitInfo: string };
 
 const teammateQuery = (query = teammateResultsSql) =>
   query.replaceAll("?1", "'driver-7'");
+
+// 车手/车队页的赛季维度查询：?1 是 slug
+const bindSlug = (query: string, slug: string) =>
+  query.replaceAll("?1", `'${slug}'`);
 
 beforeAll(() => {
   dir = mkdtempSync(path.join(tmpdir(), "f1db-plan-"));
@@ -204,6 +264,36 @@ describe("D1 查询计划", () => {
       expect(teammatePlan).not.toContain(
         "idx_rd_constructor_type (constructor_id=?",
       );
+    }
+  });
+
+  // 车手页一次渲染要跑十余条按 slug 过滤的查询，赛季维度表主键都以 year 打头，
+  // 缺列索引时每条都全扫（2026-09-03 实测 standings 1681 行/次、rounds 4189 行/次）
+  it("赛季维度表按 slug 过滤走索引而非全表扫", () => {
+    const cases: [string, string, string][] = [
+      [
+        "车手积分榜",
+        bindSlug(driverStandingsSql, "driver-7"),
+        "idx_sds_driver",
+      ],
+      ["车手参赛年份", bindSlug(driverRoundsSql, "driver-7"), "idx_sed_driver"],
+      [
+        "车队积分榜",
+        bindSlug(teamStandingsSql, "team-3"),
+        "idx_scs_constructor",
+      ],
+      [
+        "车队参赛年份",
+        bindSlug(teamRoundsSql, "team-3"),
+        "idx_sec_constructor",
+      ],
+    ];
+    for (const [label, query, index] of cases) {
+      for (const db of [dbPath, unanalyzedPath]) {
+        const queryPlan = plan(db, query);
+        expect(queryPlan, label).toContain(index);
+        expect(queryPlan, label).not.toContain("SCAN season_");
+      }
     }
   });
 

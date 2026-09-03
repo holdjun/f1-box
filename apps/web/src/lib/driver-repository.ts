@@ -235,7 +235,7 @@ GROUP BY ra.year, rd.driver_number
 ORDER BY ra.year, MIN(ra.round)`;
 
 // 年份取正式阵容与实际结果的并集：当前季未出赛也有空矩阵块，将来轮次保留空列
-const roundsSql = `
+export const roundsSql = `
 SELECT ra.year, ra.round, gp.abbreviation AS code, gp.name, gp.id AS slug, ra.circuit_id
 FROM race ra
 JOIN grand_prix gp ON gp.id = ra.grand_prix_id
@@ -314,7 +314,7 @@ CROSS JOIN sprint_race_result srr
 WHERE srr.driver_id <> ?1 AND srr.position_number IS NOT NULL`;
 
 // 逐年单行，无需变体合并
-const standingsSql = `
+export const standingsSql = `
 SELECT year, position_text, points, championship_won
 FROM season_driver_standing
 WHERE driver_id = ?1`;
