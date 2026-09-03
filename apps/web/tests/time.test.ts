@@ -121,4 +121,44 @@ describe("time formatting", () => {
       "Invalid timestamp: nope",
     );
   });
+
+  // en-GB 的九月缩写是四字母（Sept），其余十一个月三字母，日期列宽会跟着跳；
+  // 统一成三字母。ICU 升级曾把 en-GB 的 Sep 改成 Sept，逐月断言才能拦住下一次
+  test("race date keeps every month at three letters", () => {
+    const months = Array.from(
+      { length: 12 },
+      (_, index) =>
+        formatRaceDate(
+          `2026-${String(index + 1).padStart(2, "0")}-06`,
+          null,
+          null,
+        ).split(" ")[1],
+    );
+    expect(months).toEqual([
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ]);
+  });
+
+  test("weekend range uses a three-letter September", () => {
+    expect(
+      formatWeekendRange("2026-09-05T10:00:00Z", "2026-09-06T13:00:00Z"),
+    ).toBe("05-06 SEP");
+  });
+
+  test("utc date time uses a three-letter September", () => {
+    expect(formatUtcDateTime("2026-09-06T04:00:00Z", "en-GB")).toBe(
+      "06 Sep 2026, 04:00 UTC",
+    );
+  });
 });

@@ -180,7 +180,11 @@ test.describe("standings", () => {
       .getByRole("table", { name: "Driver standings" })
       .locator("tbody tr")
       .first();
-    await expect(first.locator(".vendor-cell__name").first()).toBeVisible();
+    // 断言可视宽度而非 toBeVisible：sr-only 的 1px 盒子也会被判可见，
+    // 必须确认车手名真的有可读宽度（防止将来被误收成 sr-only）
+    const winnerName = first.locator("a[href^='/drivers/'] .vendor-cell__name");
+    const box = await winnerName.boundingBox();
+    expect(box?.width ?? 0).toBeGreaterThan(40);
     await expect(first).toContainText("Kimi Antonelli");
   });
 
@@ -234,10 +238,13 @@ test("@mobile race list first column follows its content", async ({ page }) => {
     .evaluate((el) => el.clientWidth);
   expect(width).toBeLessThan(visible / 2);
   await expect(longest).toContainText("Barcelona-Catalunya");
-  // 主列（冠军车手）不跟着次要归属列一起收成徽标
-  await expect(
-    rows.first().locator(".vendor-cell__name").first(),
-  ).toBeVisible();
+  // 主列（冠军车手）不跟着次要归属列一起收成徽标；断言可视宽度而非 toBeVisible，
+  // 否则 sr-only 的 1px 盒子也会被判可见，静默失效
+  const winnerName = rows
+    .first()
+    .locator("a[href^='/drivers/'] .vendor-cell__name");
+  const box = await winnerName.boundingBox();
+  expect(box?.width ?? 0).toBeGreaterThan(40);
 });
 
 test("@mobile results pages have no page overflow", async ({ page }) => {

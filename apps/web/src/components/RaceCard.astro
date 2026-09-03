@@ -57,12 +57,10 @@ const teamColor = (constructorId: string | null): string | undefined =>
       <span
         class="font-display text-[2.25rem] leading-none font-semibold text-transparent [-webkit-text-stroke:1px_var(--ink-muted)]"
         aria-hidden="true">{round}</span>
-      <!-- 圆角和轮廓加在国旗图像本身；国旗 SVG 为 4:3，4:3 盒同比例；
-           border 挤占内容盒（1.381 非 4:3），contain 填不满会悬空一圈 —— cover 放大填满、紧贴边框 -->
       <img
         src={`/vendor/country-flags/${race.alpha2Code.toLowerCase()}.svg`}
         alt=""
-        class="vendor-cell__flag mb-1 h-4 w-auto aspect-4/3 rounded-[2px] border border-ink/25 object-cover"
+        class="vendor-cell__flag mb-1 h-4 w-auto aspect-4/3"
         loading="lazy"
       />
       <time

@@ -41,6 +41,10 @@ export function formatRaceDate(
   return formatUtcDate(date);
 }
 
+// en-GB 的九月缩写是四字母（Sept），其余十一个月三字母，日期列宽会跟着跳；
+// 统一成三字母，不动 locale（en-US 会把日期顺序整个换成月前日后的写法）
+const normalizeShortMonth = (s: string): string => s.replaceAll("Sept", "Sep");
+
 // Intl 同一选项：两位日/短月/四位年 + 指定时区
 function formatDate(
   value: Timestamp,
@@ -51,12 +55,14 @@ function formatDate(
   if (!Number.isFinite(date.getTime())) {
     throw new TypeError(`Invalid timestamp: ${String(value)}`);
   }
-  return new Intl.DateTimeFormat(locale, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone,
-  }).format(date);
+  return normalizeShortMonth(
+    new Intl.DateTimeFormat(locale, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      timeZone,
+    }).format(date),
+  );
 }
 
 // 周末日期范围（首练 → 正赛）：同月缩成 "06-08 MAR"，跨月 "27 FEB - 01 MAR"。
@@ -98,7 +104,7 @@ function zonedParts(
     parts.find((part) => part.type === type)?.value ?? "";
   return {
     day: pick("day"),
-    month: pick("month").toUpperCase(),
+    month: normalizeShortMonth(pick("month")).toUpperCase(),
     year: pick("year"),
   };
 }
@@ -160,14 +166,16 @@ function formatDateTime(
     throw new TypeError(`Invalid timestamp: ${String(value)}`);
   }
 
-  return new Intl.DateTimeFormat(locale, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-    timeZone,
-    timeZoneName: "short",
-  }).format(date);
+  return normalizeShortMonth(
+    new Intl.DateTimeFormat(locale, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+      timeZone,
+      timeZoneName: "short",
+    }).format(date),
+  );
 }

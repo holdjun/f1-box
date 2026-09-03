@@ -311,7 +311,11 @@
     /* 国旗 SVG 均为 4:3（viewBox 640×480），盒同比例才无 letterbox */
     width: 1.25rem;
     height: 0.9375rem;
-    object-fit: contain;
+    /* 白底旗（日本、韩国）在两个主题下都需要边界，否则像素浮在背景上；
+       border 挤占内容盒后不再是 4:3，contain 会悬空一圈，只能 cover 放大填满 */
+    border: 1px solid color-mix(in oklab, var(--ink) 25%, transparent);
+    border-radius: 2px;
+    object-fit: cover;
     flex: none;
   }
   .vendor-cell__monogram {
