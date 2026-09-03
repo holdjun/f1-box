@@ -4,6 +4,8 @@
 # 00-drop 反序清库后逐表重建（外键约束下无法逐表单独 drop），
 # 整库重导窗口存在，靠 data-sync 的 release tag 门禁收敛到每周一次；
 # 索引统一放 f1db-d1-indexes.sql，附在 race_data（最后一张相关表）的 dump 之后。
+# 逐表 dump 只带 CREATE TABLE 与 INSERT，上游那 164 条索引不会随之过来——
+# 这是 D1 上只有主键自动索引的原因，也是查询计划夹具必须由本脚本产出的原因。
 set -euo pipefail
 
 OUT="${1:-/tmp/f1db-d1}"
@@ -58,3 +60,14 @@ done
 } > "$OUT/$(printf '%02d' "$idx")-views.sql"
 
 echo "wrote $((idx + 1)) files to $OUT ($(du -sh "$OUT" | cut -f1))"
+
+# 查询计划夹具：与导入产物同源的表/视图定义，不含索引——正是 D1 导入后的形态。
+# 提交它，tests/d1-query-plans.test.ts 靠它在真实 schema 上验证每条查询的计划。
+SCHEMA_FIXTURE="$(dirname "$0")/../apps/web/tests/fixtures/d1-schema.sql"
+{
+  echo "-- 由 scripts/f1db-d1-dump.sh 生成，勿手改。"
+  echo "-- f1db 上游的表与视图定义，索引另见 scripts/f1db-d1-indexes.sql。"
+  sqlite3 "$WORK/f1db.db" \
+    "SELECT sql || ';' FROM sqlite_master WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY rowid;"
+} > "$SCHEMA_FIXTURE"
+echo "refreshed $SCHEMA_FIXTURE"

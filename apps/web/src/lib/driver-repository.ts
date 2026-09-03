@@ -279,7 +279,7 @@ WHERE srr.driver_id = ?1 AND srr.position_number IS NOT NULL`;
 // CROSS JOIN 固定连接顺序（stint → 该年的 race → 该场该队的成绩）。规划器自己排时，
 // 只有跑过 ANALYZE 才排得对；没有统计信息就会先按 constructor_id 拉出该车队史上
 // 全部成绩再用年份过滤，Hamilton 一次要读 5 万行。export 供查询计划测试
-export const teammateResultsSql = `
+const teammateResultsSql = `
 WITH stints AS (
   SELECT DISTINCT ra.year, rr.constructor_id
   FROM race ra

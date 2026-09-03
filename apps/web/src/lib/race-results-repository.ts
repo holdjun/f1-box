@@ -307,7 +307,7 @@ WHERE ra.year = ?1 AND ra.grand_prix_id = ?2`;
 
 // 赛道维度静态字段：total_races_held 为累计办赛场次，first_gp 为历史首办年
 // export 供索引计划测试：相关子查询按 circuit_id 取首次举办年份
-export const circuitInfoSql = `SELECT c.total_races_held,
+const circuitInfoSql = `SELECT c.total_races_held,
   (SELECT MIN(ra2.year) FROM race ra2 WHERE ra2.circuit_id = c.id) AS first_gp
 FROM circuit c
 WHERE c.id = (SELECT ra.circuit_id FROM race ra WHERE ra.year = ?1 AND ra.grand_prix_id = ?2)`;
@@ -318,7 +318,7 @@ WHERE c.id = (SELECT ra.circuit_id FROM race ra WHERE ra.year = ?1 AND ra.grand_
 // 17105 行）再逐行回表 race 与 driver，实测每次读 7.5 万行——2026-09-02 生产 D1 日读
 // 配额被这一条查询烧掉 722 万行。固定成从 ra 走 idx_race_circuit_year 后，最多只读该
 // 赛道场次数×每场最快圈行数（Monza 956 行）。
-export const recordLapSql = `SELECT fl.time, d.name AS driver_name, ra.year
+const recordLapSql = `SELECT fl.time, d.name AS driver_name, ra.year
 FROM race ra
 CROSS JOIN fastest_lap fl ON fl.race_id = ra.id
 CROSS JOIN driver d ON d.id = fl.driver_id
@@ -391,22 +391,38 @@ WHERE p.race_id = ${raceIdSubquery}
 ORDER BY p.position_display_order`;
 
 // wins：f1db 积分榜表无该列，从正赛 P1 行按年聚合（race_data (driver_id, type) 索引可用）
-const driverStandingsSql = `SELECT sds.position_number, sds.position_text,
+// 胜场数写成相关子查询时，积分榜每行都从车手分区起步：idx_rd_driver_type 里没有 year，
+// 只能先拉出该车手全生涯的成绩再回 race 表过滤（2026-09-03 实测 4166 行/次）。
+// 改成按赛季一次算完物化，读量只与该赛季的场次有关（同条件实测 389 行）
+const driverStandingsSql = `WITH season_wins AS (
+  SELECT rr.driver_id, COUNT(*) AS wins
+  FROM race ra
+  CROSS JOIN race_result rr ON rr.race_id = ra.id
+  WHERE ra.year = ?1 AND rr.position_number = 1
+  GROUP BY rr.driver_id
+)
+SELECT sds.position_number, sds.position_text,
        d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
-       sds.points,
-       (SELECT COUNT(*) FROM race_result rr JOIN race ra ON ra.id = rr.race_id
-        WHERE rr.driver_id = d.id AND rr.position_number = 1 AND ra.year = sds.year) AS wins
+       sds.points, COALESCE(w.wins, 0) AS wins
 FROM season_driver_standing sds
 JOIN driver d ON sds.driver_id = d.id
+LEFT JOIN season_wins w ON w.driver_id = d.id
 WHERE sds.year = ?1
 ORDER BY sds.position_display_order`;
 
-const constructorStandingsSql = `SELECT scs.position_number, scs.position_text,
+const constructorStandingsSql = `WITH season_wins AS (
+  SELECT rr.constructor_id, COUNT(*) AS wins
+  FROM race ra
+  CROSS JOIN race_result rr ON rr.race_id = ra.id
+  WHERE ra.year = ?1 AND rr.position_number = 1
+  GROUP BY rr.constructor_id
+)
+SELECT scs.position_number, scs.position_text,
        ct.id AS team_id, ct.name AS team_name, scs.points,
-       (SELECT COUNT(*) FROM race_result rr JOIN race ra ON ra.id = rr.race_id
-        WHERE rr.constructor_id = ct.id AND rr.position_number = 1 AND ra.year = scs.year) AS wins
+       COALESCE(w.wins, 0) AS wins
 FROM season_constructor_standing scs
 JOIN constructor ct ON scs.constructor_id = ct.id
+LEFT JOIN season_wins w ON w.constructor_id = ct.id
 WHERE scs.year = ?1
 ORDER BY scs.position_display_order`;
 
