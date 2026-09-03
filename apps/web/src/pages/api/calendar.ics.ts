@@ -1,12 +1,23 @@
 import type { APIRoute } from "astro";
-import { buildSeasonIcs, parseCalendarYear } from "../../lib/calendar-ics.js";
+import {
+  buildSeasonIcs,
+  parseCalendarRace,
+  parseCalendarYear,
+} from "../../lib/calendar-ics.js";
 
 export const GET: APIRoute = async ({ url, locals, cache }) => {
   const year = parseCalendarYear(url.searchParams);
   if (year === null) return new Response(null, { status: 404 });
-  const races =
+  const slug = parseCalendarRace(url.searchParams);
+  const season =
     await locals.app.repositories.raceResults.getSeasonCalendar(year);
-  const { ics, eventCount } = buildSeasonIcs(year, races, url.origin);
+  const races = slug === null ? season : season.filter((r) => r.slug === slug);
+  const { ics, eventCount } = buildSeasonIcs(year, races, url.origin, {
+    calendarName:
+      slug === null
+        ? `F1 ${year} · f1-box`
+        : `${races[0]?.raceName ?? slug} ${year} · f1-box`,
+  });
   // 未导入赛季、或有站次但整年无 session 时间：订阅空日历无意义
   if (eventCount === 0) return new Response(null, { status: 404 });
   // 中间件默认策略显式排除 /api/*，这里路由内 opt-in，参数与全站一致；
@@ -15,7 +26,7 @@ export const GET: APIRoute = async ({ url, locals, cache }) => {
   return new Response(ics, {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
-      "Content-Disposition": `attachment; filename="f1-${year}.ics"`,
+      "Content-Disposition": `attachment; filename="f1-${slug ?? year}.ics"`,
     },
   });
 };

@@ -724,11 +724,60 @@ export function createRaceResultsRepository(
 
     async getRacePage(year, slug) {
       if (!db) {
-        if (year !== 2026 || slug !== "australia") return null;
+        if (year !== 2026) return null;
         const { default: fixture } = await import(
           "./fixtures/race-australia-2026.json"
         );
-        return fixture as RacePage;
+        const page = fixture as RacePage;
+        if (slug === "australia") return page;
+        // DEV 预览：赛前/赛中形态没有独立 fixture。换上目标站的赛程元信息，
+        // 再按站次裁掉尚未产生的结果——china 停在排位赛后，其余为赛前
+        const { default: season } = await import(
+          "./fixtures/season-races-2026.json"
+        );
+        const race = (season as { races: RaceSummary[] }).races.find(
+          (r) => r.slug === slug,
+        );
+        if (!race) return null;
+        const meta: RaceMeta = {
+          ...page.meta,
+          round: race.round,
+          slug: race.slug,
+          name: race.name,
+          officialName: race.raceName,
+          date: race.date,
+          raceTime: race.time,
+          sessions: race.sessions,
+          circuitId: race.circuitId,
+          circuitLayoutId: race.circuitLayoutId,
+          circuitFullName: race.circuitName,
+          circuitPlace: race.circuitPlace,
+          countryName: race.countryName,
+          alpha2Code: race.alpha2Code,
+        };
+        const empty = {
+          raceResult: [],
+          qualifying: [],
+          startingGrid: [],
+          fastestLaps: [],
+          pitStops: [],
+          practice1: [],
+          practice2: [],
+          practice3: [],
+        };
+        return {
+          meta,
+          tabs:
+            slug === "china"
+              ? {
+                  ...empty,
+                  qualifying: page.tabs.qualifying,
+                  practice1: page.tabs.practice1,
+                  practice2: page.tabs.practice2,
+                  practice3: page.tabs.practice3,
+                }
+              : empty,
+        };
       }
       const values = [year, slug];
       const [

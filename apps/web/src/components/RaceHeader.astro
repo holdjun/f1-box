@@ -2,52 +2,31 @@
 import { circuitTimeZone } from "../lib/circuit-time.js";
 import type { RaceMeta } from "../lib/race-results-repository.js";
 import { formatRaceDate } from "../lib/time.js";
-import CircuitCard from "./CircuitCard.astro";
-import CircuitMap from "./CircuitMap.astro";
-import WeekendSchedule from "./WeekendSchedule.svelte";
 
 interface Props {
   meta: RaceMeta;
 }
 const { meta } = Astro.props;
 const round = String(meta.round).padStart(2, "0");
-const timeZone = circuitTimeZone(meta.circuitId);
 // 副行日期在 formatRaceDate 内回退：空 time 或无时区映射的历史赛保持 UTC，不做时区换算
-const raceDate = formatRaceDate(meta.date, meta.raceTime, timeZone);
+const raceDate = formatRaceDate(
+  meta.date,
+  meta.raceTime,
+  circuitTimeZone(meta.circuitId),
+);
 ---
 
-<!-- isolate: 让 -z-1 的描边数字压到正文之下, 又不至于沉到 body 背景后面 -->
-<header class="shell relative isolate overflow-hidden pb-20 pt-6 md:pt-8">
-  <!-- 描边巨型回合号: -z-1 沉到文字下方 (旧 z-index:-1 布局的等价表达) -->
-  <p
-    class="absolute -top-8 -left-[0.05em] -z-1 font-display text-[clamp(13rem,29vw,17rem)] leading-[0.7] font-bold text-transparent [-webkit-text-stroke:1px_var(--line)] max-md:text-[17rem]"
-    aria-hidden="true"
-  >{round}</p>
-  <div class="grid grid-cols-1 items-end gap-12 lg:grid-cols-[3fr_7fr]">
-    <div>
-      <h1 class="max-w-[10ch] text-display-xl">{meta.name}</h1>
-      <p class="race-hero__subtitle mt-6 text-[1.1rem]">
-        {raceDate} · {meta.circuitPlace} · {meta.countryName}
-      </p>
-      <p class="mt-1 text-ink-muted">{meta.officialName}</p>
-    </div>
-  </div>
-  <!-- 赛道图与信息卡同区块：桌面两列并排、375px 堆叠（对齐需求"相邻展示"） -->
-  <div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-[2fr_3fr]">
-    <div class="circuit-map-panel mx-auto w-[min(100%,24rem)]">
-      <CircuitMap
-        layoutId={meta.circuitLayoutId}
-        fallbackSrc={`/vendor/circuits/${meta.circuitLayoutId}.svg`}
-        alt={`${meta.circuitFullName} layout map`}
-      />
-    </div>
-    <CircuitCard meta={meta} />
-  </div>
-  {meta.sessions.length > 0 ? (
-    <WeekendSchedule
-      sessions={meta.sessions}
-      timeZone={timeZone}
-      client:load
-    />
-  ) : null}
+<header class="shell flex flex-wrap items-baseline gap-x-4 gap-y-2 pt-6 md:pt-8">
+  <span
+    class="font-display text-[0.8rem] font-semibold tracking-[0.12em] text-ink-muted"
+    >R{round}</span>
+  <img
+    src={`/vendor/country-flags/${meta.alpha2Code.toLowerCase()}.svg`}
+    alt=""
+    class="vendor-cell__flag h-4 w-auto aspect-4/3"
+  />
+  <h1 class="text-display-md">{meta.name}</h1>
+  <p class="race-hero__subtitle text-[0.95rem] text-ink-muted">
+    {raceDate} · {meta.circuitPlace} · {meta.countryName}
+  </p>
 </header>

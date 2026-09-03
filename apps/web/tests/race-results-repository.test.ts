@@ -701,12 +701,21 @@ describe("createRaceResultsRepository getRacePage", () => {
     expect(page?.tabs.practice1[0].gap).toBeNull();
   });
 
-  it("DEV fixture serves only australia 2026", async () => {
+  it("DEV fixture 派生出赛前/赛中/赛后三种形态", async () => {
     const repository = createRaceResultsRepository();
-    expect(await repository.getRacePage(2026, "monaco")).toBeNull();
-    const page = await repository.getRacePage(2026, "australia");
-    expect(page?.meta.name).toBe("Australia");
-    expect(page?.tabs.raceResult.length).toBeGreaterThan(0);
+    expect(await repository.getRacePage(2026, "nope")).toBeNull();
+    const finished = await repository.getRacePage(2026, "australia");
+    expect(finished?.meta.name).toBe("Australia");
+    expect(finished?.tabs.raceResult.length).toBeGreaterThan(0);
+    // 赛中：排位赛已入库、正赛未开
+    const mid = await repository.getRacePage(2026, "china");
+    expect(mid?.tabs.qualifying.length).toBeGreaterThan(0);
+    expect(mid?.tabs.raceResult).toHaveLength(0);
+    // 赛前：全空，但赛程元信息跟着站次走
+    const upcoming = await repository.getRacePage(2026, "japan");
+    expect(upcoming?.meta.name).toBe("Japan");
+    expect(upcoming?.tabs.qualifying).toHaveLength(0);
+    expect(upcoming?.meta.sessions.length).toBeGreaterThan(0);
   });
 });
 

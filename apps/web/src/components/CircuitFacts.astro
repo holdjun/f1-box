@@ -1,0 +1,43 @@
+---
+import type { RaceMeta } from "../lib/race-results-repository.js";
+import CircuitMap from "./CircuitMap.astro";
+
+interface Props {
+  meta: RaceMeta;
+}
+const { meta } = Astro.props;
+// Race Distance 是 courseLength × laps 的派生值，不重复列出
+const facts = [
+  `${meta.courseLength.toFixed(3)} km`,
+  `${meta.turns} turns`,
+  meta.direction,
+  `${meta.laps} laps`,
+];
+const history = [
+  meta.firstGrandPrix === null ? null : `First held ${meta.firstGrandPrix}`,
+  `${meta.totalRacesHeld} races held`,
+].filter((v): v is string => v !== null);
+---
+
+<section class="circuit-facts shell mt-10 border-t border-line pt-6">
+  <div class="grid grid-cols-1 items-start gap-6 md:grid-cols-[minmax(0,20rem)_1fr] md:gap-10">
+    <CircuitMap
+      layoutId={meta.circuitLayoutId}
+      fallbackSrc={`/vendor/circuits/${meta.circuitLayoutId}.svg`}
+      alt={`${meta.circuitFullName} layout map`}
+    />
+    <div>
+      <h2 class="font-display text-[1.05rem] tracking-[0.08em] uppercase">{meta.circuitFullName}</h2>
+      <p class="mt-1 text-[0.8rem] text-ink-muted">{meta.officialName}</p>
+      <p class="mt-4 text-[0.9rem] tabular-nums text-ink-strong">{facts.join(" · ")}</p>
+      <p class="mt-1 text-[0.9rem] tabular-nums text-ink-muted">{history.join(" · ")}</p>
+      <p class="mt-4 flex flex-wrap items-baseline gap-x-3 text-[0.9rem]">
+        <span class="text-[0.68rem] tracking-[0.1em] uppercase text-ink-muted">Fastest lap</span>
+        <span class="font-semibold tabular-nums text-ink-strong">{meta.recordLap?.time ?? "—"}</span>
+        {meta.recordLap ? (
+          <span class="text-ink-muted">{meta.recordLap.driverName} ({meta.recordLap.year})</span>
+        ) : null}
+      </p>
+    </div>
+  </div>
+</section>
