@@ -28,6 +28,12 @@ function displayZone(startsAtUtc: string, timeZone: string | null): string {
     : "UTC";
 }
 
+// 发车时刻是否真实存在。占位时刻不允许进入任何“几点开跑”的渲染：
+// 它既不是真实时刻，做时区换算后连日期都会漂移
+export function hasPublishedStart(startsAtUtc: string): boolean {
+  return !startsAtUtc.endsWith(PLACEHOLDER_START);
+}
+
 // 副行日期渲染的唯一入口：仅当发车时刻与赛道时区均存在时按赛道时区渲染当地比赛日，
 // 否则回退 UTC 日期。空 time 的历史赛绝不能按合成 00:00 做时区换算（负偏移时区会退一天）。
 export function formatRaceDate(
@@ -151,6 +157,27 @@ export function formatWeekdayTime(
 ): string {
   const parts = weekdayTimeParts(value, timeZone, locale, false);
   return `${parts.weekday} ${parts.time}`;
+}
+
+// 未公布发车时刻的场次：只出星期与日期（"Sun 19 Nov"）。date 存的就是赛道
+// 当地日期，按 UTC 原样呈现；换算反而会把负偏移赛道推到前一天
+export function formatWeekdayDate(
+  startsAtUtc: string,
+  locale = "en-GB",
+): string {
+  const date = new Date(startsAtUtc);
+  if (!Number.isFinite(date.getTime())) {
+    throw new TypeError(`Invalid timestamp: ${String(startsAtUtc)}`);
+  }
+  const parts = new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    timeZone: "UTC",
+  }).formatToParts(date);
+  const pick = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return `${pick("weekday")} ${pick("day")} ${normalizeShortMonth(pick("month"))}`;
 }
 
 function weekdayTimeParts(

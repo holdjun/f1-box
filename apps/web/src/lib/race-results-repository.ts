@@ -772,7 +772,16 @@ export function createRaceResultsRepository(
           officialName: race.raceName,
           date: race.date,
           raceTime: race.time,
-          sessions: race.sessions,
+          // 历史赛季普遍只有日期、无发车时刻（f1db 只从 2024 起补齐，1171 场里
+          // 1101 场 race.time 为空）。DEV 无 D1、只有 2026 fixture，借摩纳哥模拟这一
+          // 形态，赛程条的占位判据才有 e2e 可打的入口
+          sessions:
+            slug === "monaco"
+              ? race.sessions.map((s) => ({
+                  ...s,
+                  startsAtUtc: `${s.startsAtUtc.slice(0, 10)}T00:00:00Z`,
+                }))
+              : race.sessions,
           circuitId: race.circuitId,
           circuitLayoutId: race.circuitLayoutId,
           circuitFullName: race.circuitName,

@@ -6,8 +6,33 @@ import {
   formatRaceDate,
   formatUtcDateTime,
   formatUtcLongDate,
+  formatWeekdayDate,
   formatWeekendRange,
+  hasPublishedStart,
 } from "../src/lib/time.js";
+
+// f1db 只从 2024 起补齐发车时刻：1171 场里 1101 场 race.time 为空，
+// buildSessions 兜底成 T00:00:00Z。把这个合成值当真实时刻做时区换算，
+// 会在 UTC+4 的阿布扎比造出 "Sun 04:00"，在 UTC-8 的拉斯维加斯连星期都退一天
+describe("unpublished start times", () => {
+  test("placeholder start is not a published time", () => {
+    expect(hasPublishedStart("2023-11-19T00:00:00Z")).toBe(false);
+    expect(hasPublishedStart("2026-03-08T04:00:00Z")).toBe(true);
+  });
+
+  test("unpublished sessions fall back to the stored date, never a clock", () => {
+    expect(formatWeekdayDate("2023-11-19T00:00:00Z", "en-GB")).toBe(
+      "Sun 19 Nov",
+    );
+  });
+
+  // date 是赛道当地日期，按 UTC 原样呈现；一旦做时区换算就会退到前一天
+  test("stored date is rendered as-is", () => {
+    expect(formatWeekdayDate("2023-09-03T00:00:00Z", "en-GB")).toBe(
+      "Sun 03 Sep",
+    );
+  });
+});
 
 describe("time formatting", () => {
   test("formats a timestamp in UTC", () => {

@@ -103,6 +103,25 @@ test.describe("race detail", () => {
     await expect(page.locator(".weekend-progress__node")).toHaveCount(5);
   });
 
+  // f1db 只从 2024 起补齐发车时刻，历史赛普遍只有日期；合成的 00:00 一旦按赛道
+  // 时区换算就会造出假时刻（UTC+4 变 04:00，负偏移赛道连星期都退一天）
+  test("@desktop sessions without a published start time show no clock", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races/monaco/race-result");
+    const progress = page.locator(".weekend-progress");
+    await expect(progress.locator("li")).toHaveCount(5);
+    await expect(progress.locator("[data-session-date]").first()).toHaveText(
+      /^[A-Z][a-z]{2} \d{2} [A-Z][a-z]{2}$/,
+    );
+    await expect(progress.locator("[data-track-time]")).toHaveCount(0);
+    await expect(progress.locator("[data-my-time]")).toHaveCount(0);
+    await expect(progress).not.toContainText("00:00");
+    // ics 里一个事件都不会有，calendar.ics 直接 404：入口不能出现
+    await expect(progress.locator("[data-calendar-trigger]")).toHaveCount(0);
+    await expect(progress.locator("[data-calendar-race]")).toHaveCount(0);
+  });
+
   test("@desktop hero shows the circuit map as plain content", async ({
     page,
   }) => {
