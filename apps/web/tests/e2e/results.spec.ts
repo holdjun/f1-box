@@ -88,7 +88,6 @@ test.describe("race detail", () => {
     await expect(progress.locator("li")).toHaveCount(5);
     await expect(progress).toContainText("Qualifying");
     await expect(progress).toContainText("Track");
-    await expect(progress).toContainText("My");
     // 无 JS 降级行给两条 ics：本站与整季；有 JS 时换成弹窗按钮
     await expect(progress.locator("[data-calendar-race]")).toHaveAttribute(
       "href",

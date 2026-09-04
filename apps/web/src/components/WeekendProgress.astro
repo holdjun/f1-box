@@ -12,24 +12,20 @@ interface Props {
 const { nodes, timeZone, year, slug, raceName } = Astro.props;
 // 无时区映射（f1db 新增赛道未补进 circuit-timezones.json）时赛道行退化为 UTC，
 // 标签必须跟着改：把 UTC 时刻标成赛道时间比不显示更糟
-const trackLabel = timeZone === null ? "UTC" : "Track time";
+const trackLabel = timeZone === null ? "UTC" : "Track";
 // My time 只能在客户端算：SSR 无从得知浏览器时区，无 JS 时整行不出现，
 // 绝不拿 UTC 时刻冒充本地时间
 const raceIcs = `${Astro.url.origin}/api/calendar.ics?year=${year}&race=${slug}`;
 const seasonIcs = `${Astro.url.origin}/api/calendar.ics?year=${year}`;
 // 整体替换 scheme（含 https 的 s）：生产 https 下若只替换 http 前缀会产出非法的 webcals://
 const webcal = (href: string) => href.replace(/^https?:\/\//, "webcal://");
-// 日历弹窗菜单项与 SeasonFilter 下拉选项同一 hover 语言
-const itemClass =
-  "rounded px-3 py-2 text-left text-[0.82rem] text-ink-strong transition-colors hover:bg-surface-raised hover:text-ink";
+const linkClass =
+  "text-[0.78rem] text-ink-muted underline decoration-line underline-offset-4 transition-colors hover:text-accent";
 ---
 
 <section class="weekend-progress shell mt-12">
   <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-line pb-3">
-    <div>
-      <h2 class="status-label">Weekend schedule</h2>
-      <p class="mt-1 text-[0.72rem] text-ink-muted">My = your timezone · Track = circuit local time</p>
-    </div>
+    <h2 class="status-label">Weekend schedule</h2>
     <button type="button" class="button button--text calendar-entry-trigger" data-calendar-trigger hidden>
       <svg viewBox="0 0 24 24" aria-hidden="true"
         ><rect x="3.5" y="5" width="17" height="15.5" /><path d="M3.5 9.5h17M8 3v4M16 3v4" /></svg
@@ -37,28 +33,27 @@ const itemClass =
       Add to calendar
     </button>
     <p class="calendar-entry-fallback" data-calendar-fallback>
-      <a class="underline decoration-line underline-offset-4" href={raceIcs} data-calendar-race
-        download={`f1-${slug}-${year}.ics`}>This race .ics</a>
+      <a class={linkClass} href={raceIcs} data-calendar-race download={`f1-${slug}-${year}.ics`}
+        >This race .ics</a>
       <span aria-hidden="true"> · </span>
-      <a class="underline decoration-line underline-offset-4" href={seasonIcs} download={`f1-${year}.ics`}
-        >Full season .ics</a>
+      <a class={linkClass} href={seasonIcs} download={`f1-${year}.ics`}>Full season .ics</a>
     </p>
   </div>
   <ol class="grid list-none grid-cols-1 p-0 sm:grid-cols-2 lg:grid-cols-5">
     {nodes.map((node) => (
-      <li class="weekend-progress__node flex items-center justify-between gap-4 border-b border-line py-3.5 lg:block lg:border-r lg:py-5 lg:pr-5 lg:last:border-r-0">
-        <h3 class="flex items-center gap-2 text-[0.82rem] font-semibold tracking-[0.08em] uppercase">
+      <li class="weekend-progress__node flex items-center justify-between gap-4 border-b border-line px-1 py-4 lg:block lg:border-r lg:px-6 lg:py-7 lg:text-center lg:first:pl-0 lg:last:border-r-0 lg:last:pr-0">
+        <h3 class="flex items-center gap-2 text-[0.8rem] font-semibold tracking-[0.08em] uppercase text-ink-muted lg:justify-center">
           {node.key === "race" || node.key === "sprint" ? (
             <span class="weekend-progress__flag" aria-hidden="true"></span>
           ) : null}
           {node.label}
         </h3>
-        <div class="grid shrink-0 grid-cols-[auto_auto] items-baseline gap-x-2.5 gap-y-0.5 text-right lg:mt-3 lg:grid-cols-[3.6rem_auto] lg:text-left">
-          <span class="text-[0.62rem] tracking-[0.08em] uppercase text-ink-muted" data-my-row hidden>My</span>
-          <time class="text-[0.95rem] tabular-nums text-ink-strong" datetime={node.startsAtUtc} data-my-time hidden></time>
-          <span class="text-[0.62rem] tracking-[0.08em] uppercase text-ink-muted">{trackLabel === "UTC" ? "UTC" : "Track"}</span>
-          <time class="text-[0.8rem] tabular-nums text-ink-muted" datetime={node.startsAtUtc} data-track-time
-            >{formatWeekdayTime(node.startsAtUtc, timeZone ?? "UTC")}</time>
+        <div class="shrink-0 text-right lg:mt-3 lg:text-center">
+          <time class="block text-[1.15rem] tabular-nums text-ink-strong" datetime={node.startsAtUtc} data-my-time hidden></time>
+          <p class="text-[0.82rem] tabular-nums text-ink-muted">
+            <span class="mr-1.5 text-[0.68rem] tracking-[0.08em] uppercase">{trackLabel}</span>
+            <time datetime={node.startsAtUtc} data-track-time>{formatWeekdayTime(node.startsAtUtc, timeZone ?? "UTC")}</time>
+          </p>
         </div>
       </li>
     ))}
@@ -66,21 +61,29 @@ const itemClass =
 
   <dialog class="calendar-dialog" data-calendar-dialog aria-labelledby="weekend-calendar-title">
     <div class="flex items-start justify-between gap-4">
-      <h2 id="weekend-calendar-title" class="font-display text-[1.25rem] leading-tight font-semibold uppercase">
-        Add {raceName} to your calendar
+      <h2 id="weekend-calendar-title" class="font-display text-[1.15rem] leading-tight font-semibold uppercase">
+        Add to calendar
       </h2>
       <button type="button" class="calendar-dialog__close" data-calendar-close aria-label="Close">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
       </button>
     </div>
-    <div class="mt-4 grid gap-0.5">
-      <a class={itemClass} href={webcal(raceIcs)}>Subscribe — this race weekend</a>
-      <a class={itemClass} href={raceIcs} download={`f1-${slug}-${year}.ics`}>Download this race .ics</a>
-      <div class="mt-1 grid gap-0.5 border-t border-line pt-2">
-        <a class={itemClass} href={webcal(seasonIcs)}>Subscribe — full {year} season</a>
-        <a class={itemClass} href={seasonIcs} download={`f1-${year}.ics`}>Download {year} season .ics</a>
-        <button type="button" class:list={[itemClass, "w-full cursor-pointer"]} data-calendar-copy={raceIcs}
-          >Copy this race URL</button>
+    <div class="mt-5 grid gap-5">
+      <div>
+        <p class="text-[0.9rem] font-semibold text-ink-strong">{raceName} weekend</p>
+        <p class="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
+          <a class={linkClass} href={webcal(raceIcs)}>Subscribe</a>
+          <a class={linkClass} href={raceIcs} download={`f1-${slug}-${year}.ics`}>Download .ics</a>
+          <button type="button" class:list={[linkClass, "cursor-pointer"]} data-calendar-copy={raceIcs}
+            >Copy URL</button>
+        </p>
+      </div>
+      <div class="border-t border-line pt-5">
+        <p class="text-[0.9rem] font-semibold text-ink-strong">Full {year} season</p>
+        <p class="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
+          <a class={linkClass} href={webcal(seasonIcs)}>Subscribe</a>
+          <a class={linkClass} href={seasonIcs} download={`f1-${year}.ics`}>Download .ics</a>
+        </p>
       </div>
     </div>
   </dialog>
@@ -105,9 +108,6 @@ const itemClass =
   const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   for (const el of document.querySelectorAll<HTMLTimeElement>("[data-my-time]")) {
     el.textContent = formatWeekdayTime(el.dateTime, zone);
-    el.hidden = false;
-  }
-  for (const el of document.querySelectorAll<HTMLElement>("[data-my-row]")) {
     el.hidden = false;
   }
 </script>
