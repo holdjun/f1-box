@@ -12,14 +12,13 @@ const SESSION_TAB: Partial<Record<string, RaceTabKey>> = {
   race: "race-result",
 };
 
-// done = 结果已入库；upcoming = 尚无结果。时间不参与服务端判定：
-// 页面走边缘缓存，"是否已开始"只能在客户端算（见 WeekendProgress 的增强脚本）
+// tab 非 null = 该 session 的成绩已入库。时间不参与服务端判定：
+// 页面走边缘缓存，"是否已开始"只能在客户端算（见 scripts/client.ts）
 export interface WeekendNode {
   key: string;
   label: string;
   startsAtUtc: string;
   tab: RaceTabKey | null;
-  state: "done" | "upcoming";
 }
 
 export function buildWeekendNodes(
@@ -29,13 +28,11 @@ export function buildWeekendNodes(
   const available = new Set(tabsWithData);
   return sessions.map((session) => {
     const tab = SESSION_TAB[session.key] ?? null;
-    const done = tab !== null && available.has(tab);
     return {
       key: session.key,
       label: session.label,
       startsAtUtc: session.startsAtUtc,
-      tab: done ? tab : null,
-      state: done ? "done" : "upcoming",
+      tab: tab !== null && available.has(tab) ? tab : null,
     };
   });
 }

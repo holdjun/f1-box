@@ -251,6 +251,23 @@ for (const { tz, myTime } of [
   });
 }
 
+// 内容相同的内联模块脚本 ClientRouter 只执行一次：进入第二个比赛页时不再重跑，
+// 必须靠 astro:page-load 补齐。只测整页加载会漏掉站内连续点击这条主路径
+test.describe("session dual times after client navigation", () => {
+  test.use({ timezoneId: "Asia/Tokyo" });
+  test("@desktop my time renders on every race page reached by a link", async ({
+    page,
+  }) => {
+    await page.goto("/racing/2026");
+    await page.locator(".race-card a").first().click();
+    await expect(page).toHaveURL(/\/results\/2026\/races\//);
+    await expect(page.locator("[data-my-time]").first()).not.toBeEmpty();
+    await page.goBack();
+    await page.locator(".race-card a").nth(2).click();
+    await expect(page.locator("[data-my-time]").first()).not.toBeEmpty();
+  });
+});
+
 // 首列是粘滞列，它占多宽右侧就少看多宽：12rem 定值曾吃掉可视宽的 56%，
 // 窄屏改为跟随内容并允许长名折行，名字一个字都不能少
 test("@mobile race list first column follows its content", async ({ page }) => {

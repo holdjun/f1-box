@@ -13,8 +13,8 @@ const { nodes, timeZone, year, slug, raceName } = Astro.props;
 // 无时区映射（f1db 新增赛道未补进 circuit-timezones.json）时赛道行退化为 UTC，
 // 标签必须跟着改：把 UTC 时刻标成赛道时间比不显示更糟
 const trackLabel = timeZone === null ? "UTC" : "Track";
-// My time 只能在客户端算：SSR 无从得知浏览器时区，无 JS 时整行不出现，
-// 绝不拿 UTC 时刻冒充本地时间
+// My time 只能在客户端算（见 scripts/client.ts）：SSR 无从得知浏览器时区，
+// 无 JS 时整行不出现，绝不拿 UTC 时刻冒充本地时间
 const raceIcs = `${Astro.url.origin}/api/calendar.ics?year=${year}&race=${slug}`;
 const seasonIcs = `${Astro.url.origin}/api/calendar.ics?year=${year}`;
 // 整体替换 scheme（含 https 的 s）：生产 https 下若只替换 http 前缀会产出非法的 webcals://
@@ -49,9 +49,12 @@ const linkClass =
           {node.label}
         </h3>
         <div class="shrink-0 text-right lg:mt-3 lg:text-center">
-          <time class="block text-[0.95rem] tabular-nums text-ink-strong" datetime={node.startsAtUtc} data-my-time hidden></time>
-          <p class="text-[0.82rem] tabular-nums text-ink-muted">
-            <span class="mr-1.5 text-[0.68rem] tracking-[0.08em] uppercase">{trackLabel}</span>
+          <p class="text-[0.85rem] tabular-nums text-ink-strong" hidden>
+            <span class="mr-1.5 inline-block min-w-[2.4rem] text-right text-[0.68rem] tracking-[0.08em] uppercase text-ink-muted">My</span>
+            <time datetime={node.startsAtUtc} data-my-time></time>
+          </p>
+          <p class="text-[0.85rem] tabular-nums text-ink-muted">
+            <span class="mr-1.5 inline-block min-w-[2.4rem] text-right text-[0.68rem] tracking-[0.08em] uppercase">{trackLabel}</span>
             <time datetime={node.startsAtUtc} data-track-time>{formatWeekdayTime(node.startsAtUtc, timeZone ?? "UTC")}</time>
           </p>
         </div>
@@ -68,7 +71,7 @@ const linkClass =
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
       </button>
     </div>
-    <div class="mt-6 grid gap-6">
+    <div class="mt-5 grid gap-5">
       <div>
         <p class="text-[0.9rem] font-semibold text-ink-strong">{raceName} weekend</p>
         <p class="mt-2 flex flex-wrap gap-x-5 gap-y-1">
@@ -78,7 +81,7 @@ const linkClass =
             >Copy URL</button>
         </p>
       </div>
-      <div class="border-t border-line pt-6">
+      <div class="border-t border-line pt-5">
         <p class="text-[0.9rem] font-semibold text-ink-strong">Full {year} season</p>
         <p class="mt-2 flex flex-wrap gap-x-5 gap-y-1">
           <a class={linkClass} href={webcal(seasonIcs)}>Subscribe</a>
@@ -102,14 +105,3 @@ const linkClass =
     outline: 1px solid var(--line);
   }
 </style>
-
-<script>
-  // 一次性客户端变换（非 island）：补出浏览器时区那一行
-  import { formatWeekdayTime } from "../lib/time.js";
-
-  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  for (const el of document.querySelectorAll<HTMLTimeElement>("[data-my-time]")) {
-    el.textContent = formatWeekdayTime(el.dateTime, zone);
-    el.hidden = false;
-  }
-</script>

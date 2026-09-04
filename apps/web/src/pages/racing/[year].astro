@@ -101,7 +101,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
           <div class="flex items-start justify-between gap-4">
             <h2
               id="calendar-dialog-title"
-              class="font-display text-[1.25rem] leading-tight font-semibold uppercase"
+              class="font-display text-[1.15rem] leading-tight font-semibold uppercase"
             >
               Add F1 {year} to your calendar
             </h2>
@@ -116,7 +116,9 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
               >
             </button>
           </div>
-          <div class="mt-4 grid gap-0.5">
+          {/* 项自带 px-3 才能让 hover 底色比文本宽，容器负向拉回同一量，
+              文本才与标题、与周末弹窗内容同一左基线 */}
+          <div class="mt-5 -mx-3 grid gap-0.5">
             <a class={calendarItemClass} href={webcalHref} data-calendar-subscribe
               >Subscribe — Apple Calendar</a
             >
@@ -126,7 +128,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
               download={`f1-${year}.ics`}
               data-calendar-download
             >Download .ics file</a>
-            <div class="mt-1 min-w-0 border-t border-line pt-2">
+            <div class="mt-2 min-w-0 border-t border-line pt-2">
               <button
                 type="button"
                 class:list={[calendarItemClass, "w-full cursor-pointer"]}

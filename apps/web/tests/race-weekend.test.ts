@@ -27,35 +27,31 @@ const sessions: RaceSession[] = [
 ];
 
 describe("buildWeekendNodes", () => {
-  it("赛前：无结果的 session 一律 upcoming 且不可点", () => {
+  it("赛前：无结果的 session 一律不可点", () => {
     const nodes = buildWeekendNodes(sessions, []);
     expect(nodes).toHaveLength(5);
-    expect(nodes.every((n) => n.state === "upcoming" && n.tab === null)).toBe(
-      true,
-    );
+    expect(nodes.every((n) => n.tab === null)).toBe(true);
   });
 
-  it("赛中：已入库的 session 变 done 并带 tab，其余保持 upcoming", () => {
+  it("赛中：已入库的 session 带 tab，其余保持空", () => {
     const nodes = buildWeekendNodes(sessions, [
       "practice-1",
       "practice-2",
       "practice-3",
       "qualifying",
     ]);
-    expect(nodes.map((n) => n.state)).toEqual([
-      "done",
-      "done",
-      "done",
-      "done",
-      "upcoming",
+    expect(nodes.map((n) => n.tab)).toEqual([
+      "practice-1",
+      "practice-2",
+      "practice-3",
+      "qualifying",
+      null,
     ]);
-    expect(nodes[3].tab).toBe("qualifying");
-    expect(nodes[4].tab).toBeNull();
   });
 
   it("正赛 session 指向 race-result tab", () => {
     const nodes = buildWeekendNodes(sessions, ["race-result"]);
-    expect(nodes[4]).toMatchObject({ state: "done", tab: "race-result" });
+    expect(nodes[4]).toMatchObject({ tab: "race-result" });
   });
 
   it("无对应 tab 的 session（Sprint）永不 done", () => {
@@ -63,7 +59,7 @@ describe("buildWeekendNodes", () => {
       [{ key: "sprint", label: "Sprint", startsAtUtc: "2026-03-07T03:00:00Z" }],
       ["race-result"],
     );
-    expect(nodes[0]).toMatchObject({ state: "upcoming", tab: null });
+    expect(nodes[0]).toMatchObject({ tab: null });
   });
 });
 

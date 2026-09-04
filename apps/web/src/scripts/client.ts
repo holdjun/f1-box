@@ -1,3 +1,5 @@
+import { formatWeekdayTime } from "../lib/time.js";
+
 // 比赛详情页各 tab 的表格已在服务端全部渲染；JS 可用时点击 tab 就地切换
 // 面板并同步地址栏，省掉视图过渡与回页首。必须在捕获阶段拦截，
 // 否则 ClientRouter 会先行接管链接做换页。无对应面板（如年份页的 tab）
@@ -90,6 +92,20 @@ function enhanceCalendarDialog(): void {
 
 let enhanced = false;
 
+function applyLocalTimes(): void {
+  // My time 只能在客户端算：SSR 无从得知浏览器时区。内容相同的内联模块脚本
+  // ClientRouter 只执行一次，所以这段一次性变换必须挂在每次 page-load 上
+  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  for (const el of document.querySelectorAll<HTMLTimeElement>(
+    "[data-my-time]",
+  )) {
+    el.textContent = formatWeekdayTime(el.dateTime, zone);
+    // 整行（含 My 标签）隐在父节点上：无 JS 时不能只留一个孤零零的标签
+    const row = el.parentElement;
+    if (row) row.hidden = false;
+  }
+}
+
 function enhancePage(): void {
   // document 级委托只需绑定一次；astro:page-load 后 DOM 已换但监听仍在
   if (!enhanced) {
@@ -99,6 +115,7 @@ function enhancePage(): void {
   }
   // 弹窗是节点级接线，ClientRouter 换页后 DOM 全新，每次加载都要重跑
   enhanceCalendarDialog();
+  applyLocalTimes();
 }
 
 enhancePage();
