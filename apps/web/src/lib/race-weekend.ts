@@ -39,13 +39,6 @@ export function buildWeekendNodes(
   });
 }
 
-// 正赛结果一到，周末就结束：进度条整条退场，页面只剩成绩与赛道档案
-export function isWeekendFinished(
-  tabsWithData: readonly RaceTabKey[],
-): boolean {
-  return tabsWithData.includes("race-result");
-}
-
 // 裸 slug 落点：最后一个已有结果的 session，赛中进来才不会撞上空的正赛 tab
 export function latestResultTab(nodes: WeekendNode[]): RaceTabKey {
   for (let i = nodes.length - 1; i >= 0; i -= 1) {

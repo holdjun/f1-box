@@ -1,7 +1,6 @@
 ---
-import { estimateSessionMinutes } from "../lib/calendar-ics.js";
 import type { WeekendNode } from "../lib/race-weekend.js";
-import { formatLocalWeekdayTime } from "../lib/time.js";
+import { formatWeekdayTime } from "../lib/time.js";
 
 interface Props {
   nodes: WeekendNode[];
@@ -12,88 +11,49 @@ interface Props {
 const { nodes, timeZone, year, slug } = Astro.props;
 // 无时区映射（f1db 新增赛道未补进 circuit-timezones.json）时赛道行退化为 UTC，
 // 标签必须跟着改：把 UTC 时刻标成赛道时间比不显示更糟
-const trackLabel = timeZone === null ? "UTC" : "Track";
-const trackTime = (node: WeekendNode) =>
-  formatLocalWeekdayTime(node.startsAtUtc, timeZone ?? "UTC");
+const trackLabel = timeZone === null ? "UTC" : "Track time";
+// My time 只能在客户端算：SSR 无从得知浏览器时区，无 JS 时整行不出现，
+// 绝不拿 UTC 时刻冒充本地时间
 ---
 
-<section class="weekend-progress shell mt-8">
+<section class="weekend-progress shell mt-10">
   <div class="flex flex-wrap items-baseline justify-between gap-3 border-b border-line pb-3">
     <h2 class="text-[0.72rem] font-semibold tracking-[0.09em] uppercase text-ink-muted">
       Weekend schedule
     </h2>
     <a
-      class="text-[0.72rem] font-semibold tracking-[0.09em] uppercase text-ink-muted transition-colors hover:text-accent"
+      class="text-[0.72rem] font-semibold tracking-[0.09em] uppercase text-ink-muted underline decoration-line underline-offset-4 transition-colors hover:text-accent"
       href={`/api/calendar.ics?year=${year}&race=${slug}`}
       download={`f1-${slug}-${year}.ics`}>+ Add to calendar</a>
   </div>
   <ol class="grid list-none grid-cols-1 p-0 sm:grid-cols-2 lg:grid-cols-5">
     {nodes.map((node) => (
-      <li
-        class="weekend-progress__node border-b border-line py-4 lg:border-r lg:pr-4 lg:last:border-r-0"
-        data-state={node.state}
-        data-starts-at={node.startsAtUtc}
-        data-minutes={estimateSessionMinutes(node.key)}
-      >
-        <div class="flex items-baseline justify-between gap-2">
-          <h3 class="text-[0.95rem] font-semibold tracking-[0.04em] uppercase">{node.label}</h3>
-          {node.tab ? (
-            <a
-              class="shrink-0 text-[0.68rem] font-semibold tracking-[0.08em] uppercase text-accent"
-              href={`/results/${year}/races/${slug}/${node.tab}`}>Result →</a>
-          ) : (
-            <span class="weekend-progress__pending shrink-0 text-[0.68rem] tracking-[0.08em] uppercase text-ink-muted"
-              >Awaiting results</span>
-          )}
-        </div>
-        <div class="weekend-progress__times mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[0.76rem]">
-          <span class="text-ink-muted" data-my-label>UTC</span>
-          <time
-            class="tabular-nums text-ink-strong"
-            datetime={node.startsAtUtc}
-            data-my-time>{formatLocalWeekdayTime(node.startsAtUtc, "UTC")}</time>
+      <li class="weekend-progress__node flex items-baseline justify-between gap-4 border-b border-line py-3 lg:block lg:border-r lg:py-4 lg:pr-4 lg:last:border-r-0">
+        <h3 class="text-[0.95rem] font-semibold tracking-[0.04em] uppercase">{node.label}</h3>
+        <div class="grid shrink-0 grid-cols-[auto_1fr] gap-x-3 text-right text-[0.76rem] lg:mt-2 lg:gap-y-1 lg:text-left">
+          <span class="text-ink-muted" data-my-row hidden>My time</span>
+          <time class="tabular-nums text-ink-strong" datetime={node.startsAtUtc} data-my-time hidden></time>
           <span class="text-ink-muted">{trackLabel}</span>
-          <time class="tabular-nums text-ink-muted" datetime={node.startsAtUtc} data-track-time>{trackTime(node)}</time>
+          <time
+            class="tabular-nums text-ink-muted"
+            datetime={node.startsAtUtc}
+            data-track-time>{formatWeekdayTime(node.startsAtUtc, timeZone ?? "UTC")}</time>
         </div>
       </li>
     ))}
   </ol>
 </section>
 
-<style>
-  /* 已出结果的 session 整格降噪：时间退到次要，视线留给未开始的那几场 */
-  .weekend-progress__node[data-state="done"] .weekend-progress__times time {
-    color: var(--ink-muted);
-  }
-  /* 时间已过但结果未入库（f1db 按 release 节奏同步，滞后数小时到一天）*/
-  .weekend-progress__node[data-state="pending"] .weekend-progress__pending {
-    color: var(--highlight);
-  }
-</style>
-
 <script>
-  // 一次性客户端变换（非 island）：把 UTC 主行改写成浏览器时区，
-  // 并按当前时刻把已开完但无结果的 session 标成 pending。
-  // 时间判定只能在客户端做——页面走边缘缓存，服务端算出来的"已开始"会随缓存过期。
-  import { estimateSessionMinutes } from "../lib/calendar-ics.js";
-  import { formatLocalWeekdayTime } from "../lib/time.js";
+  // 一次性客户端变换（非 island）：补出浏览器时区那一行
+  import { formatWeekdayTime } from "../lib/time.js";
 
   const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   for (const el of document.querySelectorAll<HTMLTimeElement>("[data-my-time]")) {
-    el.textContent = formatLocalWeekdayTime(el.dateTime, zone);
+    el.textContent = formatWeekdayTime(el.dateTime, zone);
+    el.hidden = false;
   }
-  for (const el of document.querySelectorAll<HTMLElement>("[data-my-label]")) {
-    el.textContent = "My time";
-  }
-
-  const now = Date.now();
-  for (const node of document.querySelectorAll<HTMLElement>(
-    '.weekend-progress__node[data-state="upcoming"]',
-  )) {
-    const startsAt = Date.parse(node.dataset.startsAt ?? "");
-    const minutes = Number(node.dataset.minutes ?? estimateSessionMinutes(""));
-    if (Number.isFinite(startsAt) && startsAt + minutes * 60_000 < now) {
-      node.dataset.state = "pending";
-    }
+  for (const el of document.querySelectorAll<HTMLElement>("[data-my-row]")) {
+    el.hidden = false;
   }
 </script>

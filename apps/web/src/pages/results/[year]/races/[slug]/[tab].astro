@@ -9,7 +9,7 @@ import WeekendProgress from "../../../../../components/WeekendProgress.astro";
 import BaseLayout from "../../../../../layouts/BaseLayout.astro";
 import { circuitTimeZone } from "../../../../../lib/circuit-time.js";
 import { RACE_TAB_FIELDS } from "../../../../../lib/race-results-repository.js";
-import { buildWeekendNodes, isWeekendFinished } from "../../../../../lib/race-weekend.js";
+import { buildWeekendNodes } from "../../../../../lib/race-weekend.js";
 import { RACE_TAB_LABELS, raceTabKeys, resolveRaceTab } from "../../../../../lib/routing.js";
 
 const year = Number(Astro.params.year);
@@ -29,11 +29,10 @@ const visibleTabs =
   tab && page
     ? raceTabKeys.filter((key) => page.tabs[RACE_TAB_FIELDS[key]].length > 0)
     : [];
-// 赛前/赛中显示周末进度，赛后（正赛结果已入库）整条退场
-const weekendNodes =
-  page && !isWeekendFinished(visibleTabs)
-    ? buildWeekendNodes(page.meta.sessions, visibleTabs)
-    : [];
+// 周末进度三态常显：赛后也是赛程的一部分，只是节点全部已完成
+const weekendNodes = page
+  ? buildWeekendNodes(page.meta.sessions, visibleTabs)
+  : [];
 ---
 
 {tab && page ? (

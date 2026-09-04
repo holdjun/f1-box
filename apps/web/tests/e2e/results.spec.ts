@@ -70,12 +70,14 @@ test.describe("race detail", () => {
     ).toHaveText("RUS");
   });
 
-  test("@desktop weekend progress replaces the schedule list once the race is done", async ({
+  test("@desktop finished race keeps the weekend schedule without result links", async ({
     page,
   }) => {
     await page.goto("/results/2026/races/australia/race-result");
-    // 赛后（正赛结果已入库）进度条整条退场
-    await expect(page.locator(".weekend-progress")).toHaveCount(0);
+    const progress = page.locator(".weekend-progress");
+    await expect(progress.locator("li")).toHaveCount(5);
+    // 进度条只报时间，不再带结果入口或待更新文案
+    await expect(progress.getByRole("link")).toHaveCount(1);
   });
 
   test("@desktop upcoming race shows the weekend progress and calendar link", async ({
@@ -85,22 +87,19 @@ test.describe("race detail", () => {
     const progress = page.locator(".weekend-progress");
     await expect(progress.locator("li")).toHaveCount(5);
     await expect(progress).toContainText("Qualifying");
-    await expect(progress).toContainText("Track");
+    await expect(progress).toContainText("Track time");
+    await expect(progress).toContainText("My time");
     await expect(
       progress.getByRole("link", { name: "+ Add to calendar" }),
     ).toHaveAttribute("href", "/api/calendar.ics?year=2026&race=japan");
   });
 
-  test("@desktop mid-weekend links finished sessions to their result tab", async ({
+  test("@desktop bare slug lands on the latest session with results", async ({
     page,
   }) => {
     await page.goto("/results/2026/races/china");
-    // 裸 slug 落到最后一个有结果的 session
     await page.waitForURL(/\/results\/2026\/races\/china\/qualifying$/);
-    const nodes = page.locator(".weekend-progress__node");
-    await expect(nodes).toHaveCount(5);
-    // Sprint 周末：Sprint / Sprint Qualifying 无对应 tab，永远不会变 done
-    await expect(nodes.getByRole("link", { name: "Result" })).toHaveCount(2);
+    await expect(page.locator(".weekend-progress__node")).toHaveCount(5);
   });
 
   test("@desktop hero shows the circuit map as plain content", async ({
@@ -232,21 +231,21 @@ test.describe("standings", () => {
 // test.use 作用于所在 describe 作用域而非单个 test：两个时区必须各自成组，
 // 否则循环里的第二次调用会覆盖第一次，两个用例都跑同一个时区
 for (const { tz, myTime } of [
-  { tz: "Asia/Tokyo", myTime: "Fri 11:30 GMT+9" },
-  { tz: "America/New_York", myTime: "Thu 22:30 GMT-4" },
+  { tz: "Asia/Tokyo", myTime: "Fri 11:30" },
+  { tz: "America/New_York", myTime: "Thu 22:30" },
 ]) {
   test.describe(`session dual times (${tz})`, () => {
     test.use({ timezoneId: tz });
     test(`@desktop shows my time in ${tz} and track time in the circuit tz`, async ({
       page,
     }) => {
-      // 进度条只在赛前/赛中出现；选未开赛的日本站（Suzuka, UTC+9）
+      // 选未开赛的日本站（Suzuka, UTC+9）
       await page.goto("/results/2026/races/japan/race-result");
       // Track time 按赛道当地渲染，SSR 即正确、与浏览器时区无关
       await expect(page.locator("[data-track-time]").first()).toHaveText(
-        "Fri 11:30 GMT+9",
+        "Fri 11:30",
       );
-      // My time 进入浏览器时区；两个时区的期望值不同，任一时区没生效都会失败
+      // My time 只在客户端产生；两个时区的期望值不同，任一时区没生效都会失败
       await expect(page.locator("[data-my-time]").first()).toHaveText(myTime);
     });
   });

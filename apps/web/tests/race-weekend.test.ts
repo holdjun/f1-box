@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { RaceSession } from "../src/lib/race-results-repository.js";
-import {
-  buildWeekendNodes,
-  isWeekendFinished,
-  latestResultTab,
-} from "../src/lib/race-weekend.js";
+import { buildWeekendNodes, latestResultTab } from "../src/lib/race-weekend.js";
 
 const sessions: RaceSession[] = [
   {
@@ -68,16 +64,6 @@ describe("buildWeekendNodes", () => {
       ["race-result"],
     );
     expect(nodes[0]).toMatchObject({ state: "upcoming", tab: null });
-  });
-});
-
-describe("isWeekendFinished", () => {
-  it("正赛结果入库即为赛后", () => {
-    expect(isWeekendFinished(["race-result"])).toBe(true);
-  });
-
-  it("只有排位赛结果仍算赛中", () => {
-    expect(isWeekendFinished(["qualifying", "practice-1"])).toBe(false);
   });
 });
 

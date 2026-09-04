@@ -139,6 +139,26 @@ export function formatLocalWeekdayTime(
   timeZone: string,
   locale = "en-GB",
 ): string {
+  const parts = weekdayTimeParts(value, timeZone, locale, true);
+  return `${parts.weekday} ${parts.time} ${parts.zone}`;
+}
+
+// 周末赛程表：两行并列已经说明了哪行是哪个时区，缩写只是噪音
+export function formatWeekdayTime(
+  value: Timestamp,
+  timeZone: string,
+  locale = "en-GB",
+): string {
+  const parts = weekdayTimeParts(value, timeZone, locale, false);
+  return `${parts.weekday} ${parts.time}`;
+}
+
+function weekdayTimeParts(
+  value: Timestamp,
+  timeZone: string,
+  locale: string,
+  withZone: boolean,
+): { weekday: string; time: string; zone: string } {
   const date = value instanceof Date ? value : new Date(value);
   if (!Number.isFinite(date.getTime())) {
     throw new TypeError(`Invalid timestamp: ${String(value)}`);
@@ -149,11 +169,15 @@ export function formatLocalWeekdayTime(
     minute: "2-digit",
     hourCycle: "h23",
     timeZone,
-    timeZoneName: "short",
+    timeZoneName: withZone ? "short" : undefined,
   }).formatToParts(date);
   const pick = (type: Intl.DateTimeFormatPartTypes) =>
     parts.find((part) => part.type === type)?.value ?? "";
-  return `${pick("weekday")} ${pick("hour")}:${pick("minute")} ${pick("timeZoneName")}`;
+  return {
+    weekday: pick("weekday"),
+    time: `${pick("hour")}:${pick("minute")}`,
+    zone: pick("timeZoneName"),
+  };
 }
 
 function formatDateTime(
