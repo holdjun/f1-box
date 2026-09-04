@@ -3,8 +3,8 @@ import type {
   FastestLapRow, GridRow, PitStopRow, PracticeRow, QualifyingRow,
   RaceResultRow, RaceTabKey,
 } from "../lib/race-results-repository.js";
-import { monogramStyle as monogramStyleFor } from "../lib/tokens.js";
-import { colorForYear, logoSrcFor, logoVariantFor, vendorIndexes } from "../lib/vendor.js";
+import DriverCell from "./DriverCell.astro";
+import TeamCell from "./TeamCell.astro";
 
 interface Props {
   tab: RaceTabKey;
@@ -19,30 +19,31 @@ const CONFIG: Record<RaceTabKey, { label: string; empty: string }> = {
   "pit-stop-summary": { label: "Pit stop summary", empty: "Pit stops are not available yet." },
   "starting-grid": { label: "Starting grid", empty: "Starting grid is not available yet." },
   qualifying: { label: "Qualifying classification", empty: "Qualifying results are not available yet." },
+  sprint: { label: "Sprint classification", empty: "Sprint results are not available yet." },
+  "sprint-qualifying": { label: "Sprint qualifying classification", empty: "Sprint qualifying results are not available yet." },
   "practice-1": { label: "Practice 1 classification", empty: "Practice 1 results are not available yet." },
   "practice-2": { label: "Practice 2 classification", empty: "Practice 2 results are not available yet." },
   "practice-3": { label: "Practice 3 classification", empty: "Practice 3 results are not available yet." },
 };
 const { label, empty } = CONFIG[tab];
 
-// 无车队配色时不设 --monogram-bg，回落 components.css 里的中性灰默认值
-const monogramStyle = (constructorId: string) =>
-  monogramStyleFor(colorForYear(vendorIndexes, constructorId, year));
-const teamLogo = (constructorId: string) => logoSrcFor(vendorIndexes, constructorId);
-const teamLogoClass = (constructorId: string) =>
-  logoVariantFor(vendorIndexes, constructorId) === "white"
-    ? "vendor-cell__logo vendor-cell__logo--chip"
-    : "vendor-cell__logo";
 const positionLabel = (position: number | null, positionText: string) =>
   position === null ? positionText : String(position).padStart(2, "0");
 const positionClasses = "w-14 font-display text-[1.35rem] text-ink-muted";
-const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6, "starting-grid": 5, qualifying: 8, "practice-1": 7, "practice-2": 7, "practice-3": 7 }[tab];
+const columnCount = {
+  "race-result": 7, sprint: 7, "fastest-laps": 7, "pit-stop-summary": 6,
+  "starting-grid": 5, qualifying: 8, "sprint-qualifying": 8,
+  "practice-1": 7, "practice-2": 7, "practice-3": 7,
+}[tab];
+// Sprint 与正赛、Sprint 排位与排位的列结构相同，各共用一个分支
+const isRaceShape = tab === "race-result" || tab === "sprint";
+const isQualifyingShape = tab === "qualifying" || tab === "sprint-qualifying";
 ---
 
 <!-- biome-ignore lint/a11y/noNoninteractiveTabindex: 横滚表容器需要 tabindex，键盘用户才能滚动查看溢出列 -->
 <section class="table-scroll" aria-label={`${label}, scrollable`} tabindex="0">
   <table class="result-table" aria-label={label}>
-    {tab === "race-result" ? (
+    {isRaceShape ? (
       <>
         <thead>
           <tr>
@@ -59,20 +60,8 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
               <tr>
                 <td class={positionClasses}>{positionLabel(row.position, row.positionText)}</td>
                 <td>{row.driverNumber ?? "—"}</td>
-                <td>
-                  <a class="vendor-cell" href={`/drivers/${row.driverId}`} style={monogramStyle(row.constructorId)}>
-                    <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
-                    <span class="vendor-cell__name">{row.driverName}</span>
-                  </a>
-                </td>
-                <td>
-                  <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
-                    {teamLogo(row.constructorId) ? (
-                      <img class={teamLogoClass(row.constructorId)} src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
-                    ) : null}
-                    {row.constructorName}
-                  </a>
-                </td>
+                <td><DriverCell {...row} year={year} /></td>
+                <td><TeamCell constructorId={row.constructorId} constructorName={row.constructorName} /></td>
                 <td>{row.laps ?? "—"}</td>
                 <td>{row.time ?? row.gap ?? row.retiredReason ?? "—"}</td>
                 <td>{row.points ?? "—"}</td>
@@ -81,7 +70,7 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
           )}
         </tbody>
       </>
-    ) : tab === "qualifying" ? (
+    ) : isQualifyingShape ? (
       <>
         <thead>
           <tr>
@@ -98,20 +87,8 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
               <tr>
                 <td class={positionClasses}>{positionLabel(row.position, row.positionText)}</td>
                 <td>{row.driverNumber ?? "—"}</td>
-                <td>
-                  <a class="vendor-cell" href={`/drivers/${row.driverId}`} style={monogramStyle(row.constructorId)}>
-                    <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
-                    <span class="vendor-cell__name">{row.driverName}</span>
-                  </a>
-                </td>
-                <td>
-                  <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
-                    {teamLogo(row.constructorId) ? (
-                      <img class={teamLogoClass(row.constructorId)} src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
-                    ) : null}
-                    {row.constructorName}
-                  </a>
-                </td>
+                <td><DriverCell {...row} year={year} /></td>
+                <td><TeamCell constructorId={row.constructorId} constructorName={row.constructorName} /></td>
                 <td>{row.q1 ?? "—"}</td>
                 <td>{row.q2 ?? "—"}</td>
                 <td>{row.q3 ?? "—"}</td>
@@ -137,20 +114,8 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
               <tr>
                 <td class={positionClasses}>{positionLabel(row.position, row.positionText)}</td>
                 <td>{row.driverNumber ?? "—"}</td>
-                <td>
-                  <a class="vendor-cell" href={`/drivers/${row.driverId}`} style={monogramStyle(row.constructorId)}>
-                    <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
-                    <span class="vendor-cell__name">{row.driverName}</span>
-                  </a>
-                </td>
-                <td>
-                  <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
-                    {teamLogo(row.constructorId) ? (
-                      <img class={teamLogoClass(row.constructorId)} src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
-                    ) : null}
-                    {row.constructorName}
-                  </a>
-                </td>
+                <td><DriverCell {...row} year={year} /></td>
+                <td><TeamCell constructorId={row.constructorId} constructorName={row.constructorName} /></td>
                 <td>{row.time ?? "—"}</td>
               </tr>
             ))
@@ -174,20 +139,8 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
               <tr>
                 <td class={positionClasses}>{positionLabel(row.position, row.positionText)}</td>
                 <td>{row.driverNumber ?? "—"}</td>
-                <td>
-                  <a class="vendor-cell" href={`/drivers/${row.driverId}`} style={monogramStyle(row.constructorId)}>
-                    <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
-                    <span class="vendor-cell__name">{row.driverName}</span>
-                  </a>
-                </td>
-                <td>
-                  <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
-                    {teamLogo(row.constructorId) ? (
-                      <img class={teamLogoClass(row.constructorId)} src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
-                    ) : null}
-                    {row.constructorName}
-                  </a>
-                </td>
+                <td><DriverCell {...row} year={year} /></td>
+                <td><TeamCell constructorId={row.constructorId} constructorName={row.constructorName} /></td>
                 <td>{row.lap ?? "—"}</td>
                 <td>{row.time ?? "—"}</td>
                 <td>{row.avgSpeedKph ?? "—"}</td>
@@ -212,20 +165,8 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
               <tr>
                 <td class={positionClasses}>{String(rowIndex + 1).padStart(2, "0")}</td>
                 <td>{row.driverNumber ?? "—"}</td>
-                <td>
-                  <a class="vendor-cell" href={`/drivers/${row.driverId}`} style={monogramStyle(row.constructorId)}>
-                    <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
-                    <span class="vendor-cell__name">{row.driverName}</span>
-                  </a>
-                </td>
-                <td>
-                  <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
-                    {teamLogo(row.constructorId) ? (
-                      <img class={teamLogoClass(row.constructorId)} src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
-                    ) : null}
-                    {row.constructorName}
-                  </a>
-                </td>
+                <td><DriverCell {...row} year={year} /></td>
+                <td><TeamCell constructorId={row.constructorId} constructorName={row.constructorName} /></td>
                 <td>{row.stops}</td>
                 <td>{row.totalSeconds ?? "—"}</td>
               </tr>
@@ -251,20 +192,8 @@ const columnCount = { "race-result": 7, "fastest-laps": 7, "pit-stop-summary": 6
               <tr>
                 <td class={positionClasses}>{positionLabel(row.position, row.positionText)}</td>
                 <td>{row.driverNumber ?? "—"}</td>
-                <td>
-                  <a class="vendor-cell" href={`/drivers/${row.driverId}`} style={monogramStyle(row.constructorId)}>
-                    <span class="vendor-cell__monogram" aria-hidden="true">{row.driverCode}</span>
-                    <span class="vendor-cell__name">{row.driverName}</span>
-                  </a>
-                </td>
-                <td>
-                  <a class="vendor-cell" href={`/teams/${row.constructorId}`}>
-                    {teamLogo(row.constructorId) ? (
-                      <img class={teamLogoClass(row.constructorId)} src={teamLogo(row.constructorId) ?? ""} alt="" loading="lazy" />
-                    ) : null}
-                    {row.constructorName}
-                  </a>
-                </td>
+                <td><DriverCell {...row} year={year} /></td>
+                <td><TeamCell constructorId={row.constructorId} constructorName={row.constructorName} /></td>
                 <td>{row.time ?? "—"}</td>
                 <td>{row.gap ?? "—"}</td>
                 <td>{row.laps ?? "—"}</td>

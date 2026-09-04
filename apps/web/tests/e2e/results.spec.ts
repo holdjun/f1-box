@@ -76,8 +76,8 @@ test.describe("race detail", () => {
     await page.goto("/results/2026/races/australia/race-result");
     const progress = page.locator(".weekend-progress");
     await expect(progress.locator("li")).toHaveCount(5);
-    // 进度条只报时间，不再带结果入口或待更新文案
-    await expect(progress.getByRole("link")).toHaveCount(1);
+    // 进度条只报时间：唯一的链接是无 JS 降级行里的两条 ics（弹窗内的不计入可见树）
+    await expect(progress.locator("li a")).toHaveCount(0);
   });
 
   test("@desktop upcoming race shows the weekend progress and calendar link", async ({
@@ -87,11 +87,13 @@ test.describe("race detail", () => {
     const progress = page.locator(".weekend-progress");
     await expect(progress.locator("li")).toHaveCount(5);
     await expect(progress).toContainText("Qualifying");
-    await expect(progress).toContainText("Track time");
-    await expect(progress).toContainText("My time");
-    await expect(
-      progress.getByRole("link", { name: "+ Add to calendar" }),
-    ).toHaveAttribute("href", "/api/calendar.ics?year=2026&race=japan");
+    await expect(progress).toContainText("Track");
+    await expect(progress).toContainText("My");
+    // 无 JS 降级行给两条 ics：本站与整季；有 JS 时换成弹窗按钮
+    await expect(progress.locator("[data-calendar-race]")).toHaveAttribute(
+      "href",
+      /\/api\/calendar\.ics\?year=2026&race=japan$/,
+    );
   });
 
   test("@desktop bare slug lands on the latest session with results", async ({
@@ -131,12 +133,11 @@ test.describe("race detail", () => {
     );
     const facts = page.locator(".circuit-facts");
     await expect(facts).toContainText("Melbourne Grand Prix Circuit");
-    await expect(facts).toContainText("5.278 km");
-    await expect(facts).toContainText("14 turns");
+    await expect(facts).toContainText("5.278");
+    await expect(facts).toContainText("Turns");
     await expect(facts).toContainText("1:19.813");
     await expect(facts).toContainText("Charles Leclerc (2024)");
-    // Race Distance 是长度×圈数的派生值，已从档案条删除
-    await expect(facts).not.toContainText("306.124 km");
+    await expect(facts).toContainText("306.124 km");
   });
 
   test("@desktop bare slug redirects to race-result", async ({ page }) => {
@@ -149,7 +150,7 @@ test.describe("race detail", () => {
       (await page.goto("/results/2026/races/nope/race-result"))?.status(),
     ).toBe(404);
     expect(
-      (await page.goto("/results/2026/races/australia/sprint"))?.status(),
+      (await page.goto("/results/2026/races/australia/warm-up"))?.status(),
     ).toBe(404);
   });
 

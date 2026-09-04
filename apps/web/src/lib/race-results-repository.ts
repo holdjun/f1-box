@@ -177,6 +177,8 @@ interface RacePage {
     practice1: PracticeRow[];
     practice2: PracticeRow[];
     practice3: PracticeRow[];
+    sprintRace: RaceResultRow[];
+    sprintQualifying: QualifyingRow[];
   };
 }
 
@@ -187,6 +189,8 @@ export const RACE_TAB_FIELDS: Record<RaceTabKey, keyof RacePage["tabs"]> = {
   "pit-stop-summary": "pitStops",
   "starting-grid": "startingGrid",
   qualifying: "qualifying",
+  sprint: "sprintRace",
+  "sprint-qualifying": "sprintQualifying",
   "practice-1": "practice1",
   "practice-2": "practice2",
   "practice-3": "practice3",
@@ -391,6 +395,27 @@ JOIN driver d ON p.driver_id = d.id
 JOIN constructor ct ON p.constructor_id = ct.id
 WHERE p.race_id = ${raceIdSubquery}
 ORDER BY p.position_display_order`;
+
+// Sprint 周末专有的两张表；列形与正赛/排位一致，直接复用行映射
+const sprintRaceSql = `SELECT sr.position_number, sr.position_text, sr.driver_number,
+       d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
+       ct.id AS constructor_id, ct.name AS constructor_name,
+       sr.laps, sr.time, sr.reason_retired, sr.gap, sr.points
+FROM sprint_race_result sr
+JOIN driver d ON sr.driver_id = d.id
+JOIN constructor ct ON sr.constructor_id = ct.id
+WHERE sr.race_id = ${raceIdSubquery}
+ORDER BY sr.position_display_order`;
+
+const sprintQualifyingSql = `SELECT sq.position_number, sq.position_text, sq.driver_number,
+       d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
+       ct.id AS constructor_id, ct.name AS constructor_name,
+       sq.q1, sq.q2, sq.q3, sq.laps
+FROM sprint_qualifying_result sq
+JOIN driver d ON sq.driver_id = d.id
+JOIN constructor ct ON sq.constructor_id = ct.id
+WHERE sq.race_id = ${raceIdSubquery}
+ORDER BY sq.position_display_order`;
 
 // wins：f1db 积分榜表无该列，从正赛 P1 行按年聚合（race_data (driver_id, type) 索引可用）
 // 胜场数写成相关子查询时，积分榜每行都从车手分区起步：idx_rd_driver_type 里没有 year，
@@ -764,6 +789,8 @@ export function createRaceResultsRepository(
           practice1: [],
           practice2: [],
           practice3: [],
+          sprintRace: [],
+          sprintQualifying: [],
         };
         return {
           meta,
@@ -773,8 +800,9 @@ export function createRaceResultsRepository(
                   ...empty,
                   qualifying: page.tabs.qualifying,
                   practice1: page.tabs.practice1,
-                  practice2: page.tabs.practice2,
-                  practice3: page.tabs.practice3,
+                  // 上海是 Sprint 周末：把正赛/排位数据借去两张 Sprint 表
+                  sprintRace: page.tabs.raceResult,
+                  sprintQualifying: page.tabs.qualifying,
                 }
               : empty,
         };
@@ -790,6 +818,8 @@ export function createRaceResultsRepository(
         practice1Rows,
         practice2Rows,
         practice3Rows,
+        sprintRaceRows,
+        sprintQualifyingRows,
         circuitInfoRows,
         recordLapRows,
       ] = await db.batch([
@@ -802,6 +832,8 @@ export function createRaceResultsRepository(
         { sql: practiceSql(1), values },
         { sql: practiceSql(2), values },
         { sql: practiceSql(3), values },
+        { sql: sprintRaceSql, values },
+        { sql: sprintQualifyingSql, values },
         { sql: circuitInfoSql, values },
         { sql: recordLapSql, values },
       ]);
@@ -823,6 +855,8 @@ export function createRaceResultsRepository(
           practice1: practice1Rows.results.map(mapPracticeRow),
           practice2: practice2Rows.results.map(mapPracticeRow),
           practice3: practice3Rows.results.map(mapPracticeRow),
+          sprintRace: sprintRaceRows.results.map(mapRaceResultRow),
+          sprintQualifying: sprintQualifyingRows.results.map(mapQualifyingRow),
         },
       };
     },

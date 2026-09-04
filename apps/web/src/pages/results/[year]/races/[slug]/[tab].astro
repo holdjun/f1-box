@@ -49,9 +49,10 @@ const weekendNodes = page
           timeZone={circuitTimeZone(page.meta.circuitId)}
           year={year}
           slug={slug}
+          raceName={page.meta.name}
         />
       ) : null}
-      <div class="shell pt-6">
+      <div class="shell pt-10">
         <SeasonFilter
           years={availableYears}
           mode="link"

@@ -18,7 +18,13 @@ function fakeDbBySql(
           const match = Object.entries(rowsBySqlFragment).find(([fragment]) =>
             sql.includes(fragment),
           );
-          if (!match) throw new Error(`Unexpected SQL: ${sql}`);
+          // Sprint 两张表随 getRacePage 一起下发；用例不关心时按空结果处理
+          if (!match) {
+            if (/FROM sprint_(race|qualifying)_result/.test(sql)) {
+              return { results: [] };
+            }
+            throw new Error(`Unexpected SQL: ${sql}`);
+          }
           return { results: match[1] };
         }),
       );
@@ -699,6 +705,88 @@ describe("createRaceResultsRepository getRacePage", () => {
       "australia",
     );
     expect(page?.tabs.practice1[0].gap).toBeNull();
+  });
+
+  it("maps sprint rows into their own tabs", async () => {
+    const db = fakeDbBySql({
+      "ra.official_name": [
+        {
+          year: 2026,
+          round: 5,
+          slug: "china",
+          name: "China",
+          official_name: "Chinese Grand Prix",
+          date: "2026-03-15",
+          time: "07:00",
+          laps: 56,
+          course_length: 5.451,
+          circuit_id: "shanghai",
+          circuit_layout_id: "shanghai-1",
+          circuit_full_name: "Shanghai",
+          circuit_place: "Shanghai",
+          distance: 305.066,
+          turns: 16,
+          direction: "CLOCKWISE",
+          country_name: "China",
+          alpha2_code: "CN",
+        },
+      ],
+      "FROM sprint_race_result": [
+        {
+          position_number: 1,
+          position_text: "1",
+          driver_number: "1",
+          driver_id: "max-verstappen",
+          driver_name: "Max Verstappen",
+          driver_code: "VER",
+          constructor_id: "red-bull",
+          constructor_name: "Red Bull",
+          laps: 19,
+          time: "30:12.345",
+          reason_retired: null,
+          gap: null,
+          points: 8,
+        },
+      ],
+      "FROM sprint_qualifying_result": [
+        {
+          position_number: 1,
+          position_text: "1",
+          driver_number: "4",
+          driver_id: "lando-norris",
+          driver_name: "Lando Norris",
+          driver_code: "NOR",
+          constructor_id: "mclaren",
+          constructor_name: "McLaren",
+          q1: "1:30.1",
+          q2: "1:29.8",
+          q3: "1:29.5",
+          laps: 12,
+        },
+      ],
+      total_races_held: [{ total_races_held: 21, first_gp: 2004 }],
+      "FROM race_result": [],
+      "FROM qualifying_result": [],
+      "FROM starting_grid_position": [],
+      "FROM fastest_lap": [],
+      "FROM pit_stop": [],
+      "FROM free_practice_1_result": [],
+      "FROM free_practice_2_result": [],
+      "FROM free_practice_3_result": [],
+      "SELECT fl.time, d.name AS driver_name": [],
+    });
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2026,
+      "china",
+    );
+    expect(page?.tabs.sprintRace[0]).toMatchObject({
+      driverCode: "VER",
+      points: 8,
+    });
+    expect(page?.tabs.sprintQualifying[0]).toMatchObject({
+      driverCode: "NOR",
+      q3: "1:29.5",
+    });
   });
 
   it("DEV fixture 派生出赛前/赛中/赛后三种形态", async () => {

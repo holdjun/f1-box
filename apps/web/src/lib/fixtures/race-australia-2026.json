@@ -2189,6 +2189,8 @@
         "gap": null,
         "laps": 1
       }
-    ]
+    ],
+    "sprintRace": [],
+    "sprintQualifying": []
   }
 }
