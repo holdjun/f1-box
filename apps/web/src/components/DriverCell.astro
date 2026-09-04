@@ -1,0 +1,20 @@
+---
+import { monogramStyle } from "../lib/tokens.js";
+import { colorForYear, vendorIndexes } from "../lib/vendor.js";
+
+interface Props {
+  driverId: string;
+  driverName: string;
+  driverCode: string;
+  constructorId: string;
+  year: number;
+}
+const { driverId, driverName, driverCode, constructorId, year } = Astro.props;
+// 无车队配色时不设 --monogram-bg，回落 components.css 里的中性灰默认值
+const style = monogramStyle(colorForYear(vendorIndexes, constructorId, year));
+---
+
+<a class="vendor-cell" href={`/drivers/${driverId}`} style={style}>
+  <span class="vendor-cell__monogram" aria-hidden="true">{driverCode}</span>
+  <span class="vendor-cell__name">{driverName}</span>
+</a>

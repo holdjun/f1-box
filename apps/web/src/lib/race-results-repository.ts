@@ -154,6 +154,8 @@ export interface DriverStandingRow {
   driverCode: string;
   points: number;
   wins: number;
+  teamId: string | null;
+  teamName: string | null;
 }
 export interface TeamStandingRow {
   position: number | null;
@@ -175,6 +177,8 @@ interface RacePage {
     practice1: PracticeRow[];
     practice2: PracticeRow[];
     practice3: PracticeRow[];
+    sprintRace: RaceResultRow[];
+    sprintQualifying: QualifyingRow[];
   };
 }
 
@@ -185,6 +189,8 @@ export const RACE_TAB_FIELDS: Record<RaceTabKey, keyof RacePage["tabs"]> = {
   "pit-stop-summary": "pitStops",
   "starting-grid": "startingGrid",
   qualifying: "qualifying",
+  sprint: "sprintRace",
+  "sprint-qualifying": "sprintQualifying",
   "practice-1": "practice1",
   "practice-2": "practice2",
   "practice-3": "practice3",
@@ -390,23 +396,58 @@ JOIN constructor ct ON p.constructor_id = ct.id
 WHERE p.race_id = ${raceIdSubquery}
 ORDER BY p.position_display_order`;
 
+// Sprint 周末专有的两张表；列形与正赛/排位一致，直接复用行映射
+const sprintRaceSql = `SELECT sr.position_number, sr.position_text, sr.driver_number,
+       d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
+       ct.id AS constructor_id, ct.name AS constructor_name,
+       sr.laps, sr.time, sr.reason_retired, sr.gap, sr.points
+FROM sprint_race_result sr
+JOIN driver d ON sr.driver_id = d.id
+JOIN constructor ct ON sr.constructor_id = ct.id
+WHERE sr.race_id = ${raceIdSubquery}
+ORDER BY sr.position_display_order`;
+
+const sprintQualifyingSql = `SELECT sq.position_number, sq.position_text, sq.driver_number,
+       d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
+       ct.id AS constructor_id, ct.name AS constructor_name,
+       sq.q1, sq.q2, sq.q3, sq.laps
+FROM sprint_qualifying_result sq
+JOIN driver d ON sq.driver_id = d.id
+JOIN constructor ct ON sq.constructor_id = ct.id
+WHERE sq.race_id = ${raceIdSubquery}
+ORDER BY sq.position_display_order`;
+
 // wins：f1db 积分榜表无该列，从正赛 P1 行按年聚合（race_data (driver_id, type) 索引可用）
 // 胜场数写成相关子查询时，积分榜每行都从车手分区起步：idx_rd_driver_type 里没有 year，
 // 只能先拉出该车手全生涯的成绩再回 race 表过滤（2026-09-03 实测 4166 行/次）。
 // 改成按赛季一次算完物化，读量只与该赛季的场次有关（同条件实测 389 行）
+// 归队取该年最后一场正赛的车队（与车手目录同口径，季中转会显示现东家）。
+// 每行一条相关子查询会从车手分区起步拉出全生涯成绩，改成与 season_wins 同形的
+// 按年份一次物化；constructor_id 是跟随 MAX(round) 的裸列——SQLite 明确保证单个
+// min/max 聚合时裸列取自命中的那一行。只有积分行、该年未上过正赛的车手无行可归
 const driverStandingsSql = `WITH season_wins AS (
   SELECT rr.driver_id, COUNT(*) AS wins
   FROM race ra
   CROSS JOIN race_result rr ON rr.race_id = ra.id
   WHERE ra.year = ?1 AND rr.position_number = 1
   GROUP BY rr.driver_id
+),
+last_team AS (
+  SELECT rr.driver_id, rr.constructor_id AS team_id, MAX(ra.round) AS last_round
+  FROM race ra
+  CROSS JOIN race_result rr ON rr.race_id = ra.id
+  WHERE ra.year = ?1
+  GROUP BY rr.driver_id
 )
 SELECT sds.position_number, sds.position_text,
        d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
-       sds.points, COALESCE(w.wins, 0) AS wins
+       sds.points, COALESCE(w.wins, 0) AS wins,
+       lt.team_id, ct.name AS team_name
 FROM season_driver_standing sds
 JOIN driver d ON sds.driver_id = d.id
 LEFT JOIN season_wins w ON w.driver_id = d.id
+LEFT JOIN last_team lt ON lt.driver_id = d.id
+LEFT JOIN constructor ct ON ct.id = lt.team_id
 WHERE sds.year = ?1
 ORDER BY sds.position_display_order`;
 
@@ -436,6 +477,8 @@ function mapDriverStandingRow(row: unknown): DriverStandingRow {
     driverCode: r.str("driver_code"),
     points: r.num("points"),
     wins: r.num("wins"),
+    teamId: r.strOrNull("team_id"),
+    teamName: r.strOrNull("team_name"),
   };
 }
 
@@ -706,11 +749,72 @@ export function createRaceResultsRepository(
 
     async getRacePage(year, slug) {
       if (!db) {
-        if (year !== 2026 || slug !== "australia") return null;
+        if (year !== 2026) return null;
         const { default: fixture } = await import(
           "./fixtures/race-australia-2026.json"
         );
-        return fixture as RacePage;
+        const page = fixture as RacePage;
+        if (slug === "australia") return page;
+        // DEV 预览：赛前/赛中形态没有独立 fixture。换上目标站的赛程元信息，
+        // 再按站次裁掉尚未产生的结果——china 停在排位赛后，其余为赛前
+        const { default: season } = await import(
+          "./fixtures/season-races-2026.json"
+        );
+        const race = (season as { races: RaceSummary[] }).races.find(
+          (r) => r.slug === slug,
+        );
+        if (!race) return null;
+        const meta: RaceMeta = {
+          ...page.meta,
+          round: race.round,
+          slug: race.slug,
+          name: race.name,
+          officialName: race.raceName,
+          date: race.date,
+          raceTime: race.time,
+          // 历史赛季普遍只有日期、无发车时刻（f1db 只从 2024 起补齐，1171 场里
+          // 1101 场 race.time 为空）。DEV 无 D1、只有 2026 fixture，借摩纳哥模拟这一
+          // 形态，赛程条的占位判据才有 e2e 可打的入口
+          sessions:
+            slug === "monaco"
+              ? race.sessions.map((s) => ({
+                  ...s,
+                  startsAtUtc: `${s.startsAtUtc.slice(0, 10)}T00:00:00Z`,
+                }))
+              : race.sessions,
+          circuitId: race.circuitId,
+          circuitLayoutId: race.circuitLayoutId,
+          circuitFullName: race.circuitName,
+          circuitPlace: race.circuitPlace,
+          countryName: race.countryName,
+          alpha2Code: race.alpha2Code,
+        };
+        const empty = {
+          raceResult: [],
+          qualifying: [],
+          startingGrid: [],
+          fastestLaps: [],
+          pitStops: [],
+          practice1: [],
+          practice2: [],
+          practice3: [],
+          sprintRace: [],
+          sprintQualifying: [],
+        };
+        return {
+          meta,
+          tabs:
+            slug === "china"
+              ? {
+                  ...empty,
+                  qualifying: page.tabs.qualifying,
+                  practice1: page.tabs.practice1,
+                  // 上海是 Sprint 周末：把正赛/排位数据借去两张 Sprint 表
+                  sprintRace: page.tabs.raceResult,
+                  sprintQualifying: page.tabs.qualifying,
+                }
+              : empty,
+        };
       }
       const values = [year, slug];
       const [
@@ -723,6 +827,8 @@ export function createRaceResultsRepository(
         practice1Rows,
         practice2Rows,
         practice3Rows,
+        sprintRaceRows,
+        sprintQualifyingRows,
         circuitInfoRows,
         recordLapRows,
       ] = await db.batch([
@@ -735,6 +841,8 @@ export function createRaceResultsRepository(
         { sql: practiceSql(1), values },
         { sql: practiceSql(2), values },
         { sql: practiceSql(3), values },
+        { sql: sprintRaceSql, values },
+        { sql: sprintQualifyingSql, values },
         { sql: circuitInfoSql, values },
         { sql: recordLapSql, values },
       ]);
@@ -756,6 +864,8 @@ export function createRaceResultsRepository(
           practice1: practice1Rows.results.map(mapPracticeRow),
           practice2: practice2Rows.results.map(mapPracticeRow),
           practice3: practice3Rows.results.map(mapPracticeRow),
+          sprintRace: sprintRaceRows.results.map(mapRaceResultRow),
+          sprintQualifying: sprintQualifyingRows.results.map(mapQualifyingRow),
         },
       };
     },

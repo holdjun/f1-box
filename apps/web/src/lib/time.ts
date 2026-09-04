@@ -28,6 +28,12 @@ function displayZone(startsAtUtc: string, timeZone: string | null): string {
     : "UTC";
 }
 
+// 发车时刻是否真实存在。占位时刻不允许进入任何“几点开跑”的渲染：
+// 它既不是真实时刻，做时区换算后连日期都会漂移
+export function hasPublishedStart(startsAtUtc: string): boolean {
+  return !startsAtUtc.endsWith(PLACEHOLDER_START);
+}
+
 // 副行日期渲染的唯一入口：仅当发车时刻与赛道时区均存在时按赛道时区渲染当地比赛日，
 // 否则回退 UTC 日期。空 time 的历史赛绝不能按合成 00:00 做时区换算（负偏移时区会退一天）。
 export function formatRaceDate(
@@ -41,6 +47,10 @@ export function formatRaceDate(
   return formatUtcDate(date);
 }
 
+// en-GB 的九月缩写是四字母（Sept），其余十一个月三字母，日期列宽会跟着跳；
+// 统一成三字母，不动 locale（en-US 会把日期顺序整个换成月前日后的写法）
+const normalizeShortMonth = (s: string): string => s.replaceAll("Sept", "Sep");
+
 // Intl 同一选项：两位日/短月/四位年 + 指定时区
 function formatDate(
   value: Timestamp,
@@ -51,12 +61,14 @@ function formatDate(
   if (!Number.isFinite(date.getTime())) {
     throw new TypeError(`Invalid timestamp: ${String(value)}`);
   }
-  return new Intl.DateTimeFormat(locale, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone,
-  }).format(date);
+  return normalizeShortMonth(
+    new Intl.DateTimeFormat(locale, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      timeZone,
+    }).format(date),
+  );
 }
 
 // 周末日期范围（首练 → 正赛）：同月缩成 "06-08 MAR"，跨月 "27 FEB - 01 MAR"。
@@ -98,7 +110,7 @@ function zonedParts(
     parts.find((part) => part.type === type)?.value ?? "";
   return {
     day: pick("day"),
-    month: pick("month").toUpperCase(),
+    month: normalizeShortMonth(pick("month")).toUpperCase(),
     year: pick("year"),
   };
 }
@@ -125,6 +137,76 @@ export function formatLocalDateTime(
   return formatDateTime(value, locale, timeZone);
 }
 
+// 未开赛场次的发车时刻：星期 + 时刻 + 时区缩写（"Sun 15:00 CEST"），
+// 与卡片周末日期同口径按赛道当地渲染；无时区映射时由调用方传 UTC，
+// 不留可选参数默认到服务端本地时区。Intl 输出带逗号，卡片行里是噪音，按部件拼装
+export function formatLocalWeekdayTime(
+  value: Timestamp,
+  timeZone: string,
+  locale = "en-GB",
+): string {
+  const parts = weekdayTimeParts(value, timeZone, locale, true);
+  return `${parts.weekday} ${parts.time} ${parts.zone}`;
+}
+
+// 周末赛程表：两行并列已经说明了哪行是哪个时区，缩写只是噪音
+export function formatWeekdayTime(
+  value: Timestamp,
+  timeZone: string,
+  locale = "en-GB",
+): string {
+  const parts = weekdayTimeParts(value, timeZone, locale, false);
+  return `${parts.weekday} ${parts.time}`;
+}
+
+// 未公布发车时刻的场次：只出星期与日期（"Sun 19 Nov"）。date 存的就是赛道
+// 当地日期，按 UTC 原样呈现；换算反而会把负偏移赛道推到前一天
+export function formatWeekdayDate(
+  startsAtUtc: string,
+  locale = "en-GB",
+): string {
+  const date = new Date(startsAtUtc);
+  if (!Number.isFinite(date.getTime())) {
+    throw new TypeError(`Invalid timestamp: ${String(startsAtUtc)}`);
+  }
+  const parts = new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    timeZone: "UTC",
+  }).formatToParts(date);
+  const pick = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return `${pick("weekday")} ${pick("day")} ${normalizeShortMonth(pick("month"))}`;
+}
+
+function weekdayTimeParts(
+  value: Timestamp,
+  timeZone: string,
+  locale: string,
+  withZone: boolean,
+): { weekday: string; time: string; zone: string } {
+  const date = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(date.getTime())) {
+    throw new TypeError(`Invalid timestamp: ${String(value)}`);
+  }
+  const parts = new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZone,
+    timeZoneName: withZone ? "short" : undefined,
+  }).formatToParts(date);
+  const pick = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return {
+    weekday: pick("weekday"),
+    time: `${pick("hour")}:${pick("minute")}`,
+    zone: pick("timeZoneName"),
+  };
+}
+
 function formatDateTime(
   value: Timestamp,
   locale: string,
@@ -135,14 +217,16 @@ function formatDateTime(
     throw new TypeError(`Invalid timestamp: ${String(value)}`);
   }
 
-  return new Intl.DateTimeFormat(locale, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-    timeZone,
-    timeZoneName: "short",
-  }).format(date);
+  return normalizeShortMonth(
+    new Intl.DateTimeFormat(locale, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+      timeZone,
+      timeZoneName: "short",
+    }).format(date),
+  );
 }

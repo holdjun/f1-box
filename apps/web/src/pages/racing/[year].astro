@@ -51,15 +51,19 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
 
 <BaseLayout title={`${year} Season`} year={year}>
   <section aria-label={`${year} season overview`} class="relative overflow-hidden border-b border-line">
-    <p
-      class="pointer-events-none absolute -top-4 right-0 font-display text-[clamp(8rem,22vw,19rem)] leading-[0.8] font-bold text-transparent select-none [-webkit-text-stroke:1px_var(--line)]"
-      aria-hidden="true"
-    >{year}</p>
+    {/* 年份描边水印只填内容未占用的右侧空带：Next 卡会把字形遮掉大半只剩碎片，
+        窄屏下字形又会压到眼眉与标题，两种情况都不渲染 */}
+    {!next && (
+      <p
+        class="pointer-events-none absolute -top-4 right-0 hidden font-display text-[clamp(8rem,22vw,19rem)] leading-[0.8] font-bold text-transparent select-none lg:block [-webkit-text-stroke:1px_var(--line)]"
+        aria-hidden="true"
+      >{year}</p>
+    )}
     <div class="shell relative grid gap-10 py-12 md:py-16 lg:grid-cols-[7fr_5fr] lg:items-end">
       <div>
         <p class="status-label">Formula 1 calendar</p>
         <h1 class="mt-3 text-display-lg uppercase">{year} Season</h1>
-        <div class="mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        <div class="mt-4 flex flex-wrap items-center gap-x-7 gap-y-3">
           <p class="text-[0.85rem] text-ink-strong">
             {races.length} rounds · {completed.length} completed
           </p>
@@ -97,7 +101,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
           <div class="flex items-start justify-between gap-4">
             <h2
               id="calendar-dialog-title"
-              class="font-display text-[1.25rem] leading-tight font-semibold uppercase"
+              class="font-display text-[1.15rem] leading-tight font-semibold uppercase"
             >
               Add F1 {year} to your calendar
             </h2>
@@ -112,7 +116,9 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
               >
             </button>
           </div>
-          <div class="mt-4 grid gap-0.5">
+          {/* 项自带 px-3 才能让 hover 底色比文本宽，容器负向拉回同一量，
+              文本才与标题、与周末弹窗内容同一左基线 */}
+          <div class="mt-5 -mx-3 grid gap-0.5">
             <a class={calendarItemClass} href={webcalHref} data-calendar-subscribe
               >Subscribe — Apple Calendar</a
             >
@@ -122,7 +128,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
               download={`f1-${year}.ics`}
               data-calendar-download
             >Download .ics file</a>
-            <div class="mt-1 min-w-0 border-t border-line pt-2">
+            <div class="mt-2 min-w-0 border-t border-line pt-2">
               <button
                 type="button"
                 class:list={[calendarItemClass, "w-full cursor-pointer"]}
@@ -149,7 +155,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
             <img
               src={`/vendor/country-flags/${next.alpha2Code.toLowerCase()}.svg`}
               alt=""
-              class="vendor-cell__flag rounded-[2px] border border-ink/25 object-cover"
+              class="vendor-cell__flag"
             />
             {nextLine}
           </p>
@@ -161,7 +167,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
     </div>
   </section>
 
-  <main id="main-content" class="shell pt-10 pb-section">
+  <main id="main-content" class="shell pt-6 pb-section">
     <SeasonFilter
       years={availableYears}
       mode="link"
@@ -182,12 +188,14 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
     ) : (
       <>
         {completed.length > 0 && (
-          <section aria-label="Completed races" class="mt-10">
+          <section aria-label="Completed races" class="mt-8">
             <div class="flex items-baseline gap-3">
               <h2 class="font-display text-[2rem] leading-none font-semibold uppercase">Completed</h2>
               <span class="font-display text-[1.3rem] text-ink-muted">{completed.length}</span>
             </div>
-            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* ≥1440px 时卡面宽度足够开三列（约 437px），两列下卡内中部大片空白；
+                lg（980px）三列会把长国名挤换行，故单独取断点而不动全局 breakpoint */}
+            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 min-[90rem]:grid-cols-3">
               {completed.map((race) => (
                 <RaceCard race={race} href={cardHref(race)} status={statusOf(race)} />
               ))}
@@ -200,7 +208,7 @@ const cardHref = (race: RaceSummary) => `/results/${year}/races/${race.slug}/rac
               <h2 class="font-display text-[2rem] leading-none font-semibold uppercase">Upcoming</h2>
               <span class="font-display text-[1.3rem] text-ink-muted">{upcoming.length}</span>
             </div>
-            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 min-[90rem]:grid-cols-3">
               {upcoming.map((race) => (
                 <RaceCard race={race} href={cardHref(race)} status={statusOf(race)} />
               ))}

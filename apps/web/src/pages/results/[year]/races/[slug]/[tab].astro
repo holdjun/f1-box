@@ -1,11 +1,15 @@
 ---
+import CircuitFacts from "../../../../../components/CircuitFacts.astro";
 import RaceHeader from "../../../../../components/RaceHeader.astro";
 import RaceTable from "../../../../../components/RaceTable.astro";
 import RaceTabsNav from "../../../../../components/RaceTabsNav.astro";
 import SeasonFilter from "../../../../../components/SeasonFilter.svelte";
 import StatusPage from "../../../../../components/StatusPage.astro";
+import WeekendProgress from "../../../../../components/WeekendProgress.astro";
 import BaseLayout from "../../../../../layouts/BaseLayout.astro";
+import { circuitTimeZone } from "../../../../../lib/circuit-time.js";
 import { RACE_TAB_FIELDS } from "../../../../../lib/race-results-repository.js";
+import { buildWeekendNodes } from "../../../../../lib/race-weekend.js";
 import { RACE_TAB_LABELS, raceTabKeys, resolveRaceTab } from "../../../../../lib/routing.js";
 
 const year = Number(Astro.params.year);
@@ -25,6 +29,10 @@ const visibleTabs =
   tab && page
     ? raceTabKeys.filter((key) => page.tabs[RACE_TAB_FIELDS[key]].length > 0)
     : [];
+// 周末进度三态常显：赛后也是赛程的一部分，只是节点全部已完成
+const weekendNodes = page
+  ? buildWeekendNodes(page.meta.sessions, visibleTabs)
+  : [];
 ---
 
 {tab && page ? (
@@ -35,7 +43,16 @@ const visibleTabs =
   >
     <main id="main-content">
       <RaceHeader meta={page.meta} />
-      <div class="shell pt-6 pb-section">
+      {weekendNodes.length > 0 ? (
+        <WeekendProgress
+          nodes={weekendNodes}
+          timeZone={circuitTimeZone(page.meta.circuitId)}
+          year={year}
+          slug={slug}
+          raceName={page.meta.name}
+        />
+      ) : null}
+      <div class="shell pt-10">
         <SeasonFilter
           years={availableYears}
           mode="link"
@@ -45,12 +62,21 @@ const visibleTabs =
           showAll={false}
           client:load
         />
-        <RaceTabsNav year={year} slug={slug} active={tab} visibleTabs={visibleTabs} />
+        {visibleTabs.length > 0 ? (
+          <RaceTabsNav year={year} slug={slug} active={tab} visibleTabs={visibleTabs} />
+        ) : (
+          <p class="mt-6 text-[0.8rem] text-ink-muted">
+            Results appear here as each session is published.
+          </p>
+        )}
         {visibleTabs.map((key) => (
           <div data-race-tab-panel={key} hidden={key !== tab ? true : undefined}>
             <RaceTable tab={key} rows={page.tabs[RACE_TAB_FIELDS[key]]} year={year} />
           </div>
         ))}
+      </div>
+      <div class="pb-section">
+        <CircuitFacts meta={page.meta} />
       </div>
     </main>
   </BaseLayout>

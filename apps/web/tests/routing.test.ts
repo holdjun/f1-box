@@ -57,13 +57,15 @@ describe("resolveSeasonSelection", () => {
 });
 
 describe("resolveRaceTab", () => {
-  it("exposes the eight supported tabs in display order", () => {
+  it("exposes the supported tabs in display order", () => {
     expect(raceTabKeys).toEqual([
       "race-result",
       "fastest-laps",
       "pit-stop-summary",
       "starting-grid",
       "qualifying",
+      "sprint",
+      "sprint-qualifying",
       "practice-1",
       "practice-2",
       "practice-3",
@@ -73,7 +75,8 @@ describe("resolveRaceTab", () => {
   it("accepts known tabs and rejects unknown", () => {
     expect(resolveRaceTab("race-result")).toBe("race-result");
     expect(resolveRaceTab("practice-3")).toBe("practice-3");
-    expect(resolveRaceTab("sprint")).toBeNull();
+    expect(resolveRaceTab("sprint")).toBe("sprint");
+    expect(resolveRaceTab("sprint-race")).toBeNull();
     expect(resolveRaceTab("")).toBeNull();
   });
 });

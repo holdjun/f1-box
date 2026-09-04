@@ -1,0 +1,51 @@
+---
+import type { RaceMeta } from "../lib/race-results-repository.js";
+import CircuitMap from "./CircuitMap.astro";
+
+interface Props {
+  meta: RaceMeta;
+}
+const { meta } = Astro.props;
+// 参考 F1 官方赛道页的信息层级：圈长单独占一行大字，其余成对铺网格
+const stats = [
+  { label: "First Grand Prix", value: meta.firstGrandPrix === null ? "—" : String(meta.firstGrandPrix) },
+  { label: "Number of Laps", value: String(meta.laps) },
+  { label: "Turns", value: String(meta.turns) },
+  { label: "Race Distance", value: `${meta.distance.toFixed(3)} km` },
+];
+---
+
+<section class="circuit-facts shell mt-16 border-t border-line pt-10">
+  <h2 class="title-page text-display-md">Circuit</h2>
+  <div class="mt-8 grid grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_minmax(0,30rem)] lg:gap-16">
+    <div>
+      <CircuitMap
+        layoutId={meta.circuitLayoutId}
+        fallbackSrc={`/vendor/circuits/${meta.circuitLayoutId}.svg`}
+        alt={`${meta.circuitFullName} layout map`}
+      />
+    </div>
+    <div class="lg:border-l lg:border-line lg:pl-16">
+      <p class="text-[0.72rem] tracking-[0.1em] uppercase text-ink-muted">{meta.circuitFullName}</p>
+      <p class="mt-6 text-[0.82rem] text-ink-muted">Circuit Length</p>
+      <p class="font-display text-display-md leading-none tabular-nums">{meta.courseLength.toFixed(3)}<span class="text-[0.5em]">km</span></p>
+      <dl class="mt-8 grid grid-cols-2 gap-x-8 gap-y-6 border-t border-line pt-6">
+        {stats.map(({ label, value }) => (
+          <div>
+            <dt class="text-[0.82rem] text-ink-muted">{label}</dt>
+            <dd class="mt-1 font-display text-[1.6rem] leading-none font-semibold tabular-nums">{value}</dd>
+          </div>
+        ))}
+        <div class="col-span-2 border-t border-line pt-6">
+          <dt class="text-[0.82rem] text-ink-muted">Fastest lap</dt>
+          <dd class="mt-1 flex flex-wrap items-baseline gap-x-3">
+            <span class="font-display text-[1.6rem] leading-none font-semibold tabular-nums">{meta.recordLap?.time ?? "—"}</span>
+            {meta.recordLap ? (
+              <span class="text-[0.82rem] text-ink-muted">{meta.recordLap.driverName} ({meta.recordLap.year})</span>
+            ) : null}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</section>

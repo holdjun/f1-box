@@ -25,11 +25,33 @@ const map = layoutId
 const SECTOR_COLORS = ["#ec008c", "#ffd400", "#00a3e0"];
 const pointsAttr = (pts: [number, number][]) =>
   pts.map(([x, y]) => `${x},${y}`).join(" ");
+
+// 源坐标基于 500×500 正方形画布，而赛道多为横向，上下留白接近图形本身高度。
+// 按实际点集裁出 viewBox：padding 要包住外描边（stroke-width 13 的一半）与弯角圆标（r=9.5）
+const PADDING = 18;
+const viewBox = ((): string => {
+  const xs: number[] = [];
+  const ys: number[] = [];
+  for (const pts of map?.sectors ?? []) {
+    for (const [x, y] of pts) {
+      xs.push(x);
+      ys.push(y);
+    }
+  }
+  for (const corner of map?.corners ?? []) {
+    xs.push(corner.x);
+    ys.push(corner.y);
+  }
+  if (xs.length === 0) return "0 0 500 500";
+  const minX = Math.min(...xs) - PADDING;
+  const minY = Math.min(...ys) - PADDING;
+  return `${minX} ${minY} ${Math.max(...xs) + PADDING - minX} ${Math.max(...ys) + PADDING - minY}`;
+})();
 ---
 
 {map ? (
   <>
-  <svg class="circuit-map text-ink-strong" viewBox="0 0 500 500" role="img" aria-label={alt}>
+  <svg class="circuit-map text-ink-strong" viewBox={viewBox} role="img" aria-label={alt}>
     {map.sectors.map((pts) => (
       <polyline class="circuit-map__outline" points={pointsAttr(pts)} />
     ))}

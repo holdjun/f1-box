@@ -22,6 +22,12 @@ export function parseCalendarYear(params: URLSearchParams): number | null {
   return Number(raw);
 }
 
+// race 可选：给定 slug 时只导出该站的 session（比赛页的 Add to calendar）
+export function parseCalendarRace(params: URLSearchParams): string | null {
+  const raw = params.get("race");
+  return raw !== null && /^[a-z0-9-]+$/.test(raw) ? raw : null;
+}
+
 // buildSessions 对未公布时间的 session 兜底 "00:00"，产生 T00:00:00Z 占位值；
 // 该字符串本身就是精确判据（F1 没有 00:00 UTC 开赛的时段），直接过滤
 const PLACEHOLDER_START = "T00:00:00Z";
@@ -82,7 +88,7 @@ export function buildSeasonIcs(
   year: number,
   races: RaceSummary[],
   origin: string,
-  options?: { dtstamp?: string },
+  options?: { dtstamp?: string; calendarName?: string },
 ): SeasonIcs {
   const dtstamp = options?.dtstamp ?? formatIcsUtc(new Date());
   const lines: string[] = [
@@ -91,7 +97,7 @@ export function buildSeasonIcs(
     "PRODID:-//f1-box//Racing Calendar//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
-    `X-WR-CALNAME:F1 ${year} · f1-box`,
+    `X-WR-CALNAME:${escapeText(options?.calendarName ?? `F1 ${year} · f1-box`)}`,
     "REFRESH-INTERVAL;VALUE=DURATION:P1D",
   ];
   let eventCount = 0;

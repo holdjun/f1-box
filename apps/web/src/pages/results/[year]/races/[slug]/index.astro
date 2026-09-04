@@ -1,5 +1,24 @@
 ---
-const year = Astro.params.year;
+import { RACE_TAB_FIELDS } from "../../../../../lib/race-results-repository.js";
+import {
+  buildWeekendNodes,
+  latestResultTab,
+} from "../../../../../lib/race-weekend.js";
+import { raceTabKeys } from "../../../../../lib/routing.js";
+
+const year = Number(Astro.params.year);
 const slug = (Astro.params.slug ?? "").toLowerCase();
-return Astro.redirect(`/results/${year}/races/${slug}/race-result`, 301);
+// 落点是最后一个已有结果的 session：赛中从赛历点进来才不会撞上空的正赛 tab。
+// 落点随数据变化，故 302 而非 301
+const page = await Astro.locals.app.repositories.raceResults.getRacePage(
+  year,
+  slug,
+);
+const visibleTabs = page
+  ? raceTabKeys.filter((key) => page.tabs[RACE_TAB_FIELDS[key]].length > 0)
+  : [];
+const tab = page
+  ? latestResultTab(buildWeekendNodes(page.meta.sessions, visibleTabs))
+  : "race-result";
+return Astro.redirect(`/results/${Astro.params.year}/races/${slug}/${tab}`, 302);
 ---

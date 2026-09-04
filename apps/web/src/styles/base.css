@@ -120,6 +120,24 @@
   animation: page-in 240ms ease both;
 }
 
+/* 站内骨架（顶部导航、结果页 tab、赛季筛选）在相邻页面完全一致：命名后自成
+   一个过渡组，不再跟着 root 整页位移，同区换页看起来就是切 tab 而不是换页。
+   组本身不做位移动画：从滚动位置导航时旧位置可能远在视口外，morph 会变成长距离飞行 */
+.site-header {
+  view-transition-name: site-header;
+}
+.results-tabs {
+  view-transition-name: results-tabs;
+}
+.season-filter {
+  view-transition-name: season-filter;
+}
+::view-transition-group(site-header),
+::view-transition-group(results-tabs),
+::view-transition-group(season-filter) {
+  animation-duration: 0ms;
+}
+
 /* 后退/前进恢复历史时禁止位移动画：ClientRouter 会把滚动恢复到离开前的位置，
    内容必须原地出现；从右滑入的方向感只对前进导航有意义 */
 [data-astro-transition="back"]::view-transition-old(root),
@@ -150,8 +168,8 @@
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
     animation-name: none !important;
   }
 }

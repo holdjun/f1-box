@@ -1,7 +1,7 @@
 ---
 import { circuitTimeZone } from "../lib/circuit-time.js";
 import type { RaceSummary } from "../lib/race-results-repository.js";
-import { formatWeekendRange } from "../lib/time.js";
+import { formatLocalWeekdayTime, formatWeekendRange } from "../lib/time.js";
 import { colorForYear, vendorIndexes } from "../lib/vendor.js";
 
 interface Props {
@@ -27,6 +27,12 @@ const placeLine =
   race.circuitName && race.circuitName !== race.circuitPlace
     ? `${race.circuitPlace} · ${race.circuitName}`
     : race.circuitPlace;
+// 未完赛卡片的底行：按赛道当地渲染发车时刻，与卡片日期同口径。
+// time 为空（历史赛无公布时刻）时不渲染，绝不把合成的 00:00 冒充成发车时间
+const lightsOut =
+  status !== "complete" && race.time !== null
+    ? formatLocalWeekdayTime(startsAt, circuitTimeZone(race.circuitId) ?? "UTC")
+    : null;
 // 斜杠名次标记：第 N 名 N 条斜杠，填充该名次车手所在车队当年主色
 const teamColor = (constructorId: string | null): string | undefined =>
   constructorId
@@ -51,12 +57,10 @@ const teamColor = (constructorId: string | null): string | undefined =>
       <span
         class="font-display text-[2.25rem] leading-none font-semibold text-transparent [-webkit-text-stroke:1px_var(--ink-muted)]"
         aria-hidden="true">{round}</span>
-      <!-- 圆角和轮廓加在国旗图像本身；国旗 SVG 为 4:3，4:3 盒同比例；
-           border 挤占内容盒（1.381 非 4:3），contain 填不满会悬空一圈 —— cover 放大填满、紧贴边框 -->
       <img
         src={`/vendor/country-flags/${race.alpha2Code.toLowerCase()}.svg`}
         alt=""
-        class="vendor-cell__flag mb-1 h-4 w-auto aspect-4/3 rounded-[2px] border border-ink/25 object-cover"
+        class="vendor-cell__flag mb-1 h-4 w-auto aspect-4/3"
         loading="lazy"
       />
       <time
@@ -106,6 +110,13 @@ const teamColor = (constructorId: string | null): string | undefined =>
     )}
     {status === "complete" && race.podium.length === 0 && (
       <p class="mt-5 border-t border-line pt-4 text-[0.78rem] text-ink-muted">{race.winnerName}</p>
+    )}
+    <!-- 未完赛卡片以同样的分隔线底行收尾：与完赛卡的领奖台行结构一致，两段网格不再高矮参差 -->
+    {lightsOut !== null && (
+      <p class="mt-5 flex items-baseline gap-3 border-t border-line pt-4 text-[0.72rem] tracking-[0.08em] uppercase">
+        <span class="text-ink-muted">Lights out</span>
+        <span class="ml-auto tabular-nums text-ink-strong">{lightsOut}</span>
+      </p>
     )}
   </a>
 </article>

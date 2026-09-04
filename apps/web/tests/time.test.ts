@@ -2,11 +2,37 @@ import { describe, expect, test } from "vitest";
 
 import {
   formatLocalDateTime,
+  formatLocalWeekdayTime,
   formatRaceDate,
   formatUtcDateTime,
   formatUtcLongDate,
+  formatWeekdayDate,
   formatWeekendRange,
+  hasPublishedStart,
 } from "../src/lib/time.js";
+
+// f1db 只从 2024 起补齐发车时刻：1171 场里 1101 场 race.time 为空，
+// buildSessions 兜底成 T00:00:00Z。把这个合成值当真实时刻做时区换算，
+// 会在 UTC+4 的阿布扎比造出 "Sun 04:00"，在 UTC-8 的拉斯维加斯连星期都退一天
+describe("unpublished start times", () => {
+  test("placeholder start is not a published time", () => {
+    expect(hasPublishedStart("2023-11-19T00:00:00Z")).toBe(false);
+    expect(hasPublishedStart("2026-03-08T04:00:00Z")).toBe(true);
+  });
+
+  test("unpublished sessions fall back to the stored date, never a clock", () => {
+    expect(formatWeekdayDate("2023-11-19T00:00:00Z", "en-GB")).toBe(
+      "Sun 19 Nov",
+    );
+  });
+
+  // date 是赛道当地日期，按 UTC 原样呈现；一旦做时区换算就会退到前一天
+  test("stored date is rendered as-is", () => {
+    expect(formatWeekdayDate("2023-09-03T00:00:00Z", "en-GB")).toBe(
+      "Sun 03 Sep",
+    );
+  });
+});
 
 describe("time formatting", () => {
   test("formats a timestamp in UTC", () => {
@@ -19,6 +45,30 @@ describe("time formatting", () => {
     expect(
       formatLocalDateTime("2026-03-08T04:00:00Z", "Asia/Shanghai", "en-GB"),
     ).toBe("08 Mar 2026, 12:00 GMT+8");
+  });
+
+  test("formats a start time as weekday, clock and zone", () => {
+    expect(
+      formatLocalWeekdayTime("2026-09-06T13:00:00Z", "Europe/Rome", "en-GB"),
+    ).toBe("Sun 15:00 CEST");
+  });
+
+  // 无时区映射时调用方回退 UTC，与 formatRaceDate 同口径
+  test("start time renders in UTC when the circuit has no zone", () => {
+    expect(formatLocalWeekdayTime("2026-11-22T04:00:00Z", "UTC", "en-GB")).toBe(
+      "Sun 04:00 UTC",
+    );
+  });
+
+  // 负偏移夜赛：UTC 周日 04:00 在赛道当地仍是周六晚
+  test("start time crosses back into the previous local day", () => {
+    expect(
+      formatLocalWeekdayTime(
+        "2026-11-22T04:00:00Z",
+        "America/Los_Angeles",
+        "en-GB",
+      ),
+    ).toBe("Sat 20:00 GMT-8");
   });
 
   // 跨日夜赛：发车时刻 UTC 04:00，在负偏移时区落到前一天
@@ -94,6 +144,46 @@ describe("time formatting", () => {
   test("rejects an invalid range timestamp", () => {
     expect(() => formatWeekendRange("nope", "2026-03-08T04:00:00Z")).toThrow(
       "Invalid timestamp: nope",
+    );
+  });
+
+  // en-GB 的九月缩写是四字母（Sept），其余十一个月三字母，日期列宽会跟着跳；
+  // 统一成三字母。ICU 升级曾把 en-GB 的 Sep 改成 Sept，逐月断言才能拦住下一次
+  test("race date keeps every month at three letters", () => {
+    const months = Array.from(
+      { length: 12 },
+      (_, index) =>
+        formatRaceDate(
+          `2026-${String(index + 1).padStart(2, "0")}-06`,
+          null,
+          null,
+        ).split(" ")[1],
+    );
+    expect(months).toEqual([
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ]);
+  });
+
+  test("weekend range uses a three-letter September", () => {
+    expect(
+      formatWeekendRange("2026-09-05T10:00:00Z", "2026-09-06T13:00:00Z"),
+    ).toBe("05-06 SEP");
+  });
+
+  test("utc date time uses a three-letter September", () => {
+    expect(formatUtcDateTime("2026-09-06T04:00:00Z", "en-GB")).toBe(
+      "06 Sep 2026, 04:00 UTC",
     );
   });
 });

@@ -15,6 +15,27 @@ const pages = [
   "/teams/ferrari",
 ];
 
+// 窄屏下多个列靠媒体查询收起文字（只剩 logo / 三字码徽标），隐错只在窄屏出现：
+// 用 display:none 藏名字会直接造出无可访问名称的链接，桌面基线根本扫不到
+const mobilePages = [
+  "/results/2026/races",
+  "/results/2026/races/australia/race-result",
+  "/results/2026/drivers",
+];
+
+for (const path of mobilePages) {
+  test(`@mobile ${path} has no axe violations`, async ({ page }) => {
+    test.setTimeout(90_000);
+    await page.goto(path);
+    const { violations } = await new AxeBuilder({ page }).analyze();
+    expect(
+      violations.map(
+        (v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`,
+      ),
+    ).toEqual([]);
+  });
+}
+
 for (const scheme of ["dark", "light"] as const) {
   test.describe(`a11y (${scheme})`, () => {
     test.use({ colorScheme: scheme });

@@ -18,7 +18,13 @@ function fakeDbBySql(
           const match = Object.entries(rowsBySqlFragment).find(([fragment]) =>
             sql.includes(fragment),
           );
-          if (!match) throw new Error(`Unexpected SQL: ${sql}`);
+          // Sprint 两张表随 getRacePage 一起下发；用例不关心时按空结果处理
+          if (!match) {
+            if (/FROM sprint_(race|qualifying)_result/.test(sql)) {
+              return { results: [] };
+            }
+            throw new Error(`Unexpected SQL: ${sql}`);
+          }
           return { results: match[1] };
         }),
       );
@@ -701,12 +707,103 @@ describe("createRaceResultsRepository getRacePage", () => {
     expect(page?.tabs.practice1[0].gap).toBeNull();
   });
 
-  it("DEV fixture serves only australia 2026", async () => {
+  it("maps sprint rows into their own tabs", async () => {
+    const db = fakeDbBySql({
+      "ra.official_name": [
+        {
+          year: 2026,
+          round: 5,
+          slug: "china",
+          name: "China",
+          official_name: "Chinese Grand Prix",
+          date: "2026-03-15",
+          time: "07:00",
+          laps: 56,
+          course_length: 5.451,
+          circuit_id: "shanghai",
+          circuit_layout_id: "shanghai-1",
+          circuit_full_name: "Shanghai",
+          circuit_place: "Shanghai",
+          distance: 305.066,
+          turns: 16,
+          direction: "CLOCKWISE",
+          country_name: "China",
+          alpha2_code: "CN",
+        },
+      ],
+      "FROM sprint_race_result": [
+        {
+          position_number: 1,
+          position_text: "1",
+          driver_number: "1",
+          driver_id: "max-verstappen",
+          driver_name: "Max Verstappen",
+          driver_code: "VER",
+          constructor_id: "red-bull",
+          constructor_name: "Red Bull",
+          laps: 19,
+          time: "30:12.345",
+          reason_retired: null,
+          gap: null,
+          points: 8,
+        },
+      ],
+      "FROM sprint_qualifying_result": [
+        {
+          position_number: 1,
+          position_text: "1",
+          driver_number: "4",
+          driver_id: "lando-norris",
+          driver_name: "Lando Norris",
+          driver_code: "NOR",
+          constructor_id: "mclaren",
+          constructor_name: "McLaren",
+          q1: "1:30.1",
+          q2: "1:29.8",
+          q3: "1:29.5",
+          laps: 12,
+        },
+      ],
+      total_races_held: [{ total_races_held: 21, first_gp: 2004 }],
+      "FROM race_result": [],
+      "FROM qualifying_result": [],
+      "FROM starting_grid_position": [],
+      "FROM fastest_lap": [],
+      "FROM pit_stop": [],
+      "FROM free_practice_1_result": [],
+      "FROM free_practice_2_result": [],
+      "FROM free_practice_3_result": [],
+      "SELECT fl.time, d.name AS driver_name": [],
+    });
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2026,
+      "china",
+    );
+    expect(page?.tabs.sprintRace[0]).toMatchObject({
+      driverCode: "VER",
+      points: 8,
+    });
+    expect(page?.tabs.sprintQualifying[0]).toMatchObject({
+      driverCode: "NOR",
+      q3: "1:29.5",
+    });
+  });
+
+  it("DEV fixture 派生出赛前/赛中/赛后三种形态", async () => {
     const repository = createRaceResultsRepository();
-    expect(await repository.getRacePage(2026, "monaco")).toBeNull();
-    const page = await repository.getRacePage(2026, "australia");
-    expect(page?.meta.name).toBe("Australia");
-    expect(page?.tabs.raceResult.length).toBeGreaterThan(0);
+    expect(await repository.getRacePage(2026, "nope")).toBeNull();
+    const finished = await repository.getRacePage(2026, "australia");
+    expect(finished?.meta.name).toBe("Australia");
+    expect(finished?.tabs.raceResult.length).toBeGreaterThan(0);
+    // 赛中：排位赛已入库、正赛未开
+    const mid = await repository.getRacePage(2026, "china");
+    expect(mid?.tabs.qualifying.length).toBeGreaterThan(0);
+    expect(mid?.tabs.raceResult).toHaveLength(0);
+    // 赛前：全空，但赛程元信息跟着站次走
+    const upcoming = await repository.getRacePage(2026, "japan");
+    expect(upcoming?.meta.name).toBe("Japan");
+    expect(upcoming?.tabs.qualifying).toHaveLength(0);
+    expect(upcoming?.meta.sessions.length).toBeGreaterThan(0);
   });
 });
 
@@ -722,6 +819,8 @@ describe("createRaceResultsRepository standings", () => {
           driver_code: "ANT",
           points: 219,
           wins: 6,
+          team_id: "mercedes",
+          team_name: "Mercedes",
         },
       ],
     });
@@ -735,8 +834,33 @@ describe("createRaceResultsRepository standings", () => {
         driverCode: "ANT",
         points: 219,
         wins: 6,
+        teamId: "mercedes",
+        teamName: "Mercedes",
       },
     ]);
+  });
+
+  // 只有积分行、该年未上过正赛的车手无车队可归，归属列必须允许为空
+  it("maps a driver standing with no team entry", async () => {
+    const db = fakeDbBySql({
+      "FROM season_driver_standing": [
+        {
+          position_number: null,
+          position_text: "-",
+          driver_id: "nyck-de-vries",
+          driver_name: "Nyck de Vries",
+          driver_code: "DEV",
+          points: 0,
+          wins: 0,
+          team_id: null,
+          team_name: null,
+        },
+      ],
+    });
+    const [row] =
+      await createRaceResultsRepository(db).getDriverStandings(2026);
+    expect(row.teamId).toBeNull();
+    expect(row.teamName).toBeNull();
   });
 
   it("maps constructor standings", async () => {

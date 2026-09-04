@@ -202,13 +202,14 @@
     font-weight: 560;
   }
 
-  /* 成绩表保底宽度，在 .table-scroll 内横滚；e2e 断言完整类名，不再叠加其他类 */
-  .result-table {
-    min-width: 52rem;
-  }
-  @media (min-width: 40rem) {
-    .result-table {
-      min-width: 55rem;
+  /* 成绩表不设保底宽度：列都是 nowrap，自然宽度就是最小可读宽度，再撑到固定
+     52rem 只会在窄屏多滚一段空白（实测 375px 下正赛成绩表 832px vs 自然 575px）；
+     桌面宽度由 table { width: 100% } 接管 */
+
+  /* 积分榜只有 4-5 列，窄屏收紧列间距后刚好落在 375px 内，不用为了 Wins 一列横滚 */
+  @media (width < 40rem) {
+    .result-table--standings :is(th, td) {
+      padding-inline: 0.5rem;
     }
   }
 
@@ -221,6 +222,12 @@
       z-index: 2;
       padding-left: 0.75rem;
       background: var(--surface);
+    }
+    /* 首列粘滞，它占多宽右侧就少看多宽：窄屏放开大奖赛名换行，
+       列宽从 12rem 定值回到内容自然宽度（实测 192px → 121px） */
+    .result-table tbody th[scope="row"] {
+      min-width: 0;
+      white-space: normal;
     }
   }
 
@@ -243,12 +250,6 @@
   .info-panel {
     flex: 1 1 18rem;
     padding: 1.1rem 1.35rem 1.35rem;
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    background: var(--surface-raised);
-  }
-  .circuit-map-panel {
-    padding: 1.1rem;
     border: 1px solid var(--line);
     border-radius: 6px;
     background: var(--surface-raised);
@@ -304,7 +305,11 @@
     /* 国旗 SVG 均为 4:3（viewBox 640×480），盒同比例才无 letterbox */
     width: 1.25rem;
     height: 0.9375rem;
-    object-fit: contain;
+    /* 白底旗（日本、韩国）在两个主题下都需要边界，否则像素浮在背景上；
+       border 挤占内容盒后不再是 4:3，contain 会悬空一圈，只能 cover 放大填满 */
+    border: 1px solid color-mix(in oklab, var(--ink) 25%, transparent);
+    border-radius: 2px;
+    object-fit: cover;
     flex: none;
   }
   .vendor-cell__monogram {
@@ -333,9 +338,25 @@
     border-radius: 0.25rem;
     background: var(--ink);
   }
+  /* 次要归属列（积分榜的车队）窄屏只留 logo，留给主列名字空间。
+     名字是链接唯一的可读内容（logo 是 alt="" 装饰），display:none 会造出无名链接，
+     只能视觉隐藏、保留在可访问树里 */
   @media (width < 40rem) {
-    .vendor-cell--driver .vendor-cell__name {
-      display: none;
+    /* sr-only span 是 position:absolute：没有相对定位它就脱离 .table-scroll 的
+       overflow 裁剪、撑宽文档（races 表实测 sw 412 > 375），相对紧凑容器定位后
+       落在 anchor 内、仍被表容器裁剪，既隐藏又不溢出 */
+    .vendor-cell--compact {
+      position: relative;
+    }
+    .vendor-cell--compact .vendor-cell__name {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
     }
   }
 }
