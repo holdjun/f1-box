@@ -72,6 +72,17 @@ jobs:
           apps/web/node_modules/.bin/wrangler d1 execute f1db --remote -c apps/web/wrangler.jsonc \
             --file scripts/site-tables.sql
 
+      # 全量重导后 f1db 可能不再有某些场次（上游删场或改赛历）。
+      # 站点表没有外键兜管，不清就会留下指向不存在比赛的行。
+      - name: Prune site tables
+        if: steps.release.outputs.changed == 'true'
+        run: |
+          WRANGLER=apps/web/node_modules/.bin/wrangler
+          for table in session_time session_weather; do
+            "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --command \
+              "DELETE FROM ${table} WHERE NOT EXISTS (SELECT 1 FROM race r WHERE r.year = ${table}.year AND r.round = ${table}.round)"
+          done
+
       # 上游改 schema 时查询计划夹具会跟着变，意味着索引可能失效。数据同步不因此中断，
       # 但要在 summary 里留下痕迹，否则只能等下一次有人本地跑 dump 才发现
       - name: Flag upstream schema drift

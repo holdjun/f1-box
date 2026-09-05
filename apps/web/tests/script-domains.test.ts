@@ -3,12 +3,14 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-// "不使用 Jolpica/Ergast" 是绝对的，包括 FastF1 内部的间接调用。光扫 URL 不够：
-// FastF1 的 Session.load() 与不带 backend 的 get_session()/get_event_schedule()
-// 会在内部走 ergast 后端，源码里一个域名字符串都不会出现。所以这里同时拦两类：
-// 直接请求的未申报主机，以及会静默转到 ergast 的 FastF1 调用形式。
+// "不使用 Jolpica/Ergast" 的范围：不在自己代码里直接请求它们。
+// 经 FastF1 内部间接走到是允许的（请求由 FastF1 管理），所以这里只拦源码里
+// 直接出现的 URL 主机，并把可能的上游限定在白名单内。
 
 const scriptsDir = fileURLToPath(new URL("../../../scripts", import.meta.url));
+const workflowsDir = fileURLToPath(
+  new URL("../../../.github/workflows", import.meta.url),
+);
 // 三条管线各有一个 sync 脚本；先交付的管线先注册，后续管线交付时补进集合。
 const SCRIPT_GLOB = new Set(["sync-session-times.py", "sync-weather.py"]);
 
@@ -27,6 +29,27 @@ const ALLOWED_HOSTS = new Set([
   "api.open-meteo.com",
   "livetiming.formula1.com",
 ]);
+
+// 一处断言，两处复用：scripts/ 下的 sync 脚本，以及 workflow YAML 里的内联脚本。
+// 经 FastF1 间接走到 Jolpica 是允许的，所以这里不管 load()；管的是后端选择要显式。
+// backend 默认为 None 时由 FastF1 自己挑，版本一变取数路径就变了，而回填脚本
+// 必须可重现：同一个赛季重跑两次应当得到同一批数据。
+// 先剥掉注释行（Python 与 YAML 同为 #），注释里提到调用名不算调用。
+function assertExplicitBackend(source: string, label: string): void {
+  const code = source
+    .split("\n")
+    .filter((line) => !/^\s*#/.test(line))
+    .join("\n");
+  for (const match of code.matchAll(
+    /\b(get_session|get_event_schedule)\s*\(/g,
+  )) {
+    const call = code.slice(match.index, match.index + 200);
+    expect(
+      call.includes('backend="fastf1"'),
+      `${label} 的 ${match[1]} 没有显式传 backend="fastf1"`,
+    ).toBe(true);
+  }
+}
 
 describe("sync 脚本请求域名白名单", () => {
   it("至少注册一个 sync 脚本", () => {
@@ -58,25 +81,26 @@ describe("sync 脚本请求域名白名单", () => {
   }
 
   for (const script of [...SCRIPT_GLOB]) {
-    it(`${script} 不会静默走到 ergast 后端`, () => {
-      const source = readFileSync(`${scriptsDir}/${script}`, "utf8");
-      // Session.load() 无条件拉 ergast（fastf1/core.py _load_drivers_results），
-      // force_ergast 更是直说。两者在源码里出现即视为违约。
-      expect(/\.load\s*\(/.test(source), `${script} 调用了 load()`).toBe(false);
-      expect(/force_ergast/.test(source), `${script} 用了 force_ergast`).toBe(
-        false,
+    it(`${script} 的后端选择是显式的`, () => {
+      assertExplicitBackend(
+        readFileSync(`${scriptsDir}/${script}`, "utf8"),
+        script,
       );
-      // get_session / get_event_schedule 的 backend 默认为 None，FastF1 会自己选，
-      // 选到 ergast 就静默打 jolpica。每个调用点都必须显式写 backend="fastf1"。
-      for (const match of source.matchAll(
-        /\b(get_session|get_event_schedule)\s*\(/g,
-      )) {
-        const call = source.slice(match.index, match.index + 200);
-        expect(
-          call.includes('backend="fastf1"'),
-          `${script} 的 ${match[1]} 没有显式传 backend="fastf1"`,
-        ).toBe(true);
-      }
     });
   }
+
+  // 探针这类内联 Python 住在 workflow YAML 里，不在 scripts/ 下，按文件名注册的
+  // 护栏扫不到它们，而探针正是最容易随手写、最需要可重现的一类代码。
+  it("workflow 内联脚本的后端选择也是显式的", () => {
+    const names = readdirSync(workflowsDir).filter((name) =>
+      name.endsWith(".yml"),
+    );
+    expect(names).not.toHaveLength(0);
+    for (const name of names) {
+      assertExplicitBackend(
+        readFileSync(`${workflowsDir}/${name}`, "utf8"),
+        name,
+      );
+    }
+  });
 });

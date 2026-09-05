@@ -124,7 +124,10 @@ const hasForecast = rows.some(
           )}
         </div>
         {hasWeather ? (
-          <p class="mt-1 text-[0.8rem] tabular-nums text-ink-muted">
+          <p
+            class="mt-1 text-[0.8rem] tabular-nums text-ink-muted"
+            data-session-weather
+          >
             {weather ? (
               <>
                 <span aria-hidden="true">{weather.icon}</span>

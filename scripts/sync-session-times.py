@@ -91,18 +91,22 @@ def main():
     args = parser.parse_args()
 
     db_path = Path(args.f1db_path) if args.f1db_path else fetch_db()
-    years = (
-        [int(y.strip()) for y in args.years.split(",")]
-        if args.years
-        else list(BACKFILL_YEARS)
-    )
+    if args.years:
+        # 非法输入走 argparse 的标准错误通道，而不是抛一个没人接的 ValueError
+        # pi-lens-ignore: ast-grep:unchecked-throwing-call-python
+        years = [int(y) for y in args.years.split(",") if y.strip().isdigit()]
+        if not years:
+            parser.error(f"--years 解析不出任何赛季: {args.years}")
+    else:
+        years = list(BACKFILL_YEARS)
 
     con = sqlite3.connect(db_path)
-    # f1db race 参考：year / round / date，用于匹配与双重校验
-    ref_races = {
-        (year, round_no): {"id": race_id, "date": date}
-        for race_id, year, round_no, date in con.execute(
-            "SELECT id, year, round, date FROM race"
+    # f1db race 参考：(year, round) -> date，用于匹配与日期双重校验。
+    # 不取 id：站点表按 (year, round) 关联，代理键用不上。
+    ref_dates = {
+        (year, round_no): date
+        for year, round_no, date in con.execute(
+            "SELECT year, round, date FROM race"
         )
     }
     con.close()
@@ -120,16 +124,16 @@ def main():
             round_no = None
             try:
                 round_no = int(row["RoundNumber"])
-                ref = ref_races.get((year, round_no))
-                if ref is None:
+                ref_date = ref_dates.get((year, round_no))
+                if ref_date is None:
                     skipped.append(f"{year} Round {round_no}: no f1db race row (round mismatch)")
                     continue
                 # 日期双重校验：正赛日（Race 的 Date）应与 f1db race.date 一致
                 race_date = str(row.get("EventDate"))[:10] if row.get("EventDate") is not None else None
-                if race_date is not None and race_date != ref["date"]:
+                if race_date is not None and race_date != ref_date:
                     skipped.append(
                         f"{year} Round {round_no}: date mismatch "
-                        f"(fastf1 {race_date} vs f1db {ref['date']})"
+                        f"(fastf1 {race_date} vs f1db {ref_date})"
                     )
                     continue
             except (TypeError, ValueError) as exc:
@@ -138,8 +142,8 @@ def main():
             for key, utc in sessions_of(row):
                 inserts.append(
                     f"INSERT OR REPLACE INTO session_time "
-                    f"(race_id, session_key, starts_at_utc, source) VALUES "
-                    f"({ref['id']}, '{key}', '{utc}', 'fastf1-schedule');"
+                    f"(year, round, session_key, starts_at_utc, source) VALUES "
+                    f"({year}, {round_no}, '{key}', '{utc}', 'fastf1-schedule');"
                 )
 
     out = Path(args.out)

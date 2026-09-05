@@ -88,15 +88,30 @@ def main():
                         help="输出的 SQL 文件路径（默认当前目录 session-weather.sql）")
     parser.add_argument("--future-days", type=int, default=FUTURE_DAYS,
                         help="要回填的未来天数窗口（默认 7）")
+    parser.add_argument("--have", default=None,
+                        help="已有 trackside 行的清单文件，每行 year,round,session_key；"
+                             "列内的场次不再拉 livetiming")
     args = parser.parse_args()
+
+    # 历史场次的赛道天气不会变，拉过一次就够了。不跳过的话，日常增量每跑一次
+    # 就要重抳 2018 起全部场次 × 5 session 近千次请求。forecast 不在此列：
+    # 预报本来就要随时间刷新，而且只涉及未来 7 天内的少数几场。
+    have: set[tuple[int, int, str]] = set()
+    if args.have:
+        for line in Path(args.have).read_text().splitlines():
+            parts = [p.strip() for p in line.split(",")]
+            # 清单由 wrangler 输出转成，可能带表头或空行，非法行直接跳过
+            if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit() and parts[2]:
+                have.add((int(parts[0]), int(parts[1]), parts[2]))
+        print(f"skipping {len(have)} trackside rows already in D1")
 
     db_path = Path(args.f1db_path) if args.f1db_path else fetch_db()
     con = sqlite3.connect(db_path)
 
-    # 2018 起的 race 参考：id / year / round / date / circuit 坐标（天气取点）
+    # 2018 起的 race 参考：(year, round) 为关联键，加 date 与 circuit 坐标（天气取点）
     races = con.execute(
         """
-        SELECT r.id, r.year, r.round, r.date, c.latitude, c.longitude
+        SELECT r.year, r.round, r.date, c.latitude, c.longitude
         FROM race r JOIN circuit c ON r.circuit_id = c.id
         WHERE r.year >= ?
         ORDER BY r.year, r.round
@@ -110,7 +125,7 @@ def main():
     cutoff = now + timedelta(days=args.future_days)
 
     fastf1.set_log_level("WARNING")
-    for race_id, year, round_no, date, lat, lon in races:
+    for year, round_no, date, lat, lon in races:
         race_date = datetime.strptime(date, "%Y-%m-%d").date()
         is_future = datetime.combine(race_date, datetime.min.time(), tzinfo=timezone.utc) > now
         if is_future:
@@ -129,9 +144,9 @@ def main():
                 continue
             inserts.append(
                 f"INSERT OR REPLACE INTO session_weather "
-                f"(race_id, session_key, temp_c, precipitation_probability, "
+                f"(year, round, session_key, temp_c, precipitation_probability, "
                 f"weather_code, source, fetched_at) VALUES "
-                f"({race_id}, 'race', {temp}, {prob if prob is not None else 'NULL'}, "
+                f"({year}, {round_no}, 'race', {temp}, {prob if prob is not None else 'NULL'}, "
                 f"{json.dumps(code) if code is not None else 'NULL'}, 'forecast', '{now.isoformat()}');"
             )
             continue
@@ -158,6 +173,8 @@ def main():
             # 就是一行永远匹配不到、也不报错的死数据
             if key is None:
                 print(f"  unknown session name {year} R{round_no}: {name}")
+                continue
+            if (year, round_no, key) in have:
                 continue
             try:
                 # backend 必须显式传：默认值会让 FastF1 自己选后端，
@@ -191,9 +208,9 @@ def main():
             code = "'rain'" if has_rain else "NULL"
             inserts.append(
                 f"INSERT OR REPLACE INTO session_weather "
-                f"(race_id, session_key, temp_c, track_temp_c, weather_code, "
+                f"(year, round, session_key, temp_c, track_temp_c, weather_code, "
                 f"source, fetched_at) VALUES "
-                f"({race_id}, '{key}', {air if air is not None else 'NULL'}, "
+                f"({year}, {round_no}, '{key}', {air if air is not None else 'NULL'}, "
                 f"{track if track is not None else 'NULL'}, {code}, "
                 f"'trackside', '{now.isoformat()}');"
             )

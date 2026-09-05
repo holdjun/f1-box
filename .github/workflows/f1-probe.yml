@@ -2,9 +2,12 @@ name: f1-probe
 
 # 动手前必须先验证的探针（工单"动手前必须先验证的一件事"）：
 # 本地访问 livetiming.formula1.com 返回 403，天气与计时流只在 GitHub Actions
-# 上能拿到。本工作流取一场 2023 排位赛，打印 session.results 的列与行数、
-# session.weather_data 的行数与字段名，确认 runner 能拿到数据、字段符合文档。
+# 上能拿到。本工作流取一场 2023 比赛，走管线真正会用的三个 api.* 函数，
+# 打印字段形态，并在 socket 层记录全部出站主机、断言零 Jolpica/Ergast 触达。
 # 手动触发；结果看 Actions 的日志摘要。不部署、不写代码，只打印确诊。
+#
+# 不用 Session.load()：它无条件走 _load_drivers_results 拉 ergast(jolpica)，
+# 是工单明令禁止的调用。探针必须走与管线一致的路径，否则跑通了也不能用。
 
 on:
   workflow_dispatch:
@@ -23,11 +26,11 @@ jobs:
           # 脚本依赖 fastf1>=3.5，PEP 723 在 uv run 时自动解析
           enable-cache: true
 
-      # 用同款 PEP 723 + uv run 跑探针，脚本自身不带依赖声明，这里内联。
-      # 取一场 2023 排位赛（Round 1 = 巴林），打印三件事：
-      #   1) session.results 列与行数（重点 Abbreviation / Position）
-      #   2) session.weather_data 行数与字段名（重点 TrackTemp）
-      #   3) 车号列表，确认 timing 侧输入
+      # 取 2023 R1（巴林）的排位赛，打印四件事：
+      #   1) weather_data 的行数与字段（管线 2 trackside 依赖 AirTemp/TrackTemp）
+      #   2) driver_info 的字段与 Tla 覆盖（管线 3 车手映射的唯一输入）
+      #   3) timing_data 的返回形态与车号（管线 3 的圈速来源）
+      #   4) 全过程触达的主机清单，出现 jolpica/ergast 即失败
       - name: Probe FastF1 livetiming data
         run: |
           cat > /tmp/probe-fastf1.py <<'PY'
@@ -35,49 +38,101 @@ jobs:
           # requires-python = ">=3.12"
           # dependencies = ["fastf1>=3.5"]
           # ///
-          import json
+          import socket
+          import sys
+
+          # 在导入 fastf1 之前挂钩：DNS 解析是所有出站请求的必经之路，
+          # 比事后看日志可靠——被禁的主机是被谁请求的都跑不掉
+          HOSTS: set[str] = set()
+          _real_getaddrinfo = socket.getaddrinfo
+
+          def _recording_getaddrinfo(host, *args, **kwargs):
+              HOSTS.add(str(host).lower())
+              return _real_getaddrinfo(host, *args, **kwargs)
+
+          socket.getaddrinfo = _recording_getaddrinfo
+
           import fastf1
+          import fastf1.api as api
 
           fastf1.set_log_level("WARNING")
-          year = 2023
-          round_no = 1
-          session_name = "R"  # 正赛有 session.results 的 Position；排位同，但正赛字段更全
+          year, round_no, session_name = 2023, 1, "Qualifying"
 
-          # 所有调用显式 backend="fastf1"（工单：不能依赖默认值）
+          # backend 显式传：默认 None 会让 FastF1 自己选后端，选到 ergast 就是静默打 jolpica
           session = fastf1.get_session(year, round_no, session_name, backend="fastf1")
-          session.load(weather=True)
+          print("f1_api_support:", session.f1_api_support)
+          print("api_path:", session.api_path)
 
-          # 1) results：列、行数、Abbreviation 是否非空
-          res = session.results
-          print("=== session.results ===")
-          print("columns:", list(res.columns))
-          print("rows:", len(res))
-          ab = res["Abbreviation"].dropna().tolist() if "Abbreviation" in res.columns else []
-          pos = res["Position"].dropna().tolist() if "Position" in res.columns else []
-          print("Abbreviation non-null:", len(ab), "sample:", ab[:5])
-          print("Position non-null:", len(pos), "sample:", pos[:5])
+          def probe(label, fn):
+              """单项失败不阻断其余探测——一次跑完要拿到全部信息。"""
+              print(f"=== {label} ===")
+              try:
+                  return fn()
+              except Exception as exc:
+                  print(f"{label} FAILED: {type(exc).__name__}: {exc}")
+                  return None
 
-          # 2) weather_data：行数、字段名
-          print("=== session.weather_data ===")
-          wd = session.weather_data
-          if wd is None:
-              print("weather_data: None")
-          else:
-              print("rows:", len(wd))
-              print("columns:", list(wd.columns))
-              if "TrackTemp" in wd.columns:
-                  print("TrackTemp non-null:", wd["TrackTemp"].notna().sum())
-              if "AirTemp" in wd.columns:
-                  print("AirTemp non-null:", wd["AirTemp"].notna().sum())
+          def show_weather():
+              wd = api.weather_data(session.api_path)
+              print("type:", type(wd).__name__)
+              cols = list(wd.columns) if hasattr(wd, "columns") else list(wd.keys())
+              print("columns:", cols)
+              print("rows:", len(wd) if hasattr(wd, "__len__") else "n/a")
+              for col in ("AirTemp", "TrackTemp", "Rainfall"):
+                  if hasattr(wd, "columns") and col in wd.columns:
+                      print(f"{col} non-null:", int(wd[col].notna().sum()),
+                            "sample:", wd[col].dropna().tolist()[:3])
+              return wd
 
-          # 3) 车号列表，确认 timing 侧输入
-          print("=== driver numbers ===")
-          print("drivers:", session.drivers)
+          def show_driver_info():
+              di = api.driver_info(session.api_path)
+              print("type:", type(di).__name__, "entries:", len(di))
+              first = next(iter(di.values())) if di else {}
+              print("per-driver keys:", sorted(first.keys()))
+              # Tla 是车手映射的唯一键（车号在赛季内不唯一：FP1 青训车手共用号）
+              tlas = [v.get("Tla") for v in di.values()]
+              print("Tla non-empty:", sum(1 for t in tlas if t), "/", len(tlas))
+              print("Tla sample:", [t for t in tlas if t][:5])
+              print("RacingNumber sample:",
+                    [v.get("RacingNumber") for v in list(di.values())[:5]])
+              return di
+
+          def show_timing():
+              td = api.timing_data(session.api_path)
+              print("type:", type(td).__name__,
+                    "len:", len(td) if isinstance(td, tuple) else "n/a")
+              parts = td if isinstance(td, tuple) else (td,)
+              for i, part in enumerate(parts):
+                  cols = list(part.columns) if hasattr(part, "columns") else "n/a"
+                  print(f"  [{i}] type:", type(part).__name__,
+                        "rows:", len(part) if hasattr(part, "__len__") else "n/a")
+                  print(f"  [{i}] columns:", cols)
+                  if hasattr(part, "columns") and "Driver" in part.columns:
+                      print(f"  [{i}] distinct Driver:",
+                            sorted(part["Driver"].dropna().unique().tolist())[:8])
+                  if hasattr(part, "columns") and "LapTime" in part.columns:
+                      print(f"  [{i}] LapTime non-null:", int(part["LapTime"].notna().sum()))
+              return td
+
+          probe("api.weather_data", show_weather)
+          probe("api.driver_info", show_driver_info)
+          probe("api.timing_data", show_timing)
+
+          print("=== hosts touched ===")
+          for host in sorted(HOSTS):
+              print(" ", host)
+
+          banned = [h for h in HOSTS if "jolpi" in h or "ergast" in h]
+          if banned:
+              print("BANNED HOSTS TOUCHED:", banned)
+              sys.exit(1)
+          print("no jolpica/ergast host touched")
           PY
           uv run --quiet /tmp/probe-fastf1.py
 
       - name: Summary
         if: always()
         run: |
-          echo "探针完成。管线 3（临时结果）依赖 session.results 的 Abbreviation/Position；"
-          echo "管线 2 的 trackside 依赖 weather_data 的 TrackTemp。若字段缺失，按工单分支重新设计。"
+          echo "管线 2 trackside 依赖 weather_data 的 AirTemp/TrackTemp；"
+          echo "管线 3 依赖 driver_info 的 Tla（车手映射）与 timing_data 的圈速。"
+          echo "任一项 FAILED 或触达 jolpica/ergast，按工单分支重新设计再动手。"

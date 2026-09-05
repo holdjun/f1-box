@@ -254,7 +254,7 @@ const seasonCalendarSql = `SELECT ra.round, ra.grand_prix_id AS slug, gp.name,
        ra.sprint_qualifying_date, ra.sprint_qualifying_time,
        ra.sprint_race_date, ra.sprint_race_time,
        (SELECT json_group_array(json_object('key', session_key, 'value', starts_at_utc))
-          FROM session_time st WHERE st.race_id = ra.id) AS session_times,
+          FROM session_time st WHERE st.year = ra.year AND st.round = ra.round) AS session_times,
        wd.id AS winner_driver_id, wd.name AS winner_name, wd.abbreviation AS winner_code,
        wct.id AS winner_team_id, wct.name AS winner_team_name, wrr.time AS winner_time,
        pd.name AS pole_name, pd.abbreviation AS pole_code
@@ -318,11 +318,11 @@ const raceMetaSql = `SELECT ra.year, ra.round, ra.grand_prix_id AS slug, gp.name
        ra.sprint_qualifying_date, ra.sprint_qualifying_time,
        ra.sprint_race_date, ra.sprint_race_time,
        (SELECT json_group_array(json_object('key', session_key, 'value', starts_at_utc))
-          FROM session_time st WHERE st.race_id = ra.id) AS session_times,
+          FROM session_time st WHERE st.year = ra.year AND st.round = ra.round) AS session_times,
        (SELECT json_group_array(json_object(
             'key', session_key, 'tempC', temp_c, 'trackTempC', track_temp_c,
             'prob', precipitation_probability, 'weatherCode', weather_code, 'source', source))
-          FROM session_weather sw WHERE sw.race_id = ra.id) AS session_weather
+          FROM session_weather sw WHERE sw.year = ra.year AND sw.round = ra.round) AS session_weather
 FROM race ra
 JOIN grand_prix gp ON ra.grand_prix_id = gp.id
 JOIN circuit ci ON ra.circuit_id = ci.id

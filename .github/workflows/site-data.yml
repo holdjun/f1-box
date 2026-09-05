@@ -1,0 +1,102 @@
+name: site-data
+
+# 站点自有表的数据回填。f1db 那条链路（data-sync.yml）只管上游整库重导，
+# 建表也在那边（site-tables.sql）；本工作流只负责往已建好的表里写数据。
+#
+# session-times：一次性回填 2018-2023，f1db 从 2024 起自带时刻，跑完就不用再跑，
+#   所以只挂手动触发。data-sync 全量重导不会动 session_time（无外键、不在 dump 里）。
+# weather：forecast 每天要刷（预报会变），trackside 只补还没有的场次——
+#   历史赛道天气不会变，靠 --have 清单跳过，否则每天都要重抓近千次 livetiming。
+
+on:
+  workflow_dispatch:
+    inputs:
+      backfill_session_times:
+        description: 同时回填 2018-2023 的 session 时刻（一次性）
+        type: boolean
+        default: false
+  schedule:
+    # 每天 04:10 UTC：赛后 trackside 补齐 + 未来 7 天预报刷新
+    - cron: "10 4 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  # 与自身串行：两个实例同时写 session_weather 只会互相覆盖
+  group: site-data
+  cancel-in-progress: false
+
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  WRANGLER: apps/web/node_modules/.bin/wrangler
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # 一次性：2018-2023 的 session 时刻。手动勾选才跑。
+      - name: Backfill session times
+        if: inputs.backfill_session_times
+        run: |
+          uv run scripts/sync-session-times.py --out /tmp/session-times.sql
+          if [ -s /tmp/session-times.sql ]; then
+            "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
+              --file /tmp/session-times.sql
+          else
+            echo "no session_time rows produced"
+          fi
+
+      # trackside 已有的场次不再拉 livetiming：历史天气不会变，重抓纯属浪费。
+      # forecast 行不进清单，预报每天都要覆盖。
+      - name: Collect existing trackside rows
+        run: |
+          "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --json \
+            --command "SELECT year, round, session_key FROM session_weather WHERE source = 'trackside'" \
+            | node -e '
+              const r = JSON.parse(require("fs").readFileSync(0, "utf8"));
+              const rows = (Array.isArray(r) ? r[0] : r)?.results ?? [];
+              process.stdout.write(
+                rows.map((x) => x.year + "," + x.round + "," + x.session_key).join("\n"),
+              );
+            ' > /tmp/have.txt
+          wc -l < /tmp/have.txt
+
+      - name: Sync weather
+        run: |
+          uv run scripts/sync-weather.py --out /tmp/weather.sql --have /tmp/have.txt
+          if [ -s /tmp/weather.sql ]; then
+            "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
+              --file /tmp/weather.sql
+          else
+            echo "no session_weather rows produced"
+          fi
+
+      # 页面按 f1db 标签缓存，回填后不清就要等自然过期
+      - name: Purge edge cache
+        if: env.CLOUDFLARE_ZONE_NAME != ''
+        env:
+          CLOUDFLARE_ZONE_NAME: ${{ vars.CLOUDFLARE_ZONE_NAME }}
+        run: |
+          zone=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/zones?name=$CLOUDFLARE_ZONE_NAME" \
+            | node -p 'JSON.parse(require("fs").readFileSync(0)).result?.[0]?.id ?? ""')
+          [ -n "$zone" ] || { echo "zone lookup failed" >&2; exit 1; }
+          curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$zone/purge_cache" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"tags":["f1db"]}' \
+            > /dev/null
