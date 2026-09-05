@@ -26,10 +26,13 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v5
-        with:
-          # 脚本依赖 fastf1>=3.5，PEP 723 在 uv run 时自动解析
-          enable-cache: true
+      # 仓库的 Actions 白名单只放行 actions/* 与 pnpm/action-setup，
+      # 第三方 action（如 astral-sh/setup-uv）会被策略拒掉、直接 startup_failure。
+      # 从 PyPI 装 uv，不为一个探针扩大白名单，也不用 curl | sh。
+      - name: Install uv
+        run: |
+          python3 -m pip install --quiet --user uv
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       # 取 2023 R1（巴林）的排位赛，打印四件事：
       #   1) weather_data 的行数与字段（管线 2 trackside 依赖 AirTemp/TrackTemp）

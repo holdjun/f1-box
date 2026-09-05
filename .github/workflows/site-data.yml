@@ -44,9 +44,12 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
+      # 仓库 Actions 白名单只放行 actions/* 与 pnpm/action-setup，
+      # 第三方 setup-uv 会被策略拒掉（startup_failure），从 PyPI 装
+      - name: Install uv
+        run: |
+          python3 -m pip install --quiet --user uv
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       # 一次性：2018-2023 的 session 时刻。手动勾选才跑。
       - name: Backfill session times
