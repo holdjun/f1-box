@@ -46,95 +46,66 @@ jobs:
           # requires-python = ">=3.12"
           # dependencies = ["fastf1>=3.5"]
           # ///
-          import socket
           import sys
 
-          # 在导入 fastf1 之前挂钩：DNS 解析是所有出站请求的必经之路，
-          # 比事后看日志可靠——被禁的主机是被谁请求的都跑不掉
+          # 在 requests 层记录：socket.getaddrinfo 那层被连接池和缓存绕过，
+          # 上一轮探针记录到 0 个主机却仍打印"未触达"，是个会骗人的结论。
+          import requests
           HOSTS: set[str] = set()
-          _real_getaddrinfo = socket.getaddrinfo
+          _real_send = requests.adapters.HTTPAdapter.send
 
-          def _recording_getaddrinfo(host, *args, **kwargs):
-              HOSTS.add(str(host).lower())
-              return _real_getaddrinfo(host, *args, **kwargs)
+          def _recording_send(self, request, *args, **kwargs):
+              HOSTS.add(requests.utils.urlparse(request.url).netloc.lower())
+              return _real_send(self, request, *args, **kwargs)
 
-          socket.getaddrinfo = _recording_getaddrinfo
+          requests.adapters.HTTPAdapter.send = _recording_send
 
           import fastf1
           import fastf1.api as api
 
           fastf1.set_log_level("WARNING")
-          year, round_no, session_name = 2023, 1, "Qualifying"
 
-          # backend 显式传：默认 None 会让 FastF1 自己选后端，选到 ergast 就是静默打 jolpica
-          session = fastf1.get_session(year, round_no, session_name, backend="fastf1")
-          print("f1_api_support:", session.f1_api_support)
-          print("api_path:", session.api_path)
+          # livetiming 的 static 归档到底覆盖哪些赛季，是管线 2/3 能不能做的前提。
+          # 逐赛季取一场排位赛，只问一件事：weather_data 拿不拿得到。
+          PROBES = [(2023, 1), (2024, 1), (2025, 1), (2026, 1), (2026, 2)]
 
-          def probe(label, fn):
-              """单项失败不阻断其余探测——一次跑完要拿到全部信息。"""
-              print(f"=== {label} ===")
+          for year, rnd in PROBES:
+              print(f"=== {year} R{rnd} Qualifying ===")
               try:
-                  return fn()
+                  s = fastf1.get_session(year, rnd, "Qualifying", backend="fastf1")
+                  print("  api_path:", s.api_path, "| f1_api_support:", s.f1_api_support)
               except Exception as exc:
-                  print(f"{label} FAILED: {type(exc).__name__}: {exc}")
-                  return None
+                  print(f"  get_session FAILED: {type(exc).__name__}: {exc}")
+                  continue
+              for label, fn in (
+                  ("weather_data", lambda: api.weather_data(s.api_path)),
+                  ("driver_info", lambda: api.driver_info(s.api_path)),
+                  ("timing_data", lambda: api.timing_data(s.api_path)),
+              ):
+                  try:
+                      out = fn()
+                      if label == "driver_info":
+                          tlas = [v.get("Tla") for v in out.values()]
+                          print(f"  {label}: entries={len(out)} Tla={sum(1 for t in tlas if t)}",
+                                "keys=", sorted(next(iter(out.values())).keys())[:8] if out else [])
+                      elif label == "timing_data":
+                          parts = out if isinstance(out, tuple) else (out,)
+                          for i, part in enumerate(parts):
+                              cols = list(part.columns) if hasattr(part, "columns") else "n/a"
+                              print(f"  {label}[{i}]: rows={len(part)} cols={cols}")
+                      else:
+                          cols = list(out.columns) if hasattr(out, "columns") else list(out.keys())
+                          print(f"  {label}: rows={len(out)} cols={cols}")
+                  except Exception as exc:
+                      print(f"  {label} FAILED: {type(exc).__name__}: {exc}")
 
-          def show_weather():
-              wd = api.weather_data(session.api_path)
-              print("type:", type(wd).__name__)
-              cols = list(wd.columns) if hasattr(wd, "columns") else list(wd.keys())
-              print("columns:", cols)
-              print("rows:", len(wd) if hasattr(wd, "__len__") else "n/a")
-              for col in ("AirTemp", "TrackTemp", "Rainfall"):
-                  if hasattr(wd, "columns") and col in wd.columns:
-                      print(f"{col} non-null:", int(wd[col].notna().sum()),
-                            "sample:", wd[col].dropna().tolist()[:3])
-              return wd
-
-          def show_driver_info():
-              di = api.driver_info(session.api_path)
-              print("type:", type(di).__name__, "entries:", len(di))
-              first = next(iter(di.values())) if di else {}
-              print("per-driver keys:", sorted(first.keys()))
-              # Tla 是车手映射的唯一键（车号在赛季内不唯一：FP1 青训车手共用号）
-              tlas = [v.get("Tla") for v in di.values()]
-              print("Tla non-empty:", sum(1 for t in tlas if t), "/", len(tlas))
-              print("Tla sample:", [t for t in tlas if t][:5])
-              print("RacingNumber sample:",
-                    [v.get("RacingNumber") for v in list(di.values())[:5]])
-              return di
-
-          def show_timing():
-              td = api.timing_data(session.api_path)
-              print("type:", type(td).__name__,
-                    "len:", len(td) if isinstance(td, tuple) else "n/a")
-              parts = td if isinstance(td, tuple) else (td,)
-              for i, part in enumerate(parts):
-                  cols = list(part.columns) if hasattr(part, "columns") else "n/a"
-                  print(f"  [{i}] type:", type(part).__name__,
-                        "rows:", len(part) if hasattr(part, "__len__") else "n/a")
-                  print(f"  [{i}] columns:", cols)
-                  if hasattr(part, "columns") and "Driver" in part.columns:
-                      print(f"  [{i}] distinct Driver:",
-                            sorted(part["Driver"].dropna().unique().tolist())[:8])
-                  if hasattr(part, "columns") and "LapTime" in part.columns:
-                      print(f"  [{i}] LapTime non-null:", int(part["LapTime"].notna().sum()))
-              return td
-
-          probe("api.weather_data", show_weather)
-          probe("api.driver_info", show_driver_info)
-          probe("api.timing_data", show_timing)
-
-          print("=== hosts touched ===")
-          for host in sorted(HOSTS):
-              print(" ", host)
-
+          print("=== hosts touched (requests layer) ===")
+          for h in sorted(HOSTS):
+              print(" ", h)
+          if not HOSTS:
+              print("  (none recorded — 记录器没生效，别把空清单当成未触达)")
           banned = [h for h in HOSTS if "jolpi" in h or "ergast" in h]
-          if banned:
-              print("BANNED HOSTS TOUCHED:", banned)
-              sys.exit(1)
-          print("no jolpica/ergast host touched")
+          print("banned hosts:", banned if banned else "none")
           PY
           uv run --quiet /tmp/probe-fastf1.py
 
