@@ -11,6 +11,11 @@ name: f1-probe
 
 on:
   workflow_dispatch:
+  # 改了探针本身就在 PR 上跑一次：探针的价值在于能跑通，而它又只能在 runner 上
+  # 验证（本地 livetiming 403）。限定 paths，不给其他 PR 增加负担。
+  pull_request:
+    paths:
+      - .github/workflows/f1-probe.yml
 
 permissions:
   contents: read
