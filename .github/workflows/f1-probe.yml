@@ -67,37 +67,56 @@ jobs:
 
           # livetiming 的 static 归档到底覆盖哪些赛季，是管线 2/3 能不能做的前提。
           # 逐赛季取一场排位赛，只问一件事：weather_data 拿不拿得到。
-          PROBES = [(2023, 1), (2024, 1), (2025, 1), (2026, 1), (2026, 2)]
+          # 先找出本赛季最后一场已结束的比赛：如果连"刚结束"的场次都没有 livetiming
+          # 数据，那就不是归档过期，而是这条路整个不通。
+          import datetime
+          now = datetime.datetime.now(datetime.timezone.utc)
+          sched = fastf1.get_event_schedule(2026, backend="fastf1", include_testing=False)
+          past = [r for _, r in sched.iterrows()
+                  if r["EventDate"] is not None and str(r["EventDate"])[:10] < now.strftime("%Y-%m-%d")]
+          latest = past[-1] if past else None
+          PROBES = [(2023, 1), (2026, 1)]
+          if latest is not None:
+              PROBES.append((2026, int(latest["RoundNumber"])))
+              print("latest finished 2026 round:", int(latest["RoundNumber"]),
+                    str(latest["EventName"]), str(latest["EventDate"])[:10])
 
           for year, rnd in PROBES:
               print(f"=== {year} R{rnd} Qualifying ===")
               try:
                   s = fastf1.get_session(year, rnd, "Qualifying", backend="fastf1")
-                  print("  api_path:", s.api_path, "| f1_api_support:", s.f1_api_support)
+                  print("  api_path:", s.api_path)
               except Exception as exc:
                   print(f"  get_session FAILED: {type(exc).__name__}: {exc}")
                   continue
-              for label, fn in (
-                  ("weather_data", lambda: api.weather_data(s.api_path)),
-                  ("driver_info", lambda: api.driver_info(s.api_path)),
-                  ("timing_data", lambda: api.timing_data(s.api_path)),
-              ):
-                  try:
-                      out = fn()
-                      if label == "driver_info":
-                          tlas = [v.get("Tla") for v in out.values()]
-                          print(f"  {label}: entries={len(out)} Tla={sum(1 for t in tlas if t)}",
-                                "keys=", sorted(next(iter(out.values())).keys())[:8] if out else [])
-                      elif label == "timing_data":
-                          parts = out if isinstance(out, tuple) else (out,)
-                          for i, part in enumerate(parts):
-                              cols = list(part.columns) if hasattr(part, "columns") else "n/a"
-                              print(f"  {label}[{i}]: rows={len(part)} cols={cols}")
-                      else:
-                          cols = list(out.columns) if hasattr(out, "columns") else list(out.keys())
-                          print(f"  {label}: rows={len(out)} cols={cols}")
-                  except Exception as exc:
-                      print(f"  {label} FAILED: {type(exc).__name__}: {exc}")
+              try:
+                  wd = api.weather_data(s.api_path)
+                  print(f"  weather_data OK rows={len(wd)}")
+              except Exception as exc:
+                  print(f"  weather_data FAILED: {type(exc).__name__}")
+
+          # livetiming 不通时唯一还能给历史天气的来源：Open-Meteo archive（ERA5）。
+          # 没有赛道温度，也没有降水概率（那是集合预报产物），但气温与降水量是真的。
+          print("=== Open-Meteo ===")
+          for label, url, params in (
+              ("archive 2023-03-04 Bahrain",
+               "https://archive-api.open-meteo.com/v1/archive",
+               {"latitude": 26.032, "longitude": 50.511, "start_date": "2023-03-04",
+                "end_date": "2023-03-04", "hourly": "temperature_2m,precipitation"}),
+              ("forecast Melbourne",
+               "https://api.open-meteo.com/v1/forecast",
+               {"latitude": -37.8497, "longitude": 144.968,
+                "hourly": "temperature_2m,precipitation_probability,weather_code",
+                "forecast_days": 3}),
+          ):
+              try:
+                  r = requests.get(url, params=params, timeout=20)
+                  j = r.json()
+                  h = j.get("hourly", {})
+                  print(f"  {label}: HTTP {r.status_code} keys={list(h.keys())}",
+                        "samples=", {k: v[:2] for k, v in h.items() if isinstance(v, list)})
+              except Exception as exc:
+                  print(f"  {label} FAILED: {type(exc).__name__}: {exc}")
 
           print("=== hosts touched (requests layer) ===")
           for h in sorted(HOSTS):
