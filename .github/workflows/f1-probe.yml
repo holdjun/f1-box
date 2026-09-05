@@ -1,0 +1,83 @@
+name: f1-probe
+
+# 动手前必须先验证的探针（工单"动手前必须先验证的一件事"）：
+# 本地访问 livetiming.formula1.com 返回 403，天气与计时流只在 GitHub Actions
+# 上能拿到。本工作流取一场 2023 排位赛，打印 session.results 的列与行数、
+# session.weather_data 的行数与字段名，确认 runner 能拿到数据、字段符合文档。
+# 手动触发；结果看 Actions 的日志摘要。不部署、不写代码，只打印确诊。
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v5
+        with:
+          # 脚本依赖 fastf1>=3.5，PEP 723 在 uv run 时自动解析
+          enable-cache: true
+
+      # 用同款 PEP 723 + uv run 跑探针，脚本自身不带依赖声明，这里内联。
+      # 取一场 2023 排位赛（Round 1 = 巴林），打印三件事：
+      #   1) session.results 列与行数（重点 Abbreviation / Position）
+      #   2) session.weather_data 行数与字段名（重点 TrackTemp）
+      #   3) 车号列表，确认 timing 侧输入
+      - name: Probe FastF1 livetiming data
+        run: |
+          cat > /tmp/probe-fastf1.py <<'PY'
+          # /// script
+          # requires-python = ">=3.12"
+          # dependencies = ["fastf1>=3.5"]
+          # ///
+          import json
+          import fastf1
+
+          fastf1.set_log_level("WARNING")
+          year = 2023
+          round_no = 1
+          session_name = "R"  # 正赛有 session.results 的 Position；排位同，但正赛字段更全
+
+          # 所有调用显式 backend="fastf1"（工单：不能依赖默认值）
+          session = fastf1.get_session(year, round_no, session_name, backend="fastf1")
+          session.load(weather=True)
+
+          # 1) results：列、行数、Abbreviation 是否非空
+          res = session.results
+          print("=== session.results ===")
+          print("columns:", list(res.columns))
+          print("rows:", len(res))
+          ab = res["Abbreviation"].dropna().tolist() if "Abbreviation" in res.columns else []
+          pos = res["Position"].dropna().tolist() if "Position" in res.columns else []
+          print("Abbreviation non-null:", len(ab), "sample:", ab[:5])
+          print("Position non-null:", len(pos), "sample:", pos[:5])
+
+          # 2) weather_data：行数、字段名
+          print("=== session.weather_data ===")
+          wd = session.weather_data
+          if wd is None:
+              print("weather_data: None")
+          else:
+              print("rows:", len(wd))
+              print("columns:", list(wd.columns))
+              if "TrackTemp" in wd.columns:
+                  print("TrackTemp non-null:", wd["TrackTemp"].notna().sum())
+              if "AirTemp" in wd.columns:
+                  print("AirTemp non-null:", wd["AirTemp"].notna().sum())
+
+          # 3) 车号列表，确认 timing 侧输入
+          print("=== driver numbers ===")
+          print("drivers:", session.drivers)
+          PY
+          uv run --quiet /tmp/probe-fastf1.py
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "探针完成。管线 3（临时结果）依赖 session.results 的 Abbreviation/Position；"
+          echo "管线 2 的 trackside 依赖 weather_data 的 TrackTemp。若字段缺失，按工单分支重新设计。"

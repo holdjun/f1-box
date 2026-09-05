@@ -35,6 +35,16 @@ export interface RaceSession {
   key: string;
   label: string;
   startsAtUtc: string;
+  // 天气来自 session_weather 表（只比赛页下发，赛历页不查）。
+  // trackside（F1 计时流）：temp/trackTemp；forecast（Open-Meteo）：temp/prob/weatherCode。
+  // 按 source 判空，别指望列齐；无该场 session 的天气时不携带该字段。
+  weather?: {
+    tempC: number | null;
+    trackTempC: number | null;
+    prob: number | null;
+    weatherCode: string | null;
+    source: "trackside" | "forecast";
+  };
 }
 
 interface PodiumEntry {
@@ -243,6 +253,8 @@ const seasonCalendarSql = `SELECT ra.round, ra.grand_prix_id AS slug, gp.name,
        ra.qualifying_date, ra.qualifying_time,
        ra.sprint_qualifying_date, ra.sprint_qualifying_time,
        ra.sprint_race_date, ra.sprint_race_time,
+       (SELECT json_group_array(json_object('key', session_key, 'value', starts_at_utc))
+          FROM session_time st WHERE st.race_id = ra.id) AS session_times,
        wd.id AS winner_driver_id, wd.name AS winner_name, wd.abbreviation AS winner_code,
        wct.id AS winner_team_id, wct.name AS winner_team_name, wrr.time AS winner_time,
        pd.name AS pole_name, pd.abbreviation AS pole_code
@@ -304,7 +316,13 @@ const raceMetaSql = `SELECT ra.year, ra.round, ra.grand_prix_id AS slug, gp.name
        ra.free_practice_3_date, ra.free_practice_3_time,
        ra.qualifying_date, ra.qualifying_time,
        ra.sprint_qualifying_date, ra.sprint_qualifying_time,
-       ra.sprint_race_date, ra.sprint_race_time
+       ra.sprint_race_date, ra.sprint_race_time,
+       (SELECT json_group_array(json_object('key', session_key, 'value', starts_at_utc))
+          FROM session_time st WHERE st.race_id = ra.id) AS session_times,
+       (SELECT json_group_array(json_object(
+            'key', session_key, 'tempC', temp_c, 'trackTempC', track_temp_c,
+            'prob', precipitation_probability, 'weatherCode', weather_code, 'source', source))
+          FROM session_weather sw WHERE sw.race_id = ra.id) AS session_weather
 FROM race ra
 JOIN grand_prix gp ON ra.grand_prix_id = gp.id
 JOIN circuit ci ON ra.circuit_id = ci.id
@@ -494,6 +512,45 @@ function mapTeamStandingRow(row: unknown): TeamStandingRow {
   };
 }
 
+// session_time 子查询固定返回 [{key, value}, ...]（见 seasonCalendarSql/raceMetaSql）。
+// 这是我们自己的 SQL 生成的，不是外部输入，按类型信任；夹具行没有该列时
+// strOrNull 给 null，自然回落 f1db。
+function parseSessionTimes(raw: string | null): Map<string, string> {
+  if (raw === null) return new Map();
+  // pi-lens-ignore: ast-grep:unchecked-throwing-call
+  const rows = JSON.parse(raw) as { key: string; value: string }[];
+  return new Map(rows.map((row) => [row.key, row.value]));
+}
+
+// session_weather 子查询返回 [{key, tempC, trackTempC, prob, weatherCode, source}, ...]。
+// source 的取值由建表时的 CHECK 约束保证（见 site-tables.sql），这里不再归一化。
+function parseSessionWeather(
+  raw: string | null,
+): Map<string, NonNullable<RaceSession["weather"]>> {
+  if (raw === null) return new Map();
+  // pi-lens-ignore: ast-grep:unchecked-throwing-call
+  const rows = JSON.parse(raw) as {
+    key: string;
+    tempC: number | null;
+    trackTempC: number | null;
+    prob: number | null;
+    weatherCode: string | null;
+    source: "trackside" | "forecast";
+  }[];
+  return new Map(
+    rows.map((row) => [
+      row.key,
+      {
+        tempC: row.tempC,
+        trackTempC: row.trackTempC,
+        prob: row.prob,
+        weatherCode: row.weatherCode,
+        source: row.source,
+      },
+    ]),
+  );
+}
+
 function buildSessions(r: RowReader): RaceSession[] {
   const defs: [string, string, string, string][] = [
     [
@@ -524,12 +581,32 @@ function buildSessions(r: RowReader): RaceSession[] {
     ["sprint", "Sprint", "sprint_race_date", "sprint_race_time"],
     ["race", "Race", "date", "time"],
   ];
+  const sessionTimes = parseSessionTimes(r.strOrNull("session_times"));
+  const sessionWeather = parseSessionWeather(r.strOrNull("session_weather"));
   const sessions: RaceSession[] = [];
   for (const [key, label, dateKey, timeKey] of defs) {
-    if (r.isNull(dateKey)) continue;
-    const date = r.str(dateKey);
-    const time = r.strOrNull(timeKey) ?? "00:00";
-    sessions.push({ key, label, startsAtUtc: `${date}T${time}:00Z` });
+    const date = r.strOrNull(dateKey);
+    const time = r.strOrNull(timeKey);
+    const fromSessionTime = sessionTimes.get(key);
+    // 优先级：f1db 真实时刻 > session_time > <date>T00:00:00Z 占位（只有日期）
+    // f1db 从 2024 起才记录时刻，2018-2023 的练习/排位连日期都没有，只能靠
+    // session_time 补；≤2017 无 session_time，走占位、只显示日期
+    let startsAtUtc: string | null = null;
+    if (date !== null && time !== null) {
+      startsAtUtc = `${date}T${time}:00Z`;
+    } else if (fromSessionTime !== undefined) {
+      startsAtUtc = fromSessionTime;
+    } else if (date !== null) {
+      startsAtUtc = `${date}T00:00:00Z`;
+    }
+    if (startsAtUtc !== null) {
+      const weather = sessionWeather.get(key);
+      sessions.push(
+        weather
+          ? { key, label, startsAtUtc, weather }
+          : { key, label, startsAtUtc },
+      );
+    }
   }
   // defs 顺序是字段映射序；sprint 周末 Quali 在 Sprint 之后，按开始时间排回真实顺序
   return sessions.sort((a, b) => a.startsAtUtc.localeCompare(b.startsAtUtc));

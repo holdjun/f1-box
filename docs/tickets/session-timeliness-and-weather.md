@@ -60,11 +60,14 @@
 - 源：`fastf1.get_event_schedule(year, backend="fastf1", include_testing=False)`，每赛季一次调用，2018–2023 共 6 次，一次性跑完就结束：2024 起 f1db 自带时刻，这条管线不需要常驻增量，除非 f1db 哪年又停了时间字段。数据来自 FastF1 维护在 GitHub 上的赛程文件，不碰任何 F1 私有端点。
 - 对齐：`year` + `RoundNumber` 匹配 f1db `race`，并用日期双重校验；对不上的跳过并在 summary 里列出，绝不猜。`Session1..Session5` 的名称映射到现有 `session_key`（`practice-1`、`sprint-qualifying`、`qualifying`、`race` …），冲刺周末的场次顺序与常规周末不同，映射按名称而不是按序号。
 - 表 `session_time`，`PRIMARY KEY (race_id, session_key)`，另有 `starts_at_utc`、`source` 两列。不写 f1db 导入的表——data-sync 全量重导会冲掉。
-- 仓储：`buildSessions` 的取数顺序改成 f1db 时刻优先、`session_time` 回落，都没有才落到 `<date>T00:00:00Z` 兜底值。这个兜底值不是要清除的脏数据，它是"只有日期"这个状态的载体：`time.ts` 的 `hasPublishedStart`、`calendar-ics.ts` 的过滤、`WeekendProgress` 的 `slice(0, 10)` 全靠它区分两种形态，而 ≤2017 的 976 场永远走这条分支。所以 `PLACEHOLDER_START` 判据必须保留，这一步要改的只是让更多场次拿到真实时刻，不是取消占位形态。（"不拿占位值做时区换算"这件事 #30 已经做完。）
+- 仓储：`session_time` 的行既覆盖已有 session 的时刻，也新增 f1db 根本没有的 session——这一点不能读成“只补时刻”。`buildSessions` 现在靠 `if (r.isNull(dateKey)) continue` 逐列建表，而 f1db 对 2018–2023 连 `free_practice_1_date` 都没有，那些赛季目前只会产出 `race` 一个 session。只做覆盖的话，补完仍然只有一格赛程条、ICS 仍然只有一个事件，验收全挂。
+- 仓储：合并后的优先级是 f1db 时刻 > `session_time` > `<date>T00:00:00Z` 兜底值。这个兜底值不是要清除的脏数据，它是"只有日期"这个状态的载体：`time.ts` 的 `hasPublishedStart`、`calendar-ics.ts` 的过滤、`WeekendProgress` 的 `slice(0, 10)` 全靠它区分两种形态，而 ≤2017 的 976 场永远走这条分支。所以 `PLACEHOLDER_START` 判据必须保留，这一步要改的只是让更多场次拿到真实时刻，不是取消占位形态。（"不拿占位值做时区换算"这件事 #30 已经做完。）
+- 仓储：`buildSessions` 被 `mapRaceSummary`（`seasonCalendarSql`）与 `mapRaceMeta`（`raceMetaSql`）共用，两条 SQL 都要带上 `session_time`，不分岔。用子查询一次带回，不要每站再发一轮：`(SELECT json_group_array(json_object('key', session_key, 'value', starts_at_utc)) FROM session_time st WHERE st.race_id = ra.id) AS session_times`。不用 `json_group_object`——D1 的 JSON 函数表只列了 `json_group_array`，没列 `json_group_object`，后者在本机 sqlite3 能跑、在 D1 可能直接抛 no such function，是测试绿生产红的坑。空输入返回 `[]`，`buildSessions` 解析成空 Map、回落 f1db；子查询走 `session_time` 主键索引（`SEARCH st USING INDEX ... race_id=?`），无读放大。本地 dev 无 D1 走 fixture 时该列为空，自然回落 f1db。
 
 ### 验收
 
-- 2018–2023 的比赛页赛程条显示真实发车时刻，与维基百科对得上
+- 2018–2023 的比赛页赛程条从一格变成整个周末，发车时刻与维基百科对得上
+- 同期赛历页卡片的周末日期范围从单日变成真实区间（`12 MAY` → `10-12 MAY`），这是 `formatWeekendRange` 那句"老赛季无练习赛数据"注释对应的缺口被补上
 - 冲刺周末的场次名称与时刻一一对应，不串位
 - ≤2017 的比赛页仍只显示日期，无 00:00
 - 2024+ 的页面完全不变（f1db 优先）
@@ -182,7 +185,7 @@ FastF1 的 `fastf1.livetiming.client` 只负责把 SignalR 原始流录成文件
 
 本地开发机请求 `livetiming.formula1.com` 返回 403，FastF1 的镜像返回 404，所以天气与计时流在本地拿不到数据（赛程走 GitHub，不受影响）。这是地区性访问限制，不是路径问题——`api_path` 本身构造正确。
 
-第一步先在 GitHub Actions 上跑一个最小探针：取一场 2023 的排位赛，`session.load()` 后打印 `session.results` 的列与行数（重点 `Abbreviation`、`Position`）、`session.weather_data` 的行数与字段名。三件事要一起看清楚：
+第一步先在 GitHub Actions 上跑一个最小探针（已落成 `.github/workflows/f1-probe.yml`，`workflow_dispatch` 手动触发）：取一场 2023 的排位赛，`session.load()` 后打印 `session.results` 的列与行数（重点 `Abbreviation`、`Position`）、`session.weather_data` 的行数与字段名。三件事要一起看清楚：
 
 - `session.results` 为空或 `Abbreviation` 缺列：车手映射失去输入，第三条直接不做，不要换回车号硬凑——车号在赛季内不唯一
 - `weather_data` 字段与文档不符（特别是 `TrackTemp`）：天气行的第三项要改回降水口径
@@ -193,18 +196,9 @@ FastF1 的 `fastf1.livetiming.client` 只负责把 SignalR 原始流录成文件
 - 新表的 schema 没有归属。导入链路是逐表 `sqlite3 .dump` + `00-drop.sql` 反序清库，索引单独放 `scripts/f1db-d1-indexes.sql`，仓库没有 migration 机制。新增 `scripts/site-tables.sql`（幂等 `CREATE TABLE IF NOT EXISTS`），data-sync 导入后执行，preview 与生产同一份。
 - 不建到 `race` 的外键。`00-drop.sql` 会 DROP f1db 表，外键会挡住清库。用裸 `race_id` + 导入后清理孤儿行。
 - 查询计划护栏跑在 `apps/web/tests/fixtures/d1-schema.sql` 上，那份夹具由 dump 脚本产出、只含 f1db 表。新表的查询会因为表不存在直接让 `pnpm test` 变红，夹具生成流程要一并扩展，新索引进 `f1db-d1-indexes.sql`。
-- D1 读放大。比赛页会多出两张表的查询，都按 `race_id` 前缀命中主键索引，单页多两次小读；赛历页不查这两张表。
+- D1 读放大。两张表的消费面不同：`session_weather` 只在比赛页用（天气只渲染在赛程条里），赛历页不查；`session_time` 两条路径都要，因为赛历卡片的周末日期范围就是从 `sessions[0]` 算的，不带它赛历页自己就是错的。代价是一整页 23 站多读百来行（每站最多 5 行，走 `race_id` 主键前缀），与 `seasonCalendarSql` 现有的 join 同一量级——配额约束防的是无索引全表扫那种几十万行，不是这个。
 - 本地 dev 无 D1 走 fixture，三条管线的形态都要有对应 fixture，否则 e2e 打不到。
 - 三个脚本都要在 CI 里断言请求域名白名单，把"未申报域名"变成会红的测试，而不是靠人记住。
-
-## 许可与署名
-
-| 数据源 | 许可 | 影响 |
-| --- | --- | --- |
-| f1db | CC BY 4.0 | 署名即可，无传染性 |
-| Open-Meteo | CC BY 4.0，免费档限非商业 | 页脚署名；商业化需换付费档 |
-| FastF1 | 软件 MIT；数据来自 F1 官方计时流 | 只做赛后拉取，不做实时流，遵守禁止 data mining 的条款 |
-| Jolpica（经 FastF1 间接） | CC BY-NC-SA | 临时结果表短暂存其派生数据，f1db 接管时清空；不做实时流 |
 
 ## 交付顺序
 

@@ -18,12 +18,62 @@ const trackLabel = timeZone === null ? "UTC" : "Track";
 // 没有任何已公布发车时刻时（历史赛季的常态）ics 里一个事件都不会有，
 // calendar.ics 直接 404；入口随之不出，不给必然失败的按钮
 const hasCalendar = nodes.some((node) => hasPublishedStart(node.startsAtUtc));
+// 任一节点有天气时，每个节点都占一行天气位（无天气的节点渲染 &nbsp; 占位，
+// 空元素撑不起行高），避免同一页里格子参差；完全无天气时不占用布局高度。
 const raceIcs = `${Astro.url.origin}/api/calendar.ics?year=${year}&race=${slug}`;
 const seasonIcs = `${Astro.url.origin}/api/calendar.ics?year=${year}`;
 // 整体替换 scheme（含 https 的 s）：生产 https 下若只替换 http 前缀会产出非法的 webcals://
 const webcal = (href: string) => href.replace(/^https?:\/\//, "webcal://");
 const linkClass =
   "py-0.5 text-[0.82rem] text-ink-muted underline decoration-line underline-offset-4 transition-colors hover:text-accent";
+
+// 天气图标：按 weatherCode 粗分，回退到气温行。图标只是视觉提示，不承担语义。
+// trackside（F1 计时流）用 trackTempC 当第三项，forecast（Open-Meteo）用降水概率。
+function weatherIcon(code: string | null): string {
+  if (code === null) return "☁";
+  const c = code.toLowerCase();
+  if (c.includes("thunder")) return "⛈";
+  if (c.includes("rain") || c.includes("drizzle")) return "🌦";
+  if (c.includes("snow")) return "🌨";
+  if (c.includes("fog") || c.includes("mist")) return "🌫";
+  if (c.includes("clear") || c.includes("sun")) return "☀";
+  if (c.includes("cloud")) return "☁";
+  return "☁";
+}
+
+// 天气行第三项：trackTempC（trackside）> 降水概率（forecast）> 无。
+// 单位后缀不能省：24° 与 41° track 并列时，没后缀就是两个温度堆在一起。
+// 温度缺失时不渲染那一项，不能拿 0° 顶替——编造的数值比空白更糟；
+// 两项都没有就返回 null，这一格当作没有天气处理。
+function weatherDisplay(weather: NonNullable<WeekendNode["weather"]>): {
+  icon: string;
+  temp: string | null;
+  third: string | null;
+} | null {
+  const temp = weather.tempC === null ? null : `${Math.round(weather.tempC)}°`;
+  const third =
+    weather.trackTempC !== null
+      ? `${Math.round(weather.trackTempC)}° track`
+      : weather.prob !== null
+        ? `${Math.round(weather.prob)}% rain`
+        : null;
+  if (temp === null && third === null) return null;
+  return { icon: weatherIcon(weather.weatherCode), temp, third };
+}
+
+// 预先算好：模板里每个节点只取一次，hasWeather 也按真实可渲染结果判定，
+// 而不是只看有没有 weather 字段。
+const rows = nodes.map((node) => ({
+  node,
+  weather: node.weather ? weatherDisplay(node.weather) : null,
+  source: node.weather?.source ?? null,
+}));
+const hasWeather = rows.some((row) => row.weather !== null);
+// 署名只在真的渲染了 Open-Meteo 数据时出现（许可要求），
+// 有 forecast 行但渲染不出任何值时不算使用。
+const hasForecast = rows.some(
+  (row) => row.weather !== null && row.source === "forecast",
+);
 ---
 
 <section class="weekend-progress shell mt-12">
@@ -47,7 +97,7 @@ const linkClass =
     )}
   </div>
   <ol class="grid list-none grid-cols-1 p-0 sm:grid-cols-2 lg:grid-cols-5">
-    {nodes.map((node) => (
+    {rows.map(({ node, weather }) => (
       <li class="weekend-progress__node flex items-center justify-between gap-4 border-b border-line px-1 py-4 lg:block lg:border-r lg:px-6 lg:py-7 lg:text-center lg:first:pl-0 lg:last:border-r-0 lg:last:pr-0">
         <h3 class="flex items-center gap-2 text-[0.8rem] font-semibold tracking-[0.08em] uppercase text-ink-muted lg:justify-center">
           {node.key === "race" || node.key === "sprint" ? (
@@ -73,9 +123,30 @@ const linkClass =
             </p>
           )}
         </div>
+        {hasWeather ? (
+          <p class="mt-1 text-[0.8rem] tabular-nums text-ink-muted">
+            {weather ? (
+              <>
+                <span aria-hidden="true">{weather.icon}</span>
+                {weather.temp ? <span class="ml-1.5">{weather.temp}</span> : null}
+                {weather.third ? (
+                  <span class="ml-1.5 text-ink-strong">{weather.third}</span>
+                ) : null}
+              </>
+            ) : (
+              <span aria-hidden="true">&nbsp;</span>
+            )}
+          </p>
+        ) : null}
       </li>
     ))}
   </ol>
+
+  {hasForecast ? (
+    <p class="mt-2 text-[0.7rem] text-ink-muted">
+      Forecast data by <a class="underline decoration-line underline-offset-2 hover:text-accent" href="https://open-meteo.com/" rel="noreferrer nofollow" target="_blank">Open-Meteo</a>
+    </p>
+  ) : null}
 
   {hasCalendar && (
   <dialog class="calendar-dialog" data-calendar-dialog aria-labelledby="weekend-calendar-title">
