@@ -10,7 +10,10 @@ test("@desktop root redirects to active season racing page", async ({
   await page.waitForURL(/\/racing\/2026$/);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-  expect(browserRequests.some((url) => /jolpi|ergast/i.test(url))).toBe(false);
+  // 访客请求不得直连任何上游数据源（AGENTS.md）：上游一律预取入库，
+  // 页面只读自己的源。直接断定“没有站外请求”，比枚举具体域名更不易过期
+  const origin = new URL(page.url()).origin;
+  expect(browserRequests.filter((url) => !url.startsWith(origin))).toEqual([]);
 });
 
 test("@desktop racing calendar links every round to its results page", async ({
