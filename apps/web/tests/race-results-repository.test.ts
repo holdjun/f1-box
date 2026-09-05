@@ -910,3 +910,199 @@ describe("formatSeconds", () => {
     expect(formatSeconds(null)).toBeNull();
   });
 });
+
+describe("buildSessions 合并 f1db 与 session_time", () => {
+  // 2024+：f1db 自带完整时刻，session_time 即使有值也不该覆盖 f1db
+  it("f1db 有真实时刻时优先生效", async () => {
+    const metaWithSt = {
+      ...metaRow,
+      session_times: JSON.stringify([
+        { key: "practice-1", value: "2026-03-06T99:00:00Z" },
+      ]),
+    };
+    const db = fakeDbBySql(tabFragments({ circuit_full_name: [metaWithSt] }));
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2026,
+      "australia",
+    );
+    // practice-1 仍为 f1db 时刻 01:30，不被 session_time 的假值覆盖
+    expect(page?.meta.sessions[0]).toEqual({
+      key: "practice-1",
+      label: "Practice 1",
+      startsAtUtc: "2026-03-06T01:30:00Z",
+    });
+  });
+
+  // 2018-2023：f1db 连练习/排位日期都没有，只能靠 session_time 补出整个周末
+  it("f1db 无练习/排位日期时由 session_time 填充，并新增 race 的真实时刻", async () => {
+    const meta2018 = {
+      ...metaRow,
+      date: "2023-03-05",
+      time: null,
+      free_practice_1_date: null,
+      free_practice_1_time: null,
+      free_practice_2_date: null,
+      free_practice_2_time: null,
+      free_practice_3_date: null,
+      free_practice_3_time: null,
+      qualifying_date: null,
+      qualifying_time: null,
+      sprint_qualifying_date: null,
+      sprint_qualifying_time: null,
+      sprint_race_date: null,
+      sprint_race_time: null,
+      session_times: JSON.stringify([
+        { key: "practice-1", value: "2023-03-03T01:30:00Z" },
+        { key: "practice-2", value: "2023-03-03T05:00:00Z" },
+        { key: "practice-3", value: "2023-03-04T01:30:00Z" },
+        { key: "qualifying", value: "2023-03-04T05:00:00Z" },
+        { key: "race", value: "2023-03-05T04:00:00Z" },
+      ]),
+    };
+    const db = fakeDbBySql(tabFragments({ circuit_full_name: [meta2018] }));
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2023,
+      "bahrain",
+    );
+    expect(page?.meta.sessions).toEqual([
+      {
+        key: "practice-1",
+        label: "Practice 1",
+        startsAtUtc: "2023-03-03T01:30:00Z",
+      },
+      {
+        key: "practice-2",
+        label: "Practice 2",
+        startsAtUtc: "2023-03-03T05:00:00Z",
+      },
+      {
+        key: "practice-3",
+        label: "Practice 3",
+        startsAtUtc: "2023-03-04T01:30:00Z",
+      },
+      {
+        key: "qualifying",
+        label: "Qualifying",
+        startsAtUtc: "2023-03-04T05:00:00Z",
+      },
+      { key: "race", label: "Race", startsAtUtc: "2023-03-05T04:00:00Z" },
+    ]);
+  });
+
+  // ≤2017：f1db 只有 race 有日期、无时刻，session_time 为空，落回占位（只显示日期）
+  it("f1db 与 session_time 都没有时落回占位，仅 race 一格", async () => {
+    const meta2017 = {
+      ...metaRow,
+      date: "2017-11-26",
+      time: null,
+      free_practice_1_date: null,
+      free_practice_1_time: null,
+      free_practice_2_date: null,
+      free_practice_2_time: null,
+      free_practice_3_date: null,
+      free_practice_3_time: null,
+      qualifying_date: null,
+      qualifying_time: null,
+      sprint_qualifying_date: null,
+      sprint_qualifying_time: null,
+      sprint_race_date: null,
+      sprint_race_time: null,
+      // 用空数组模拟该场无 session_time 行
+      session_times: JSON.stringify([]),
+    };
+    const db = fakeDbBySql(tabFragments({ circuit_full_name: [meta2017] }));
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2017,
+      "abu-dhabi",
+    );
+    expect(page?.meta.sessions).toEqual([
+      { key: "race", label: "Race", startsAtUtc: "2017-11-26T00:00:00Z" },
+    ]);
+  });
+
+  it("session_times 列缺失时回落到 f1db", async () => {
+    // 缺列（metaRowNoSessions 不携带 session_times）：夹具/本地 dev 的真实形态
+    const dbMissing = fakeDbBySql(
+      tabFragments({ circuit_full_name: [metaRowNoSessions] }),
+    );
+    const page = await createRaceResultsRepository(dbMissing).getRacePage(
+      2026,
+      "australia",
+    );
+    expect(page?.meta.sessions).toEqual([
+      { key: "race", label: "Race", startsAtUtc: "2026-03-08T04:00:00Z" },
+    ]);
+  });
+
+  it("session_weather 只挂到匹配的 session，其余不携带 weather 字段", async () => {
+    const metaWithWeather = {
+      ...metaRow,
+      session_weather: JSON.stringify([
+        {
+          key: "race",
+          tempC: 24.0,
+          trackTempC: 41.0,
+          prob: null,
+          weatherCode: null,
+          source: "trackside",
+        },
+        {
+          key: "qualifying",
+          tempC: 23.0,
+          trackTempC: 40.0,
+          prob: null,
+          weatherCode: null,
+          source: "trackside",
+        },
+      ]),
+    };
+    const db = fakeDbBySql(
+      tabFragments({ circuit_full_name: [metaWithWeather] }),
+    );
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2026,
+      "australia",
+    );
+    const race = page?.meta.sessions.find((s) => s.key === "race");
+    const quali = page?.meta.sessions.find((s) => s.key === "qualifying");
+    const p1 = page?.meta.sessions.find((s) => s.key === "practice-1");
+    expect(race?.weather).toEqual({
+      tempC: 24.0,
+      trackTempC: 41.0,
+      prob: null,
+      weatherCode: null,
+      source: "trackside",
+    });
+    expect(quali?.weather?.tempC).toBe(23.0);
+    expect(p1?.weather).toBeUndefined();
+  });
+
+  it("forecast 天气只带 temp/prob/weatherCode，trackTempC 为 null", async () => {
+    const metaForecast = {
+      ...metaRow,
+      session_weather: JSON.stringify([
+        {
+          key: "race",
+          tempC: 24.0,
+          trackTempC: null,
+          prob: 40,
+          weatherCode: "rain",
+          source: "forecast",
+        },
+      ]),
+    };
+    const db = fakeDbBySql(tabFragments({ circuit_full_name: [metaForecast] }));
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2026,
+      "australia",
+    );
+    const race = page?.meta.sessions.find((s) => s.key === "race");
+    expect(race?.weather).toEqual({
+      tempC: 24.0,
+      trackTempC: null,
+      prob: 40,
+      weatherCode: "rain",
+      source: "forecast",
+    });
+  });
+});

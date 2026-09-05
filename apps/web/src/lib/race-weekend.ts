@@ -19,6 +19,7 @@ export interface WeekendNode {
   label: string;
   startsAtUtc: string;
   tab: RaceTabKey | null;
+  weather?: NonNullable<RaceSession["weather"]>;
 }
 
 export function buildWeekendNodes(
@@ -33,6 +34,7 @@ export function buildWeekendNodes(
       label: session.label,
       startsAtUtc: session.startsAtUtc,
       tab: tab !== null && available.has(tab) ? tab : null,
+      weather: session.weather,
     };
   });
 }

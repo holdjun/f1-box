@@ -95,6 +95,42 @@ test.describe("race detail", () => {
     );
   });
 
+  // 天气三来源三形态：trackside 给赛道温度、forecast 给降水概率、缺温度时留空。
+  // 缺温度那格最关键——曾经会渲染成 0°，跟合成的 00:00 是同一类编造。
+  test("@desktop weekend weather shows per-source values and never fakes a temperature", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races/australia/race-result");
+    const progress = page.locator(".weekend-progress");
+    const weather = progress.locator("[data-session-weather]");
+    // 有天气时每格都占位，格子高度才齐
+    await expect(weather).toHaveCount(5);
+    // trackside：气温 + 赛道温度，后缀不能省
+    await expect(weather.nth(0)).toContainText("18°");
+    await expect(weather.nth(0)).toContainText("31° track");
+    // forecast：气温 + 降水概率
+    await expect(weather.nth(4)).toContainText("24°");
+    await expect(weather.nth(4)).toContainText("35% rain");
+    // 排位赛只有赛道温度、没有气温：只显示 26° track，不得出现 0°
+    await expect(weather.nth(3)).toContainText("26° track");
+    await expect(progress).not.toContainText("0°");
+    // 用到 Open-Meteo 的预报才出署名（许可要求）
+    await expect(
+      progress.getByRole("link", { name: "Open-Meteo" }),
+    ).toBeVisible();
+  });
+
+  test("@desktop weekend without weather renders no weather row", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races/monaco/race-result");
+    const progress = page.locator(".weekend-progress");
+    await expect(progress.locator("[data-session-weather]")).toHaveCount(0);
+    await expect(
+      progress.getByRole("link", { name: "Open-Meteo" }),
+    ).toHaveCount(0);
+  });
+
   test("@desktop bare slug lands on the latest session with results", async ({
     page,
   }) => {

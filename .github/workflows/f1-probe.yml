@@ -1,0 +1,136 @@
+name: f1-probe
+
+# 动手前必须先验证的探针（工单"动手前必须先验证的一件事"）：
+# 本地访问 livetiming.formula1.com 返回 403，天气与计时流只在 GitHub Actions
+# 上能拿到。本工作流取一场 2023 比赛，走管线真正会用的三个 api.* 函数，
+# 打印字段形态，并在 socket 层记录全部出站主机、断言零 Jolpica/Ergast 触达。
+# 手动触发；结果看 Actions 的日志摘要。不部署、不写代码，只打印确诊。
+#
+# 不用 Session.load()：它无条件走 _load_drivers_results 拉 ergast(jolpica)，
+# 是工单明令禁止的调用。探针必须走与管线一致的路径，否则跑通了也不能用。
+
+on:
+  workflow_dispatch:
+  # 改了探针本身就在 PR 上跑一次：探针的价值在于能跑通，而它又只能在 runner 上
+  # 验证（本地 livetiming 403）。限定 paths，不给其他 PR 增加负担。
+  pull_request:
+    paths:
+      - .github/workflows/f1-probe.yml
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      # 仓库的 Actions 白名单只放行 actions/* 与 pnpm/action-setup，
+      # 第三方 action（如 astral-sh/setup-uv）会被策略拒掉、直接 startup_failure。
+      # 从 PyPI 装 uv，不为一个探针扩大白名单，也不用 curl | sh。
+      - name: Install uv
+        run: |
+          python3 -m pip install --quiet --user uv
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # 取 2023 R1（巴林）的排位赛，打印四件事：
+      #   1) weather_data 的行数与字段（管线 2 trackside 依赖 AirTemp/TrackTemp）
+      #   2) driver_info 的字段与 Tla 覆盖（管线 3 车手映射的唯一输入）
+      #   3) timing_data 的返回形态与车号（管线 3 的圈速来源）
+      #   4) 全过程触达的主机清单，出现 jolpica/ergast 即失败
+      - name: Probe FastF1 livetiming data
+        run: |
+          cat > /tmp/probe-fastf1.py <<'PY'
+          # /// script
+          # requires-python = ">=3.12"
+          # dependencies = ["fastf1>=3.5"]
+          # ///
+          import sys
+
+          # 在 requests 层记录：socket.getaddrinfo 那层被连接池和缓存绕过，
+          # 上一轮探针记录到 0 个主机却仍打印"未触达"，是个会骗人的结论。
+          import requests
+          HOSTS: set[str] = set()
+          _real_send = requests.adapters.HTTPAdapter.send
+
+          def _recording_send(self, request, *args, **kwargs):
+              HOSTS.add(requests.utils.urlparse(request.url).netloc.lower())
+              return _real_send(self, request, *args, **kwargs)
+
+          requests.adapters.HTTPAdapter.send = _recording_send
+
+          import fastf1
+          import fastf1.api as api
+
+          fastf1.set_log_level("WARNING")
+
+          # livetiming 的 static 归档到底覆盖哪些赛季，是管线 2/3 能不能做的前提。
+          # 逐赛季取一场排位赛，只问一件事：weather_data 拿不拿得到。
+          # 先找出本赛季最后一场已结束的比赛：如果连"刚结束"的场次都没有 livetiming
+          # 数据，那就不是归档过期，而是这条路整个不通。
+          import datetime
+          now = datetime.datetime.now(datetime.timezone.utc)
+          sched = fastf1.get_event_schedule(2026, backend="fastf1", include_testing=False)
+          past = [r for _, r in sched.iterrows()
+                  if r["EventDate"] is not None and str(r["EventDate"])[:10] < now.strftime("%Y-%m-%d")]
+          latest = past[-1] if past else None
+          PROBES = [(2023, 1), (2026, 1)]
+          if latest is not None:
+              PROBES.append((2026, int(latest["RoundNumber"])))
+              print("latest finished 2026 round:", int(latest["RoundNumber"]),
+                    str(latest["EventName"]), str(latest["EventDate"])[:10])
+
+          for year, rnd in PROBES:
+              print(f"=== {year} R{rnd} Qualifying ===")
+              try:
+                  s = fastf1.get_session(year, rnd, "Qualifying", backend="fastf1")
+                  print("  api_path:", s.api_path)
+              except Exception as exc:
+                  print(f"  get_session FAILED: {type(exc).__name__}: {exc}")
+                  continue
+              try:
+                  wd = api.weather_data(s.api_path)
+                  print(f"  weather_data OK rows={len(wd)}")
+              except Exception as exc:
+                  print(f"  weather_data FAILED: {type(exc).__name__}")
+
+          # livetiming 不通时唯一还能给历史天气的来源：Open-Meteo archive（ERA5）。
+          # 没有赛道温度，也没有降水概率（那是集合预报产物），但气温与降水量是真的。
+          print("=== Open-Meteo ===")
+          for label, url, params in (
+              ("archive 2023-03-04 Bahrain",
+               "https://archive-api.open-meteo.com/v1/archive",
+               {"latitude": 26.032, "longitude": 50.511, "start_date": "2023-03-04",
+                "end_date": "2023-03-04", "hourly": "temperature_2m,precipitation"}),
+              ("forecast Melbourne",
+               "https://api.open-meteo.com/v1/forecast",
+               {"latitude": -37.8497, "longitude": 144.968,
+                "hourly": "temperature_2m,precipitation_probability,weather_code",
+                "forecast_days": 3}),
+          ):
+              try:
+                  r = requests.get(url, params=params, timeout=20)
+                  j = r.json()
+                  h = j.get("hourly", {})
+                  print(f"  {label}: HTTP {r.status_code} keys={list(h.keys())}",
+                        "samples=", {k: v[:2] for k, v in h.items() if isinstance(v, list)})
+              except Exception as exc:
+                  print(f"  {label} FAILED: {type(exc).__name__}: {exc}")
+
+          print("=== hosts touched (requests layer) ===")
+          for h in sorted(HOSTS):
+              print(" ", h)
+          if not HOSTS:
+              print("  (none recorded — 记录器没生效，别把空清单当成未触达)")
+          banned = [h for h in HOSTS if "jolpi" in h or "ergast" in h]
+          print("banned hosts:", banned if banned else "none")
+          PY
+          uv run --quiet /tmp/probe-fastf1.py
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "管线 2 trackside 依赖 weather_data 的 AirTemp/TrackTemp；"
+          echo "管线 3 依赖 driver_info 的 Tla（车手映射）与 timing_data 的圈速。"
+          echo "任一项 FAILED 或触达 jolpica/ergast，按工单分支重新设计再动手。"
