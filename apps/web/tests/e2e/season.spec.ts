@@ -55,20 +55,24 @@ test("@desktop racing calendar links every round to its results page", async ({
   await expect(page.locator(".year-selector")).toHaveCount(0);
 });
 
-test("@desktop Results hover does not issue a rejected speculative prefetch", async ({
+test("@desktop Results hover uses preload instead of rejected prefetch", async ({
   page,
 }) => {
   await page.goto("/racing/2026");
   const target = "/results/2026/races";
-  const requests: string[] = [];
+  const requests: { purpose: string; type: string }[] = [];
   page.on("request", (request) => {
-    if (new URL(request.url()).pathname === target)
-      requests.push(request.url());
+    if (new URL(request.url()).pathname === target) {
+      requests.push({
+        purpose: request.headers()["sec-purpose"] ?? "",
+        type: request.resourceType(),
+      });
+    }
   });
 
   await page.locator(`header a[href="${target}"]`).hover();
-  await page.waitForTimeout(300);
-  expect(requests).toEqual([]);
+  await expect.poll(() => requests.length).toBe(1);
+  expect(requests).toEqual([{ purpose: "", type: "other" }]);
 });
 
 test("@desktop Results navigation shows feedback while the document loads", async ({

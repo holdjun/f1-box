@@ -90,6 +90,39 @@ function enhanceCalendarDialog(): void {
   });
 }
 
+const preloadedNavigation = new Set<string>();
+
+function preloadNavigationTarget(event: Event): void {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const link = target.closest<HTMLAnchorElement>("a[data-navigation-preload]");
+  if (!link || link.origin !== window.location.origin) return;
+  if (link.pathname === window.location.pathname) return;
+  if (preloadedNavigation.has(link.href)) return;
+
+  preloadedNavigation.add(link.href);
+  const preload = document.createElement("link");
+  preload.rel = "preload";
+  preload.as = "fetch";
+  preload.href = link.href;
+  preload.addEventListener(
+    "error",
+    () => preloadedNavigation.delete(link.href),
+    { once: true },
+  );
+  document.head.insertAdjacentElement("beforeend", preload);
+}
+
+function enhanceNavigationPreload(): void {
+  // Astro 的 rel=prefetch 会被 Cloudflare Worker 路由拒绝；普通 fetch preload
+  // 不带 sec-purpose=prefetch，能提前暖边缘缓存与连接，ClientRouter 点击仍走正常请求。
+  document.addEventListener("pointerover", preloadNavigationTarget);
+  document.addEventListener("focusin", preloadNavigationTarget);
+  document.addEventListener("touchstart", preloadNavigationTarget, {
+    passive: true,
+  });
+}
+
 let enhanced = false;
 
 function applyLocalTimes(): void {
@@ -112,6 +145,7 @@ function enhancePage(): void {
     enhanced = true;
     enhanceRaceTabs();
     enhanceCalendarCopy();
+    enhanceNavigationPreload();
   }
   // 弹窗是节点级接线，ClientRouter 换页后 DOM 全新，每次加载都要重跑
   enhanceCalendarDialog();

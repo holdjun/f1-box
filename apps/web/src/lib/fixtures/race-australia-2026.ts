@@ -1,4 +1,4 @@
-{
+export default {
   "meta": {
     "year": 2026,
     "round": 1,
@@ -2208,4 +2208,4 @@
     "sprintRace": [],
     "sprintQualifying": []
   }
-}
+};

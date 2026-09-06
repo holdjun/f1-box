@@ -825,7 +825,7 @@ export function createRaceResultsRepository(
       if (!db) {
         if (year !== 2026) return null;
         const { default: fixture } = await import(
-          "./fixtures/race-australia-2026.json"
+          "./fixtures/race-australia-2026.js"
         );
         const page = fixture as RacePage;
         if (slug === "australia") return page;
