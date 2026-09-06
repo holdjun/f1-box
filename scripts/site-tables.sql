@@ -20,21 +20,17 @@ CREATE TABLE IF NOT EXISTS session_time (
   PRIMARY KEY (year, round, session_key)
 );
 
--- 赛道天气：2018 起由 sync-weather.py 回填。source ∈ trackside / forecast，
--- 能填的列不同，读的时候按 source 判空，别指望列齐。
--- weather_code 存语义词（clear/cloud/fog/rain/snow/thunder）而不是上游原值：
--- 两个来源（Open-Meteo 的 WMO 数字、trackside 的 Rainfall 布尔）必须落在同一套词上，
--- 前端才能用一套关键词分图标。
+-- 赛道实测天气：仅写 FastF1 能提供的字段。AirTemp / TrackTemp / Rainfall
+-- 任一缺失都保持 NULL，不从其他来源补值；weather_code 目前只存 Rainfall=true
+-- 对应的 rain，不能从 Rainfall=false 推断晴天或云量。
 CREATE TABLE IF NOT EXISTS session_weather (
   year INTEGER NOT NULL,
   round INTEGER NOT NULL,
   session_key TEXT NOT NULL,
   temp_c REAL,
   track_temp_c REAL,
-  precipitation_probability REAL,
   weather_code TEXT,
-  -- 取值在建表层约束，仓储层就不用再归一化一遍
-  source TEXT NOT NULL CHECK (source IN ('trackside', 'forecast')),
+  source TEXT NOT NULL CHECK (source = 'fastf1'),
   fetched_at TEXT NOT NULL,
   PRIMARY KEY (year, round, session_key)
 );

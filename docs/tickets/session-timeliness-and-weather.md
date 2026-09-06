@@ -1,6 +1,6 @@
 # 工单：赛程时刻补全、天气与赛后时效
 
-三条数据管线，形态相同——GitHub Action 定时脚本写入独立表，页面读到才渲染。主力数据源是 FastF1，天气缺口由 Open-Meteo 补。可分三次交付，顺序不可颠倒：天气要按 session 时刻取值，所以时刻补全排在最前。
+三条数据管线，形态相同——GitHub Action 定时脚本写入独立表，页面读到才渲染。数据源统一为 FastF1；FastF1 缺失的数据保持空白，不使用第三方天气源补值。可分三次交付，顺序不可颠倒：天气按 session 取值，所以时刻补全排在最前。
 
 不使用 Jolpica，指的是不在自己代码里直接请求它。经 FastF1 间接调用是可接受的——`Session.load()` 内部会自己拉 Jolpica 的结果数据，我们用 FastF1 的公开 API，不直接写 `api.jolpi.ca` 的 URL，Jolpica 的请求由 FastF1 管理。
 
@@ -29,10 +29,10 @@
 | 能力 | 调用 | 实际请求的域名 | 覆盖 |
 | --- | --- | --- | --- |
 | 赛程时刻 | `get_event_schedule(year, backend="fastf1")` | 只有 `raw.githubusercontent.com` | 2018 至今 |
-| 赛道天气 | `api.weather_data(api_path)` | 只有 `livetiming.formula1.com` | 2018 至今 |
+| 赛道天气 | `api.weather_data(api_path)` | 只有 `livetiming.formula1.com` | 理论覆盖 2018 至今；2026-09-05 Actions 探针的代表样本均返回 `SessionNotAvailableError` |
 | 成绩与名次 | `Session.load()` → `session.results` | `livetiming.formula1.com` + `api.jolpi.ca` | 2018 至今 |
 
-前两条干净可用，只打 F1 官方端点。第三条会引入 `api.jolpi.ca`，但这是 FastF1 内部自己处理的：`Session.load()` 结果里的 `session.results` 自带 `Abbreviation`（三字母码）、`DriverNumber`、`Position`（名次）、`ClassifiedPosition`，全部来自 Ergast/Jolpica。Jolpica 的请求不落在我们代码里，只经 FastF1，可接受。
+赛程时刻路径已确认可用，只打 GitHub 上的 FastF1 调度文件。天气路径仅允许 FastF1 官方计时端点；当前探针未取到样本，因此同步脚本把天气视为可选数据：成功才写，失败留空并在后续运行重试。第三条会引入 `api.jolpi.ca`，但这是 FastF1 内部自己处理的：`Session.load()` 结果里的 `session.results` 自带 `Abbreviation`（三字母码）、`DriverNumber`、`Position`（名次）、`ClassifiedPosition`，全部来自 Ergast/Jolpica。Jolpica 的请求不落在我们代码里，只经 FastF1，可接受。
 
 顺带确认了边界安全：`get_event_schedule(2017, backend="fastf1")` 直接抛 `Failed to load any schedule data`，不会偷偷改用 ergast。所有调用都必须显式写 `backend="fastf1"`，不能依赖默认值。
 
@@ -78,62 +78,33 @@
 
 ## 二、天气
 
-### 覆盖范围：只做 2018 起
+### 覆盖范围与来源
 
-≤2017 不做天气。老比赛（1950–2017）散落在近 976 场，fastf1 对它们没有计时流数据（`api.weather_data` 只覆盖 2018 起），Open-Meteo 的 archive 是按天回填的粗粒度，为一件几十年前的比赛显示当日气温价值很低，不引入。这条管线只管 2018+，含当前赛季的未来预报。
+天气只使用 FastF1 `api.weather_data`。它可能提供 `AirTemp`、`TrackTemp` 与 `Rainfall`；字段或整个 session 取不到时保持空白，不使用其他天气源补值，也不展示未来预报。
 
-### 两个来源，按场次分工
-
-| 场次 | 来源 | 拿到什么 |
-| --- | --- | --- |
-| 2018 至今、已结束 | FastF1 `api.weather_data` | 气温、赛道温度、湿度、气压、是否降雨、风速 |
-| 未来 7 天内 | Open-Meteo `/v1/forecast` 按小时 | 气温、天气代码、降水概率 |
-| 更远的未来 | 不取 | 预报本来不准，留空好过给假数字 |
-
-赛道温度只有 F1 计时流有，ERA5 给不了，是这一行最有 F1 味道的字段，2018 起的场次都该显示。
-
-一个必须知道的约束：`precipitation_probability` 是集合预报模型的产物，只有 Open-Meteo `forecast` 有；F1 计时流的 `api.weather_data` 只有"是否降雨"布尔。两条路给的是不同的东西，不能共用一个百分号。`api.weather_data` 是比赛实测，不受 ERA5 五天延迟的影响，直接可用。
+FastF1 文档标称计时流覆盖 2018 起，但 2026-09-05 GitHub Actions 探针对 2023 R1、2026 R1 和最近已结束场次均返回 `SessionNotAvailableError`。因此天气是可选增强，不能作为页面可用性的前提，也不能承诺所有 2018+ 场次都有数据。
 
 ### 表与脚本
 
 - 脚本 `scripts/sync-weather.py`，PEP 723 + `uv run`
-- 表 `session_weather`，`PRIMARY KEY (year, round, session_key)`，另有 `temp_c`、`track_temp_c`、`precipitation_probability`、`weather_code`、`source`、`fetched_at`。`weather_code` 存语义词（clear/cloud/fog/rain/snow/thunder）而不是上游原值：Open-Meteo 给 WMO 数字、trackside 给 Rainfall 布尔，两者必须落在同一套词上，前端才能用一套关键词分图标。两种来源能填的列不同，读的时候按 `source` 判空，别指望列齐：
-
-  | source | 有 | 没有 |
-  | --- | --- | --- |
-  | `trackside` | 气温、赛道温度、是否降雨（布尔） | 降水量、降水概率、`weather_code` |
-  | `forecast` | 气温、降水概率、`weather_code` | 赛道温度、降水实测值 |
-
-  优先级 `trackside` > `forecast`。降雨在两种来源里是两个不同的东西（布尔 / 百分比），不能往同一个列里塞。
-- 回填：2018 至今已结束的场次——包括 2024+ 那 70 场——走 FastF1，按 session 取，用一次 `api.weather_data` 的中位数代表整场。未来 7 天内的当前赛季场次走 Open-Meteo forecast。
-- 增量：每天一到两次，只处理未来 7 天内的场次；场次结束后由 FastF1 抓实测覆盖预报值，新赛季同理——`forecast` 只是一个会被替换的中间态
-- 页面读不到就不渲染那一行
+- 表 `session_weather` 使用 `(year, round, session_key)` 主键，存 `temp_c`、`track_temp_c`、`weather_code`、固定来源 `fastf1` 与抓取时间
+- `Rainfall=true` 只映射为 `weather_code='rain'`；`false` 不能推断晴天或云量
+- 默认同步 2018 起全部赛季；日常 workflow 只扫当前赛季，并用 `--have` 跳过已成功写入的 session。历史回填需手动勾选
+- session 尚未开始、FastF1 不支持、端点无数据或单次请求失败时不写行；后续运行继续重试
+- 页面读不到就不渲染天气行
 
 ### 展示
 
-赛程条每格现在是两行（My / Track）或"只有日期"的单行，天气加在它们下面。两种形态各有天气行：
-
-| 场次形态 | 时间区 | 天气行 |
-| --- | --- | --- |
-| 2018+ 已结束（`trackside`） | `MY Sat 22:00` / `TRACK Sat 15:00` | `☁ 24° · 41° track` |
-| 未来一周内（`forecast`） | `MY Sun 21:00` / `TRACK Sun 14:00` | `☁ 24° · 40% rain` |
-
-≤2017 的场次只有日期单行，没有天气行。
-
-- 天气行固定三段：图标、气温、第三项。第三项按来源取它能给的那个：`trackside` 给赛道温度，`forecast` 给降水概率
-- 单位后缀不能省：`41° track` 与 `24°` 并列时，没后缀就是两个温度堆在一起
-- 单位固定摄氏，不做切换开关
-- 天气行是新增的第三行，赛程条格子高度会变；有无天气都要占位，避免同一页里格子参差
+赛程条只展示 FastF1 实际拿到的字段：气温、赛道温度、雨况可以独立缺失。无雨况信息时使用温度图标，不把未知状态画成晴或多云；`Rainfall=true` 时显示 `rain`。同一周末只要有一格天气，其余格保留空占位以维持布局。
 
 ### 验收
 
-- 未来一周内的场次显示预报与降水概率，更远的场次不显示天气行
-- 2018 起的已结束场次显示赛道温度，数据与 F1 官方转播口径一致
-- ≤2017 的场次不显示天气行
-- 重复运行脚本不下调已有的 `trackside` 行到 `forecast`
-- 2018 起的场次回填完成，只有日期的场次不报错
-- 页脚出现 Open-Meteo 署名
-- 天气行缺失时赛程条布局不跳动
+- 不直接或间接请求 Open-Meteo
+- FastF1 有数据的 session 展示可用字段，缺失字段不伪造为 0
+- FastF1 无数据的 session 和 ≤2017 场次不显示天气内容
+- `Sprint Shootout` 与 `Sprint Qualifying` 都映射到 `sprint-qualifying`
+- 探针在零成功样本、记录器失效或触达禁用主机时明确失败
+- 天气缺失不影响比赛页面可用性
 
 ## 三、赛后临时结果（FastF1 计时流）
 
@@ -181,30 +152,26 @@ FastF1 的 `fastf1.livetiming.client` 只负责把 SignalR 原始流录成文件
 - 仓储回落逻辑有单元测试，覆盖"只有临时数据""两者都有""都没有"三种情况
 - 脚本请求的域名落在白名单内；Jolpica 只经 FastF1 触达，未直接请求
 
-## 动手前必须先验证的一件事
+## FastF1 可用性探针
 
-本地开发机请求 `livetiming.formula1.com` 返回 403，FastF1 的镜像返回 404，所以天气与计时流在本地拿不到数据（赛程走 GitHub，不受影响）。这是地区性访问限制，不是路径问题——`api_path` 本身构造正确。
+本地开发机请求 `livetiming.formula1.com` 返回 403，赛程调度走 GitHub 不受影响。`.github/workflows/f1-probe.yml` 保留手动 `workflow_dispatch`：直接调用与天气同步脚本相同的 `api.weather_data`，打印代表性 session 的行数和字段，同时记录请求主机。
 
-第一步先在 GitHub Actions 上跑一个最小探针（已落成 `.github/workflows/f1-probe.yml`，`workflow_dispatch` 手动触发）：取一场 2023 的排位赛，`session.load()` 后打印 `session.results` 的列与行数（重点 `Abbreviation`、`Position`）、`session.weather_data` 的行数与字段名。三件事要一起看清楚：
-
-- `session.results` 为空或 `Abbreviation` 缺列：车手映射失去输入，第三条直接不做，不要换回车号硬凑——车号在赛季内不唯一
-- `weather_data` 字段与文档不符（特别是 `TrackTemp`）：天气行的第三项要改回降水口径
-- 数据都取不到：第二条 2018+ 部分和第三条整条都要重新设计
+探针不参与每个 PR 的必过检查，因为 FastF1 数据不可用不应阻断页面与其他管线；但手动运行时必须如实反映能力：零成功样本、请求记录器失效或触达 Jolpica/Ergast 都以非零状态结束。临时结果管线实施前需要另补 `session.results` 字段探针，不能拿天气探针替代。
 
 ## 三条管线共用的工程前提
 
-- 新表的 schema 没有归属。导入链路是逐表 `sqlite3 .dump` + `00-drop.sql` 反序清库，索引单独放 `scripts/f1db-d1-indexes.sql`，仓库没有 migration 机制。新增 `scripts/site-tables.sql`（幂等 `CREATE TABLE IF NOT EXISTS`），data-sync 导入后执行，preview 与生产同一份。
+- 新表的 schema 不属于 f1db 上游。导入链路是逐表 `sqlite3 .dump` + `00-drop.sql` 反序清库，索引单独放 `scripts/f1db-d1-indexes.sql`。`scripts/site-tables.sql` 使用幂等 `CREATE TABLE IF NOT EXISTS`，preview/production 部署 Worker 前和 data-sync 全量导入后都会执行。
 - 不建到 `race` 的外键。`00-drop.sql` 会 DROP f1db 表，外键会挡住清库。关联键用 `(year, round)` 而不是 `race.id`：`id` 是上游代理键，补录一场早期比赛就可能整体平移，届时旧行会静默指向另一场比赛，页面显示错时刻且无人报警；`(year, round)` 是 f1db 自己声明的业务唯一键（`race_year_round_uk`，1171 场全唯一），也是 F1 赛历的自然标识。data-sync 重导后仍跑一遍 prune，清掉上游已删场次留下的孤儿行。
 - 查询计划护栏跑在 `apps/web/tests/fixtures/d1-schema.sql` 上，那份夹具由 dump 脚本产出、只含 f1db 表。新表的查询会因为表不存在直接让 `pnpm test` 变红，夹具生成流程要一并扩展，新索引进 `f1db-d1-indexes.sql`。
 - D1 读放大。两张表的消费面不同：`session_weather` 只在比赛页用（天气只渲染在赛程条里），赛历页不查；`session_time` 两条路径都要，因为赛历卡片的周末日期范围就是从 `sessions[0]` 算的，不带它赛历页自己就是错的。代价是一整页 23 站多读百来行（每站最多 5 行，走 `(year, round)` 主键前缀），与 `seasonCalendarSql` 现有的 join 同一量级——配额约束防的是无索引全表扫那种几十万行，不是这个。
-- 接线。建表在 data-sync（`site-tables.sql`，全量重导后幂等执行）；写数据在独立的 `site-data.yml`：session 时刻是一次性回填，只挂手动触发；天气每天跑一次，forecast 刷新未来 7 天，trackside 靠 `--have` 清单跳过已有场次——不跳的话每天都要重抓 2018 起全部场次 × 5 session 近千次 livetiming 请求，而历史赛道天气根本不会变。
+- 接线。preview 与 production 都在部署 Worker 前幂等执行 `site-tables.sql`，避免新代码先于 schema 上线；data-sync 全量重导后也会再次执行。写数据在独立的 `site-data.yml`：session 时刻一次性回填；天气定时任务只扫当前赛季并靠 `--have` 跳过已有 FastF1 行，历史回填只允许手动触发。
 - 本地 dev 无 D1 走 fixture，三条管线的形态都要有对应 fixture，否则 e2e 打不到。
-- 三个脚本都要在 CI 里断言请求域名白名单，把"未申报域名"变成会红的测试，而不是靠人记住。
+- 所有 sync 脚本都要在 CI 里断言请求域名白名单，把"未申报域名"变成会红的测试，而不是靠人记住。
 
 ## 交付顺序
 
 1. 赛程时刻补全：无 UI 改动，直接让赛程条、ICS 受益，也是天气按小时取值的前提，且是唯一完全不依赖 livetiming 的一条
-2. 天气：先做 2018 起已结束场次的 FastF1 实测（不依赖 livetiming 之外的东西），再接未来 7 天的 Open-Meteo 预报
+2. 天气：仅同步 FastF1 能返回的 session 实测值；当前端点可用性不足时允许保持空白
 3. 临时结果：依赖 livetiming 探针结果，改动触及仓储回落与车手映射，风险最高
 
 前两条不改页面结构，第三条只加一行提示。天气行是唯一的结构改动，在第二条里一次做完。

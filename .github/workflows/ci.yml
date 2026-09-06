@@ -57,12 +57,26 @@ jobs:
       - run: pnpm --filter @f1-box/web build
         env:
           F1BOX_WRANGLER_CONFIG: ./wrangler.preview.jsonc
-      # 凭据只给真正要用的这一步：放在 job 级 env 上时，依赖安装与构建里跑的任意
+      # 新代码引用站点表时必须先建表；preview 与 production 共用该 D1，建表幂等。
+      - name: Apply site tables
+        run: |
+          apps/web/node_modules/.bin/wrangler d1 execute f1db --remote \
+            -c apps/web/wrangler.preview.jsonc --file scripts/site-tables.sql
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # 凭据只给真正要用的步骤：放在 job 级 env 上时，依赖安装与构建里跑的任意
       # 第三方代码都能读到它
       - run: pnpm --filter @f1-box/web exec wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Smoke test preview
+        run: |
+          for path in /racing/2026 /results/2026/races /results/2026/races/australia/race-result; do
+            curl --retry 5 --retry-delay 2 --retry-all-errors -fsS \
+              "https://f1-box-preview.rj7c4mhzcp.workers.dev${path}" > /dev/null
+          done
 
   production:
     # 显式锁定 main：部署生产的边界守卫，不依赖触发器配置的隐式保证
@@ -79,7 +93,20 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @f1-box/web build
+      - name: Apply site tables
+        run: |
+          apps/web/node_modules/.bin/wrangler d1 execute f1db --remote \
+            -c apps/web/wrangler.jsonc --file scripts/site-tables.sql
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - run: pnpm --filter @f1-box/web exec wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Smoke test production
+        run: |
+          for path in /racing/2026 /results/2026/races /results/2026/races/australia/race-result; do
+            curl --retry 5 --retry-delay 2 --retry-all-errors -fsS \
+              "https://f1-box.com${path}" > /dev/null
+          done

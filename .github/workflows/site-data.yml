@@ -5,8 +5,8 @@ name: site-data
 #
 # session-times：一次性回填 2018-2023，f1db 从 2024 起自带时刻，跑完就不用再跑，
 #   所以只挂手动触发。data-sync 全量重导不会动 session_time（无外键、不在 dump 里）。
-# weather：forecast 每天要刷（预报会变），trackside 只补还没有的场次——
-#   历史赛道天气不会变，靠 --have 清单跳过，否则每天都要重抓近千次 livetiming。
+# weather：只写 FastF1 能提供的 session 实测天气。定时任务只扫当前赛季且跳过
+#   已有行；历史回填必须手动确认，避免每天重抓近千次 livetiming 请求。
 
 on:
   workflow_dispatch:
@@ -15,8 +15,12 @@ on:
         description: 同时回填 2018-2023 的 session 时刻（一次性）
         type: boolean
         default: false
+      backfill_weather:
+        description: 尝试回填 2018 起全部 FastF1 session 天气
+        type: boolean
+        default: false
   schedule:
-    # 每天 04:10 UTC：赛后 trackside 补齐 + 未来 7 天预报刷新
+    # 每天 04:10 UTC：重试当前赛季尚未写入的已开始 session
     - cron: "10 4 * * *"
 
 permissions:
@@ -28,8 +32,6 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
   WRANGLER: apps/web/node_modules/.bin/wrangler
 
 jobs:
@@ -51,24 +53,37 @@ jobs:
           python3 -m pip install --quiet --user uv
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      # 一次性：2018-2023 的 session 时刻。手动勾选才跑。
-      - name: Backfill session times
+      - name: Apply site tables
+        run: |
+          "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
+            --file scripts/site-tables.sql
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # 一次性：2018-2023 的 session 时刻。生成阶段不接触 Cloudflare secrets。
+      - name: Generate session times
+        if: inputs.backfill_session_times
+        run: uv run scripts/sync-session-times.py --out /tmp/session-times.sql
+
+      - name: Apply session times
         if: inputs.backfill_session_times
         run: |
-          uv run scripts/sync-session-times.py --out /tmp/session-times.sql
           if [ -s /tmp/session-times.sql ]; then
             "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
               --file /tmp/session-times.sql
           else
             echo "no session_time rows produced"
           fi
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      # trackside 已有的场次不再拉 livetiming：历史天气不会变，重抓纯属浪费。
-      # forecast 行不进清单，预报每天都要覆盖。
-      - name: Collect existing trackside rows
+      # 已成功写入的 FastF1 session 不再拉 livetiming：实测天气不会变化。
+      - name: Collect existing FastF1 rows
         run: |
           "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --json \
-            --command "SELECT year, round, session_key FROM session_weather WHERE source = 'trackside'" \
+            --command "SELECT year, round, session_key FROM session_weather WHERE source = 'fastf1'" \
             | node -e '
               const r = JSON.parse(require("fs").readFileSync(0, "utf8"));
               const rows = (Array.isArray(r) ? r[0] : r)?.results ?? [];
@@ -77,21 +92,37 @@ jobs:
               );
             ' > /tmp/have.txt
           wc -l < /tmp/have.txt
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Sync weather
+      - name: Generate FastF1 weather
         run: |
-          uv run scripts/sync-weather.py --out /tmp/weather.sql --have /tmp/have.txt
+          args=(--years "$(date -u +%Y)")
+          if [ "$BACKFILL_WEATHER" = "true" ]; then
+            args=()
+          fi
+          uv run scripts/sync-weather.py --out /tmp/weather.sql --have /tmp/have.txt "${args[@]}"
+        env:
+          BACKFILL_WEATHER: ${{ inputs.backfill_weather }}
+
+      - name: Apply FastF1 weather
+        run: |
           if [ -s /tmp/weather.sql ]; then
             "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
               --file /tmp/weather.sql
           else
             echo "no session_weather rows produced"
           fi
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       # 页面按 f1db 标签缓存，回填后不清就要等自然过期
       - name: Purge edge cache
         if: env.CLOUDFLARE_ZONE_NAME != ''
         env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ZONE_NAME: ${{ vars.CLOUDFLARE_ZONE_NAME }}
         run: |
           zone=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \

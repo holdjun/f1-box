@@ -1034,7 +1034,7 @@ describe("buildSessions 合并 f1db 与 session_time", () => {
     ]);
   });
 
-  it("session_weather 只挂到匹配的 session，其余不携带 weather 字段", async () => {
+  it("session_weather 只挂 FastF1 可用字段到匹配 session", async () => {
     const metaWithWeather = {
       ...metaRow,
       session_weather: JSON.stringify([
@@ -1042,17 +1042,13 @@ describe("buildSessions 合并 f1db 与 session_time", () => {
           key: "race",
           tempC: 24.0,
           trackTempC: 41.0,
-          prob: null,
-          weatherCode: null,
-          source: "trackside",
+          weatherCode: "rain",
         },
         {
           key: "qualifying",
           tempC: 23.0,
           trackTempC: 40.0,
-          prob: null,
           weatherCode: null,
-          source: "trackside",
         },
       ]),
     };
@@ -1069,40 +1065,14 @@ describe("buildSessions 合并 f1db 与 session_time", () => {
     expect(race?.weather).toEqual({
       tempC: 24.0,
       trackTempC: 41.0,
-      prob: null,
-      weatherCode: null,
-      source: "trackside",
+      weatherCode: "rain",
     });
+    expect(Object.keys(race?.weather ?? {}).sort()).toEqual([
+      "tempC",
+      "trackTempC",
+      "weatherCode",
+    ]);
     expect(quali?.weather?.tempC).toBe(23.0);
     expect(p1?.weather).toBeUndefined();
-  });
-
-  it("forecast 天气只带 temp/prob/weatherCode，trackTempC 为 null", async () => {
-    const metaForecast = {
-      ...metaRow,
-      session_weather: JSON.stringify([
-        {
-          key: "race",
-          tempC: 24.0,
-          trackTempC: null,
-          prob: 40,
-          weatherCode: "rain",
-          source: "forecast",
-        },
-      ]),
-    };
-    const db = fakeDbBySql(tabFragments({ circuit_full_name: [metaForecast] }));
-    const page = await createRaceResultsRepository(db).getRacePage(
-      2026,
-      "australia",
-    );
-    const race = page?.meta.sessions.find((s) => s.key === "race");
-    expect(race?.weather).toEqual({
-      tempC: 24.0,
-      trackTempC: null,
-      prob: 40,
-      weatherCode: "rain",
-      source: "forecast",
-    });
   });
 });

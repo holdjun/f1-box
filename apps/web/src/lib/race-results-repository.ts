@@ -35,15 +35,11 @@ export interface RaceSession {
   key: string;
   label: string;
   startsAtUtc: string;
-  // 天气来自 session_weather 表（只比赛页下发，赛历页不查）。
-  // trackside（F1 计时流）：temp/trackTemp；forecast（Open-Meteo）：temp/prob/weatherCode。
-  // 按 source 判空，别指望列齐；无该场 session 的天气时不携带该字段。
+  // 只消费 FastF1 的 session 实测天气；任一字段取不到就保持 null。
   weather?: {
     tempC: number | null;
     trackTempC: number | null;
-    prob: number | null;
     weatherCode: string | null;
-    source: "trackside" | "forecast";
   };
 }
 
@@ -321,7 +317,7 @@ const raceMetaSql = `SELECT ra.year, ra.round, ra.grand_prix_id AS slug, gp.name
           FROM session_time st WHERE st.year = ra.year AND st.round = ra.round) AS session_times,
        (SELECT json_group_array(json_object(
             'key', session_key, 'tempC', temp_c, 'trackTempC', track_temp_c,
-            'prob', precipitation_probability, 'weatherCode', weather_code, 'source', source))
+            'weatherCode', weather_code))
           FROM session_weather sw WHERE sw.year = ra.year AND sw.round = ra.round) AS session_weather
 FROM race ra
 JOIN grand_prix gp ON ra.grand_prix_id = gp.id
@@ -517,38 +513,39 @@ function mapTeamStandingRow(row: unknown): TeamStandingRow {
 // strOrNull 给 null，自然回落 f1db。
 function parseSessionTimes(raw: string | null): Map<string, string> {
   if (raw === null) return new Map();
-  // pi-lens-ignore: ast-grep:unchecked-throwing-call
-  const rows = JSON.parse(raw) as { key: string; value: string }[];
-  return new Map(rows.map((row) => [row.key, row.value]));
+  try {
+    const rows = JSON.parse(raw) as { key: string; value: string }[];
+    return new Map(rows.map((row) => [row.key, row.value]));
+  } catch {
+    return new Map();
+  }
 }
 
-// session_weather 子查询返回 [{key, tempC, trackTempC, prob, weatherCode, source}, ...]。
-// source 的取值由建表时的 CHECK 约束保证（见 site-tables.sql），这里不再归一化。
+// session_weather 子查询只返回 FastF1 可提供的三个展示字段。
 function parseSessionWeather(
   raw: string | null,
 ): Map<string, NonNullable<RaceSession["weather"]>> {
   if (raw === null) return new Map();
-  // pi-lens-ignore: ast-grep:unchecked-throwing-call
-  const rows = JSON.parse(raw) as {
-    key: string;
-    tempC: number | null;
-    trackTempC: number | null;
-    prob: number | null;
-    weatherCode: string | null;
-    source: "trackside" | "forecast";
-  }[];
-  return new Map(
-    rows.map((row) => [
-      row.key,
-      {
-        tempC: row.tempC,
-        trackTempC: row.trackTempC,
-        prob: row.prob,
-        weatherCode: row.weatherCode,
-        source: row.source,
-      },
-    ]),
-  );
+  try {
+    const rows = JSON.parse(raw) as {
+      key: string;
+      tempC: number | null;
+      trackTempC: number | null;
+      weatherCode: string | null;
+    }[];
+    return new Map(
+      rows.map((row) => [
+        row.key,
+        {
+          tempC: row.tempC,
+          trackTempC: row.trackTempC,
+          weatherCode: row.weatherCode,
+        },
+      ]),
+    );
+  } catch {
+    return new Map();
+  }
 }
 
 function buildSessions(r: RowReader): RaceSession[] {

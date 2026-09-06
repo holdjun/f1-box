@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
@@ -17,7 +18,6 @@ const SCRIPT_GLOB = new Set(["sync-session-times.py", "sync-weather.py"]);
 // 允许出现的网络主机。脚本回填可能用到的上游：
 // - raw.githubusercontent.com：FastF1 的赛程文件（backend="fastf1"）
 // - github.com / objects.githubusercontent.com：f1db 官方 SQLite release 下载
-// - api.open-meteo.com：Open-Meteo 预报（天气 forecast 占位）
 // - api.github.com：release 元数据查询
 // - livetiming.formula1.com：由 FastF1 内部请求（我们不经脚本硬编码），列白名单供核对
 // 允许域名白名单之外的主机一律视为未申报。
@@ -26,7 +26,6 @@ const ALLOWED_HOSTS = new Set([
   "github.com",
   "objects.githubusercontent.com",
   "api.github.com",
-  "api.open-meteo.com",
   "livetiming.formula1.com",
 ]);
 
@@ -101,6 +100,42 @@ describe("sync 脚本请求域名白名单", () => {
         readFileSync(`${workflowsDir}/${name}`, "utf8"),
         name,
       );
+    }
+  });
+
+  it("FastF1 当前的 Sprint Qualifying 名称映射到站点键", () => {
+    const output = execFileSync(
+      "python3",
+      [
+        "-c",
+        `import sys; sys.path.insert(0, ${JSON.stringify(scriptsDir)}); from f1_session_keys import session_key; print(session_key("Sprint Qualifying"))`,
+      ],
+      { encoding: "utf8" },
+    ).trim();
+    expect(output).toBe("sprint-qualifying");
+  });
+
+  it("FastF1 探针在没有任何天气样本时失败", () => {
+    const source = readFileSync(`${workflowsDir}/f1-probe.yml`, "utf8");
+    expect(source).toContain("if successful_weather == 0:");
+    expect(source).toContain("raise SystemExit");
+  });
+
+  it("preview 与 production 都在部署 Worker 前应用站点表", () => {
+    const source = readFileSync(`${workflowsDir}/ci.yml`, "utf8");
+    const jobs = ["preview", "production"];
+    for (const [index, job] of jobs.entries()) {
+      const start = source.indexOf(`  ${job}:`);
+      const end =
+        index + 1 < jobs.length
+          ? source.indexOf(`  ${jobs[index + 1]}:`)
+          : source.length;
+      const block = source.slice(start, end);
+      const schema = block.indexOf("--file scripts/site-tables.sql");
+      const deploy = block.indexOf("wrangler deploy");
+      expect(schema, `${job} 缺少站点表部署步骤`).toBeGreaterThan(-1);
+      expect(deploy, `${job} 缺少 Worker 部署步骤`).toBeGreaterThan(-1);
+      expect(schema, `${job} 必须先建表再部署 Worker`).toBeLessThan(deploy);
     }
   });
 });

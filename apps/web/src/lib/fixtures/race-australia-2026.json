@@ -33,9 +33,7 @@
         "weather": {
           "tempC": 18.4,
           "trackTempC": 31.2,
-          "prob": null,
-          "weatherCode": "cloud",
-          "source": "trackside"
+          "weatherCode": null
         }
       },
       {
@@ -45,9 +43,7 @@
         "weather": {
           "tempC": 21.7,
           "trackTempC": 40.9,
-          "prob": null,
-          "weatherCode": "rain",
-          "source": "trackside"
+          "weatherCode": "rain"
         }
       },
       {
@@ -62,22 +58,13 @@
         "weather": {
           "tempC": null,
           "trackTempC": 26.0,
-          "prob": null,
-          "weatherCode": null,
-          "source": "trackside"
+          "weatherCode": null
         }
       },
       {
         "key": "race",
         "label": "Race",
-        "startsAtUtc": "2026-03-08T04:00:00Z",
-        "weather": {
-          "tempC": 24.1,
-          "trackTempC": null,
-          "prob": 35,
-          "weatherCode": "cloud",
-          "source": "forecast"
-        }
+        "startsAtUtc": "2026-03-08T04:00:00Z"
       }
     ]
   },
