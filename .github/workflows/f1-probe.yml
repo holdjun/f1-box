@@ -35,13 +35,22 @@ jobs:
 
           def _recording_send(self, request, *args, **kwargs):
               HOSTS.add(requests.utils.urlparse(request.url).netloc.lower())
-              return _real_send(self, request, *args, **kwargs)
+              try:
+                  response = _real_send(self, request, *args, **kwargs)
+              except requests.RequestException as exc:
+                  print(f"HTTP {request.url}: {type(exc).__name__}", flush=True)
+                  raise
+              print(f"HTTP {response.status_code} {request.url}", flush=True)
+              return response
 
           requests.adapters.HTTPAdapter.send = _recording_send
 
           import fastf1
           import fastf1.api as api
 
+          print(f"FastF1 {fastf1.__version__}; requests {requests.__version__}", flush=True)
+          # 探针验证当前网络可用性，不能由旧的成功缓存代答。
+          fastf1.Cache.set_disabled()
           fastf1.set_log_level("WARNING")
           now = datetime.datetime.now(datetime.timezone.utc)
           schedule = fastf1.get_event_schedule(
