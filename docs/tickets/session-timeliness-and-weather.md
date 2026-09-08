@@ -28,7 +28,7 @@ f1db 从 2024 赛季起记录场次时刻；2018–2023 由 `scripts/sync-sessio
 
 `fastf1.api` 是上游标记未来可能私有化的低层接口。本 PR 保留它以只获取天气，不为天气加载成绩；后续统一采集时再评估 `Session.load()`。其底层可能访问官方计时域名及 FastF1 自有镜像，不保证只触达一个域名。
 
-2026-09-08 在 GitHub Actions 重跑天气探针：2023 R1 与 2026 R13 排位均返回 `SessionNotAvailableError`，零成功样本使探针如实失败。这只说明当次获取不可用，不能证明对应年代没有数据，也不阻止 PR 的功能验收。[探针日志](https://github.com/holdjun/f1-box/actions/runs/34193545172)
+2026-09-08 诊断确认 GitHub Actions 收到官方 HTTP 403、镜像 HTTP 404；不能将 `SessionNotAvailableError` 当成源数据缺失。Cloudflare Containers 两轮真实取数（含销毁重启）均取得巴林、沙特、蒙扎的天气。决定先验证再迁移天气同步，完成后才合并 PR #32；具体证据与合并门槛见 [天气同步执行环境](../decisions/weather-sync-cloudflare.md)。
 
 验收：可用字段单独展示，天气缺失不影响页面；fixture 覆盖气温、赛道温度、降雨、整场无数据与部分字段缺失；桌面/375px、双主题 axe 与截图通过。
 
