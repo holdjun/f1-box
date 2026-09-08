@@ -1,4 +1,4 @@
-"""三条 sync 管线共用的 session_key 与天气条件映射。
+"""同步管线共用的 session 键与比赛日期匹配。
 
 session_key 必须与 race-results-repository.ts 的 buildSessions defs 严格一致，
 否则回填的行匹配不到任何 session，页面上什么都不会变——这种错静默且难查，
@@ -23,3 +23,12 @@ SESSION_KEYS: dict[str, str] = {
 def session_key(name: str) -> str | None:
     """FastF1 的 session 名 → 站点 session_key，不认识的返回 None。"""
     return SESSION_KEYS.get(name)
+
+
+def matches_race_date(event, expected: str) -> bool:
+    # 夜赛的赛地日期可能比 f1db 的 UTC 比赛日早一天（如拉斯维加斯）。
+    dates = {str(event.get("EventDate"))[:10]}
+    for index in range(1, 6):
+        if event.get(f"Session{index}") == "Race":
+            dates.add(str(event.get(f"Session{index}DateUtc"))[:10])
+    return expected in dates

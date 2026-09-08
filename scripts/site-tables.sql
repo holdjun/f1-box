@@ -7,7 +7,7 @@
 -- 用 (year, round) 而不是 race.id 关联：id 是上游的代理键，补录一场早期比赛
 -- 就可能整体平移，届时旧行会静默指向另一场比赛，页面显示错时刻且无人报警。
 -- (year, round) 是 f1db 自己声明的业务唯一键（race_year_round_uk），
--- 也是 F1 赛历的自然标识，不会变。
+-- 已结束比赛用它关联；赛历可能改期或重排轮次，写入前仍须核对比赛日期。
 
 -- 赛程发车时刻补全：2018-2023 由 sync-session-times.py 回填，2024 起 f1db 自带。
 -- starts_at_utc 是完整 UTC 时间戳；source 记来源（fastf1-schedule 等），用于核对。
@@ -34,6 +34,3 @@ CREATE TABLE IF NOT EXISTS session_weather (
   fetched_at TEXT NOT NULL,
   PRIMARY KEY (year, round, session_key)
 );
-
--- 赛后临时结果的表等管线 3 真做时再建：它的列取决于探针确认的
--- session.results 实际字段，现在建出来只是一张没人读写、且大概率要改的表。

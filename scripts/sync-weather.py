@@ -26,7 +26,7 @@ from urllib.request import urlretrieve
 import fastf1  # pyright: ignore[reportMissingImports]
 import fastf1.api as fastf1_api  # pyright: ignore[reportMissingImports]
 
-from f1_session_keys import session_key
+from f1_session_keys import matches_race_date, session_key
 
 WEATHER_SINCE = 2018
 SESSION_SETTLE_DELAY = timedelta(hours=4)
@@ -147,21 +147,17 @@ def main() -> None:
     db_path = Path(args.f1db_path) if args.f1db_path else fetch_db()
     con = sqlite3.connect(db_path)
     race_rows = con.execute(
-        "SELECT year, round FROM race WHERE year >= ? ORDER BY year, round",
+        "SELECT year, round, date FROM race WHERE year >= ? ORDER BY year, round",
         (WEATHER_SINCE,),
     ).fetchall()
     con.close()
 
-    available_years = {year for year, _ in race_rows if isinstance(year, int)}
+    available_years = {year for year, _, _ in race_rows if isinstance(year, int)}
     try:
         years = _parse_years(args.years, available_years)
     except ValueError as exc:
         parser.error(str(exc))
-    races = {
-        (year, round_no)
-        for year, round_no in race_rows
-        if isinstance(year, int) and isinstance(round_no, int)
-    }
+    races = {(year, round_no): date for year, round_no, date in race_rows}
 
     inserts: list[str] = []
     failures = 0
@@ -186,6 +182,10 @@ def main() -> None:
             except (TypeError, ValueError):
                 continue
             if (year, round_no) not in races:
+                continue
+            # 赛历变更可能重排轮次；和时刻回填一样，日期不一致时不猜对应关系。
+            if not matches_race_date(event, races[(year, round_no)]):
+                print(f"date mismatch skipped {year} R{round_no}")
                 continue
 
             for index in range(1, 6):

@@ -24,15 +24,15 @@ Qualifying、Sprint Shootout、Sprint、Race）映射到现有 session_key；spr
 
 import argparse
 import sqlite3
-import sys
 import tempfile
 import zipfile
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.request import urlretrieve
 
 import fastf1
 
-from f1_session_keys import SESSION_KEYS
+from f1_session_keys import SESSION_KEYS, matches_race_date
 
 # 期望回填的赛季（f1db 2024 起自带，2024 前都要补）
 BACKFILL_YEARS = range(2018, 2024)
@@ -57,10 +57,13 @@ def to_utc_iso(ts) -> str | None:
     """pandas Timestamp → 'YYYY-MM-DDTHH:MM:SSZ'；NaT 返回 None。"""
     if ts is None:
         return None
-    value = str(ts)  # 已经是 'YYYY-MM-DD HH:MM:SS'（UTC，DateUtc 列）
-    # 兼容带微秒/时区的格式：只取前 19 位
-    value = value[:19]
-    return value.replace(" ", "T") + "Z"
+    try:
+        value = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def sessions_of(row) -> list[tuple[str, str]]:
@@ -128,9 +131,8 @@ def main():
                 if ref_date is None:
                     skipped.append(f"{year} Round {round_no}: no f1db race row (round mismatch)")
                     continue
-                # 日期双重校验：正赛日（Race 的 Date）应与 f1db race.date 一致
-                race_date = str(row.get("EventDate"))[:10] if row.get("EventDate") is not None else None
-                if race_date is not None and race_date != ref_date:
+                race_date = str(row.get("EventDate"))[:10]
+                if not matches_race_date(row, ref_date):
                     skipped.append(
                         f"{year} Round {round_no}: date mismatch "
                         f"(fastf1 {race_date} vs f1db {ref_date})"
