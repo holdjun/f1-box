@@ -13,6 +13,18 @@ function runPython(source: string): void {
   });
 }
 
+const fixtureEventSource = `
+class FixtureEvent:
+    def __init__(self, data):
+        self.data = data
+    def get(self, key, default=None):
+        return self.data.get(key, default)
+    def __getitem__(self, key):
+        return self.data[key]
+    def get_session(self, name):
+        return types.SimpleNamespace(api_path="fixture")
+`;
+
 describe("FastF1 weather container", () => {
   it("summarizes available fields and records rain without filling zeros", () => {
     runPython(`
@@ -28,15 +40,22 @@ spec = importlib.util.spec_from_file_location("app", pathlib.Path("app.py"))
 app = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(app)
 
-event = {
+${fixtureEventSource}
+event = FixtureEvent({
   "RoundNumber": 1,
   "EventDate": "2023-03-05",
   "Session3": "Qualifying",
   "Session3DateUtc": "2023-03-04T16:00:00Z",
-}
+})
 schedule = types.SimpleNamespace(iterrows=lambda: [(0, event)])
-fastf1.get_event_schedule = lambda year, backend, include_testing: schedule
-fastf1.get_session = lambda year, round_no, name, backend: types.SimpleNamespace(api_path="fixture")
+backends = []
+def get_event_schedule(year, backend, include_testing):
+    backends.append(backend)
+    return schedule
+fastf1.get_event_schedule = get_event_schedule
+def fail_get_session(*args, **kwargs):
+    raise AssertionError("session must come from the event schedule")
+fastf1.get_session = fail_get_session
 fastf1.api.weather_data = lambda path: {
   "AirTemp": [20, None, 24],
   "TrackTemp": [30, 34],
@@ -48,6 +67,7 @@ payload = {
   "sessionNames": {"Qualifying": "qualifying"},
 }
 result = app.collect_payload(payload)
+assert backends == ["f1timing"], backends
 assert result["sessions"] == [{
   "year": 2023, "round": 1, "sessionKey": "qualifying", "status": "success",
   "tempC": 22.0, "trackTempC": 32.0, "weatherCode": "rain",
@@ -70,11 +90,11 @@ sys.modules["fastf1.api"] = fastf1.api
 spec = importlib.util.spec_from_file_location("app", pathlib.Path("app.py"))
 app = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(app)
-event = {"RoundNumber": 1, "EventDate": "2023-03-05",
-         "Session3": "Qualifying", "Session3DateUtc": "2023-03-04T16:00:00Z"}
+${fixtureEventSource}
+event = FixtureEvent({"RoundNumber": 1, "EventDate": "2023-03-05",
+         "Session3": "Qualifying", "Session3DateUtc": "2023-03-04T16:00:00Z"})
 schedule = types.SimpleNamespace(iterrows=lambda: [(0, event)])
 fastf1.get_event_schedule = lambda year, backend, include_testing: schedule
-fastf1.get_session = lambda year, round_no, name, backend: types.SimpleNamespace(api_path="fixture")
 
 def unavailable(path):
     app._REQUEST_LOG.append({"host": "livetiming.formula1.com", "status": 403})
@@ -109,11 +129,11 @@ sys.modules["fastf1.api"] = fastf1.api
 spec = importlib.util.spec_from_file_location("app", pathlib.Path("app.py"))
 app = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(app)
-event = {"RoundNumber": 1, "EventDate": "2023-03-12",
-         "Session3": "Qualifying", "Session3DateUtc": "2023-03-11T16:00:00Z"}
+${fixtureEventSource}
+event = FixtureEvent({"RoundNumber": 1, "EventDate": "2023-03-12",
+         "Session3": "Qualifying", "Session3DateUtc": "2023-03-11T16:00:00Z"})
 schedule = types.SimpleNamespace(iterrows=lambda: [(0, event)])
 fastf1.get_event_schedule = lambda year, backend, include_testing: schedule
-fastf1.get_session = lambda year, round_no, name, backend: types.SimpleNamespace(api_path="fixture")
 fastf1.api.weather_data = lambda path: {"AirTemp": [24]}
 payload = {
   "year": 2023,

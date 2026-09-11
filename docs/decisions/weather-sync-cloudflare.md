@@ -30,6 +30,7 @@ GitHub Actions 上的 FastF1 3.8.3 请求官方天气地址返回 HTTP 403，镜
 - Workflow 按年拆成选择候选、容器采集、D1 写入、缓存刷新与覆盖率检查步骤。步骤结果由 Cloudflare Workflows 持久化，D1 状态不依赖容器临时磁盘。
 - 候选场次优先来自 f1db 原生 session 时刻；2018–2023 缺失时用 `session_time` 补齐，保证 current 模式覆盖 2024 之后的赛季。
 - 候选 SQL 用 `VALUES` CTE 枚举 session 类型；D1 将 compound SELECT 限制为 5 个分支，不能用七段 `UNION ALL`。
+- 赛程使用 FastF1 的 `f1timing` backend，并从同一份 Event schedule 创建 session；这避免依赖 GitHub schedule 文件，也保持不回落 Ergast/Jolpica。
 - Container 镜像预装 FastF1 3.8.3 与 requests 2.34.2；Worker 与容器之间使用共享 secret 认证，容器入口只开放 health 与 collect。
 - 采集在 requests 层记录实际主机与 HTTP 状态。触达 Jolpica/Ergast、HTTP 4xx/5xx、超时或异常记为请求失败；只有明确空结果才记为无数据。
 - `weather_sync_state` 区分 `success`、`no_data`、`mismatch`、`failed`、`exhausted`。失败按 15 分钟、1 小时、6 小时、24 小时退避，最多 5 次；终态不每日重抓。

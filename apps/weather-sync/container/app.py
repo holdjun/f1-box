@@ -110,7 +110,7 @@ def _session_result(year: int, requested: dict, event: dict, name_by_key: dict[s
 
     _REQUEST_LOG.clear()
     try:
-        session = fastf1.get_session(year, round_no, name, backend="fastf1")
+        session = event.get_session(name)
         weather = fastf1_api.weather_data(session.api_path)
         failures = [
             item
@@ -149,7 +149,7 @@ def collect_payload(payload: dict) -> dict:
 
     _ALL_HOSTS.clear()
     _REQUEST_LOG.clear()
-    schedule = fastf1.get_event_schedule(year, backend="fastf1", include_testing=False)
+    schedule = fastf1.get_event_schedule(year, backend="f1timing", include_testing=False)
     events = {int(row["RoundNumber"]): row for _, row in schedule.iterrows()}
     name_by_key = {key: name for name, key in session_names.items()}
     results = []

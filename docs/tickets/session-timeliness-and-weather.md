@@ -40,6 +40,6 @@ f1db 从 2024 赛季起记录场次时刻；2018–2023 由 `scripts/sync-sessio
 - `.github/workflows/site-data.yml` 只保留历史时刻的一次性手动回填；天气持续同步与历史回填由 Cloudflare weather-sync Worker 执行。
 - 访客只查询本站 D1，不直连任何上游。
 - preview 与 production 当前共享 D1，站点表数据写入前先核对产物；代码验收在预览完成。
-- 代码边界测试限制直接 URL 和显式 backend。Container 在 requests 层记录实际主机与 HTTP 状态，触达 Jolpica/Ergast 或把请求失败当无数据会让测试与采集状态变红。
+- 代码边界测试限制直接 URL 和显式 `f1timing` backend。Container 在 requests 层记录实际主机与 HTTP 状态，触达 Jolpica/Ergast 或把请求失败当无数据会让测试与采集状态变红。
 
 新结果功能可经 FastF1 内部访问 Jolpica，但不能假定结果都来自它，更不能直接实现另一套 Jolpica 客户端。天气探针不能替代结果、圈速和遥测能力探针。
