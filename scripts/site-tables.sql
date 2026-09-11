@@ -34,3 +34,22 @@ CREATE TABLE IF NOT EXISTS session_weather (
   fetched_at TEXT NOT NULL,
   PRIMARY KEY (year, round, session_key)
 );
+
+-- Cloudflare Workflows 的采集状态。success/no_data/mismatch 是终态；
+-- failed 带退避时间重试，达到上限后转为 exhausted，不能伪装成无数据。
+CREATE TABLE IF NOT EXISTS weather_sync_state (
+  year INTEGER NOT NULL,
+  round INTEGER NOT NULL,
+  session_key TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('success', 'no_data', 'mismatch', 'failed', 'exhausted')),
+  attempts INTEGER NOT NULL,
+  last_error TEXT,
+  last_attempt_at TEXT NOT NULL,
+  next_attempt_at TEXT,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (year, round, session_key)
+);
+
+-- 天气同步按“某年已结束 session”扫候选；复合索引避免按年份过滤时扫全表。
+CREATE INDEX IF NOT EXISTS session_time_year_start_idx
+  ON session_time(year, starts_at_utc);

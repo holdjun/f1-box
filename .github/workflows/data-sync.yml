@@ -78,7 +78,7 @@ jobs:
         if: steps.release.outputs.changed == 'true'
         run: |
           WRANGLER=apps/web/node_modules/.bin/wrangler
-          for table in session_time session_weather; do
+          for table in session_time session_weather weather_sync_state; do
             "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --command \
               "DELETE FROM ${table} WHERE NOT EXISTS (SELECT 1 FROM race r WHERE r.year = ${table}.year AND r.round = ${table}.round)"
           done

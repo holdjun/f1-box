@@ -1,33 +1,24 @@
 name: site-data
 
-# 站点自有表的数据回填。f1db 那条链路（data-sync.yml）只管上游整库重导，
-# 建表也在那边（site-tables.sql）；本工作流只负责往已建好的表里写数据。
+# 站点自有表的一次性修复入口。f1db 那条链路（data-sync.yml）只管上游整库重导，
+# 建表也在那边；天气持续同步由 apps/weather-sync 的 Cloudflare Worker 执行。
 #
-# session-times：一次性回填 2018-2023，f1db 从 2024 起自带时刻，跑完就不用再跑，
-#   所以只挂手动触发。data-sync 全量重导不会动 session_time（无外键、不在 dump 里）。
-# weather：只写 FastF1 能提供的 session 实测天气。定时任务只扫当前赛季且跳过
-#   已有行；历史回填必须手动确认，避免每天重抓近千次 livetiming 请求。
+# session-times：一次性回填 2018-2023，f1db 从 2024 起自带时刻，跑完就不用再跑。
+# data-sync 全量重导不会动 session_time（无外键、不在 dump 里）。
 
 on:
   workflow_dispatch:
     inputs:
       backfill_session_times:
-        description: 同时回填 2018-2023 的 session 时刻（一次性）
+        description: Backfill 2018-2023 session times
         type: boolean
         default: false
-      backfill_weather:
-        description: 尝试回填 2018 起全部 FastF1 session 天气
-        type: boolean
-        default: false
-  schedule:
-    # 每天 04:10 UTC：重试当前赛季尚未写入的已开始 session
-    - cron: "10 4 * * *"
 
 permissions:
   contents: read
 
 concurrency:
-  # 与自身串行：两个实例同时写 session_weather 只会互相覆盖
+  # 与自身串行，避免两个一次性回填互相覆盖
   group: site-data
   cancel-in-progress: false
 
@@ -79,48 +70,9 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      # 已成功写入的 FastF1 session 不再拉 livetiming：实测天气不会变化。
-      - name: Collect existing FastF1 rows
-        run: |
-          "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --json \
-            --command "SELECT year, round, session_key FROM session_weather WHERE source = 'fastf1'" \
-            | node -e '
-              const r = JSON.parse(require("fs").readFileSync(0, "utf8"));
-              const rows = (Array.isArray(r) ? r[0] : r)?.results ?? [];
-              process.stdout.write(
-                rows.map((x) => x.year + "," + x.round + "," + x.session_key).join("\n"),
-              );
-            ' > /tmp/have.txt
-          wc -l < /tmp/have.txt
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      - name: Generate FastF1 weather
-        run: |
-          args=(--years "$(date -u +%Y)")
-          if [ "$BACKFILL_WEATHER" = "true" ]; then
-            args=()
-          fi
-          uv run scripts/sync-weather.py --out /tmp/weather.sql --have /tmp/have.txt "${args[@]}"
-        env:
-          BACKFILL_WEATHER: ${{ inputs.backfill_weather }}
-
-      - name: Apply FastF1 weather
-        run: |
-          if [ -s /tmp/weather.sql ]; then
-            "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
-              --file /tmp/weather.sql
-          else
-            echo "no session_weather rows produced"
-          fi
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
       # 页面按 f1db 标签缓存，回填后不清就要等自然过期
       - name: Purge edge cache
-        if: env.CLOUDFLARE_ZONE_NAME != ''
+        if: inputs.backfill_session_times && env.CLOUDFLARE_ZONE_NAME != ''
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ZONE_NAME: ${{ vars.CLOUDFLARE_ZONE_NAME }}

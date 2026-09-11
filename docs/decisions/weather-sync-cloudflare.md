@@ -24,15 +24,25 @@ GitHub Actions 上的 FastF1 3.8.3 请求官方天气地址返回 HTTP 403，镜
 
 这些样本验证的是当次 Cloudflare 容器出口可访问官方天气数据，尚不代表全部年代均有数据或未来不会出现网络失败。
 
-## 正式实现边界
+## 已落地实现
 
-- 独立的数据同步 Worker，定时触发 Workflow；Container 运行 FastF1，按场次产生天气摘要。
-- 使用持久任务进度和有界重试；403、超时、限流与明确的缺数据分开记录。全部请求失败必须可见，不得显示为同步成功。
-- 历史按赛季分批回填；近期场次有限复查，补充迟到字段；完整历史不每日重抓。任务重复执行不重复发布，失败保留已有数据。
-- D1 继续保存 `session_weather` 摘要和必要的同步状态；检查点不依赖容器临时磁盘。只有需要保留文件时才使用 R2。
-- f1db 已有字段直接采用，FastF1 扩展表独立管理。不在访客请求中访问任何上游。
-- 写入后刷新受影响页面缓存，生产自定义域名与 workers.dev 预览地址分别验收。
-- 不同时迁移 f1db 全量导入，也不为天气新增另一套数据库或通用任务平台。
+- `apps/weather-sync` 是独立 Worker：生产配置每 30 分钟由 Cron 触发当季 Workflow；预览 Worker 不挂 Cron，只用于手动验收，避免重复写共享 D1。
+- Workflow 按年拆成选择候选、容器采集、D1 写入、缓存刷新与覆盖率检查步骤。步骤结果由 Cloudflare Workflows 持久化，D1 状态不依赖容器临时磁盘。
+- Container 镜像预装 FastF1 3.8.3 与 requests 2.34.2；Worker 与容器之间使用共享 secret 认证，容器入口只开放 health 与 collect。
+- 采集在 requests 层记录实际主机与 HTTP 状态。触达 Jolpica/Ergast、HTTP 4xx/5xx、超时或异常记为请求失败；只有明确空结果才记为无数据。
+- `weather_sync_state` 区分 `success`、`no_data`、`mismatch`、`failed`、`exhausted`。失败按 15 分钟、1 小时、6 小时、24 小时退避，最多 5 次；终态不每日重抓。
+- `session_weather` 只保存 FastF1 可提供的气温、赛道温度与降雨证据。缺失字段保持 NULL，不用其他来源补值。
+- 成功写入后按 `f1db` 缓存标签刷新页面。缓存刷新失败会让 Workflow 继续重试，不会静默丢弃。
+- f1db 已有字段直接采用，FastF1 扩展表独立管理。访客请求不访问任何上游。
+- GitHub Actions 只保留 f1db 导入、CI、镜像构建与部署；不再执行天气取数。
+
+手动操作走认证 API：
+
+- `POST /runs`，body 为 `{"mode":"current"}` 或 `{"mode":"backfill"}`；backfill 可传 `years` 数组，缺省处理 2018 起全部已有 `session_time` 的赛季。
+- `GET /runs/<instanceId>` 查询 Workflow 状态。
+- `GET /status` 查询状态计数、已写入天气行数与失败摘要。
+
+部署需要的 Worker secrets 是 `WEATHER_SYNC_TOKEN`、`WEATHER_CONTAINER_TOKEN`、`CLOUDFLARE_API_TOKEN`；token 值只存在于 Cloudflare 与 GitHub secrets，不进入仓库。
 
 Cloudflare Python Workers 的运行环境与普通 CPython 不同，同步 HTTP 依赖不能直接原样使用。Containers 提供完整运行环境；Workflows 负责持久步骤与重试，但数据库写入仍须自行保证重复执行安全。[Python 包限制](https://developers.cloudflare.com/workers/languages/python/packages/)、[Containers](https://developers.cloudflare.com/containers/)、[Workflows 规则](https://developers.cloudflare.com/workflows/build/rules-of-workflows/)
 

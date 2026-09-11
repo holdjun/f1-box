@@ -23,7 +23,7 @@ f1db 从 2024 赛季起记录场次时刻；2018–2023 由 `scripts/sync-sessio
 - FastF1 返回的字段缺失或非有限数值保持空；本站不自行补零。但 FastF1 底层解析可能已将原始缺失字段转为 0，当前不能反推出其原始缺失状态。
 - 距离计划开始至少四小时才抓取，降低把半场样本永久写入的概率；这不是异常长时间暂停场次已结束的证明。
 - `session_weather` 以 `(year, round, session_key)` 为主键，保存来源和抓取时间；同样核对比赛日期，避免轮次变化导致串场。
-- 定时任务只处理当季，`--have` 跳过已有成功行；历史回填必须手动触发。已存部分字段的行目前不会自动复查。
+- 生产 weather-sync Worker 每 30 分钟处理当季已结束且未完成的场次；历史回填按年经认证 API 手动触发。成功与明确无数据是终态，请求失败按退避重试并保留错误摘要。
 - 页面仅展示可用字段；整场无天气不渲染天气行，同一周末有部分天气时保留对齐占位。
 
 `fastf1.api` 是上游标记未来可能私有化的低层接口。本 PR 保留它以只获取天气，不为天气加载成绩；后续统一采集时再评估 `Session.load()`。其底层可能访问官方计时域名及 FastF1 自有镜像，不保证只触达一个域名。
@@ -37,9 +37,9 @@ f1db 从 2024 赛季起记录场次时刻；2018–2023 由 `scripts/sync-sessio
 - `scripts/site-tables.sql` 在 preview/production Worker 部署前执行，也在 f1db 全量重导后执行；它幂等建表，不能替代未来 schema 迁移。
 - 两张站点表不进入 f1db dump/drop 列表，不建指向 f1db 的外键；重导后清理不存在的比赛关联。
 - `(year, round)` 用于已核对的比赛关联，不宣称轮次永不变化。未来赛程改期应独立处理映射。
-- `.github/workflows/site-data.yml` 负责写入；历史时刻一次性手动回填，天气每日更新当季空缺。
+- `.github/workflows/site-data.yml` 只保留历史时刻的一次性手动回填；天气持续同步与历史回填由 Cloudflare weather-sync Worker 执行。
 - 访客只查询本站 D1，不直连任何上游。
 - preview 与 production 当前共享 D1，站点表数据写入前先核对产物；代码验收在预览完成。
-- 代码边界测试限制直接 URL 和显式 backend，不能替代真实域名观察。手动探针在零成功样本、记录器失效或触达 Jolpica/Ergast 时失败。
+- 代码边界测试限制直接 URL 和显式 backend。Container 在 requests 层记录实际主机与 HTTP 状态，触达 Jolpica/Ergast 或把请求失败当无数据会让测试与采集状态变红。
 
 新结果功能可经 FastF1 内部访问 Jolpica，但不能假定结果都来自它，更不能直接实现另一套 Jolpica 客户端。天气探针不能替代结果、圈速和遥测能力探针。
