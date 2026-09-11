@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["fastf1>=3.5"]
+# dependencies = ["fastf1==3.8.3"]
 # ///
 """回填 2018–2023 各 session 的 UTC 发车时刻到站点表 session_time。
 
@@ -116,17 +116,26 @@ def main():
 
     inserts: list[str] = []
     skipped: list[str] = []  # FastF1 有但 f1db 匹配不到
+    failures: list[str] = []
 
     fastf1.set_log_level("WARNING")
     for year in years:
+        expected_rounds = {
+            round_no for race_year, round_no in ref_dates if race_year == year
+        }
+        if not expected_rounds:
+            failures.append(f"{year}: no f1db races")
+            continue
         schedule = fastf1.get_event_schedule(
             year, backend="fastf1", include_testing=False
         )
+        seen_rounds: set[int] = set()
         for _, row in schedule.iterrows():
             # 解析异常按"跳过+列出"处理，不整批崩溃。RoundNumber/日期任一损坏就跳。
             round_no = None
             try:
                 round_no = int(row["RoundNumber"])
+                seen_rounds.add(round_no)
                 ref_date = ref_dates.get((year, round_no))
                 if ref_date is None:
                     skipped.append(f"{year} Round {round_no}: no f1db race row (round mismatch)")
@@ -141,12 +150,27 @@ def main():
             except (TypeError, ValueError) as exc:
                 skipped.append(f"{year} Round {round_no if round_no is not None else '?'}: malformed row: {exc}")
                 continue
-            for key, utc in sessions_of(row):
+            sessions = sessions_of(row)
+            if not sessions:
+                failures.append(f"{year} Round {round_no}: no usable sessions")
+                continue
+            for key, utc in sessions:
                 inserts.append(
                     f"INSERT OR REPLACE INTO session_time "
                     f"(year, round, session_key, starts_at_utc, source) VALUES "
                     f"({year}, {round_no}, '{key}', '{utc}', 'fastf1-schedule');"
                 )
+
+        missing_rounds = sorted(expected_rounds - seen_rounds)
+        if missing_rounds:
+            failures.append(
+                f"{year}: missing rounds {','.join(str(round_no) for round_no in missing_rounds)}"
+            )
+
+    if failures:
+        raise RuntimeError("; ".join(failures))
+    if not inserts:
+        raise RuntimeError("no session times generated")
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)

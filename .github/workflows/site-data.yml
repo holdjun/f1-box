@@ -46,12 +46,17 @@ jobs:
 
       - name: Apply session times
         run: |
-          if [ -s /tmp/session-times.sql ]; then
-            "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
-              --file /tmp/session-times.sql
-          else
-            echo "no session_time rows produced"
-          fi
+          [ -s /tmp/session-times.sql ] || { echo "session-time backfill is empty" >&2; exit 1; }
+          expected=$(wc -l < /tmp/session-times.sql | tr -d ' ')
+          "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
+            --file /tmp/session-times.sql
+          actual=$("$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --json \
+            --command "SELECT COUNT(*) AS count FROM session_time WHERE year BETWEEN 2018 AND 2023" \
+            | node -p 'const r = JSON.parse(require("fs").readFileSync(0)); const rows = (Array.isArray(r) ? r[0] : r)?.results ?? []; rows[0]?.count ?? 0')
+          [ "$actual" -ge "$expected" ] || {
+            echo "session_time readback failed: expected at least $expected rows, got $actual" >&2
+            exit 1
+          }
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

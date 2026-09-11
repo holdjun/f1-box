@@ -70,8 +70,42 @@ assert not module.matches_race_date(event, "2023-11-20")
       expect(allowedHosts.has(host), `unexpected host: ${host}`).toBe(true);
     }
     expect(source).toContain('backend="fastf1"');
+    expect(source).toContain('dependencies = ["fastf1==3.8.3"]');
     expect(source).not.toContain("jolpi.ca");
     expect(source).not.toContain("ergast.com");
+  });
+
+  it("rejects an incomplete FastF1 schedule before writing SQL", () => {
+    runPython(`
+import sqlite3, sys, tempfile, types
+work = pathlib.Path(tempfile.mkdtemp())
+db_path = work / "f1db.db"
+out_path = work / "session-times.sql"
+with sqlite3.connect(db_path) as connection:
+    connection.execute("CREATE TABLE race (year INTEGER, round INTEGER, date TEXT)")
+    connection.executemany(
+        "INSERT INTO race VALUES (?, ?, ?)",
+        [(2023, 1, "2023-03-05"), (2023, 2, "2023-03-19")],
+    )
+event = {
+    "RoundNumber": 1,
+    "EventDate": "2023-03-05",
+    "Session1": "Race",
+    "Session1DateUtc": "2023-03-05T15:00:00Z",
+}
+fastf1.set_log_level = lambda level: None
+fastf1.get_event_schedule = lambda *args, **kwargs: types.SimpleNamespace(
+    iterrows=lambda: iter([(0, event)])
+)
+sys.argv = ["sync-session-times.py", str(db_path), "--out", str(out_path), "--years", "2023"]
+try:
+    module.main()
+except RuntimeError as exc:
+    assert "missing rounds" in str(exc), exc
+else:
+    raise AssertionError("incomplete schedule was accepted")
+assert not out_path.exists()
+`);
   });
 
   it("loads site tables before deploys and exposes the backfill workflow", () => {
@@ -93,5 +127,9 @@ assert not module.matches_race_date(event, "2023-11-20")
     );
     expect(siteData).toContain("uv run scripts/sync-session-times.py");
     expect(siteData).toContain("--file scripts/site-tables.sql");
+    expect(siteData).toContain(
+      "SELECT COUNT(*) AS count FROM session_time WHERE year BETWEEN 2018 AND 2023",
+    );
+    expect(siteData).not.toContain("no session_time rows produced");
   });
 });
