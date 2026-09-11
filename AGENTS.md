@@ -15,6 +15,8 @@
 - 验证命令：`pnpm check`、`pnpm test`、`pnpm -r build`；e2e 用 `pnpm --filter @f1-box/web test:e2e`（桌面 / 375px / reduced-motion / 双主题 axe 可访问性）。
 - 视觉审阅（截图检查）可用 VLM 网关，配置见 `.env.example`；token 只放本地 `.env`，严禁提交。
 - `gh` 已登录 holdjun 账号；仓库为 holdjun/f1-box。Cloudflare 资源（Worker、R2）操作前先用 `wrangler whoami` 确认登录状态，有问题找用户处理。
+- 账号与凭据边界：GitHub secrets、Cloudflare API token、账号权限由用户维护。部署或 API 调用出现 401/403/权限不足时，只根据日志定位一次缺失能力，然后直接请用户更新并等待确认，不反复试探、不尝试绕过；token 明文不输出、不提交。
+- 本机网络访问 `workers.dev` 或外部文档可能受 DNS 污染影响，需要代理时使用：`export https_proxy=http://127.0.0.1:7897 http_proxy=http://127.0.0.1:7897 all_proxy=socks5://127.0.0.1:7897`。
 - wrangler 的 `r2 object` / `kv key` 命令不带参数时默认操作本地模拟存储；操作真实云端必须加 `--remote`。
 - 地址：生产 https://f1-box.com，预览 https://f1-box-preview.rj7c4mhzcp.workers.dev（账号子域 rj7c4mhzcp）。
 - `wrangler dev --remote` 会把 D1/KV/AI/R2 全指向生产环境，且 dev server 响应请求时走真实生产库。用它调试等于用生产配额。用完立即停，否则孤儿进程（父进程退出后仍挂的）会一直连生产、持续烧 D1 每日配额。排查残留：`ps -ef | grep -E 'wrangler dev|workerd|--remote'`，确认 cwd 指向临时目录（如 `/private/tmp/*`）但目录已不存在的进程即孤儿，直接 kill，`lsof -iTCP:<port> -sTCP:LISTEN` 查端口占用。
