@@ -1,0 +1,75 @@
+name: site-data
+
+# 站点自有表的运维入口。f1db 整库重导由 data-sync.yml 负责；
+# 这里的 session_time 是一次性历史回填，手动触发，不进常规 CI。
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-data
+  cancel-in-progress: false
+
+env:
+  WRANGLER: apps/web/node_modules/.bin/wrangler
+
+jobs:
+  backfill-session-times:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install uv
+        run: |
+          python3 -m pip install --quiet --user uv
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Apply site tables
+        run: |
+          "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
+            --file scripts/site-tables.sql
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Generate session times
+        run: uv run scripts/sync-session-times.py --out /tmp/session-times.sql
+
+      - name: Apply session times
+        run: |
+          if [ -s /tmp/session-times.sql ]; then
+            "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
+              --file /tmp/session-times.sql
+          else
+            echo "no session_time rows produced"
+          fi
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Purge f1db cache
+        run: |
+          if [ -z "$CLOUDFLARE_ZONE_NAME" ]; then
+            echo "CLOUDFLARE_ZONE_NAME is empty; skip cache purge"
+            exit 0
+          fi
+          zone=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/zones?name=$CLOUDFLARE_ZONE_NAME" \
+            | node -p 'JSON.parse(require("fs").readFileSync(0)).result?.[0]?.id ?? ""')
+          [ -n "$zone" ] || { echo "zone lookup failed" >&2; exit 1; }
+          curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$zone/purge_cache" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"tags":["f1db"]}' > /dev/null
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ZONE_NAME: ${{ vars.CLOUDFLARE_ZONE_NAME }}

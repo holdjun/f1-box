@@ -417,6 +417,25 @@ const metaRowNoSessions = {
   sprint_race_date: null,
 };
 
+const metaRow2018 = {
+  ...metaRow,
+  year: 2018,
+  date: "2018-03-25",
+  time: null,
+  free_practice_1_date: null,
+  free_practice_1_time: null,
+  free_practice_2_date: null,
+  free_practice_2_time: null,
+  free_practice_3_date: null,
+  free_practice_3_time: null,
+  qualifying_date: null,
+  qualifying_time: null,
+  sprint_qualifying_date: null,
+  sprint_qualifying_time: null,
+  sprint_race_date: null,
+  sprint_race_time: null,
+};
+
 // getRacePage 一次 batch 11 条语句；未登记的语句抛错，用本助手把其余 tab 置空
 function tabFragments(
   extra: Record<string, unknown[]>,
@@ -537,6 +556,75 @@ describe("createRaceResultsRepository getRacePage", () => {
       driverName: "Charles Leclerc",
       year: 2024,
     });
+  });
+
+  it("prefers f1db session times over session_time backfill", async () => {
+    const db = fakeDbBySql(
+      tabFragments({
+        circuit_full_name: [
+          {
+            ...metaRow,
+            session_times: JSON.stringify([
+              { key: "practice-1", value: "2000-01-01T00:00:00Z" },
+            ]),
+          },
+        ],
+      }),
+    );
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2026,
+      "australia",
+    );
+    const practice1 = page?.meta.sessions.find(
+      (session) => session.key === "practice-1",
+    );
+    expect(practice1?.startsAtUtc).toBe("2026-03-06T01:30:00Z");
+  });
+
+  it("backfills sessions from session_time when f1db only has the race date", async () => {
+    const db = fakeDbBySql(
+      tabFragments({
+        circuit_full_name: [
+          {
+            ...metaRow2018,
+            session_times: JSON.stringify([
+              { key: "practice-1", value: "2018-03-23T01:00:00Z" },
+              { key: "practice-2", value: "2018-03-23T05:00:00Z" },
+              { key: "practice-3", value: "2018-03-24T01:00:00Z" },
+              { key: "qualifying", value: "2018-03-24T05:00:00Z" },
+              { key: "race", value: "2018-03-25T05:00:00Z" },
+            ]),
+          },
+        ],
+      }),
+    );
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2018,
+      "australia",
+    );
+    expect(page?.meta.sessions).toEqual([
+      {
+        key: "practice-1",
+        label: "Practice 1",
+        startsAtUtc: "2018-03-23T01:00:00Z",
+      },
+      {
+        key: "practice-2",
+        label: "Practice 2",
+        startsAtUtc: "2018-03-23T05:00:00Z",
+      },
+      {
+        key: "practice-3",
+        label: "Practice 3",
+        startsAtUtc: "2018-03-24T01:00:00Z",
+      },
+      {
+        key: "qualifying",
+        label: "Qualifying",
+        startsAtUtc: "2018-03-24T05:00:00Z",
+      },
+      { key: "race", label: "Race", startsAtUtc: "2018-03-25T05:00:00Z" },
+    ]);
   });
 
   it("renders the anti-clockwise direction without the raw underscore", async () => {
