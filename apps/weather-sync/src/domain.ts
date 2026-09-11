@@ -96,18 +96,52 @@ export interface WorkflowParams {
   years: number[] | null;
 }
 
-export const candidateSql = `SELECT st.year, st.round,
-       st.session_key AS sessionKey, r.date AS raceDate,
-       st.starts_at_utc AS startsAtUtc,
+// current 赛季时刻在 f1db race 列；session_time 只补旧赛季缺失，不能当唯一来源。
+export const candidateSql = `WITH session_start AS (
+  SELECT st.year, st.round, st.session_key, st.starts_at_utc
+  FROM session_time st
+  WHERE st.year = ?1
+  UNION ALL
+  SELECT r.year, r.round, s.session_key,
+         CASE s.session_key
+           WHEN 'practice-1' THEN r.free_practice_1_date || 'T' || r.free_practice_1_time || ':00Z'
+           WHEN 'practice-2' THEN r.free_practice_2_date || 'T' || r.free_practice_2_time || ':00Z'
+           WHEN 'practice-3' THEN r.free_practice_3_date || 'T' || r.free_practice_3_time || ':00Z'
+           WHEN 'qualifying' THEN r.qualifying_date || 'T' || r.qualifying_time || ':00Z'
+           WHEN 'sprint-qualifying' THEN r.sprint_qualifying_date || 'T' || r.sprint_qualifying_time || ':00Z'
+           WHEN 'sprint' THEN r.sprint_race_date || 'T' || r.sprint_race_time || ':00Z'
+           ELSE r.date || 'T' || r.time || ':00Z'
+         END AS starts_at_utc
+  FROM race r
+  JOIN (
+    SELECT 'practice-1' AS session_key
+    UNION ALL SELECT 'practice-2'
+    UNION ALL SELECT 'practice-3'
+    UNION ALL SELECT 'qualifying'
+    UNION ALL SELECT 'sprint-qualifying'
+    UNION ALL SELECT 'sprint'
+    UNION ALL SELECT 'race'
+  ) s
+  WHERE r.year = ?1
+    AND NOT EXISTS (
+      SELECT 1 FROM session_time st
+      WHERE st.year = r.year
+        AND st.round = r.round
+        AND st.session_key = s.session_key
+    )
+)
+SELECT ss.year, ss.round,
+       ss.session_key AS sessionKey, r.date AS raceDate,
+       ss.starts_at_utc AS startsAtUtc,
        COALESCE(ws.attempts, 0) AS attempts
-FROM session_time st
-JOIN race r ON r.year = st.year AND r.round = st.round
+FROM session_start ss
+JOIN race r ON r.year = ss.year AND r.round = ss.round
 LEFT JOIN session_weather sw
-  ON sw.year = st.year AND sw.round = st.round AND sw.session_key = st.session_key
+  ON sw.year = ss.year AND sw.round = ss.round AND sw.session_key = ss.session_key
 LEFT JOIN weather_sync_state ws
-  ON ws.year = st.year AND ws.round = st.round AND ws.session_key = st.session_key
-WHERE st.year = ?1
-  AND st.starts_at_utc <= ?2
+  ON ws.year = ss.year AND ws.round = ss.round AND ws.session_key = ss.session_key
+WHERE ss.year = ?1
+  AND ss.starts_at_utc <= ?2
   AND sw.year IS NULL
   AND (
     ws.year IS NULL
@@ -117,11 +151,11 @@ WHERE st.year = ?1
       AND (ws.next_attempt_at IS NULL OR ws.next_attempt_at <= ?4)
     )
   )
-ORDER BY st.year, st.round, st.session_key
+ORDER BY ss.year, ss.round, ss.session_key
 LIMIT 500`;
 
-export const yearsSql = `SELECT DISTINCT year
-FROM session_time
+export const yearsSql = `SELECT year
+FROM season
 WHERE year >= ?1
 ORDER BY year`;
 

@@ -14,6 +14,7 @@ import {
   parseContainerResponse,
   parseRunRequest,
   summarize,
+  yearsSql,
 } from "../src/domain";
 
 const repoRoot = path.resolve(
@@ -188,6 +189,78 @@ describe("Cloudflare weather sync domain", () => {
     ).toThrow(/years/i);
   });
 
+  it("uses native f1db session times in current seasons", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "weather-current-"));
+    const dbPath = path.join(dir, "d1.db");
+    const run = (script: string) =>
+      execFileSync("sqlite3", ["-json", dbPath], {
+        input: script,
+        encoding: "utf8",
+      });
+    run(
+      readFileSync(
+        path.join(repoRoot, "apps/web/tests/fixtures/d1-schema.sql"),
+        "utf8",
+      ),
+    );
+    run(readFileSync(path.join(repoRoot, "scripts/site-tables.sql"), "utf8"));
+    run(
+      readFileSync(path.join(repoRoot, "scripts/f1db-d1-indexes.sql"), "utf8"),
+    );
+    run(`
+      INSERT INTO season (year) VALUES (2026);
+      INSERT INTO race (
+        id, year, round, date, time, grand_prix_id, official_name,
+        qualifying_format, circuit_id, circuit_layout_id, circuit_type,
+        direction, course_length, turns, laps, distance,
+        drivers_championship_decider, constructors_championship_decider,
+        free_practice_1_date, free_practice_1_time,
+        qualifying_date, qualifying_time
+      ) VALUES (
+        1, 2026, 1, '2026-03-08', '04:00', 'bahrain', 'Bahrain Grand Prix',
+        'standard', 'bahrain', 'bahrain-2026', 'track',
+        'clockwise', 5.412, 15, 57, 308.238, 0, 0,
+        '2026-03-06', '01:30', '2026-03-07', '05:00'
+      );
+    `);
+    const bind = (sql: string) =>
+      sql
+        .replace(/\?1/g, "2026")
+        .replace(/\?2/g, "'2026-09-12T00:00:00.000Z'")
+        .replace(/\?3/g, "5")
+        .replace(/\?4/g, "'2026-09-11T00:00:00.000Z'");
+    const years = JSON.parse(run(bind(yearsSql)));
+    const candidates = JSON.parse(run(bind(candidateSql)));
+    expect(years).toEqual([{ year: 2026 }]);
+    expect(candidates).toEqual([
+      {
+        year: 2026,
+        round: 1,
+        sessionKey: "practice-1",
+        raceDate: "2026-03-08",
+        startsAtUtc: "2026-03-06T01:30:00Z",
+        attempts: 0,
+      },
+      {
+        year: 2026,
+        round: 1,
+        sessionKey: "qualifying",
+        raceDate: "2026-03-08",
+        startsAtUtc: "2026-03-07T05:00:00Z",
+        attempts: 0,
+      },
+      {
+        year: 2026,
+        round: 1,
+        sessionKey: "race",
+        raceDate: "2026-03-08",
+        startsAtUtc: "2026-03-08T04:00:00Z",
+        attempts: 0,
+      },
+    ]);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
   it("uses an indexed candidate query", () => {
     const dir = mkdtempSync(path.join(tmpdir(), "weather-plan-"));
     const dbPath = path.join(dir, "d1.db");
@@ -213,7 +286,7 @@ describe("Cloudflare weather sync domain", () => {
     const unindexedScans = plan
       .split("\n")
       .filter((line) =>
-        /SCAN (session_time|weather_sync_state)(?! USING)/.test(line),
+        /SCAN (race|session_time|weather_sync_state)(?! USING)/.test(line),
       );
     expect(unindexedScans).toEqual([]);
     rmSync(dir, { recursive: true, force: true });
