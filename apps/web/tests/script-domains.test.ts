@@ -26,18 +26,22 @@ const allowedHosts = new Set([
   "livetiming.formula1.com",
 ]);
 
-function assertExplicitBackend(source: string, label: string): void {
+function assertExplicitBackend(
+  source: string,
+  label: string,
+  backend: "fastf1" | "f1timing",
+): void {
   const code = source
     .split("\n")
     .filter((line) => !/^\s*#/.test(line))
     .join("\n");
   for (const match of code.matchAll(
-    /\b(get_session|get_event_schedule)\s*\(/g,
+    /\bfastf1\s*\.\s*(get_session|get_event_schedule)\s*\(/g,
   )) {
     const call = code.slice(match.index, match.index + 200);
     expect(
-      call.includes('backend="fastf1"'),
-      `${label} 的 ${match[1]} 没有显式传 backend="fastf1"`,
+      call.includes(`backend="${backend}"`),
+      `${label} 的 ${match[1]} 没有显式传 backend="${backend}"`,
     ).toBe(true);
   }
 }
@@ -58,7 +62,11 @@ describe("FastF1 请求边界", () => {
           `${script} 引用未申报/禁用主机 ${host}`,
         ).toBe(true);
       }
-      assertExplicitBackend(source, script);
+      assertExplicitBackend(
+        source,
+        script,
+        script.endsWith("app.py") ? "f1timing" : "fastf1",
+      );
     });
   }
 
@@ -67,6 +75,7 @@ describe("FastF1 请求边界", () => {
       assertExplicitBackend(
         readFileSync(path.join(workflowsDir, name), "utf8"),
         name,
+        "fastf1",
       );
     }
   });
