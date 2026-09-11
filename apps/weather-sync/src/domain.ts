@@ -97,7 +97,11 @@ export interface WorkflowParams {
 }
 
 // current 赛季时刻在 f1db race 列；session_time 只补旧赛季缺失，不能当唯一来源。
-export const candidateSql = `WITH session_start AS (
+export const candidateSql = `WITH session_keys(session_key) AS (
+  VALUES ('practice-1'), ('practice-2'), ('practice-3'),
+         ('qualifying'), ('sprint-qualifying'), ('sprint'), ('race')
+),
+session_start AS (
   SELECT st.year, st.round, st.session_key, st.starts_at_utc
   FROM session_time st
   WHERE st.year = ?1
@@ -113,15 +117,7 @@ export const candidateSql = `WITH session_start AS (
            ELSE r.date || 'T' || r.time || ':00Z'
          END AS starts_at_utc
   FROM race r
-  JOIN (
-    SELECT 'practice-1' AS session_key
-    UNION ALL SELECT 'practice-2'
-    UNION ALL SELECT 'practice-3'
-    UNION ALL SELECT 'qualifying'
-    UNION ALL SELECT 'sprint-qualifying'
-    UNION ALL SELECT 'sprint'
-    UNION ALL SELECT 'race'
-  ) s
+  JOIN session_keys s
   WHERE r.year = ?1
     AND NOT EXISTS (
       SELECT 1 FROM session_time st

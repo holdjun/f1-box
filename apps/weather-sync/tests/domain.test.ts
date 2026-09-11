@@ -189,14 +189,16 @@ describe("Cloudflare weather sync domain", () => {
     ).toThrow(/years/i);
   });
 
-  it("uses native f1db session times in current seasons", () => {
+  it("uses native f1db session times within D1 limits", () => {
     const dir = mkdtempSync(path.join(tmpdir(), "weather-current-"));
     const dbPath = path.join(dir, "d1.db");
     const run = (script: string) =>
       execFileSync("sqlite3", ["-json", dbPath], {
-        input: script,
+        input: `.limit compound_select 5\n${script}`,
         encoding: "utf8",
       });
+    const runJson = (script: string) =>
+      JSON.parse(run(script).replace(/^\s*compound_select 5\n/, ""));
     run(
       readFileSync(
         path.join(repoRoot, "apps/web/tests/fixtures/d1-schema.sql"),
@@ -229,8 +231,8 @@ describe("Cloudflare weather sync domain", () => {
         .replace(/\?2/g, "'2026-09-12T00:00:00.000Z'")
         .replace(/\?3/g, "5")
         .replace(/\?4/g, "'2026-09-11T00:00:00.000Z'");
-    const years = JSON.parse(run(bind(yearsSql)));
-    const candidates = JSON.parse(run(bind(candidateSql)));
+    const years = runJson(bind(yearsSql));
+    const candidates = runJson(bind(candidateSql));
     expect(years).toEqual([{ year: 2026 }]);
     expect(candidates).toEqual([
       {
