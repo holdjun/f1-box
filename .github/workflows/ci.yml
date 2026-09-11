@@ -57,12 +57,66 @@ jobs:
       - run: pnpm --filter @f1-box/web build
         env:
           F1BOX_WRANGLER_CONFIG: ./wrangler.preview.jsonc
-      # 凭据只给真正要用的这一步：放在 job 级 env 上时，依赖安装与构建里跑的任意
+      # 新代码引用站点表时必须先建表；preview 与 production 共用该 D1，建表幂等。
+      - name: Apply site tables
+        run: |
+          apps/web/node_modules/.bin/wrangler d1 execute f1db --remote \
+            -c apps/web/wrangler.preview.jsonc --file scripts/site-tables.sql
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # 凭据只给真正要用的步骤：放在 job 级 env 上时，依赖安装与构建里跑的任意
       # 第三方代码都能读到它
       - run: pnpm --filter @f1-box/web exec wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Smoke test preview
+        run: |
+          for path in /racing/2026 /results/2026/races /results/2026/races/australia/race-result; do
+            curl --retry 5 --retry-delay 2 --retry-all-errors -fsS \
+              "https://f1-box-preview.rj7c4mhzcp.workers.dev${path}" > /dev/null
+          done
+
+  weather-preview:
+    # 预览 Worker 不挂 cron，只允许手动触发验收，避免和正式采集任务重复写共享 D1。
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply site tables
+        run: |
+          apps/web/node_modules/.bin/wrangler d1 execute f1db --remote \
+            -c apps/web/wrangler.preview.jsonc --file scripts/site-tables.sql
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Deploy weather sync preview
+        run: |
+          printf 'WEATHER_SYNC_TOKEN=%s\nWEATHER_CONTAINER_TOKEN=%s\nCLOUDFLARE_API_TOKEN=%s\n' \
+            "$WEATHER_SYNC_TOKEN" "$WEATHER_SYNC_TOKEN" "$CLOUDFLARE_API_TOKEN" \
+            > /tmp/weather-sync.secrets
+          pnpm --filter @f1-box/weather-sync exec wrangler deploy \
+            --config wrangler.preview.jsonc --secrets-file /tmp/weather-sync.secrets
+          rm /tmp/weather-sync.secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WEATHER_SYNC_TOKEN: ${{ secrets.WEATHER_SYNC_TOKEN }}
+      - name: Smoke test weather sync preview
+        run: |
+          curl --retry 10 --retry-delay 5 --retry-all-errors -fsS \
+            "https://f1-box-weather-sync-preview.rj7c4mhzcp.workers.dev/health" > /dev/null
 
   production:
     # 显式锁定 main：部署生产的边界守卫，不依赖触发器配置的隐式保证
@@ -79,7 +133,57 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @f1-box/web build
+      - name: Apply site tables
+        run: |
+          apps/web/node_modules/.bin/wrangler d1 execute f1db --remote \
+            -c apps/web/wrangler.jsonc --file scripts/site-tables.sql
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - run: pnpm --filter @f1-box/web exec wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Smoke test production
+        run: |
+          for path in /racing/2026 /results/2026/races /results/2026/races/australia/race-result; do
+            curl --retry 5 --retry-delay 2 --retry-all-errors -fsS \
+              "https://f1-box.com${path}" > /dev/null
+          done
+
+  weather-production:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply site tables
+        run: |
+          apps/web/node_modules/.bin/wrangler d1 execute f1db --remote \
+            -c apps/web/wrangler.jsonc --file scripts/site-tables.sql
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Deploy weather sync
+        run: |
+          printf 'WEATHER_SYNC_TOKEN=%s\nWEATHER_CONTAINER_TOKEN=%s\nCLOUDFLARE_API_TOKEN=%s\n' \
+            "$WEATHER_SYNC_TOKEN" "$WEATHER_SYNC_TOKEN" "$CLOUDFLARE_API_TOKEN" \
+            > /tmp/weather-sync.secrets
+          pnpm --filter @f1-box/weather-sync exec wrangler deploy \
+            --config wrangler.jsonc --secrets-file /tmp/weather-sync.secrets
+          rm /tmp/weather-sync.secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WEATHER_SYNC_TOKEN: ${{ secrets.WEATHER_SYNC_TOKEN }}
+      - name: Smoke test weather sync
+        run: |
+          curl --retry 10 --retry-delay 5 --retry-all-errors -fsS \
+            "https://f1-box-weather-sync.rj7c4mhzcp.workers.dev/health" > /dev/null

@@ -57,6 +57,16 @@ const {
         };
         applyTheme();
         document.addEventListener("astro:after-swap", applyTheme);
+        // Cloudflare 会拒绝 Worker 路由的 speculative prefetch；真实文档加载期间
+        // 立即显示顶部进度反馈，收到响应后再进入短视图过渡。
+        document.addEventListener("astro:before-preparation", () => {
+          document.documentElement.setAttribute("data-navigation-pending", "");
+        });
+        const clearNavigationPending = () => {
+          document.documentElement.removeAttribute("data-navigation-pending");
+        };
+        document.addEventListener("astro:after-preparation", clearNavigationPending);
+        document.addEventListener("astro:page-load", clearNavigationPending);
       })();
     </script>
     <title>{title} · F1 Box</title>

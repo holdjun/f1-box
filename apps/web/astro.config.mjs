@@ -6,6 +6,9 @@ import { defineConfig } from "astro/config";
 
 export default defineConfig({
   output: "server",
+  // Cloudflare 对 Worker 路由的 sec-purpose=prefetch 请求返回 503；关闭无效预取，
+  // 避免 hover 白跑一次请求，真实导航期间由 ClientRouter 进度条即时反馈。
+  prefetch: false,
   cache: { provider: cacheCloudflare() },
   integrations: [svelte()],
   vite: {

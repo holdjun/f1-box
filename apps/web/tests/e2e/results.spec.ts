@@ -95,6 +95,40 @@ test.describe("race detail", () => {
     );
   });
 
+  // FastF1 有什么就显示什么：气温、赛道温度和是否降雨均允许独立缺失，
+  // 不用其他来源补值，也不能把缺失温度渲染成 0°。
+  test("@desktop weekend weather shows only FastF1 values", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races/australia/race-result");
+    const progress = page.locator(".weekend-progress");
+    const weather = progress.locator("[data-session-weather]");
+    // 任一 session 有天气时每格都占位，格子高度才齐
+    await expect(weather).toHaveCount(5);
+    await expect(weather.nth(0)).toContainText("18°");
+    await expect(weather.nth(0)).toContainText("31° track");
+    await expect(weather.nth(1)).toContainText("rain");
+    // 排位赛只有赛道温度：不伪造气温
+    await expect(weather.nth(3)).toContainText("26° track");
+    await expect(progress).not.toContainText("0°");
+    // 正赛没有 FastF1 天气时保持空占位，不回退到第三方预报
+    await expect(weather.nth(4)).toHaveText("");
+    await expect(
+      progress.getByRole("link", { name: "Open-Meteo" }),
+    ).toHaveCount(0);
+  });
+
+  test("@desktop weekend without weather renders no weather row", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races/monaco/race-result");
+    const progress = page.locator(".weekend-progress");
+    await expect(progress.locator("[data-session-weather]")).toHaveCount(0);
+    await expect(
+      progress.getByRole("link", { name: "Open-Meteo" }),
+    ).toHaveCount(0);
+  });
+
   test("@desktop bare slug lands on the latest session with results", async ({
     page,
   }) => {

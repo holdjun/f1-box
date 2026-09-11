@@ -55,6 +55,59 @@ test("@desktop racing calendar links every round to its results page", async ({
   await expect(page.locator(".year-selector")).toHaveCount(0);
 });
 
+test("@desktop Results hover uses preload instead of rejected prefetch", async ({
+  page,
+}) => {
+  await page.goto("/racing/2026");
+  const target = "/results/2026/races";
+  const requests: { purpose: string; type: string }[] = [];
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname === target) {
+      requests.push({
+        purpose: request.headers()["sec-purpose"] ?? "",
+        type: request.resourceType(),
+      });
+    }
+  });
+
+  await page.locator(`header a[href="${target}"]`).hover();
+  await expect.poll(() => requests.length).toBe(1);
+  expect(requests).toEqual([{ purpose: "", type: "other" }]);
+});
+
+test("@desktop Results navigation shows feedback while the document loads", async ({
+  page,
+}) => {
+  await page.goto("/racing/2026");
+  let release: () => void = () => {};
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/results/2026/races", async (route) => {
+    await gate;
+    await route.continue();
+  });
+
+  const click = page.locator('header a[href="/results/2026/races"]').click();
+  try {
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-navigation-pending",
+      "",
+    );
+  } finally {
+    release();
+  }
+  await click;
+  await page.waitForURL(/\/results\/2026\/races$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "2026 Race Results",
+  );
+  await expect(page.locator("html")).not.toHaveAttribute(
+    "data-navigation-pending",
+    "",
+  );
+});
+
 test("@desktop browser back from race detail returns to the calendar", async ({
   page,
 }) => {

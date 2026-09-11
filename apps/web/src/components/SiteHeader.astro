@@ -30,6 +30,7 @@ const links = [
         {links.map((link) => (
           <a
             href={link.href}
+            data-navigation-preload={link.key === "results" ? "" : undefined}
             aria-current={active === link.key ? "page" : undefined}
             class="relative inline-flex min-h-11 shrink-0 items-center text-[0.64rem] font-semibold tracking-[0.07em] uppercase text-ink-strong transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:origin-left after:scale-x-0 after:bg-accent after:transition-transform after:duration-200 hover:text-ink hover:after:scale-x-100 aria-[current=page]:text-ink aria-[current=page]:after:scale-x-100 lg:text-[0.78rem] lg:tracking-[0.11em]"
           >{link.label}</a>

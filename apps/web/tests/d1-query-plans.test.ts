@@ -14,6 +14,7 @@ const SCHEMA_FIXTURE = path.join(
   repoRoot,
   "apps/web/tests/fixtures/d1-schema.sql",
 );
+const SITE_TABLES = path.join(repoRoot, "scripts/site-tables.sql");
 const INDEX_SQL = path.join(repoRoot, "scripts/f1db-d1-indexes.sql");
 const DUMP_SCRIPT = path.join(repoRoot, "scripts/f1db-d1-dump.sh");
 const IMPORT_SCRIPT = path.join(repoRoot, "scripts/f1db-d1-import.sh");
@@ -150,7 +151,9 @@ beforeAll(() => {
   // 真实 D1 的形态：上游的表与视图，加上索引脚本，没有别的索引。逐表 dump 不带索引，
   // 所以上游那 164 条单列索引一条都不在库里——夹具必须如实反映，否则计划断言测的是
   // 另一个世界。也没有 sqlite_stat1：规划器只能靠启发式，这是最坏情况下的验证。
+  // site-tables.sql 是站点自己的表（session_time 等），不属于 f1db 上游，单独加载。
   run(readFileSync(SCHEMA_FIXTURE, "utf8"));
+  run(readFileSync(SITE_TABLES, "utf8"));
   run(readFileSync(INDEX_SQL, "utf8"));
   queries = collectQueryConstants();
   return () => rmSync(dir, { recursive: true, force: true });

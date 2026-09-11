@@ -1,4 +1,4 @@
-{
+export default {
   "meta": {
     "year": 2026,
     "round": 1,
@@ -29,12 +29,22 @@
       {
         "key": "practice-1",
         "label": "Practice 1",
-        "startsAtUtc": "2026-03-06T01:30:00Z"
+        "startsAtUtc": "2026-03-06T01:30:00Z",
+        "weather": {
+          "tempC": 18.4,
+          "trackTempC": 31.2,
+          "weatherCode": null
+        }
       },
       {
         "key": "practice-2",
         "label": "Practice 2",
-        "startsAtUtc": "2026-03-06T05:00:00Z"
+        "startsAtUtc": "2026-03-06T05:00:00Z",
+        "weather": {
+          "tempC": 21.7,
+          "trackTempC": 40.9,
+          "weatherCode": "rain"
+        }
       },
       {
         "key": "practice-3",
@@ -44,7 +54,12 @@
       {
         "key": "qualifying",
         "label": "Qualifying",
-        "startsAtUtc": "2026-03-07T05:00:00Z"
+        "startsAtUtc": "2026-03-07T05:00:00Z",
+        "weather": {
+          "tempC": null,
+          "trackTempC": 26.0,
+          "weatherCode": null
+        }
       },
       {
         "key": "race",
@@ -2193,4 +2208,4 @@
     "sprintRace": [],
     "sprintQualifying": []
   }
-}
+};
