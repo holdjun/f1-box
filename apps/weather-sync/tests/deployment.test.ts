@@ -11,6 +11,10 @@ const dockerfile = readFileSync(
   path.join(repoRoot, "apps/weather-sync/container/Dockerfile"),
   "utf8",
 );
+const containerSource = readFileSync(
+  path.join(repoRoot, "apps/weather-sync/src/container.ts"),
+  "utf8",
+);
 const ci = readFileSync(
   path.join(repoRoot, ".github/workflows/ci.yml"),
   "utf8",
@@ -23,6 +27,7 @@ const weatherPreviewJob = ci.slice(
 describe("weather deployment configuration", () => {
   it("gives the FastF1 cache a writable container directory", () => {
     expect(dockerfile).toContain("FASTF1_CACHE=/tmp/fastf1");
+    expect(containerSource).toContain('FASTF1_CACHE: "/tmp/fastf1"');
     expect(dockerfile).toContain(
       "install -d -m 0700 -o nobody -g nogroup /tmp/fastf1",
     );

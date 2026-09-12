@@ -11,6 +11,7 @@ export class WeatherContainer extends Container<Env> {
   pingEndpoint = "health";
   sleepAfter = "5m";
   envVars = {
+    FASTF1_CACHE: "/tmp/fastf1",
     WEATHER_CONTAINER_TOKEN: this.env.WEATHER_CONTAINER_TOKEN,
   };
 
