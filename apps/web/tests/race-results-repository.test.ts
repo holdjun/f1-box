@@ -627,6 +627,78 @@ describe("createRaceResultsRepository getRacePage", () => {
     ]);
   });
 
+  it("merges session weather while preserving null and zero values", async () => {
+    const db = fakeDbBySql(
+      tabFragments({
+        circuit_full_name: [
+          {
+            ...metaRow,
+            session_weather: JSON.stringify([
+              {
+                key: "practice-1",
+                tempC: 23.4,
+                trackTempC: null,
+                weatherCode: null,
+              },
+              {
+                key: "practice-2",
+                tempC: 0,
+                trackTempC: 0,
+                weatherCode: null,
+              },
+              {
+                key: "practice-3",
+                tempC: null,
+                trackTempC: null,
+                weatherCode: null,
+              },
+              {
+                key: "qualifying",
+                tempC: null,
+                trackTempC: 31.25,
+                weatherCode: "rain",
+              },
+              {
+                key: "race",
+                tempC: 24.6,
+                trackTempC: 32.5,
+                weatherCode: "rain",
+              },
+            ]),
+          },
+        ],
+      }),
+    );
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2026,
+      "australia",
+    );
+    const byKey = new Map(
+      page?.meta.sessions.map((session) => [session.key, session]),
+    );
+    expect(byKey.get("practice-1")?.weather).toEqual({
+      tempC: 23.4,
+      trackTempC: null,
+      weatherCode: null,
+    });
+    expect(byKey.get("practice-2")?.weather).toEqual({
+      tempC: 0,
+      trackTempC: 0,
+      weatherCode: null,
+    });
+    expect(byKey.get("practice-3")?.weather).toBeUndefined();
+    expect(byKey.get("qualifying")?.weather).toEqual({
+      tempC: null,
+      trackTempC: 31.25,
+      weatherCode: "rain",
+    });
+    expect(byKey.get("race")?.weather).toEqual({
+      tempC: 24.6,
+      trackTempC: 32.5,
+      weatherCode: "rain",
+    });
+  });
+
   it("renders the anti-clockwise direction without the raw underscore", async () => {
     const db = fakeDbBySql(
       tabFragments({

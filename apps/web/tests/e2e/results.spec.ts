@@ -80,6 +80,27 @@ test.describe("race detail", () => {
     await expect(progress.locator("li a")).toHaveCount(0);
   });
 
+  test("@desktop shows partial session weather with stable slots", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races/australia/race-result");
+    const weather = page.locator("[data-session-weather]");
+    await expect(weather).toHaveCount(5);
+    await expect(weather.nth(0)).toHaveText("Air 23.4°C");
+    await expect(weather.nth(1)).toHaveText("Air 0°C · Track 0°C");
+    await expect(weather.nth(2)).toHaveText("");
+    await expect(weather.nth(3)).toHaveText("Track 31.3°C · Rain");
+    await expect(weather.nth(4)).toHaveText("Air 24.6°C · Track 32.5°C · Rain");
+  });
+
+  test("@desktop race without weather renders no weather slots", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races/japan/race-result");
+    await expect(page.locator(".weekend-progress")).toBeVisible();
+    await expect(page.locator("[data-session-weather]")).toHaveCount(0);
+  });
+
   test("@desktop upcoming race shows the weekend progress and calendar link", async ({
     page,
   }) => {

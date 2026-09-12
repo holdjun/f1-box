@@ -102,6 +102,21 @@ describe("middleware 默认缓存", () => {
     expect(cache.set).not.toHaveBeenCalled();
   });
 
+  it("比赛详情页追加所在年份的天气缓存标签", async () => {
+    const { cache } = await run("/results/2026/races/australia/race-result");
+    expect(cache.set).toHaveBeenCalledWith({
+      ...CACHE_OPTIONS,
+      tags: ["f1db", "weather:2026"],
+    });
+  });
+
+  it("裸 slug 重定向仍只使用 f1db 标签", async () => {
+    const { cache } = await run("/results/2026/races/australia", {
+      status: 302,
+    });
+    expect(cache.set).toHaveBeenCalledWith(CACHE_OPTIONS);
+  });
+
   // 首页 302 -> /racing/<当前赛季> 占生产总流量三分之一（2026-09-03 实测 23h
   // 60203 次），不缓存时每次都要唤醒 Worker 并查一次 season 表定重定向目标
   it("稳定重定向（301/302）opt-in 边缘缓存", async () => {

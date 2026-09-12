@@ -24,6 +24,22 @@ const seasonIcs = `${Astro.url.origin}/api/calendar.ics?year=${year}`;
 const webcal = (href: string) => href.replace(/^https?:\/\//, "webcal://");
 const linkClass =
   "py-0.5 text-[0.82rem] text-ink-muted underline decoration-line underline-offset-4 transition-colors hover:text-accent";
+const hasWeather = nodes.some((node) => node.weather !== undefined);
+const temperatureFormatter = new Intl.NumberFormat("en", {
+  maximumFractionDigits: 1,
+});
+const weatherText = (weather: NonNullable<WeekendNode["weather"]>) =>
+  [
+    weather.tempC === null
+      ? null
+      : `Air ${temperatureFormatter.format(weather.tempC)}°C`,
+    weather.trackTempC === null
+      ? null
+      : `Track ${temperatureFormatter.format(weather.trackTempC)}°C`,
+    weather.weatherCode === "rain" ? "Rain" : null,
+  ]
+    .filter((part) => part !== null)
+    .join(" · ");
 ---
 
 <section class="weekend-progress shell mt-12">
@@ -72,6 +88,11 @@ const linkClass =
               <time datetime={node.startsAtUtc.slice(0, 10)} data-session-date>{formatWeekdayDate(node.startsAtUtc)}</time>
             </p>
           )}
+          {hasWeather ? (
+            <p class="mt-2 min-h-[1.25rem] text-[0.72rem] text-ink-muted" data-session-weather>
+              {node.weather ? weatherText(node.weather) : ""}
+            </p>
+          ) : null}
         </div>
       </li>
     ))}
