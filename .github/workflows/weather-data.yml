@@ -1,0 +1,61 @@
+name: weather-data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 3 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weather-data
+  cancel-in-progress: false
+
+env:
+  WRANGLER: apps/web/node_modules/.bin/wrangler
+
+jobs:
+  refresh-session-refs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install uv
+        run: |
+          python3 -m pip install --quiet --user uv
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Generate session references
+        run: uv run scripts/sync-session-refs.py --out /tmp/session-refs.sql
+
+      - name: Apply site tables
+        run: |
+          "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
+            --file scripts/site-tables.sql
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Apply session references
+        run: |
+          [ -s /tmp/session-refs.sql ] || { echo "session refs are empty" >&2; exit 1; }
+          expected=$(grep -c '^INSERT INTO session_source_ref' /tmp/session-refs.sql)
+          "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
+            --file /tmp/session-refs.sql
+          actual=$("$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --json \
+            --command "SELECT COUNT(*) AS count FROM session_source_ref WHERE year >= 2018" \
+            | node -p 'const r = JSON.parse(require("fs").readFileSync(0)); const rows = (Array.isArray(r) ? r[0] : r)?.results ?? []; rows[0]?.count ?? 0')
+          [ "$actual" -eq "$expected" ] || {
+            echo "session_source_ref readback failed: expected $expected, got $actual" >&2
+            exit 1
+          }
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

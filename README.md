@@ -30,6 +30,8 @@ f1db（CC-BY-4.0）→ `data-sync.yml` 按上游发布节奏轮询 release tag�
 
 2018–2023 的各 session 发车时刻由 `scripts/sync-session-times.py` 从 FastF1 schedule 回填到 D1 `session_time`；2024 起 f1db 自带，页面读取时 f1db 优先。回填通过 `site-data.yml` 手动触发。
 
+天气采集分成两层：`weather-data.yml` 在 GitHub Actions 里解析 FastF1 schedule，把稳定的 `api_path` 写进 D1 `session_source_ref`；Cloudflare Worker 只按这些明确路径调用无状态 Container 取天气，状态和缓存刷新分别落在 `weather_sync_state` 与 `weather_cache_outbox`。
+
 `scripts/f1db-d1-dump.sh` 从 f1db 官方 SQLite release 生成按表拆分的导入 SQL，`scripts/f1db-d1-import.sh` 推进 D1。赛道轮廓 SVG、车队 logo、国旗存仓库 `apps/web/public/vendor/`；轮廓 SVG 用 `scripts/f1db-circuit-svg-sync.sh` 从 f1db 仓库同步，新增布局时手动跑。带遥测的注解赛道图由 `scripts/generate-circuit-maps.py` 离线生成到 `apps/web/src/data/circuit-maps.json`，无遥测的历史赛道回落轮廓 SVG。
 
 ## 样式系统

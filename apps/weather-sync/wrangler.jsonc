@@ -1,0 +1,46 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "f1-box-weather-sync",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-21",
+  "workers_dev": true,
+  "triggers": { "crons": ["*/30 * * * *"] },
+  "d1_databases": [
+    {
+      "binding": "F1_DB",
+      "database_name": "f1db",
+      "database_id": "50683ee9-c236-4bc5-bc11-4e8151916f54"
+    }
+  ],
+  "containers": [
+    {
+      "class_name": "WeatherContainer",
+      "image": "./container/Dockerfile",
+      "max_instances": 1
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "WEATHER_CONTAINER",
+        "class_name": "WeatherContainer"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["WeatherContainer"]
+    }
+  ],
+  "vars": {
+    "CLOUDFLARE_ZONE_NAME": "f1-box.com"
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1
+    }
+  }
+}
