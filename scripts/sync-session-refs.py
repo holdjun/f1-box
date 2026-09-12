@@ -46,6 +46,10 @@ def to_utc_iso(value) -> str | None:
     return parsed.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def sql_string(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
+
+
 def sessions_of(row) -> list[tuple[str, str, str]]:
     result: list[tuple[str, str, str]] = []
     for index in range(1, 6):
@@ -100,6 +104,7 @@ def main() -> None:
     skipped: list[str] = []
     failures: list[str] = []
     keys_by_year: dict[int, list[tuple[int, str]]] = {year: [] for year in years}
+    seen_keys: set[tuple[int, int, str]] = set()
     fastf1.Cache.set_disabled()
     fastf1.set_log_level("WARNING")
 
@@ -124,6 +129,7 @@ def main() -> None:
                     skipped.append(f"{year} Round {round_no}: no f1db race")
                     continue
                 if not matches_race_date(row, race_date):
+                    # 身份不一致的引用不可信：本次不生成，并在末尾 prune 掉旧引用及派生数据。
                     skipped.append(
                         f"{year} Round {round_no}: date mismatch "
                         f"(fastf1 {row.get('EventDate')} vs f1db {race_date})"
@@ -134,12 +140,20 @@ def main() -> None:
                     failures.append(f"{year} Round {round_no}: no usable sessions")
                     continue
                 for session_key, api_path, starts_at in sessions:
+                    identity = (year, round_no, session_key)
+                    if identity in seen_keys:
+                        failures.append(
+                            f"{year} Round {round_no}: duplicate session reference {session_key}"
+                        )
+                        continue
+                    seen_keys.add(identity)
                     keys_by_year[year].append((round_no, session_key))
                     inserts.append(
                         "INSERT INTO session_source_ref "
                         "(year, round, session_key, api_path, race_date, starts_at_utc, source) VALUES "
-                        f"({year}, {round_no}, '{session_key}', '{api_path}', "
-                        f"'{race_date}', '{starts_at}', 'fastf1-schedule') "
+                        f"({year}, {round_no}, {sql_string(session_key)}, "
+                        f"{sql_string(api_path)}, {sql_string(race_date)}, "
+                        f"{sql_string(starts_at)}, 'fastf1-schedule') "
                         "ON CONFLICT(year, round, session_key) DO UPDATE SET "
                         "api_path = excluded.api_path, race_date = excluded.race_date, "
                         "starts_at_utc = excluded.starts_at_utc, source = excluded.source;"
@@ -164,7 +178,8 @@ def main() -> None:
         if not keys:
             raise RuntimeError(f"{year}: no session references generated")
         keep = ", ".join(
-            f"({round_no}, '{session_key}')" for round_no, session_key in keys
+            f"({round_no}, {sql_string(session_key)})"
+            for round_no, session_key in keys
         )
         prunes.append(
             "DELETE FROM session_source_ref "

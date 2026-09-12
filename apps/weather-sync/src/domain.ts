@@ -165,6 +165,17 @@ FROM weather_sync_state
 GROUP BY status
 ORDER BY status`;
 
+export const weatherCountSql = `SELECT COUNT(*) AS count FROM session_weather`;
+
+export const referenceCountSql = `SELECT COUNT(*) AS count FROM session_source_ref`;
+
+export const failuresSql = `SELECT year, round, session_key AS sessionKey, status, attempts,
+       last_error AS lastError, next_attempt_at AS nextAttemptAt
+FROM weather_sync_state
+WHERE status IN ('failed', 'exhausted', 'mismatch')
+ORDER BY updated_at DESC
+LIMIT 50`;
+
 const failedRetryDelaysMinutes = [15, 60, 360, 1440];
 
 export function nextRetryAt(

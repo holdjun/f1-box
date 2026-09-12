@@ -72,6 +72,8 @@ class Row:
     def get(self, key):
         return self.values.get(key)
     def get_session(self, name):
+        if name == "Race":
+            return Session("/static/2023/O'Brien_Grand_Prix/Race/")
         return Session(f"/static/2023/2023-09-03_Italian_Grand_Prix/{name}/")
 
 row = Row({
@@ -91,7 +93,7 @@ sql = out_path.read_text()
 assert "ON CONFLICT(year, round, session_key) DO UPDATE" in sql, sql
 assert "DELETE FROM session_source_ref" in sql, sql
 assert "/static/2023/2023-09-03_Italian_Grand_Prix/Practice 1/" in sql, sql
-assert "/static/2023/2023-09-03_Italian_Grand_Prix/Race/" in sql, sql
+assert "/static/2023/O''Brien_Grand_Prix/Race/" in sql, sql
 with sqlite3.connect(db_path) as connection:
     connection.executescript(sql)
     keys = connection.execute(
@@ -163,6 +165,44 @@ except RuntimeError as exc:
     assert "unknown session" in str(exc), exc
 else:
     raise AssertionError("unknown session name was silently pruned")
+assert not out_path.exists()
+`);
+  });
+
+  it("rejects duplicate normalized session identities", () => {
+    runPython(`
+work = pathlib.Path(tempfile.mkdtemp())
+db_path = work / "f1db.db"
+out_path = work / "refs.sql"
+with sqlite3.connect(db_path) as connection:
+    connection.execute("CREATE TABLE race (year INTEGER, round INTEGER, date TEXT)")
+    connection.execute("INSERT INTO race VALUES (2023, 1, '2023-03-05')")
+
+class Row:
+    def get(self, key):
+        return {
+            "RoundNumber": 1,
+            "EventDate": "2023-03-05",
+            "Session1": "Sprint Shootout",
+            "Session1DateUtc": "2023-03-04T11:00:00Z",
+            "Session2": "Sprint Qualifying",
+            "Session2DateUtc": "2023-03-04T15:00:00Z",
+            "Session5": "Race",
+            "Session5DateUtc": "2023-03-05T15:00:00Z",
+        }.get(key)
+    def get_session(self, name):
+        return types.SimpleNamespace(api_path=f"/static/2023/{name}/")
+
+fastf1.get_event_schedule = lambda *args, **kwargs: types.SimpleNamespace(
+    iterrows=lambda: [(0, Row())]
+)
+sys.argv = ["sync-session-refs.py", str(db_path), "--out", str(out_path), "--years", "2023"]
+try:
+    module.main()
+except RuntimeError as exc:
+    assert "duplicate session reference" in str(exc), exc
+else:
+    raise AssertionError("duplicate normalized identity was accepted")
 assert not out_path.exists()
 `);
   });

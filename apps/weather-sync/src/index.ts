@@ -6,6 +6,7 @@ import {
   buildPersistPlan,
   type ContainerSessionResult,
   candidateSql,
+  failuresSql,
   LOCK_TTL_MS,
   lockAcquireSql,
   lockReleaseSql,
@@ -14,23 +15,16 @@ import {
   outboxInsertSql,
   outboxSql,
   parseRunRequest,
+  referenceCountSql,
   SETTLE_DELAY_MS,
   type SessionCandidate,
   stateUpsertSql,
   statusSql,
+  weatherCountSql,
   weatherUpsertSql,
 } from "./domain";
 
 export { WeatherContainer } from "./container";
-
-const weatherCountSql = `SELECT COUNT(*) AS count FROM session_weather`;
-const referenceCountSql = `SELECT COUNT(*) AS count FROM session_source_ref`;
-const failuresSql = `SELECT year, round, session_key AS sessionKey, status, attempts,
-       last_error AS lastError, next_attempt_at AS nextAttemptAt
-FROM weather_sync_state
-WHERE status IN ('failed', 'exhausted', 'mismatch')
-ORDER BY updated_at DESC
-LIMIT 50`;
 
 function jsonResponse(value: unknown, status = 200): Response {
   return Response.json(value, {

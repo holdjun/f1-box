@@ -50,10 +50,10 @@ jobs:
           "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
             --file /tmp/session-refs.sql
           actual=$("$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --json \
-            --command "SELECT COUNT(*) AS count FROM session_source_ref" \
+            --command "SELECT COUNT(*) AS count FROM session_source_ref WHERE year >= 2018" \
             | node -p 'const r = JSON.parse(require("fs").readFileSync(0)); const rows = (Array.isArray(r) ? r[0] : r)?.results ?? []; rows[0]?.count ?? 0')
-          [ "$actual" -ge "$expected" ] || {
-            echo "session_source_ref readback failed: expected at least $expected, got $actual" >&2
+          [ "$actual" -eq "$expected" ] || {
+            echo "session_source_ref readback failed: expected $expected, got $actual" >&2
             exit 1
           }
         env:

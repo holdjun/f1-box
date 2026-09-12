@@ -30,9 +30,11 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          if git diff --quiet "$BASE_SHA" "$HEAD_SHA" -- \
+          base=$(git merge-base "$BASE_SHA" "$HEAD_SHA")
+          if git diff --quiet "$base" "$HEAD_SHA" -- \
             apps/weather-sync scripts/site-tables.sql scripts/sync-session-refs.py \
-            scripts/f1_session_keys.py .github/workflows/ci.yml pnpm-lock.yaml; then
+            scripts/f1_session_keys.py .github/workflows/ci.yml \
+            .github/workflows/weather-data.yml pnpm-lock.yaml; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -147,16 +149,18 @@ jobs:
 
       - name: Deploy weather preview
         run: |
-          container_token=$(openssl rand -hex 32)
+          secrets_file=$(mktemp)
+          chmod 600 "$secrets_file"
+          trap 'rm -f "$secrets_file"' EXIT
           printf 'WEATHER_SYNC_TOKEN=%s\nWEATHER_CONTAINER_TOKEN=%s\n' \
-            "$WEATHER_SYNC_TOKEN" "$container_token" > /tmp/weather-sync.secrets
+            "$WEATHER_SYNC_TOKEN" "$WEATHER_CONTAINER_TOKEN" > "$secrets_file"
           pnpm --filter @f1-box/weather-sync exec wrangler deploy \
-            --config wrangler.preview.jsonc --secrets-file /tmp/weather-sync.secrets
-          rm /tmp/weather-sync.secrets
+            --config wrangler.preview.jsonc --secrets-file "$secrets_file"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           WEATHER_SYNC_TOKEN: ${{ secrets.WEATHER_SYNC_TOKEN }}
+          WEATHER_CONTAINER_TOKEN: ${{ secrets.WEATHER_CONTAINER_TOKEN || secrets.WEATHER_SYNC_TOKEN }}
 
       - name: Smoke test weather preview
         run: |
@@ -170,14 +174,27 @@ jobs:
             -H "content-type: application/json" \
             -d '{"limit":1}' \
             "https://f1-box-weather-sync-preview.rj7c4mhzcp.workers.dev/run" > /tmp/weather-run.json
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS \
+            -H "Authorization: Bearer $WEATHER_SYNC_TOKEN" \
+            "https://f1-box-weather-sync-preview.rj7c4mhzcp.workers.dev/status" > /tmp/weather-status.json
           cat /tmp/weather-run.json
+          cat /tmp/weather-status.json
           node <<'NODE'
           const result = JSON.parse(
             require("fs").readFileSync("/tmp/weather-run.json", "utf8"),
           );
-          if (result.requested !== 1 || result.success !== 1) {
+          const status = JSON.parse(
+            require("fs").readFileSync("/tmp/weather-status.json", "utf8"),
+          );
+          const success = status.statuses.find((row) => row.status === "success");
+          if (
+            result.requested !== 1 ||
+            result.success !== 1 ||
+            status.weatherRows !== 1 ||
+            success?.count !== 1
+          ) {
             console.error(
-              `weather canary wrote no successful rows: ${JSON.stringify(result)}`,
+              `weather canary did not persist one row: ${JSON.stringify({ result, status })}`,
             );
             process.exit(1);
           }
@@ -234,17 +251,19 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Deploy weather sync
         run: |
-          container_token=$(openssl rand -hex 32)
+          secrets_file=$(mktemp)
+          chmod 600 "$secrets_file"
+          trap 'rm -f "$secrets_file"' EXIT
           printf 'WEATHER_SYNC_TOKEN=%s\nWEATHER_CONTAINER_TOKEN=%s\nCLOUDFLARE_API_TOKEN=%s\n' \
-            "$WEATHER_SYNC_TOKEN" "$container_token" "$CLOUDFLARE_API_TOKEN" \
-            > /tmp/weather-sync.secrets
+            "$WEATHER_SYNC_TOKEN" "$WEATHER_CONTAINER_TOKEN" "$CLOUDFLARE_API_TOKEN" \
+            > "$secrets_file"
           pnpm --filter @f1-box/weather-sync exec wrangler deploy \
-            --config wrangler.jsonc --secrets-file /tmp/weather-sync.secrets
-          rm /tmp/weather-sync.secrets
+            --config wrangler.jsonc --secrets-file "$secrets_file"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           WEATHER_SYNC_TOKEN: ${{ secrets.WEATHER_SYNC_TOKEN }}
+          WEATHER_CONTAINER_TOKEN: ${{ secrets.WEATHER_CONTAINER_TOKEN || secrets.WEATHER_SYNC_TOKEN }}
       - name: Smoke test weather sync
         run: |
           curl --retry 10 --retry-delay 5 --retry-all-errors -fsS \

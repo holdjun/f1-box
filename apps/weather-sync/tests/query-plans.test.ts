@@ -54,7 +54,14 @@ beforeAll(() => {
 describe("weather ingestion query plans", () => {
   it("collects the read queries", () => {
     expect(queries.map((query) => query.key)).toEqual(
-      expect.arrayContaining(["candidateSql", "statusSql", "outboxSql"]),
+      expect.arrayContaining([
+        "candidateSql",
+        "statusSql",
+        "outboxSql",
+        "weatherCountSql",
+        "referenceCountSql",
+        "failuresSql",
+      ]),
     );
   });
 
