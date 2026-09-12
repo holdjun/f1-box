@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import {
+  candidateSql,
   lockAcquireSql,
   lockReleaseSql,
   stateUpsertSql,
@@ -167,5 +168,37 @@ describe("weather ingestion query plans", () => {
       { owner: "owner-b" },
       { locks: 0 },
     ]);
+  });
+
+  it("prioritizes a recent due retry over historical backlog", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "weather-priority-"));
+    const priorityDb = path.join(dir, "weather.db");
+    const sql = bindSql(candidateSql, [
+      "'2026-09-12T00:00:00Z'",
+      "5",
+      "'2026-09-12T00:00:00Z'",
+      "2",
+    ]);
+    const output = execFileSync("sqlite3", ["-json", priorityDb], {
+      encoding: "utf8",
+      input: `${siteTables}
+        INSERT INTO session_source_ref VALUES
+          (2026, 1, 'race', '/static/2026/race/', '2026-03-08',
+           '2026-03-08T04:00:00Z', 'fastf1-schedule'),
+          (2023, 1, 'race', '/static/2023/race-1/', '2023-03-05',
+           '2023-03-05T15:00:00Z', 'fastf1-schedule'),
+          (2023, 2, 'race', '/static/2023/race-2/', '2023-03-19',
+           '2023-03-19T15:00:00Z', 'fastf1-schedule');
+        INSERT INTO weather_sync_state VALUES
+          (2026, 1, 'race', 'failed', 1, 'HTTP 503',
+           '2026-09-11T23:00:00Z', '2026-09-11T23:15:00Z',
+           '2026-09-11T23:00:00Z');
+        ${sql};
+      `,
+    });
+    expect(JSON.parse(output).map((row: { year: number }) => row.year)).toEqual(
+      [2026, 2023],
+    );
+    rmSync(dir, { recursive: true, force: true });
   });
 });

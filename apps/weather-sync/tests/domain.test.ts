@@ -5,7 +5,6 @@ import {
   buildCollectionFailureResults,
   buildPersistPlan,
   type ContainerSessionResult,
-  candidateSql,
   MAX_ATTEMPTS,
   nextRetryAt,
   outboxInsertSql,
@@ -201,12 +200,6 @@ describe("weather ingestion domain", () => {
         error: "Error: container HTTP 503",
       }),
     ]);
-  });
-
-  it("prioritizes the newest due sessions", () => {
-    expect(candidateSql).toContain(
-      "ORDER BY ws.year IS NOT NULL, sr.starts_at_utc DESC",
-    );
   });
 
   it("queues year-scoped weather cache tags", () => {

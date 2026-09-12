@@ -112,8 +112,7 @@ WHERE sr.starts_at_utc <= ?1
       AND (ws.next_attempt_at IS NULL OR ws.next_attempt_at <= ?3)
     )
   )
-ORDER BY ws.year IS NOT NULL, sr.starts_at_utc DESC,
-         sr.year DESC, sr.round DESC, sr.session_key
+ORDER BY sr.starts_at_utc DESC, sr.year DESC, sr.round DESC, sr.session_key
 LIMIT ?4`;
 
 export const lockAcquireSql = `INSERT INTO weather_sync_lock
