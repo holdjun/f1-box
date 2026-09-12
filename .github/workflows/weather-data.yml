@@ -39,6 +39,8 @@ jobs:
         run: |
           "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
             --file scripts/site-tables.sql
+          "$WRANGLER" d1 migrations apply f1db --remote \
+            -c apps/web/wrangler.jsonc
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

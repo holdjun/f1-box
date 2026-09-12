@@ -41,6 +41,14 @@ export interface RaceSession {
 export interface SessionWeather {
   tempC: number | null;
   trackTempC: number | null;
+  humidityPct: number | null;
+  pressureHpa: number | null;
+  windSpeedKph: number | null;
+  windDirectionDeg: number | null;
+  rainfall: boolean | null;
+  sampleCount: number | null;
+  observedAtUtc: string | null;
+  fetchedAt: string;
   weatherCode: "rain" | null;
 }
 
@@ -320,6 +328,14 @@ const raceMetaSql = `SELECT ra.year, ra.round, ra.grand_prix_id AS slug, gp.name
             'key', sw.session_key,
             'tempC', sw.temp_c,
             'trackTempC', sw.track_temp_c,
+            'humidityPct', sw.humidity_pct,
+            'pressureHpa', sw.pressure_hpa,
+            'windSpeedKph', sw.wind_speed_kph,
+            'windDirectionDeg', sw.wind_direction_deg,
+            'rainfall', sw.rainfall,
+            'sampleCount', sw.sample_count,
+            'observedAtUtc', sw.observed_at_utc,
+            'fetchedAt', sw.fetched_at,
             'weatherCode', sw.weather_code
           ))
           FROM session_weather sw
@@ -534,13 +550,30 @@ function parseSessionWeather(raw: string | null): Map<string, SessionWeather> {
       key: string;
       tempC: number | null;
       trackTempC: number | null;
+      humidityPct: number | null;
+      pressureHpa: number | null;
+      windSpeedKph: number | null;
+      windDirectionDeg: number | null;
+      rainfall: boolean | null;
+      sampleCount: number | null;
+      observedAtUtc: string | null;
+      fetchedAt: string;
       weatherCode: "rain" | null;
     }>;
     return new Map(
-      rows.flatMap(({ key, tempC, trackTempC, weatherCode }) =>
-        tempC === null && trackTempC === null && weatherCode === null
-          ? []
-          : [[key, { tempC, trackTempC, weatherCode }]],
+      rows.flatMap(({ key, ...weather }) =>
+        [
+          weather.tempC,
+          weather.trackTempC,
+          weather.humidityPct,
+          weather.pressureHpa,
+          weather.windSpeedKph,
+          weather.windDirectionDeg,
+          weather.rainfall,
+          weather.weatherCode,
+        ].some((value) => value !== null)
+          ? [[key, weather]]
+          : [],
       ),
     );
   } catch {

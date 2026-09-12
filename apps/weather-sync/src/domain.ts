@@ -32,6 +32,12 @@ export interface ContainerSessionResult {
   sampleCount: number;
   tempC: number | null;
   trackTempC: number | null;
+  humidityPct: number | null;
+  pressureHpa: number | null;
+  windSpeedKph: number | null;
+  windDirectionDeg: number | null;
+  rainfall: boolean | null;
+  observedAtUtc: string | null;
   weatherCode: string | null;
   fetchedAt: string;
   error: string | null;
@@ -45,7 +51,10 @@ export interface ContainerResponse {
 
 export interface CollectRequest {
   sessions: Array<
-    Pick<SessionCandidate, "year" | "round" | "sessionKey" | "apiPath">
+    Pick<
+      SessionCandidate,
+      "year" | "round" | "sessionKey" | "apiPath" | "startsAtUtc"
+    >
   >;
 }
 
@@ -70,6 +79,13 @@ export interface WeatherUpsert {
   sessionKey: string;
   tempC: number | null;
   trackTempC: number | null;
+  humidityPct: number | null;
+  pressureHpa: number | null;
+  windSpeedKph: number | null;
+  windDirectionDeg: number | null;
+  rainfall: boolean | null;
+  sampleCount: number;
+  observedAtUtc: string | null;
   weatherCode: string | null;
   fetchedAt: string;
   refApiPath: string;
@@ -128,11 +144,13 @@ export const lockReleaseSql = `DELETE FROM weather_sync_lock
 WHERE name = 'ingestion' AND owner = ?1`;
 
 export const weatherUpsertSql = `INSERT OR REPLACE INTO session_weather
-  (year, round, session_key, temp_c, track_temp_c, weather_code, source, fetched_at)
-SELECT ?1, ?2, ?3, ?4, ?5, ?6, 'fastf1', ?7
+  (year, round, session_key, temp_c, track_temp_c, humidity_pct, pressure_hpa,
+   wind_speed_kph, wind_direction_deg, rainfall, sample_count, observed_at_utc,
+   weather_code, source, fetched_at)
+SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, 'fastf1', ?14
 FROM session_source_ref sr
 WHERE sr.year = ?1 AND sr.round = ?2 AND sr.session_key = ?3
-  AND sr.api_path = ?8 AND sr.race_date = ?9 AND sr.starts_at_utc = ?10`;
+  AND sr.api_path = ?15 AND sr.race_date = ?16 AND sr.starts_at_utc = ?17`;
 
 export const stateUpsertSql = `INSERT INTO weather_sync_state
   (year, round, session_key, status, attempts, last_error, last_attempt_at, next_attempt_at, updated_at)
@@ -204,6 +222,23 @@ function parseNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+// 扩展字段允许 undefined：Worker 与 Container 镜像滚动更新时可能短暂错开一个版本。
+function parseBoolean(value: unknown): boolean | null {
+  if (value === undefined) return null;
+  if (value === true || value === false) return value;
+  if (value === null) return null;
+  throw new Error("container result boolean is invalid");
+}
+
+function parseTimestamp(value: unknown): string | null {
+  if (value === undefined) return null;
+  if (value === null) return null;
+  if (typeof value !== "string" || Number.isNaN(Date.parse(value))) {
+    throw new Error("container result timestamp is invalid");
+  }
+  return value;
+}
+
 function parseResult(raw: unknown): ContainerSessionResult {
   if (typeof raw !== "object" || raw === null) {
     throw new Error("container result must be an object");
@@ -249,6 +284,8 @@ function parseResult(raw: unknown): ContainerSessionResult {
   if (value.weatherCode !== null && value.weatherCode !== "rain") {
     throw new Error(`unknown weather code: ${String(value.weatherCode)}`);
   }
+  const rainfall = parseBoolean(value.rainfall);
+  const observedAtUtc = parseTimestamp(value.observedAtUtc);
   const error =
     value.error === null || typeof value.error === "string"
       ? value.error
@@ -264,6 +301,12 @@ function parseResult(raw: unknown): ContainerSessionResult {
     sampleCount: value.sampleCount,
     tempC: parseNumber(value.tempC),
     trackTempC: parseNumber(value.trackTempC),
+    humidityPct: parseNumber(value.humidityPct),
+    pressureHpa: parseNumber(value.pressureHpa),
+    windSpeedKph: parseNumber(value.windSpeedKph),
+    windDirectionDeg: parseNumber(value.windDirectionDeg),
+    rainfall,
+    observedAtUtc,
     weatherCode,
     fetchedAt: fetchedAt || new Date().toISOString(),
     error,
@@ -330,6 +373,12 @@ export function buildCollectionFailureResults(
     sampleCount: 0,
     tempC: null,
     trackTempC: null,
+    humidityPct: null,
+    pressureHpa: null,
+    windSpeedKph: null,
+    windDirectionDeg: null,
+    rainfall: null,
+    observedAtUtc: null,
     weatherCode: null,
     fetchedAt: now.toISOString(),
     error: message.slice(0, 1000),
@@ -393,6 +442,13 @@ export function buildPersistPlan(
         sessionKey: result.sessionKey,
         tempC: result.tempC,
         trackTempC: result.trackTempC,
+        humidityPct: result.humidityPct,
+        pressureHpa: result.pressureHpa,
+        windSpeedKph: result.windSpeedKph,
+        windDirectionDeg: result.windDirectionDeg,
+        rainfall: result.rainfall,
+        sampleCount: result.sampleCount,
+        observedAtUtc: result.observedAtUtc,
         weatherCode: result.weatherCode,
         fetchedAt: result.fetchedAt,
         refApiPath: candidate.apiPath,

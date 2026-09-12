@@ -58,6 +58,14 @@ describe("buildWeekendNodes", () => {
     const weather = {
       tempC: 23.4,
       trackTempC: null,
+      humidityPct: null,
+      pressureHpa: null,
+      windSpeedKph: null,
+      windDirectionDeg: null,
+      rainfall: null,
+      sampleCount: 1,
+      observedAtUtc: null,
+      fetchedAt: "2026-03-06T02:30:00Z",
       weatherCode: null,
     };
     const nodes = buildWeekendNodes(

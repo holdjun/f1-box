@@ -86,11 +86,13 @@ test.describe("race detail", () => {
     await page.goto("/results/2026/races/australia/race-result");
     const weather = page.locator("[data-session-weather]");
     await expect(weather).toHaveCount(5);
-    await expect(weather.nth(0)).toHaveText("Air 23.4°C");
-    await expect(weather.nth(1)).toHaveText("Air 0°C · Track 0°C");
+    await expect(weather.nth(0)).toHaveText("🌡 23.4°C · 💧 48% · 💨 14.2 km/h");
+    await expect(weather.nth(1)).toHaveText("🌡 0°C · 🛣 0°C");
     await expect(weather.nth(2)).toHaveText("");
-    await expect(weather.nth(3)).toHaveText("Track 31.3°C · Rain");
-    await expect(weather.nth(4)).toHaveText("Air 24.6°C · Track 32.5°C · Rain");
+    await expect(weather.nth(3)).toHaveText("🛣 31.3°C · 💧 72% · 🌧 Rain");
+    await expect(weather.nth(4)).toHaveText(
+      "🌡 24.6°C · 🛣 32.5°C · 💧 61% · 🌧 Rain · 💨 9.6 km/h",
+    );
   });
 
   test("@desktop race without weather renders no weather slots", async ({
@@ -99,6 +101,24 @@ test.describe("race detail", () => {
     await page.goto("/results/2026/races/japan/race-result");
     await expect(page.locator(".weekend-progress")).toBeVisible();
     await expect(page.locator("[data-session-weather]")).toHaveCount(0);
+  });
+
+  test("@desktop opens keyboard-accessible weather details", async ({
+    page,
+  }) => {
+    await page.goto("/results/2026/races/australia/race-result");
+    const details = page.getByRole("dialog", {
+      name: "Race weather details",
+    });
+    await page.locator("[data-session-weather]").nth(4).click();
+    await expect(details).toBeVisible();
+    await expect(details).toContainText("Air temperature");
+    await expect(details).toContainText("24.6°C");
+    await expect(details).toContainText("Wind");
+    await expect(details).toContainText("9.6 km/h · 180°");
+    await expect(details).toContainText("FastF1 · 120 samples");
+    await page.keyboard.press("Escape");
+    await expect(details).toBeHidden();
   });
 
   test("@desktop upcoming race shows the weekend progress and calendar link", async ({

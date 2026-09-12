@@ -1,7 +1,7 @@
 import json
 import math
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import fastf1
@@ -31,7 +31,7 @@ def column(weather, name: str) -> list:
     return []
 
 
-def median(values: list) -> float | None:
+def finite_numbers(values: list) -> list[float]:
     numbers: list[float] = []
     for value in values:
         if value is None:
@@ -42,6 +42,11 @@ def median(values: list) -> float | None:
             continue
         if math.isfinite(number):
             numbers.append(number)
+    return numbers
+
+
+def median(values: list) -> float | None:
+    numbers = finite_numbers(values)
     if not numbers:
         return None
     numbers.sort()
@@ -49,6 +54,57 @@ def median(values: list) -> float | None:
     if len(numbers) % 2:
         return numbers[middle]
     return (numbers[middle - 1] + numbers[middle]) / 2
+
+
+def circular_mean_degrees(values: list) -> float | None:
+    numbers = finite_numbers(values)
+    if not numbers:
+        return None
+    x = sum(math.cos(math.radians(value)) for value in numbers) / len(numbers)
+    y = sum(math.sin(math.radians(value)) for value in numbers) / len(numbers)
+    angle = math.degrees(math.atan2(y, x)) % 360
+    return 0.0 if angle == 360 else angle
+
+
+def rainfall(values: list) -> bool | None:
+    observations = [value for value in values if value is True or value is False]
+    if not observations:
+        return None
+    return any(value is True for value in observations)
+
+
+def parse_utc_datetime(value) -> datetime:
+    parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        raise ValueError("session start is not timezone-aware")
+    return parsed.astimezone(timezone.utc)
+
+
+def duration_seconds(value) -> float | None:
+    if isinstance(value, timedelta):
+        return value.total_seconds()
+    if hasattr(value, "total_seconds"):
+        try:
+            seconds = float(value.total_seconds())
+        except (TypeError, ValueError):
+            return None
+        return seconds if math.isfinite(seconds) else None
+    if isinstance(value, (int, float)) and math.isfinite(value):
+        return float(value)
+    return None
+
+
+def observed_at_utc(weather, starts_at: datetime) -> str | None:
+    offsets = [
+        seconds
+        for seconds in (duration_seconds(value) for value in column(weather, "Time"))
+        if seconds is not None
+    ]
+    if not offsets:
+        return None
+    return (starts_at + timedelta(seconds=max(offsets))).isoformat().replace(
+        "+00:00", "Z"
+    )
 
 
 def collect_session(requested: dict) -> dict:
@@ -59,6 +115,12 @@ def collect_session(requested: dict) -> dict:
         "sampleCount": 0,
         "tempC": None,
         "trackTempC": None,
+        "humidityPct": None,
+        "pressureHpa": None,
+        "windSpeedKph": None,
+        "windDirectionDeg": None,
+        "rainfall": None,
+        "observedAtUtc": None,
         "weatherCode": None,
         "fetchedAt": utc_now(),
         "error": None,
@@ -66,26 +128,54 @@ def collect_session(requested: dict) -> dict:
     api_path = requested.get("apiPath")
     if not isinstance(api_path, str) or not api_path.startswith("/static/"):
         return {**base, "status": "mismatch", "error": "invalid FastF1 api path"}
+    try:
+        starts_at = parse_utc_datetime(requested.get("startsAtUtc"))
+    except (AttributeError, TypeError, ValueError):
+        return {**base, "status": "mismatch", "error": "invalid session start time"}
 
     try:
         weather = fastf1_api.weather_data(api_path)
+        rain = rainfall(column(weather, "Rainfall"))
         sample_count = max(
             (
                 len(column(weather, name))
-                for name in ("AirTemp", "TrackTemp", "Rainfall")
+                for name in (
+                    "Time",
+                    "AirTemp",
+                    "TrackTemp",
+                    "Humidity",
+                    "Pressure",
+                    "Rainfall",
+                    "WindDirection",
+                    "WindSpeed",
+                )
             ),
             default=0,
         )
         if sample_count == 0:
             return {**base, "status": "empty"}
-        rainfall = column(weather, "Rainfall")
         return {
             **base,
             "status": "success",
             "sampleCount": sample_count,
             "tempC": median(column(weather, "AirTemp")),
             "trackTempC": median(column(weather, "TrackTemp")),
-            "weatherCode": "rain" if any(value is True for value in rainfall) else None,
+            "humidityPct": median(column(weather, "Humidity")),
+            "pressureHpa": median(column(weather, "Pressure")),
+            "windSpeedKph": (
+                median(
+                    [
+                        value * 3.6
+                        for value in finite_numbers(column(weather, "WindSpeed"))
+                    ]
+                )
+            ),
+            "windDirectionDeg": circular_mean_degrees(
+                column(weather, "WindDirection")
+            ),
+            "rainfall": rain,
+            "observedAtUtc": observed_at_utc(weather, starts_at),
+            "weatherCode": "rain" if rain is True else None,
         }
     except Exception as exc:
         return {

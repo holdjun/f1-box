@@ -33,6 +33,14 @@
         "weather": {
           "tempC": 23.4,
           "trackTempC": null,
+          "humidityPct": 48,
+          "pressureHpa": 1010.5,
+          "windSpeedKph": 14.2,
+          "windDirectionDeg": 220,
+          "rainfall": false,
+          "sampleCount": 57,
+          "observedAtUtc": "2026-03-06T02:26:00Z",
+          "fetchedAt": "2026-03-06T02:30:00Z",
           "weatherCode": null
         }
       },
@@ -43,6 +51,14 @@
         "weather": {
           "tempC": 0,
           "trackTempC": 0,
+          "humidityPct": null,
+          "pressureHpa": null,
+          "windSpeedKph": null,
+          "windDirectionDeg": null,
+          "rainfall": null,
+          "sampleCount": 2,
+          "observedAtUtc": null,
+          "fetchedAt": "2026-03-06T06:00:00Z",
           "weatherCode": null
         }
       },
@@ -58,6 +74,14 @@
         "weather": {
           "tempC": null,
           "trackTempC": 31.25,
+          "humidityPct": 72,
+          "pressureHpa": null,
+          "windSpeedKph": null,
+          "windDirectionDeg": null,
+          "rainfall": true,
+          "sampleCount": 63,
+          "observedAtUtc": "2026-03-07T06:02:00Z",
+          "fetchedAt": "2026-03-07T06:05:00Z",
           "weatherCode": "rain"
         }
       },
@@ -68,6 +92,14 @@
         "weather": {
           "tempC": 24.6,
           "trackTempC": 32.5,
+          "humidityPct": 61,
+          "pressureHpa": 1011,
+          "windSpeedKph": 9.6,
+          "windDirectionDeg": 180,
+          "rainfall": true,
+          "sampleCount": 120,
+          "observedAtUtc": "2026-03-08T05:59:00Z",
+          "fetchedAt": "2026-03-08T06:05:00Z",
           "weatherCode": "rain"
         }
       }

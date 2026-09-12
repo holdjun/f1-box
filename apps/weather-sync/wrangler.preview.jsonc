@@ -8,7 +8,8 @@
     {
       "binding": "F1_DB",
       "database_name": "f1db-weather-preview",
-      "database_id": "df680e59-b2ed-41bc-b29e-13ea62cb6b47"
+      "database_id": "df680e59-b2ed-41bc-b29e-13ea62cb6b47",
+      "migrations_dir": "../../migrations"
     }
   ],
   "containers": [

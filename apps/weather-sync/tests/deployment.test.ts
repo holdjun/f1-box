@@ -1,4 +1,6 @@
-import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -27,12 +29,121 @@ const weatherData = readFileSync(
   path.join(repoRoot, ".github/workflows/weather-data.yml"),
   "utf8",
 );
+const siteTables = readFileSync(
+  path.join(repoRoot, "scripts/site-tables.sql"),
+  "utf8",
+);
+const weatherMigrationPath = path.join(
+  repoRoot,
+  "migrations/0001_session_weather_fields.sql",
+);
+const weatherMigration = readFileSync(weatherMigrationPath, "utf8");
 const weatherPreviewJob = ci.slice(
   ci.indexOf("  weather-preview:"),
   ci.indexOf("\n  production:", ci.indexOf("  weather-preview:")),
 );
 
 describe("weather deployment configuration", () => {
+  it("keeps fresh schemas and existing databases on the same weather shape", () => {
+    for (const column of [
+      "humidity_pct",
+      "pressure_hpa",
+      "wind_speed_kph",
+      "wind_direction_deg",
+      "rainfall",
+      "sample_count",
+      "observed_at_utc",
+    ]) {
+      expect(siteTables).toContain(column);
+      expect(weatherMigration).toContain(column);
+    }
+    expect(ci).toContain("d1 migrations apply f1db");
+  });
+
+  it("migrates existing weather rows without dropping measurements", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "f1box-weather-migration-"));
+    const db = path.join(dir, "weather.db");
+    const output = execFileSync("sqlite3", ["-json", db], {
+      encoding: "utf8",
+      input: `
+        CREATE TABLE session_source_ref (
+          year INTEGER NOT NULL,
+          round INTEGER NOT NULL,
+          session_key TEXT NOT NULL,
+          api_path TEXT NOT NULL,
+          race_date TEXT NOT NULL,
+          starts_at_utc TEXT NOT NULL,
+          source TEXT NOT NULL,
+          PRIMARY KEY (year, round, session_key)
+        );
+        CREATE TABLE weather_sync_state (
+          year INTEGER NOT NULL,
+          round INTEGER NOT NULL,
+          session_key TEXT NOT NULL,
+          status TEXT NOT NULL,
+          attempts INTEGER NOT NULL,
+          last_error TEXT,
+          last_attempt_at TEXT NOT NULL,
+          next_attempt_at TEXT,
+          updated_at TEXT NOT NULL,
+          PRIMARY KEY (year, round, session_key)
+        );
+        CREATE TABLE weather_cache_outbox (
+          cache_tag TEXT PRIMARY KEY,
+          created_at TEXT NOT NULL
+        );
+        CREATE TABLE session_weather (
+          year INTEGER NOT NULL,
+          round INTEGER NOT NULL,
+          session_key TEXT NOT NULL,
+          temp_c REAL,
+          track_temp_c REAL,
+          weather_code TEXT,
+          source TEXT NOT NULL CHECK (source = 'fastf1'),
+          fetched_at TEXT NOT NULL,
+          PRIMARY KEY (year, round, session_key)
+        );
+        INSERT INTO session_weather VALUES
+          (2026, 1, 'race', 24.6, 32.5, 'rain', 'fastf1', '2026-03-08T06:05:00Z');
+        CREATE TRIGGER session_source_ref_changed
+        AFTER UPDATE ON session_source_ref
+        BEGIN
+          DELETE FROM session_weather;
+        END;
+        ${weatherMigration}
+        SELECT temp_c, track_temp_c, humidity_pct, pressure_hpa, wind_speed_kph,
+               wind_direction_deg, rainfall, sample_count, observed_at_utc,
+               weather_code, source, fetched_at,
+               (SELECT json_group_array(json_object('name', name))
+                  FROM sqlite_master WHERE type = 'trigger') AS triggers
+        FROM session_weather;
+      `,
+    });
+    const [row] = JSON.parse(output) as Array<
+      Record<string, unknown> & { triggers: string }
+    >;
+    const { triggers, ...values } = row;
+    expect(values).toEqual({
+      temp_c: 24.6,
+      track_temp_c: 32.5,
+      humidity_pct: null,
+      pressure_hpa: null,
+      wind_speed_kph: null,
+      wind_direction_deg: null,
+      rainfall: null,
+      sample_count: null,
+      observed_at_utc: null,
+      weather_code: "rain",
+      source: "fastf1",
+      fetched_at: "2026-03-08T06:05:00Z",
+    });
+    expect(JSON.parse(triggers)).toEqual([
+      { name: "session_source_ref_changed" },
+      { name: "session_source_ref_deleted" },
+    ]);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
   it("gives the FastF1 cache a writable container directory", () => {
     expect(dockerfile).toContain("FASTF1_CACHE=/tmp/fastf1");
     expect(containerSource).toContain('FASTF1_CACHE: "/tmp/fastf1"');

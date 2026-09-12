@@ -13,7 +13,8 @@
     {
       "binding": "F1_DB",
       "database_name": "f1db",
-      "database_id": "50683ee9-c236-4bc5-bc11-4e8151916f54"
+      "database_id": "50683ee9-c236-4bc5-bc11-4e8151916f54",
+      "migrations_dir": "../../migrations"
     }
   ],
   "kv_namespaces": [
