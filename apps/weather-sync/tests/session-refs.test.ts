@@ -169,6 +169,27 @@ assert not out_path.exists()
 `);
   });
 
+  it("ignores blank schedule slots while keeping real sessions", () => {
+    runPython(`
+class Row:
+    def get(self, key):
+        return {
+            "Session1": "",
+            "Session2": "   ",
+            "Session5": "Race",
+            "Session5DateUtc": "2020-11-01T12:10:00Z",
+        }.get(key)
+    def get_session(self, name):
+        if name != "Race":
+            raise AssertionError(f"blank slot was resolved as a session: {name!r}")
+        return types.SimpleNamespace(api_path="/static/2020/imola/Race/")
+
+assert module.sessions_of(Row()) == [
+    ("race", "/static/2020/imola/Race/", "2020-11-01T12:10:00Z")
+]
+`);
+  });
+
   it("rejects duplicate normalized session identities", () => {
     runPython(`
 work = pathlib.Path(tempfile.mkdtemp())

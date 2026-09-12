@@ -54,7 +54,11 @@ def sessions_of(row) -> list[tuple[str, str, str]]:
     result: list[tuple[str, str, str]] = []
     for index in range(1, 6):
         name = row.get(f"Session{index}")
-        if name is None or name == "Testing":
+        if name is None:
+            continue
+        if isinstance(name, str):
+            name = name.strip()
+        if not name or name == "Testing":
             continue
         key = SESSION_KEYS.get(name)
         if key is None:
