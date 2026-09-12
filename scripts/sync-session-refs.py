@@ -48,18 +48,19 @@ def to_utc_iso(value) -> str | None:
 
 def sessions_of(row) -> list[tuple[str, str, str]]:
     result: list[tuple[str, str, str]] = []
-    for name, key in SESSION_KEYS.items():
-        if name not in [row.get(f"Session{i}") for i in range(1, 6)]:
+    for index in range(1, 6):
+        name = row.get(f"Session{index}")
+        if name is None or name == "Testing":
             continue
-        date_key = next(
-            f"Session{i}DateUtc"
-            for i in range(1, 6)
-            if row.get(f"Session{i}") == name
-        )
-        starts_at = to_utc_iso(row.get(date_key))
+        key = SESSION_KEYS.get(name)
+        if key is None:
+            raise ValueError(f"unknown session name: {name}")
+        starts_at = to_utc_iso(row.get(f"Session{index}DateUtc"))
         api_path = row.get_session(name).api_path
-        if starts_at is None or not api_path:
-            continue
+        if starts_at is None:
+            raise ValueError(f"invalid start time for {name}")
+        if not isinstance(api_path, str) or not api_path.startswith("/static/"):
+            raise ValueError(f"invalid api path for {name}")
         result.append((key, api_path, starts_at))
     return result
 
@@ -98,6 +99,7 @@ def main() -> None:
     inserts: list[str] = []
     skipped: list[str] = []
     failures: list[str] = []
+    keys_by_year: dict[int, list[tuple[int, str]]] = {year: [] for year in years}
     fastf1.Cache.set_disabled()
     fastf1.set_log_level("WARNING")
 
@@ -132,14 +134,18 @@ def main() -> None:
                     failures.append(f"{year} Round {round_no}: no usable sessions")
                     continue
                 for session_key, api_path, starts_at in sessions:
+                    keys_by_year[year].append((round_no, session_key))
                     inserts.append(
-                        "INSERT OR REPLACE INTO session_source_ref "
+                        "INSERT INTO session_source_ref "
                         "(year, round, session_key, api_path, race_date, starts_at_utc, source) VALUES "
                         f"({year}, {round_no}, '{session_key}', '{api_path}', "
-                        f"'{race_date}', '{starts_at}', 'fastf1-schedule');"
+                        f"'{race_date}', '{starts_at}', 'fastf1-schedule') "
+                        "ON CONFLICT(year, round, session_key) DO UPDATE SET "
+                        "api_path = excluded.api_path, race_date = excluded.race_date, "
+                        "starts_at_utc = excluded.starts_at_utc, source = excluded.source;"
                     )
             except (TypeError, ValueError, AttributeError) as exc:
-                skipped.append(f"{year} Round {round_no}: malformed row: {exc}")
+                failures.append(f"{year} Round {round_no}: malformed row: {exc}")
 
         missing_rounds = sorted(expected_rounds - seen_rounds)
         if missing_rounds:
@@ -152,9 +158,22 @@ def main() -> None:
     if not inserts:
         raise RuntimeError("no session references generated")
 
+    prunes: list[str] = []
+    for year in years:
+        keys = sorted(set(keys_by_year[year]))
+        if not keys:
+            raise RuntimeError(f"{year}: no session references generated")
+        keep = ", ".join(
+            f"({round_no}, '{session_key}')" for round_no, session_key in keys
+        )
+        prunes.append(
+            "DELETE FROM session_source_ref "
+            f"WHERE year = {year} AND (round, session_key) NOT IN ({keep});"
+        )
+
     output = Path(args.out)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text("\n".join(inserts) + "\n")
+    output.write_text("\n".join([*inserts, *prunes]) + "\n")
     print(f"wrote {len(inserts)} session_source_ref rows to {output}")
     if skipped:
         print(f"skipped {len(skipped)}:")

@@ -1,8 +1,7 @@
-export const WEATHER_SINCE = 2018;
 export const MAX_ATTEMPTS = 5;
-export const EMPTY_CONFIRMATIONS = 2;
 export const SETTLE_DELAY_MS = 4 * 60 * 60 * 1000;
 export const BATCH_LIMIT = 50;
+export const LOCK_TTL_MS = 25 * 60 * 1000;
 
 export type SyncStatus =
   | "success"
@@ -22,6 +21,7 @@ export interface SessionCandidate {
   raceDate: string;
   startsAtUtc: string;
   attempts: number;
+  previousStatus: SyncStatus | null;
 }
 
 export interface ContainerSessionResult {
@@ -59,6 +59,9 @@ export interface StateUpsert {
   lastAttemptAt: string;
   nextAttemptAt: string | null;
   updatedAt: string;
+  refApiPath: string;
+  refRaceDate: string;
+  refStartsAtUtc: string;
 }
 
 export interface WeatherUpsert {
@@ -69,6 +72,9 @@ export interface WeatherUpsert {
   trackTempC: number | null;
   weatherCode: string | null;
   fetchedAt: string;
+  refApiPath: string;
+  refRaceDate: string;
+  refStartsAtUtc: string;
 }
 
 export interface SyncSummary {
@@ -90,7 +96,8 @@ export interface RunRequest {
 export const candidateSql = `SELECT sr.year, sr.round,
        sr.session_key AS sessionKey, sr.api_path AS apiPath,
        sr.race_date AS raceDate, sr.starts_at_utc AS startsAtUtc,
-       COALESCE(ws.attempts, 0) AS attempts
+       COALESCE(ws.attempts, 0) AS attempts,
+       ws.status AS previousStatus
 FROM session_source_ref sr
 LEFT JOIN session_weather sw
   ON sw.year = sr.year AND sw.round = sr.round AND sw.session_key = sr.session_key
@@ -101,21 +108,39 @@ WHERE sr.starts_at_utc <= ?1
   AND (
     ws.year IS NULL
     OR (
-      ws.status IN ('empty', 'failed')
-      AND ws.attempts < ?2
+      (ws.status = 'empty' OR (ws.status = 'failed' AND ws.attempts < ?2))
       AND (ws.next_attempt_at IS NULL OR ws.next_attempt_at <= ?3)
     )
   )
-ORDER BY sr.starts_at_utc, sr.year, sr.round, sr.session_key
+ORDER BY ws.year IS NOT NULL, sr.starts_at_utc DESC,
+         sr.year DESC, sr.round DESC, sr.session_key
 LIMIT ?4`;
+
+export const lockAcquireSql = `INSERT INTO weather_sync_lock
+  (name, owner, expires_at)
+VALUES ('ingestion', ?1, ?2)
+ON CONFLICT(name) DO UPDATE SET
+  owner = excluded.owner,
+  expires_at = excluded.expires_at
+WHERE weather_sync_lock.expires_at <= ?3
+`;
+
+export const lockReleaseSql = `DELETE FROM weather_sync_lock
+WHERE name = 'ingestion' AND owner = ?1`;
 
 export const weatherUpsertSql = `INSERT OR REPLACE INTO session_weather
   (year, round, session_key, temp_c, track_temp_c, weather_code, source, fetched_at)
-VALUES (?1, ?2, ?3, ?4, ?5, ?6, 'fastf1', ?7)`;
+SELECT ?1, ?2, ?3, ?4, ?5, ?6, 'fastf1', ?7
+FROM session_source_ref sr
+WHERE sr.year = ?1 AND sr.round = ?2 AND sr.session_key = ?3
+  AND sr.api_path = ?8 AND sr.race_date = ?9 AND sr.starts_at_utc = ?10`;
 
 export const stateUpsertSql = `INSERT INTO weather_sync_state
   (year, round, session_key, status, attempts, last_error, last_attempt_at, next_attempt_at, updated_at)
-VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9
+FROM session_source_ref sr
+WHERE sr.year = ?1 AND sr.round = ?2 AND sr.session_key = ?3
+  AND sr.api_path = ?10 AND sr.race_date = ?11 AND sr.starts_at_utc = ?12
 ON CONFLICT(year, round, session_key) DO UPDATE SET
   status = excluded.status,
   attempts = excluded.attempts,
@@ -126,7 +151,7 @@ ON CONFLICT(year, round, session_key) DO UPDATE SET
 
 export const outboxInsertSql = `INSERT OR IGNORE INTO weather_cache_outbox
   (cache_tag, created_at)
-VALUES ('f1db', ?1)`;
+VALUES (?1, ?2)`;
 
 export const outboxSql = `SELECT cache_tag, created_at
 FROM weather_cache_outbox
@@ -147,7 +172,7 @@ export function nextRetryAt(
   attempt: number,
   now: Date,
 ): string | null {
-  if (attempt >= MAX_ATTEMPTS) return null;
+  if (status === "failed" && attempt >= MAX_ATTEMPTS) return null;
   const minutes =
     status === "empty"
       ? 60
@@ -201,6 +226,12 @@ function parseResult(raw: unknown): ContainerSessionResult {
   if (status === "success" && fetchedAt === "") {
     throw new Error("successful container result has no fetchedAt");
   }
+  if (
+    (status === "success" && value.sampleCount === 0) ||
+    (status === "empty" && value.sampleCount !== 0)
+  ) {
+    throw new Error(`container ${status} result has invalid sample count`);
+  }
   const weatherCode =
     value.weatherCode === null || value.weatherCode === "rain"
       ? value.weatherCode
@@ -251,6 +282,9 @@ export function parseContainerResponse(
   const sessions = value.sessions.map(parseResult);
   const expectedKeys = new Set(expected.map(sessionKey));
   const actualKeys = new Set(sessions.map(sessionKey));
+  if (actualKeys.size !== sessions.length) {
+    throw new Error("duplicate container result identity");
+  }
   const missing = [...expectedKeys].filter((key) => !actualKeys.has(key));
   const extra = [...actualKeys].filter((key) => !expectedKeys.has(key));
   if (missing.length > 0 && extra.length > 0) {
@@ -269,6 +303,27 @@ export function parseContainerResponse(
     requestsVersion: value.requestsVersion,
     sessions,
   };
+}
+
+export function buildCollectionFailureResults(
+  candidates: SessionCandidate[],
+  error: unknown,
+  now: Date,
+): ContainerSessionResult[] {
+  const message =
+    error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+  return candidates.map((candidate) => ({
+    year: candidate.year,
+    round: candidate.round,
+    sessionKey: candidate.sessionKey,
+    status: "unavailable",
+    sampleCount: 0,
+    tempC: null,
+    trackTempC: null,
+    weatherCode: null,
+    fetchedAt: now.toISOString(),
+    error: message.slice(0, 1000),
+  }));
 }
 
 export function buildPersistPlan(
@@ -297,7 +352,7 @@ export function buildPersistPlan(
     if (result.status === "success") {
       status = "success";
     } else if (result.status === "empty") {
-      status = attempts >= EMPTY_CONFIRMATIONS ? "no_data" : "empty";
+      status = candidate.previousStatus === "empty" ? "no_data" : "empty";
       nextAttemptAt =
         status === "empty" ? nextRetryAt("empty", attempts, now) : null;
     } else if (result.status === "unavailable") {
@@ -317,6 +372,9 @@ export function buildPersistPlan(
       lastAttemptAt: now.toISOString(),
       nextAttemptAt,
       updatedAt: now.toISOString(),
+      refApiPath: candidate.apiPath,
+      refRaceDate: candidate.raceDate,
+      refStartsAtUtc: candidate.startsAtUtc,
     });
     if (result.status === "success") {
       weather.push({
@@ -327,6 +385,9 @@ export function buildPersistPlan(
         trackTempC: result.trackTempC,
         weatherCode: result.weatherCode,
         fetchedAt: result.fetchedAt,
+        refApiPath: candidate.apiPath,
+        refRaceDate: candidate.raceDate,
+        refStartsAtUtc: candidate.startsAtUtc,
       });
     }
   }

@@ -46,7 +46,7 @@ jobs:
       - name: Apply session references
         run: |
           [ -s /tmp/session-refs.sql ] || { echo "session refs are empty" >&2; exit 1; }
-          expected=$(wc -l < /tmp/session-refs.sql | tr -d ' ')
+          expected=$(grep -c '^INSERT INTO session_source_ref' /tmp/session-refs.sql)
           "$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc \
             --file /tmp/session-refs.sql
           actual=$("$WRANGLER" d1 execute f1db --remote -c apps/web/wrangler.jsonc --json \

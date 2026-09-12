@@ -2,13 +2,18 @@ import { describe, expect, it } from "vitest";
 
 import {
   BATCH_LIMIT,
+  buildCollectionFailureResults,
   buildPersistPlan,
   type ContainerSessionResult,
+  candidateSql,
   MAX_ATTEMPTS,
   nextRetryAt,
+  outboxInsertSql,
   parseContainerResponse,
   parseRunRequest,
   type SessionCandidate,
+  stateUpsertSql,
+  weatherUpsertSql,
 } from "../src/domain";
 
 const now = new Date("2026-09-12T12:00:00.000Z");
@@ -21,6 +26,7 @@ const candidate: SessionCandidate = {
   raceDate: "2023-09-03",
   startsAtUtc: "2023-09-03T14:00:00.000Z",
   attempts: 0,
+  previousStatus: null,
 };
 
 const successfulResult: ContainerSessionResult = {
@@ -74,6 +80,15 @@ describe("weather ingestion domain", () => {
         [candidate],
       ),
     ).toThrow(/unknown container status/i);
+    expect(() =>
+      parseContainerResponse(
+        {
+          ...containerResponse,
+          sessions: [{ ...successfulResult, sampleCount: 0 }],
+        },
+        [candidate],
+      ),
+    ).toThrow(/sample count/i);
   });
 
   it("writes successful weather and terminal state together", () => {
@@ -87,6 +102,9 @@ describe("weather ingestion domain", () => {
         trackTempC: 43,
         weatherCode: null,
         fetchedAt: successfulResult.fetchedAt,
+        refApiPath: candidate.apiPath,
+        refRaceDate: candidate.raceDate,
+        refStartsAtUtc: candidate.startsAtUtc,
       },
     ]);
     expect(plan.rows[0]).toMatchObject({
@@ -118,7 +136,7 @@ describe("weather ingestion domain", () => {
     expect(first.cacheDirty).toBe(false);
 
     const second = buildPersistPlan(
-      [{ ...candidate, attempts: 1 }],
+      [{ ...candidate, attempts: 1, previousStatus: "empty" }],
       [emptyResult],
       now,
     );
@@ -127,6 +145,82 @@ describe("weather ingestion domain", () => {
       attempts: 2,
       nextAttemptAt: null,
     });
+  });
+
+  it("counts empty confirmations independently from retrieval failures", () => {
+    const emptyResult: ContainerSessionResult = {
+      ...successfulResult,
+      status: "empty",
+      sampleCount: 0,
+      tempC: null,
+      trackTempC: null,
+      weatherCode: null,
+    };
+    const afterFailures = buildPersistPlan(
+      [{ ...candidate, attempts: 4, previousStatus: "failed" }],
+      [emptyResult],
+      now,
+    );
+    expect(afterFailures.rows[0]).toMatchObject({
+      status: "empty",
+      attempts: 5,
+      nextAttemptAt: "2026-09-12T13:00:00.000Z",
+    });
+
+    const unavailable = {
+      ...emptyResult,
+      status: "unavailable" as const,
+      error: "container unavailable",
+    };
+    const afterEmpty = buildPersistPlan(
+      [{ ...candidate, attempts: 1, previousStatus: "empty" }],
+      [unavailable],
+      now,
+    );
+    expect(afterEmpty.rows[0]).toMatchObject({
+      status: "failed",
+      attempts: 2,
+    });
+  });
+
+  it("turns a batch-level container error into retryable per-session results", () => {
+    expect(
+      buildCollectionFailureResults(
+        [candidate],
+        new Error("container HTTP 503"),
+        now,
+      ),
+    ).toEqual([
+      expect.objectContaining({
+        year: 2023,
+        round: 14,
+        sessionKey: "race",
+        status: "unavailable",
+        sampleCount: 0,
+        fetchedAt: now.toISOString(),
+        error: "Error: container HTTP 503",
+      }),
+    ]);
+  });
+
+  it("prioritizes the newest due sessions", () => {
+    expect(candidateSql).toContain(
+      "ORDER BY ws.year IS NOT NULL, sr.starts_at_utc DESC",
+    );
+  });
+
+  it("queues year-scoped weather cache tags", () => {
+    expect(outboxInsertSql).toContain("VALUES (?1, ?2)");
+    expect(outboxInsertSql).not.toContain("'f1db'");
+  });
+
+  it("guards persistence against a changed session reference", () => {
+    for (const sql of [weatherUpsertSql, stateUpsertSql]) {
+      expect(sql).toContain("FROM session_source_ref sr");
+      expect(sql).toContain("sr.api_path =");
+      expect(sql).toContain("sr.race_date =");
+      expect(sql).toContain("sr.starts_at_utc =");
+    }
   });
 
   it("separates retrieval failures from empty data and bounds retries", () => {
@@ -154,7 +248,13 @@ describe("weather ingestion domain", () => {
     });
 
     const exhausted = buildPersistPlan(
-      [{ ...candidate, attempts: MAX_ATTEMPTS - 1 }],
+      [
+        {
+          ...candidate,
+          attempts: MAX_ATTEMPTS - 1,
+          previousStatus: "failed",
+        },
+      ],
       [unavailable],
       now,
     );

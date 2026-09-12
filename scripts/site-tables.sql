@@ -1,5 +1,5 @@
 -- 站点自己的表：不属于 f1db 上游，不能进 f1db-d1-dump.sh 生成的夹具。
--- f1db 全量重导不会 DROP 这些表；preview 与生产共用同一份 D1。
+-- f1db 全量重导不会 DROP 这些表；每个 Worker 对自己的 D1 绑定幂等应用本文件。
 -- 不建到 f1db 表的外键：00-drop.sql 会 DROP f1db 表，外键会挡住清库。
 
 -- 用 (year, round) 而不是 race.id 关联：id 是上游代理键，补录一场早期比赛
@@ -74,3 +74,44 @@ CREATE INDEX IF NOT EXISTS session_source_ref_year_start_idx
 
 CREATE INDEX IF NOT EXISTS session_source_ref_start_idx
   ON session_source_ref(starts_at_utc, year, round, session_key);
+
+-- Cron 与手动触发共用一把带过期时间的租约，进程异常退出后可自动恢复。
+CREATE TABLE IF NOT EXISTS weather_sync_lock (
+  name TEXT PRIMARY KEY CHECK (name = 'ingestion'),
+  owner TEXT NOT NULL,
+  expires_at TEXT NOT NULL
+);
+
+-- 引用身份变化或被移除时，旧天气与终态不能继续遮挡新引用。
+CREATE TRIGGER IF NOT EXISTS session_source_ref_changed
+AFTER UPDATE OF api_path, race_date, starts_at_utc ON session_source_ref
+WHEN OLD.api_path IS NOT NEW.api_path
+  OR OLD.race_date IS NOT NEW.race_date
+  OR OLD.starts_at_utc IS NOT NEW.starts_at_utc
+BEGIN
+  INSERT OR IGNORE INTO weather_cache_outbox (cache_tag, created_at)
+    SELECT 'weather:' || NEW.year, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+    WHERE EXISTS (
+      SELECT 1 FROM session_weather
+      WHERE year = NEW.year AND round = NEW.round AND session_key = NEW.session_key
+    );
+  DELETE FROM session_weather
+    WHERE year = NEW.year AND round = NEW.round AND session_key = NEW.session_key;
+  DELETE FROM weather_sync_state
+    WHERE year = NEW.year AND round = NEW.round AND session_key = NEW.session_key;
+END;
+
+CREATE TRIGGER IF NOT EXISTS session_source_ref_deleted
+AFTER DELETE ON session_source_ref
+BEGIN
+  INSERT OR IGNORE INTO weather_cache_outbox (cache_tag, created_at)
+    SELECT 'weather:' || OLD.year, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+    WHERE EXISTS (
+      SELECT 1 FROM session_weather
+      WHERE year = OLD.year AND round = OLD.round AND session_key = OLD.session_key
+    );
+  DELETE FROM session_weather
+    WHERE year = OLD.year AND round = OLD.round AND session_key = OLD.session_key;
+  DELETE FROM weather_sync_state
+    WHERE year = OLD.year AND round = OLD.round AND session_key = OLD.session_key;
+END;

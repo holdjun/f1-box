@@ -16,6 +16,11 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def is_authorized(header: str | None) -> bool:
+    token = os.environ.get("WEATHER_CONTAINER_TOKEN")
+    return bool(token) and header == f"Bearer {token}"
+
+
 def column(weather, name: str) -> list:
     if hasattr(weather, "columns"):
         if name not in weather.columns:
@@ -111,8 +116,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def authorized(self) -> bool:
-        expected = f"Bearer {os.environ.get('WEATHER_CONTAINER_TOKEN', '')}"
-        return bool(expected) and self.headers.get("authorization") == expected
+        return is_authorized(self.headers.get("authorization"))
 
     def do_GET(self) -> None:
         if self.path == "/health":

@@ -114,4 +114,15 @@ assert result["sessions"][0]["status"] == "mismatch", result
 assert "api path" in result["sessions"][0]["error"], result
 `);
   });
+
+  it("rejects authorization when the container secret is missing", () => {
+    runPython(`
+import os
+os.environ.pop("WEATHER_CONTAINER_TOKEN", None)
+assert not app.is_authorized("Bearer ")
+os.environ["WEATHER_CONTAINER_TOKEN"] = "internal-secret"
+assert app.is_authorized("Bearer internal-secret")
+assert not app.is_authorized("Bearer wrong")
+`);
+  });
 });
