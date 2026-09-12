@@ -1,6 +1,11 @@
 ---
 import type { WeekendNode } from "../lib/race-weekend.js";
-import { formatWeekdayDate, formatWeekdayTime, hasPublishedStart } from "../lib/time.js";
+import {
+  formatUtcDateTime,
+  formatWeekdayDate,
+  formatWeekdayTime,
+  hasPublishedStart,
+} from "../lib/time.js";
 
 interface Props {
   nodes: WeekendNode[];
@@ -25,21 +30,58 @@ const webcal = (href: string) => href.replace(/^https?:\/\//, "webcal://");
 const linkClass =
   "py-0.5 text-[0.82rem] text-ink-muted underline decoration-line underline-offset-4 transition-colors hover:text-accent";
 const hasWeather = nodes.some((node) => node.weather !== undefined);
-const temperatureFormatter = new Intl.NumberFormat("en", {
+const numberFormatter = new Intl.NumberFormat("en", {
   maximumFractionDigits: 1,
 });
-const weatherText = (weather: NonNullable<WeekendNode["weather"]>) =>
-  [
-    weather.tempC === null
+interface WeatherPart {
+  icon: string;
+  visual: string;
+  aria: string;
+}
+
+const weatherParts = (weather: NonNullable<WeekendNode["weather"]>) => {
+  const parts: WeatherPart[] = [];
+  if (weather.tempC !== null) {
+    const value = `${numberFormatter.format(weather.tempC)}°C`;
+    parts.push({ icon: "🌡", visual: value, aria: `Air ${value}` });
+  }
+  if (weather.trackTempC !== null) {
+    const value = `${numberFormatter.format(weather.trackTempC)}°C`;
+    parts.push({ icon: "🛣", visual: value, aria: `Track ${value}` });
+  }
+  if (weather.humidityPct !== null) {
+    const value = `${numberFormatter.format(weather.humidityPct)}%`;
+    parts.push({ icon: "💧", visual: value, aria: `Humidity ${value}` });
+  }
+  if (weather.weatherCode === "rain" || weather.rainfall === true) {
+    parts.push({ icon: "🌧", visual: "Rain", aria: "Rain" });
+  }
+  if (weather.windSpeedKph !== null) {
+    const value = `${numberFormatter.format(weather.windSpeedKph)} km/h`;
+    parts.push({ icon: "💨", visual: value, aria: `Wind ${value}` });
+  }
+  if (parts.length === 0 && weather.rainfall === false) {
+    parts.push({ icon: "🌧", visual: "No rain", aria: "No rain" });
+  }
+  return parts;
+};
+
+const weatherAria = (weather: NonNullable<WeekendNode["weather"]>) =>
+  weatherParts(weather)
+    .map((part) => part.aria)
+    .join(", ");
+
+const windDetail = (weather: NonNullable<WeekendNode["weather"]>) => {
+  const speed =
+    weather.windSpeedKph === null
       ? null
-      : `Air ${temperatureFormatter.format(weather.tempC)}°C`,
-    weather.trackTempC === null
+      : `${numberFormatter.format(weather.windSpeedKph)} km/h`;
+  const direction =
+    weather.windDirectionDeg === null
       ? null
-      : `Track ${temperatureFormatter.format(weather.trackTempC)}°C`,
-    weather.weatherCode === "rain" ? "Rain" : null,
-  ]
-    .filter((part) => part !== null)
-    .join(" · ");
+      : `${numberFormatter.format(weather.windDirectionDeg)}°`;
+  return [speed, direction].filter((part) => part !== null).join(" · ");
+};
 ---
 
 <section class="weekend-progress shell mt-12">
@@ -64,7 +106,7 @@ const weatherText = (weather: NonNullable<WeekendNode["weather"]>) =>
   </div>
   <ol class="grid list-none grid-cols-1 p-0 sm:grid-cols-2 lg:grid-cols-5">
     {nodes.map((node) => (
-      <li class="weekend-progress__node flex items-center justify-between gap-4 border-b border-line px-1 py-4 lg:block lg:border-r lg:px-6 lg:py-7 lg:text-center lg:first:pl-0 lg:last:border-r-0 lg:last:pr-0">
+      <li class="weekend-progress__node relative flex items-center justify-between gap-4 border-b border-line px-1 py-4 lg:block lg:border-r lg:px-6 lg:py-7 lg:text-center lg:first:pl-0 lg:last:border-r-0 lg:last:pr-0">
         <h3 class="flex items-center gap-2 text-[0.8rem] font-semibold tracking-[0.08em] uppercase text-ink-muted lg:justify-center">
           {node.key === "race" || node.key === "sprint" ? (
             <span class="weekend-progress__flag" aria-hidden="true"></span>
@@ -89,11 +131,79 @@ const weatherText = (weather: NonNullable<WeekendNode["weather"]>) =>
             </p>
           )}
           {hasWeather ? (
-            <p class="mt-2 min-h-[1.25rem] text-[0.72rem] text-ink-muted" data-session-weather>
-              {node.weather ? weatherText(node.weather) : ""}
-            </p>
+            node.weather ? (
+              <button
+                type="button"
+                class="mt-2 inline-flex min-h-[1.25rem] cursor-pointer flex-wrap items-center justify-end gap-x-1 text-[0.72rem] text-ink-muted underline decoration-line decoration-dotted underline-offset-4 transition-colors hover:text-accent lg:justify-center"
+                style={`anchor-name: --weather-${year}-${slug}-${node.key}`}
+                popovertarget={`weather-${year}-${slug}-${node.key}`}
+                aria-haspopup="dialog"
+                aria-label={`${node.label} weather: ${weatherAria(node.weather)}`}
+                data-session-weather
+              >
+                {weatherParts(node.weather).map((part, index) => (
+                  <span aria-hidden="true">
+                    {`${index > 0 ? " · " : ""}${part.icon} ${part.visual}`}
+                  </span>
+                ))}
+              </button>
+            ) : (
+              <p class="mt-2 min-h-[1.25rem] text-[0.72rem] text-ink-muted" data-session-weather></p>
+            )
           ) : null}
         </div>
+        {node.weather ? (
+          <div
+            popover="auto"
+            id={`weather-${year}-${slug}-${node.key}`}
+            class="weekend-progress__weather-details z-30 w-64 max-w-[calc(100vw-2rem)] rounded-md border border-line bg-surface-raised p-4 text-left text-[0.78rem] shadow-panel light:shadow-panel"
+            style={`position-anchor: --weather-${year}-${slug}-${node.key}`}
+            role="dialog"
+            aria-label={`${node.label} weather details`}
+          >
+            <dl class="grid gap-2">
+              {node.weather.tempC !== null ? (
+                <div class="flex justify-between gap-4">
+                  <dt class="text-ink-muted">Air temperature</dt>
+                  <dd class="tabular-nums text-ink-strong">{numberFormatter.format(node.weather.tempC)}°C</dd>
+                </div>
+              ) : null}
+              {node.weather.trackTempC !== null ? (
+                <div class="flex justify-between gap-4">
+                  <dt class="text-ink-muted">Track temperature</dt>
+                  <dd class="tabular-nums text-ink-strong">{numberFormatter.format(node.weather.trackTempC)}°C</dd>
+                </div>
+              ) : null}
+              {node.weather.humidityPct !== null ? (
+                <div class="flex justify-between gap-4">
+                  <dt class="text-ink-muted">Humidity</dt>
+                  <dd class="tabular-nums text-ink-strong">{numberFormatter.format(node.weather.humidityPct)}%</dd>
+                </div>
+              ) : null}
+              {node.weather.pressureHpa !== null ? (
+                <div class="flex justify-between gap-4">
+                  <dt class="text-ink-muted">Pressure</dt>
+                  <dd class="tabular-nums text-ink-strong">{numberFormatter.format(node.weather.pressureHpa)} hPa</dd>
+                </div>
+              ) : null}
+              {windDetail(node.weather) !== "" ? (
+                <div class="flex justify-between gap-4">
+                  <dt class="text-ink-muted">Wind</dt>
+                  <dd class="tabular-nums text-ink-strong">{windDetail(node.weather)}</dd>
+                </div>
+              ) : null}
+              {node.weather.rainfall !== null || node.weather.weatherCode === "rain" ? (
+                <div class="flex justify-between gap-4">
+                  <dt class="text-ink-muted">Rainfall</dt>
+                  <dd class="text-ink-strong">{node.weather.rainfall === false && node.weather.weatherCode !== "rain" ? "No rain" : "Rain"}</dd>
+                </div>
+              ) : null}
+            </dl>
+            <p class="mt-3 border-t border-line pt-3 text-[0.7rem] text-ink-muted">
+              FastF1 · {node.weather.sampleCount ?? "—"} samples · Updated {formatUtcDateTime(node.weather.observedAtUtc ?? node.weather.fetchedAt)}
+            </p>
+          </div>
+        ) : null}
       </li>
     ))}
   </ol>
@@ -133,6 +243,16 @@ const weatherText = (weather: NonNullable<WeekendNode["weather"]>) =>
 </section>
 
 <style>
+  /* 支持 CSS Anchor Positioning 时贴住摘要；旧浏览器保留 UA popover 的居中回退 */
+  @supports (anchor-name: --weather-anchor) {
+    .weekend-progress__weather-details {
+      inset: auto;
+      margin: 0;
+      top: calc(anchor(bottom) + 0.4rem);
+      left: anchor(left);
+    }
+  }
+
   /* 赛格旗方格：正赛与 Sprint 两格的身份标记，纯 CSS 免掉一张图 */
   .weekend-progress__flag {
     width: 0.6rem;

@@ -36,9 +36,27 @@ const successfulResult: ContainerSessionResult = {
   sampleCount: 156,
   tempC: 29.3,
   trackTempC: 43,
+  humidityPct: 48,
+  pressureHpa: 1012,
+  windSpeedKph: 14,
+  windDirectionDeg: 220,
+  rainfall: false,
+  observedAtUtc: "2023-09-03T15:56:00.000Z",
   weatherCode: null,
   fetchedAt: "2026-09-12T12:00:01.000Z",
   error: null,
+};
+
+const emptyMeasurements = {
+  tempC: null,
+  trackTempC: null,
+  humidityPct: null,
+  pressureHpa: null,
+  windSpeedKph: null,
+  windDirectionDeg: null,
+  rainfall: null,
+  observedAtUtc: null,
+  weatherCode: null,
 };
 
 const containerResponse = {
@@ -99,6 +117,13 @@ describe("weather ingestion domain", () => {
         sessionKey: "race",
         tempC: 29.3,
         trackTempC: 43,
+        humidityPct: 48,
+        pressureHpa: 1012,
+        windSpeedKph: 14,
+        windDirectionDeg: 220,
+        rainfall: false,
+        sampleCount: 156,
+        observedAtUtc: "2023-09-03T15:56:00.000Z",
         weatherCode: null,
         fetchedAt: successfulResult.fetchedAt,
         refApiPath: candidate.apiPath,
@@ -115,14 +140,43 @@ describe("weather ingestion domain", () => {
     expect(plan.cacheDirty).toBe(true);
   });
 
+  it("tolerates extended fields absent during a container rollout", () => {
+    const legacyResponse = {
+      fastf1Version: "3.8.3",
+      requestsVersion: "2.34.2",
+      sessions: [
+        {
+          year: 2023,
+          round: 14,
+          sessionKey: "race",
+          status: "success",
+          sampleCount: 156,
+          tempC: 29.3,
+          trackTempC: 43,
+          weatherCode: "rain",
+          fetchedAt: successfulResult.fetchedAt,
+          error: null,
+        },
+      ],
+    };
+    const parsed = parseContainerResponse(legacyResponse, [candidate]);
+    expect(parsed.sessions[0]).toMatchObject({
+      rainfall: null,
+      humidityPct: null,
+      pressureHpa: null,
+      windSpeedKph: null,
+      windDirectionDeg: null,
+      sampleCount: 156,
+      observedAtUtc: null,
+    });
+  });
+
   it("requires a second empty observation before terminal no-data", () => {
     const emptyResult: ContainerSessionResult = {
       ...successfulResult,
       status: "empty",
       sampleCount: 0,
-      tempC: null,
-      trackTempC: null,
-      weatherCode: null,
+      ...emptyMeasurements,
     };
 
     const first = buildPersistPlan([candidate], [emptyResult], now);
@@ -151,9 +205,7 @@ describe("weather ingestion domain", () => {
       ...successfulResult,
       status: "empty",
       sampleCount: 0,
-      tempC: null,
-      trackTempC: null,
-      weatherCode: null,
+      ...emptyMeasurements,
     };
     const afterFailures = buildPersistPlan(
       [{ ...candidate, attempts: 4, previousStatus: "failed" }],
@@ -227,9 +279,7 @@ describe("weather ingestion domain", () => {
       ...successfulResult,
       status: "unavailable",
       sampleCount: 0,
-      tempC: null,
-      trackTempC: null,
-      weatherCode: null,
+      ...emptyMeasurements,
       error: "HTTP 403",
     };
     const first = buildPersistPlan([candidate], [unavailable], now);

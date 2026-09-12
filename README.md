@@ -32,7 +32,7 @@ f1db（CC-BY-4.0）→ `data-sync.yml` 按上游发布节奏轮询 release tag�
 
 天气采集分成两层：`weather-data.yml` 在 GitHub Actions 里解析 FastF1 schedule，把稳定的 `api_path` 写进 D1 `session_source_ref`；Cloudflare Worker 只按这些明确路径调用无状态 Container 取天气，状态和缓存刷新分别落在 `weather_sync_state` 与 `weather_cache_outbox`。
 
-比赛详情页按 session 读取 `session_weather`，只在已有实测数据时显示气温、赛道温度和降雨；缓存用 `weather:<year>` 标签精确失效。
+比赛详情页按 session 读取 `session_weather`，只在已有实测数据时显示气温、赛道温度、湿度、降雨与风速摘要；原生 popover 补充气压、风向、样本数和更新时间。缓存用 `weather:<year>` 标签精确失效。
 
 `scripts/f1db-d1-dump.sh` 从 f1db 官方 SQLite release 生成按表拆分的导入 SQL，`scripts/f1db-d1-import.sh` 推进 D1。赛道轮廓 SVG、车队 logo、国旗存仓库 `apps/web/public/vendor/`；轮廓 SVG 用 `scripts/f1db-circuit-svg-sync.sh` 从 f1db 仓库同步，新增布局时手动跑。带遥测的注解赛道图由 `scripts/generate-circuit-maps.py` 离线生成到 `apps/web/src/data/circuit-maps.json`，无遥测的历史赛道回落轮廓 SVG。
 

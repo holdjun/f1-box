@@ -29,12 +29,20 @@ CREATE TABLE IF NOT EXISTS session_source_ref (
 
 -- 赛道实测天气：仅保存 FastF1 能提供的字段。缺失保持 NULL，
 -- 不用其他来源补值，也不从 Rainfall=false 推断晴天。
+-- 单位在容器侧统一为 °C/%/hPa/km/h/度；rainfall 只存 FastF1 的布尔观测。
 CREATE TABLE IF NOT EXISTS session_weather (
   year INTEGER NOT NULL,
   round INTEGER NOT NULL,
   session_key TEXT NOT NULL,
   temp_c REAL,
   track_temp_c REAL,
+  humidity_pct REAL,
+  pressure_hpa REAL,
+  wind_speed_kph REAL,
+  wind_direction_deg REAL,
+  rainfall INTEGER CHECK (rainfall IN (0, 1)),
+  sample_count INTEGER CHECK (sample_count >= 0),
+  observed_at_utc TEXT,
   weather_code TEXT,
   source TEXT NOT NULL CHECK (source = 'fastf1'),
   fetched_at TEXT NOT NULL,

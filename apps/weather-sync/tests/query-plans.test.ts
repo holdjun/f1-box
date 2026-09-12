@@ -92,6 +92,13 @@ describe("weather ingestion query plans", () => {
       "'race'",
       "20",
       "30",
+      "48",
+      "1012",
+      "14",
+      "220",
+      "0",
+      "156",
+      "'2023-09-03T15:56:00Z'",
       "NULL",
       "'2026-09-12T12:00:00Z'",
       "'/static/current/'",
@@ -108,10 +115,10 @@ describe("weather ingestion query plans", () => {
       "'2026-09-12T12:00:00Z'",
       "NULL",
       "'2026-09-12T12:00:00Z'",
-      ...identity.slice(7),
+      ...identity.slice(14),
     ];
     const staleIdentity = [...identity];
-    staleIdentity[7] = "'/static/stale/'";
+    staleIdentity[14] = "'/static/stale/'";
     const staleState = [...state];
     staleState[9] = "'/static/stale/'";
     const output = execFileSync("sqlite3", ["-json", dbPath], {

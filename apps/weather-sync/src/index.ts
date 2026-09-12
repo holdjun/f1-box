@@ -130,6 +130,7 @@ async function runLockedIngestion(env: Env, limit: number, now: Date) {
         round: candidate.round,
         sessionKey: candidate.sessionKey,
         apiPath: candidate.apiPath,
+        startsAtUtc: candidate.startsAtUtc,
       })),
     });
     results = response.sessions;
@@ -145,6 +146,13 @@ async function runLockedIngestion(env: Env, limit: number, now: Date) {
         weather.sessionKey,
         weather.tempC,
         weather.trackTempC,
+        weather.humidityPct,
+        weather.pressureHpa,
+        weather.windSpeedKph,
+        weather.windDirectionDeg,
+        weather.rainfall,
+        weather.sampleCount,
+        weather.observedAtUtc,
         weather.weatherCode,
         weather.fetchedAt,
         weather.refApiPath,

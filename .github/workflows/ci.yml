@@ -87,6 +87,8 @@ jobs:
         run: |
           apps/web/node_modules/.bin/wrangler d1 execute f1db --remote \
             -c apps/web/wrangler.preview.jsonc --file scripts/site-tables.sql
+          apps/web/node_modules/.bin/wrangler d1 migrations apply f1db --remote \
+            -c apps/web/wrangler.preview.jsonc
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -123,6 +125,8 @@ jobs:
         run: |
           apps/web/node_modules/.bin/wrangler d1 execute f1db-weather-preview --remote \
             -c apps/weather-sync/wrangler.preview.jsonc --file scripts/site-tables.sql
+          apps/web/node_modules/.bin/wrangler d1 migrations apply f1db-weather-preview --remote \
+            -c apps/weather-sync/wrangler.preview.jsonc
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -221,6 +225,8 @@ jobs:
         run: |
           apps/web/node_modules/.bin/wrangler d1 execute f1db --remote \
             -c apps/web/wrangler.jsonc --file scripts/site-tables.sql
+          apps/web/node_modules/.bin/wrangler d1 migrations apply f1db --remote \
+            -c apps/web/wrangler.jsonc
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -231,7 +237,8 @@ jobs:
 
   weather-production:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: verify
+    # 生产 D1 迁移由 web 部署先落地；weather worker 的新 upsert 不能抢在列存在前上线
+    needs: [verify, production]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

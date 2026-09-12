@@ -115,7 +115,9 @@ assert keys == [(14, "practice-1"), (14, "race")], keys
       input: `${schema}
         INSERT INTO session_source_ref VALUES
           (2026, 1, 'race', '/static/old/', '2026-03-08', '2026-03-08T04:00:00Z', 'fastf1-schedule');
-        INSERT INTO session_weather VALUES
+        INSERT INTO session_weather
+          (year, round, session_key, temp_c, track_temp_c, weather_code, source, fetched_at)
+        VALUES
           (2026, 1, 'race', 20, 30, NULL, 'fastf1', '2026-03-08T08:00:00Z');
         INSERT INTO weather_sync_state VALUES
           (2026, 1, 'race', 'success', 1, NULL, '2026-03-08T08:00:00Z', NULL, '2026-03-08T08:00:00Z');
@@ -187,6 +189,28 @@ class Row:
 assert module.sessions_of(Row()) == [
     ("race", "/static/2020/imola/Race/", "2020-11-01T12:10:00Z")
 ]
+`);
+  });
+
+  it("does not synthesize missing practice sessions on sprint weekends", () => {
+    runPython(`
+class Row:
+    def get(self, key):
+        return {
+            "Session1": "Sprint Qualifying",
+            "Session1DateUtc": "2026-05-16T13:30:00Z",
+            "Session2": "Sprint",
+            "Session2DateUtc": "2026-05-16T16:00:00Z",
+            "Session3": "Qualifying",
+            "Session3DateUtc": "2026-05-17T13:00:00Z",
+            "Session5": "Race",
+            "Session5DateUtc": "2026-05-18T13:00:00Z",
+        }.get(key)
+    def get_session(self, name):
+        return types.SimpleNamespace(api_path=f"/static/2026/{name}/")
+
+keys = [entry[0] for entry in module.sessions_of(Row())]
+assert keys == ["sprint-qualifying", "sprint", "qualifying", "race"], keys
 `);
   });
 
