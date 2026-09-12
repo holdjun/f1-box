@@ -54,6 +54,19 @@ describe("buildWeekendNodes", () => {
     expect(nodes[4]).toMatchObject({ tab: "race-result" });
   });
 
+  it("天气原样传递，不参与 tab 判定", () => {
+    const weather = {
+      tempC: 23.4,
+      trackTempC: null,
+      weatherCode: null,
+    };
+    const nodes = buildWeekendNodes(
+      [{ ...sessions[0], weather }],
+      ["race-result"],
+    );
+    expect(nodes[0]).toMatchObject({ tab: null, weather });
+  });
+
   it("无对应 tab 的 session（Sprint）永不 done", () => {
     const nodes = buildWeekendNodes(
       [{ key: "sprint", label: "Sprint", startsAtUtc: "2026-03-07T03:00:00Z" }],

@@ -35,6 +35,13 @@ export interface RaceSession {
   key: string;
   label: string;
   startsAtUtc: string;
+  weather?: SessionWeather;
+}
+
+export interface SessionWeather {
+  tempC: number | null;
+  trackTempC: number | null;
+  weatherCode: "rain" | null;
 }
 
 interface PodiumEntry {
@@ -305,10 +312,18 @@ const raceMetaSql = `SELECT ra.year, ra.round, ra.grand_prix_id AS slug, gp.name
        ra.free_practice_2_date, ra.free_practice_2_time,
        ra.free_practice_3_date, ra.free_practice_3_time,
        ra.qualifying_date, ra.qualifying_time,
-       ra.sprint_qualifying_date, ra.sprint_qualifying_time,
-       ra.sprint_race_date, ra.sprint_race_time,
-       (SELECT json_group_array(json_object('key', session_key, 'value', starts_at_utc))
-          FROM session_time st WHERE st.year = ra.year AND st.round = ra.round) AS session_times
+      ra.sprint_qualifying_date, ra.sprint_qualifying_time,
+      ra.sprint_race_date, ra.sprint_race_time,
+      (SELECT json_group_array(json_object('key', session_key, 'value', starts_at_utc))
+         FROM session_time st WHERE st.year = ra.year AND st.round = ra.round) AS session_times,
+         (SELECT json_group_array(json_object(
+            'key', sw.session_key,
+            'tempC', sw.temp_c,
+            'trackTempC', sw.track_temp_c,
+            'weatherCode', sw.weather_code
+          ))
+          FROM session_weather sw
+          WHERE sw.year = ra.year AND sw.round = ra.round) AS session_weather
 FROM race ra
 JOIN grand_prix gp ON ra.grand_prix_id = gp.id
 JOIN circuit ci ON ra.circuit_id = ci.id
@@ -510,6 +525,29 @@ function parseSessionTimes(raw: string | null): Map<string, string> {
   }
 }
 
+// session_weather 与 session_time 一样是站点 SQL 生成的 JSON；
+// 全 NULL 行没有可展示信息，直接不进入 session 模型。
+function parseSessionWeather(raw: string | null): Map<string, SessionWeather> {
+  if (raw === null) return new Map();
+  try {
+    const rows = JSON.parse(raw) as Array<{
+      key: string;
+      tempC: number | null;
+      trackTempC: number | null;
+      weatherCode: "rain" | null;
+    }>;
+    return new Map(
+      rows.flatMap(({ key, tempC, trackTempC, weatherCode }) =>
+        tempC === null && trackTempC === null && weatherCode === null
+          ? []
+          : [[key, { tempC, trackTempC, weatherCode }]],
+      ),
+    );
+  } catch {
+    return new Map();
+  }
+}
+
 function buildSessions(r: RowReader): RaceSession[] {
   const defs: [string, string, string, string][] = [
     [
@@ -541,6 +579,7 @@ function buildSessions(r: RowReader): RaceSession[] {
     ["race", "Race", "date", "time"],
   ];
   const sessionTimes = parseSessionTimes(r.strOrNull("session_times"));
+  const sessionWeather = parseSessionWeather(r.strOrNull("session_weather"));
   const sessions: RaceSession[] = [];
   for (const [key, label, dateKey, timeKey] of defs) {
     const date = r.strOrNull(dateKey);
@@ -558,7 +597,10 @@ function buildSessions(r: RowReader): RaceSession[] {
       startsAtUtc = `${date}T00:00:00Z`;
     }
     if (startsAtUtc !== null) {
-      sessions.push({ key, label, startsAtUtc });
+      const session: RaceSession = { key, label, startsAtUtc };
+      const weather = sessionWeather.get(key);
+      if (weather !== undefined) session.weather = weather;
+      sessions.push(session);
     }
   }
   // defs 顺序是字段映射序；sprint 周末 Quali 在 Sprint 之后，按开始时间排回真实顺序

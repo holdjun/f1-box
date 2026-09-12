@@ -18,6 +18,7 @@ export interface WeekendNode {
   key: string;
   label: string;
   startsAtUtc: string;
+  weather?: RaceSession["weather"];
   tab: RaceTabKey | null;
 }
 
@@ -28,12 +29,14 @@ export function buildWeekendNodes(
   const available = new Set(tabsWithData);
   return sessions.map((session) => {
     const tab = SESSION_TAB[session.key] ?? null;
-    return {
+    const node: WeekendNode = {
       key: session.key,
       label: session.label,
       startsAtUtc: session.startsAtUtc,
       tab: tab !== null && available.has(tab) ? tab : null,
     };
+    if (session.weather !== undefined) node.weather = session.weather;
+    return node;
   });
 }
 
