@@ -112,6 +112,15 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
+      - name: Reset preview weather state
+        run: |
+          apps/web/node_modules/.bin/wrangler d1 execute f1db-weather-preview --remote \
+            -c apps/weather-sync/wrangler.preview.jsonc \
+            --command "DELETE FROM weather_sync_state; DELETE FROM session_weather; DELETE FROM weather_cache_outbox;"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
       - name: Deploy weather preview
         run: |
           printf 'WEATHER_SYNC_TOKEN=%s\nWEATHER_CONTAINER_TOKEN=%s\n' \
