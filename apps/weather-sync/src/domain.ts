@@ -1,5 +1,5 @@
 export const MAX_ATTEMPTS = 5;
-export const SETTLE_DELAY_MS = 15 * 60 * 1000;
+export const WEATHER_SETTLE_DELAY_MS = 4 * 60 * 60 * 1000;
 export const RESULT_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
 export const BATCH_LIMIT = 10;
 export const LOCK_TTL_MS = 25 * 60 * 1000;
@@ -224,7 +224,13 @@ export const resultCandidateSql = `SELECT sr.year, sr.round,
 FROM session_source_ref sr
 LEFT JOIN session_result_sync_state rs
   ON rs.year = sr.year AND rs.round = sr.round AND rs.session_key = sr.session_key
-WHERE sr.starts_at_utc <= ?1
+WHERE unixepoch(sr.starts_at_utc) + CASE sr.session_key
+    WHEN 'race' THEN 14400
+    WHEN 'sprint' THEN 7200
+    WHEN 'qualifying' THEN 7200
+    WHEN 'sprint-qualifying' THEN 5400
+    ELSE 5400
+  END <= unixepoch(?1)
   AND sr.starts_at_utc >= ?2
   AND (
     rs.year IS NULL
@@ -313,15 +319,15 @@ FROM session_source_ref sr, json_each(?4) AS row
 WHERE sr.year = ?1 AND sr.round = ?2 AND sr.session_key = ?3
   AND sr.api_path = ?7 AND sr.race_date = ?8 AND sr.starts_at_utc = ?9`;
 
-export const outboxInsertSql = `INSERT OR IGNORE INTO session_cache_outbox
+export const outboxInsertSql = `INSERT OR IGNORE INTO weather_cache_outbox
   (cache_tag, created_at)
 VALUES (?1, ?2)`;
 
 export const outboxSql = `SELECT cache_tag, created_at
-FROM session_cache_outbox
+FROM weather_cache_outbox
 ORDER BY created_at`;
 
-export const outboxDeleteSql = `DELETE FROM session_cache_outbox
+export const outboxDeleteSql = `DELETE FROM weather_cache_outbox
 WHERE cache_tag = ?1`;
 
 export const weatherStatusSql = `SELECT status, COUNT(*) AS count
@@ -873,10 +879,11 @@ export function buildPersistPlan(
 }
 
 export function parseRunRequest(raw: unknown): RunRequest {
-  const value =
-    typeof raw === "object" && raw !== null
-      ? (raw as Record<string, unknown>)
-      : {};
+  if (raw === undefined || raw === null) return { limit: BATCH_LIMIT };
+  if (typeof raw !== "object" || Array.isArray(raw)) {
+    throw new Error("request body must be an object");
+  }
+  const value = raw as Record<string, unknown>;
   const limit = value.limit === undefined ? BATCH_LIMIT : value.limit;
   if (
     typeof limit !== "number" ||

@@ -19,12 +19,12 @@ import {
   resultCandidateSql,
   resultStateUpsertSql,
   resultStatusSql,
-  SETTLE_DELAY_MS,
   type SessionCandidate,
   type SnapshotUpsert,
   snapshotCountSql,
   snapshotDeleteSql,
   snapshotUpsertSql,
+  WEATHER_SETTLE_DELAY_MS,
   weatherCandidateSql,
   weatherCountSql,
   weatherStateUpsertSql,
@@ -133,6 +133,7 @@ function candidateIdentity(row: CandidateKindRow): string {
 function mergeCandidates(
   weatherRows: CandidateKindRow[],
   resultRows: CandidateKindRow[],
+  limit: number,
 ): SessionCandidate[] {
   const candidates = new Map<string, SessionCandidate>();
   const upsert = (row: CandidateKindRow, kind: "weather" | "results") => {
@@ -158,13 +159,15 @@ function mergeCandidates(
   };
   for (const row of weatherRows) upsert(row, "weather");
   for (const row of resultRows) upsert(row, "results");
-  return [...candidates.values()].sort(
-    (a, b) =>
-      b.startsAtUtc.localeCompare(a.startsAtUtc) ||
-      b.year - a.year ||
-      b.round - a.round ||
-      a.sessionKey.localeCompare(b.sessionKey),
-  );
+  return [...candidates.values()]
+    .sort(
+      (a, b) =>
+        b.startsAtUtc.localeCompare(a.startsAtUtc) ||
+        b.year - a.year ||
+        b.round - a.round ||
+        a.sessionKey.localeCompare(b.sessionKey),
+    )
+    .slice(0, limit);
 }
 
 function stateStatement(env: Env, sql: string, state: StateUpsert) {
@@ -207,24 +210,30 @@ function snapshotsBySession(
 }
 
 async function runLockedIngestion(env: Env, limit: number, now: Date) {
-  const cutoff = new Date(now.getTime() - SETTLE_DELAY_MS).toISOString();
+  const weatherCutoff = new Date(
+    now.getTime() - WEATHER_SETTLE_DELAY_MS,
+  ).toISOString();
   const lookback = new Date(now.getTime() - RESULT_LOOKBACK_MS).toISOString();
   const [weatherRows, resultRows] = (await env.F1_DB.batch([
     env.F1_DB.prepare(weatherCandidateSql).bind(
-      cutoff,
+      weatherCutoff,
       MAX_ATTEMPTS,
       now.toISOString(),
       limit,
     ),
     env.F1_DB.prepare(resultCandidateSql).bind(
-      cutoff,
+      now.toISOString(),
       lookback,
       MAX_ATTEMPTS,
       now.toISOString(),
       limit,
     ),
   ])) as Array<D1Result<CandidateKindRow>>;
-  const candidates = mergeCandidates(weatherRows.results, resultRows.results);
+  const candidates = mergeCandidates(
+    weatherRows.results,
+    resultRows.results,
+    limit,
+  );
 
   if (candidates.length === 0) {
     return { sessions: 0, cachePurged: await purgeOutbox(env) };

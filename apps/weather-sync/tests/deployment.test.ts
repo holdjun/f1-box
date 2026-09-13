@@ -42,6 +42,10 @@ const resultMigration = readFileSync(
   path.join(repoRoot, "migrations/0002_session_result_snapshots.sql"),
   "utf8",
 );
+const outboxCompatibilityMigration = readFileSync(
+  path.join(repoRoot, "migrations/0003_restore_weather_cache_outbox.sql"),
+  "utf8",
+);
 const weatherPreviewJob = ci.slice(
   ci.indexOf("  weather-preview:"),
   ci.indexOf("\n  production:", ci.indexOf("  weather-preview:")),
@@ -96,6 +100,8 @@ describe("weather deployment configuration", () => {
           cache_tag TEXT PRIMARY KEY,
           created_at TEXT NOT NULL
         );
+        INSERT INTO weather_cache_outbox VALUES
+          ('weather:2026', '2026-09-12T12:00:00Z');
         CREATE TABLE session_weather (
           year INTEGER NOT NULL,
           round INTEGER NOT NULL,
@@ -116,10 +122,12 @@ describe("weather deployment configuration", () => {
         END;
         ${weatherMigration}
         ${resultMigration}
+        ${outboxCompatibilityMigration}
         SELECT temp_c, track_temp_c, humidity_pct, pressure_hpa, wind_speed_kph,
                wind_direction_deg, rainfall, sample_count, observed_at_utc,
                weather_code, source, fetched_at,
-               (SELECT json_group_array(json_object('name', name))
+               (SELECT COUNT(*) FROM weather_cache_outbox) AS pending_purges,
+               (SELECT json_group_array(json_object('name', name, 'sql', sql))
                   FROM sqlite_master WHERE type = 'trigger') AS triggers
         FROM session_weather;
       `,
@@ -141,11 +149,20 @@ describe("weather deployment configuration", () => {
       weather_code: "rain",
       source: "fastf1",
       fetched_at: "2026-03-08T06:05:00Z",
+      pending_purges: 1,
     });
-    expect(JSON.parse(triggers)).toEqual([
-      { name: "session_source_ref_changed" },
-      { name: "session_source_ref_deleted" },
+    const parsedTriggers = JSON.parse(triggers) as Array<{
+      name: string;
+      sql: string;
+    }>;
+    expect(parsedTriggers.map(({ name }) => name)).toEqual([
+      "session_source_ref_changed",
+      "session_source_ref_deleted",
     ]);
+    for (const trigger of parsedTriggers) {
+      expect(trigger.sql).toContain("weather_cache_outbox");
+      expect(trigger.sql).not.toContain("session_cache_outbox");
+    }
     rmSync(dir, { recursive: true, force: true });
   });
 
@@ -162,18 +179,42 @@ describe("weather deployment configuration", () => {
     const resetIndex = weatherPreviewJob.indexOf("Reset preview weather state");
     const resetStep = weatherPreviewJob.slice(
       resetIndex,
-      weatherPreviewJob.indexOf("Run one-session canary"),
+      weatherPreviewJob.indexOf("Run weather canary"),
     );
     expect(resetStep).toContain("DELETE FROM weather_sync_state;");
     expect(resetStep).toContain("DELETE FROM session_weather;");
-    expect(resetStep).toContain("DELETE FROM session_cache_outbox;");
+    expect(resetStep).toContain("DELETE FROM weather_cache_outbox;");
     expect(resetStep).toContain("DELETE FROM weather_sync_lock;");
     expect(
       weatherPreviewJob.indexOf("Apply preview session references"),
     ).toBeLessThan(resetIndex);
     expect(resetIndex).toBeLessThan(
-      weatherPreviewJob.indexOf("Run one-session canary"),
+      weatherPreviewJob.indexOf("Run weather canary"),
     );
+  });
+
+  it("keeps the existing outbox as the active cache invalidation queue", () => {
+    expect(siteTables).toContain(
+      "CREATE TABLE IF NOT EXISTS weather_cache_outbox",
+    );
+    expect(siteTables).not.toContain(
+      "CREATE TABLE IF NOT EXISTS session_cache_outbox",
+    );
+    expect(workerSource).toContain("outboxInsertSql");
+    expect(resultMigration).not.toContain("DROP TABLE weather_cache_outbox");
+  });
+
+  it("applies query indexes before preview and production web deploys", () => {
+    expect(ci.match(/--file scripts\/f1db-d1-indexes\.sql/g)).toHaveLength(2);
+  });
+
+  it("runs a recent result canary and asserts snapshots and invalidation", () => {
+    expect(weatherPreviewJob).toContain("date -u +%Y");
+    expect(weatherPreviewJob).toContain("status.snapshotRows < 1");
+    expect(weatherPreviewJob).toContain("status.pendingCachePurges < 1");
+    expect(weatherPreviewJob).toContain("status.resultStatuses.find");
+    expect(weatherPreviewJob).toContain("Run weather canary");
+    expect(weatherPreviewJob).toContain("Run result canary");
   });
 
   it("serializes ingestion and only runs the canary for weather changes", () => {

@@ -173,6 +173,14 @@ describe("middleware 浏览器缓存头", () => {
     expect(response.headers.get("ETag")).toBeNull();
   });
 
+  it("缓存禁用时也不向客户端暴露内部比赛轮次头", async () => {
+    const { response } = await run(
+      "/results/2026/races/australia/race-result",
+      { cacheEnabled: false },
+    );
+    expect(response.headers.get("X-F1-Race-Round")).toBeNull();
+  });
+
   it("no-store 等显式头页面不覆盖", async () => {
     const { response } = await run("/racing/2026", {
       headers: { "Cache-Control": "no-store" },

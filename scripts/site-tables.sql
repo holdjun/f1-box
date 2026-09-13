@@ -117,13 +117,13 @@ CREATE INDEX IF NOT EXISTS session_result_sync_state_status_idx
   ON session_result_sync_state(status);
 
 -- 缓存刷新独立于采集成功，失败时保留 outbox，下一次调度重试。
-CREATE TABLE IF NOT EXISTS session_cache_outbox (
+CREATE TABLE IF NOT EXISTS weather_cache_outbox (
   cache_tag TEXT PRIMARY KEY,
   created_at TEXT NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS session_cache_outbox_created_idx
-  ON session_cache_outbox(created_at, cache_tag);
+CREATE INDEX IF NOT EXISTS weather_cache_outbox_created_idx
+  ON weather_cache_outbox(created_at, cache_tag);
 
 CREATE INDEX IF NOT EXISTS session_source_ref_year_start_idx
   ON session_source_ref(year, starts_at_utc);
@@ -145,13 +145,13 @@ WHEN OLD.api_path IS NOT NEW.api_path
   OR OLD.race_date IS NOT NEW.race_date
   OR OLD.starts_at_utc IS NOT NEW.starts_at_utc
 BEGIN
-  INSERT OR IGNORE INTO session_cache_outbox (cache_tag, created_at)
+  INSERT OR IGNORE INTO weather_cache_outbox (cache_tag, created_at)
     SELECT 'weather:' || NEW.year, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
     WHERE EXISTS (
       SELECT 1 FROM session_weather
       WHERE year = NEW.year AND round = NEW.round AND session_key = NEW.session_key
     );
-  INSERT OR IGNORE INTO session_cache_outbox (cache_tag, created_at)
+  INSERT OR IGNORE INTO weather_cache_outbox (cache_tag, created_at)
     SELECT 'results:' || NEW.year, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
     WHERE EXISTS (
       SELECT 1 FROM session_result_snapshot
@@ -170,13 +170,13 @@ END;
 CREATE TRIGGER IF NOT EXISTS session_source_ref_deleted
 AFTER DELETE ON session_source_ref
 BEGIN
-  INSERT OR IGNORE INTO session_cache_outbox (cache_tag, created_at)
+  INSERT OR IGNORE INTO weather_cache_outbox (cache_tag, created_at)
     SELECT 'weather:' || OLD.year, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
     WHERE EXISTS (
       SELECT 1 FROM session_weather
       WHERE year = OLD.year AND round = OLD.round AND session_key = OLD.session_key
     );
-  INSERT OR IGNORE INTO session_cache_outbox (cache_tag, created_at)
+  INSERT OR IGNORE INTO weather_cache_outbox (cache_tag, created_at)
     SELECT 'results:' || OLD.year, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
     WHERE EXISTS (
       SELECT 1 FROM session_result_snapshot

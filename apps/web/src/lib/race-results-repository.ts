@@ -420,10 +420,12 @@ const sessionSnapshotsSql = `SELECT json_group_array(json_object(
          'gapMs', s.gap_ms,
          'gapText', s.gap_text,
          'laps', s.laps,
-         'status', s.status
+         'status', s.status,
+         'points', s.points
        )) AS session_snapshots
-FROM session_result_snapshot s
-JOIN race ra ON ra.year = s.year AND ra.round = s.round
+FROM race ra
+CROSS JOIN session_result_snapshot s
+  ON s.year = ra.year AND s.round = ra.round
 WHERE ra.year = ?1 AND ra.grand_prix_id = ?2`;
 
 const raceResultSql = `SELECT rr.position_number, rr.position_text, rr.driver_number,
@@ -868,6 +870,7 @@ interface SessionSnapshotRow {
   gapText: string | null;
   laps: number | null;
   status: string | null;
+  points: number | null;
 }
 
 function parseSessionSnapshots(
@@ -913,7 +916,15 @@ function formatLapMs(totalMs: number | null): string | null {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = `${totalSeconds % 60}`.padStart(2, "0");
   const millis = `${totalMs % 1000}`.padStart(3, "0");
-  return `${hours > 0 ? `${hours}:` : ""}${minutes}:${seconds}.${millis}`;
+  const displayedMinutes =
+    hours > 0 ? String(minutes).padStart(2, "0") : minutes;
+  return `${hours > 0 ? `${hours}:` : ""}${displayedMinutes}:${seconds}.${millis}`;
+}
+
+function formatGapMs(totalMs: number | null): string | null {
+  if (totalMs === null || totalMs < 0) return null;
+  if (totalMs >= 60_000) return `+${formatLapMs(totalMs)}`;
+  return `+${Math.floor(totalMs / 1000)}.${String(totalMs % 1000).padStart(3, "0")}`;
 }
 
 function mapSnapshotIdentity(row: SessionSnapshotRow) {
@@ -935,9 +946,8 @@ function mapSnapshotRaceRow(row: SessionSnapshotRow): RaceResultRow {
     laps: row.laps,
     time: formatLapMs(row.totalTimeMs),
     retiredReason: row.status,
-    gap:
-      row.gapText ?? (row.gapMs === null ? null : `+${formatLapMs(row.gapMs)}`),
-    points: null,
+    gap: row.gapText ?? formatGapMs(row.gapMs),
+    points: row.points,
   };
 }
 
@@ -959,7 +969,7 @@ function mapSnapshotPracticeRow(row: SessionSnapshotRow): PracticeRow {
     position: row.position,
     positionText: row.positionText,
     time: formatLapMs(row.bestLapMs),
-    gap: row.gapMs === null ? null : `+${formatLapMs(row.gapMs)}`,
+    gap: formatGapMs(row.gapMs),
     laps: row.laps,
   };
 }
@@ -1036,7 +1046,13 @@ export function createRaceResultsRepository(
         );
         const page: RacePage = {
           ...(fixture as unknown as RacePage),
-          sources: {},
+          sources: {
+            "race-result": {
+              source: "f1db",
+              provisional: false,
+              fetchedAt: null,
+            },
+          },
         };
         if (slug === "australia") return page;
         // DEV 预览：赛前/赛中形态没有独立 fixture。换上目标站的赛程元信息，
@@ -1091,14 +1107,42 @@ export function createRaceResultsRepository(
             slug === "china"
               ? {
                   ...empty,
-                  qualifying: page.tabs.qualifying,
+                  qualifying: page.tabs.qualifying.map((row, index) =>
+                    index === 0
+                      ? { ...row, driverId: null, constructorId: null }
+                      : row,
+                  ),
                   practice1: page.tabs.practice1,
                   // 上海是 Sprint 周末：把正赛/排位数据借去两张 Sprint 表
                   sprintRace: page.tabs.raceResult,
                   sprintQualifying: page.tabs.qualifying,
                 }
               : empty,
-          sources: {},
+          sources:
+            slug === "china"
+              ? {
+                  qualifying: {
+                    source: "fastf1",
+                    provisional: true,
+                    fetchedAt: "2026-03-14T08:15:00Z",
+                  },
+                  "practice-1": {
+                    source: "fastf1",
+                    provisional: true,
+                    fetchedAt: "2026-03-13T08:15:00Z",
+                  },
+                  sprint: {
+                    source: "fastf1",
+                    provisional: true,
+                    fetchedAt: "2026-03-14T04:15:00Z",
+                  },
+                  "sprint-qualifying": {
+                    source: "fastf1",
+                    provisional: true,
+                    fetchedAt: "2026-03-13T12:15:00Z",
+                  },
+                }
+              : {},
         };
       }
       const values = [year, slug];

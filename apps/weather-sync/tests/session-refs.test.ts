@@ -135,7 +135,7 @@ assert keys == [(14, "practice-1"), (14, "race")], keys
           (SELECT COUNT(*) FROM weather_sync_state) AS weatherState,
           (SELECT COUNT(*) FROM session_result_snapshot) AS snapshot,
           (SELECT COUNT(*) FROM session_result_sync_state) AS resultState,
-          (SELECT COUNT(*) FROM session_cache_outbox) AS outbox;
+          (SELECT COUNT(*) FROM weather_cache_outbox) AS outbox;
       `,
     });
     expect(JSON.parse(result)).toEqual([

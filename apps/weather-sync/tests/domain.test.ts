@@ -328,6 +328,9 @@ describe("session ingestion domain", () => {
       "LEFT JOIN session_result_sync_state rs",
     );
     expect(resultCandidateSql).not.toContain("session_weather");
+    expect(resultCandidateSql).toContain("WHEN 'race' THEN 14400");
+    expect(resultCandidateSql).toContain("WHEN 'sprint' THEN 7200");
+    expect(resultCandidateSql).toContain("unixepoch(sr.starts_at_utc)");
     expect(weatherStateUpsertSql).toContain("INSERT INTO weather_sync_state");
     expect(resultStateUpsertSql).toContain(
       "INSERT INTO session_result_sync_state",
@@ -378,6 +381,7 @@ describe("session ingestion domain", () => {
   });
 
   it("queues year-scoped cache tags without touching the f1db tag", () => {
+    expect(outboxInsertSql).toContain("weather_cache_outbox");
     expect(outboxInsertSql).toContain("VALUES (?1, ?2)");
     expect(outboxInsertSql).not.toContain("'f1db'");
   });
@@ -386,6 +390,8 @@ describe("session ingestion domain", () => {
     expect(parseRunRequest(undefined)).toEqual({ limit: BATCH_LIMIT });
     expect(parseRunRequest({})).toEqual({ limit: BATCH_LIMIT });
     expect(parseRunRequest({ limit: 1 })).toEqual({ limit: 1 });
+    expect(() => parseRunRequest("{}")).toThrow(/object/i);
+    expect(() => parseRunRequest([])).toThrow(/object/i);
     expect(() => parseRunRequest({ limit: 0 })).toThrow(/limit/i);
     expect(() => parseRunRequest({ limit: 101 })).toThrow(/limit/i);
     expect(() => parseRunRequest({ limit: 1.5 })).toThrow(/limit/i);

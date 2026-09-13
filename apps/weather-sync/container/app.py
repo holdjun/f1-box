@@ -25,6 +25,19 @@ SESSION_IDENTIFIERS = {
     "race": "R",
 }
 
+
+def empty_results_payload(status: str, error: str | None) -> dict:
+    return {
+        "status": status,
+        "rowCount": 0,
+        "rows": [],
+        "sourceRevision": "0" * 64,
+        "fetchedAt": utc_now(),
+        "error": error,
+        "adapter": "extended-timing-fallback",
+        "schemaVersion": RESULTS_SCHEMA_VERSION,
+    }
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
@@ -413,7 +426,11 @@ def public_result_rows(session, session_key: str) -> list[dict]:
             ):
                 row[key] = duration_ms(result.get(field))
         elif session_key in ("race", "sprint"):
-            row["totalTimeMs"] = duration_ms(result.get("Time"))
+            elapsed = duration_ms(result.get("Time"))
+            if row["position"] == 1:
+                row["totalTimeMs"] = elapsed
+            else:
+                row["gapMs"] = elapsed
             row["status"] = text_value(result.get("Status"))
             row["points"] = result.get("Points")
             if isinstance(row["points"], float) and not math.isfinite(
@@ -754,13 +771,9 @@ def collect_session(requested: dict) -> dict:
                 **mismatch,
             }
         if requested.get("results"):
-            result["results"] = {
-                "rowCount": 0,
-                "rows": [],
-                "sourceRevision": "0" * 64,
-                "fetchedAt": utc_now(),
-                **mismatch,
-            }
+            result["results"] = empty_results_payload(
+                mismatch["status"], mismatch["error"]
+            )
         return result
     try:
         starts_at = parse_utc_datetime(requested.get("startsAtUtc"))
@@ -785,13 +798,9 @@ def collect_session(requested: dict) -> dict:
                 **mismatch,
             }
         if requested.get("results"):
-            result["results"] = {
-                "rowCount": 0,
-                "rows": [],
-                "sourceRevision": "0" * 64,
-                "fetchedAt": utc_now(),
-                **mismatch,
-            }
+            result["results"] = empty_results_payload(
+                mismatch["status"], mismatch["error"]
+            )
         return result
 
     if requested.get("weather"):
@@ -817,14 +826,9 @@ def collect_session(requested: dict) -> dict:
         try:
             result["results"] = results_result(requested, api_path)
         except Exception as exc:
-            result["results"] = {
-                "status": "unavailable",
-                "rowCount": 0,
-                "rows": [],
-                "sourceRevision": "0" * 64,
-                "fetchedAt": utc_now(),
-                "error": f"{type(exc).__name__}: {exc}",
-            }
+            result["results"] = empty_results_payload(
+                "unavailable", f"{type(exc).__name__}: {exc}"
+            )
     return result
 
 

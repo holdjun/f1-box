@@ -14,6 +14,7 @@ const pages = [
   "/racing/2026",
   "/results/2026/races",
   "/results/2026/races/australia/race-result",
+  "/results/2026/races/china/qualifying",
   "/results/2026/drivers",
   "/results/2026/teams",
   "/drivers",
@@ -27,6 +28,7 @@ const pages = [
 const mobilePages = [
   "/results/2026/races",
   "/results/2026/races/australia/race-result",
+  "/results/2026/races/china/qualifying",
   "/results/2026/drivers",
 ];
 

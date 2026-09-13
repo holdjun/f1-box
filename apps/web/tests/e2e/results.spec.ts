@@ -68,6 +68,26 @@ test.describe("race detail", () => {
     await expect(
       table.locator("tbody tr").first().locator(".vendor-cell__monogram"),
     ).toHaveText("RUS");
+    await expect(page.locator("[data-result-source]")).toHaveText(
+      "f1db · official",
+    );
+  });
+
+  test("@desktop labels provisional FastF1 results", async ({ page }) => {
+    await page.goto("/results/2026/races/china/qualifying");
+    await expect(
+      page.locator('[data-race-tab-panel="qualifying"] [data-result-source]'),
+    ).toContainText("FastF1 · provisional");
+    const firstRow = page
+      .getByRole("table", { name: "Qualifying classification" })
+      .locator("tbody tr")
+      .first();
+    await expect(firstRow.locator("td").nth(2).getByRole("link")).toHaveCount(
+      0,
+    );
+    await expect(firstRow.locator("td").nth(3).getByRole("link")).toHaveCount(
+      0,
+    );
   });
 
   test("@desktop finished race keeps the weekend schedule without result links", async ({

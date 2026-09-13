@@ -1,63 +1,17 @@
--- 0001 后的生产库使用 weather_cache_outbox。保留该稳定表名；
--- session_cache_outbox 仅兼容本 migration 曾被 PR preview 提前应用的数据库。
-DROP TRIGGER IF EXISTS session_source_ref_changed;
-DROP TRIGGER IF EXISTS session_source_ref_deleted;
-
-CREATE TABLE IF NOT EXISTS session_cache_outbox (
-  cache_tag TEXT PRIMARY KEY,
-  created_at TEXT NOT NULL
-);
+-- 0002 在 PR preview 共用生产 D1 时提前把 outbox 改了名。恢复沿用既有表名，
+-- 并保留新表作兼容，避免在旧、新 Worker 滚动切换期间删除任何待 purge 的 tag。
 CREATE TABLE IF NOT EXISTS weather_cache_outbox (
   cache_tag TEXT PRIMARY KEY,
   created_at TEXT NOT NULL
 );
-INSERT OR IGNORE INTO session_cache_outbox (cache_tag, created_at)
-SELECT cache_tag, created_at FROM weather_cache_outbox;
+INSERT OR IGNORE INTO weather_cache_outbox (cache_tag, created_at)
+SELECT cache_tag, created_at FROM session_cache_outbox;
 
-CREATE TABLE IF NOT EXISTS session_result_snapshot (
-  year INTEGER NOT NULL,
-  round INTEGER NOT NULL,
-  session_key TEXT NOT NULL,
-  driver_number TEXT NOT NULL,
-  position_number INTEGER,
-  position_text TEXT NOT NULL,
-  driver_source_id TEXT,
-  driver_name TEXT NOT NULL,
-  driver_code TEXT NOT NULL,
-  constructor_source_id TEXT,
-  constructor_name TEXT NOT NULL,
-  best_lap_ms INTEGER,
-  q1_ms INTEGER,
-  q2_ms INTEGER,
-  q3_ms INTEGER,
-  total_time_ms INTEGER,
-  gap_ms INTEGER,
-  gap_text TEXT,
-  laps INTEGER,
-  status TEXT,
-  points REAL,
-  source_revision TEXT NOT NULL,
-  fetched_at TEXT NOT NULL,
-  PRIMARY KEY (year, round, session_key, driver_number)
-);
+CREATE INDEX IF NOT EXISTS weather_cache_outbox_created_idx
+  ON weather_cache_outbox(created_at, cache_tag);
 
-CREATE TABLE IF NOT EXISTS session_result_sync_state (
-  year INTEGER NOT NULL,
-  round INTEGER NOT NULL,
-  session_key TEXT NOT NULL,
-  status TEXT NOT NULL CHECK (
-    status IN ('success', 'empty', 'no_data', 'failed', 'exhausted', 'mismatch')
-  ),
-  attempts INTEGER NOT NULL,
-  last_error TEXT,
-  last_attempt_at TEXT NOT NULL,
-  next_attempt_at TEXT,
-  updated_at TEXT NOT NULL,
-  PRIMARY KEY (year, round, session_key)
-);
-
-CREATE INDEX IF NOT EXISTS session_result_sync_state_status_idx
-  ON session_result_sync_state(status);
+DROP TRIGGER IF EXISTS session_source_ref_changed;
+DROP TRIGGER IF EXISTS session_source_ref_deleted;
 
 CREATE TRIGGER session_source_ref_changed
 AFTER UPDATE OF api_path, race_date, starts_at_utc ON session_source_ref

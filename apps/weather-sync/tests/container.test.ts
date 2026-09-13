@@ -167,8 +167,8 @@ session = types.SimpleNamespace(
             "DriverNumber": "4", "DriverId": "lando_norris",
             "FullName": "Lando Norris", "Abbreviation": "NOR",
             "TeamId": "mclaren", "TeamName": "McLaren",
-            "Position": None, "ClassifiedPosition": "R",
-            "Time": None, "Status": "Retired", "Points": 0.0, "Laps": 12.0,
+            "Position": 2.0, "ClassifiedPosition": "2",
+            "Time": Duration(7.376), "Status": "Finished", "Points": 18.0, "Laps": 58.0,
         },
     ]),
     laps=Frame([]),
@@ -183,9 +183,10 @@ assert result["rows"][0]["positionText"] == "1", result
 assert result["rows"][0]["totalTimeMs"] == 4800000, result
 assert result["rows"][0]["status"] == "Finished", result
 assert result["rows"][0]["points"] == 25.0, result
-assert result["rows"][1]["position"] is None, result
-assert result["rows"][1]["positionText"] == "R", result
-assert result["rows"][1]["laps"] == 12, result
+assert result["rows"][1]["position"] == 2, result
+assert result["rows"][1]["totalTimeMs"] is None, result
+assert result["rows"][1]["gapMs"] == 7376, result
+assert result["rows"][1]["points"] == 18.0, result
 `);
   });
 
@@ -200,6 +201,8 @@ result = app.collect_payload({
 })["sessions"][0]["results"]
 assert result["status"] == "unavailable", result
 assert "timing schema" in result["error"], result
+assert result["adapter"] == "extended-timing-fallback", result
+assert result["schemaVersion"] == 1, result
 `);
   });
 

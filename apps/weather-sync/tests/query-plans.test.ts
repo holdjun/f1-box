@@ -306,7 +306,7 @@ describe("weather ingestion query plans", () => {
     ]);
   });
 
-  it("prioritizes recent retries and scopes results to the lookback window", () => {
+  it("collects results only after conservative session-specific end windows", () => {
     const dir = mkdtempSync(path.join(tmpdir(), "weather-priority-"));
     const priorityDb = path.join(dir, "weather.db");
     const weatherSql = bindSql(weatherCandidateSql, [
@@ -326,8 +326,14 @@ describe("weather ingestion query plans", () => {
       encoding: "utf8",
       input: `${siteTables}
         INSERT INTO session_source_ref VALUES
-          (2026, 1, 'race', '/static/2026/race/', '2026-09-11',
-           '2026-09-11T04:00:00Z', 'fastf1-schedule'),
+          (2026, 1, 'race', '/static/2026/race-finished/', '2026-09-11',
+           '2026-09-11T19:59:00Z', 'fastf1-schedule'),
+          (2026, 2, 'race', '/static/2026/race-running/', '2026-09-11',
+           '2026-09-11T22:00:00Z', 'fastf1-schedule'),
+          (2026, 3, 'practice-1', '/static/2026/practice-finished/', '2026-09-11',
+           '2026-09-11T22:29:00Z', 'fastf1-schedule'),
+          (2026, 4, 'practice-1', '/static/2026/practice-running/', '2026-09-11',
+           '2026-09-11T23:00:00Z', 'fastf1-schedule'),
           (2023, 1, 'race', '/static/2023/race-1/', '2023-03-05',
            '2023-03-05T15:00:00Z', 'fastf1-schedule'),
           (2023, 2, 'race', '/static/2023/race-2/', '2023-03-19',
@@ -341,7 +347,8 @@ describe("weather ingestion query plans", () => {
       `,
     });
     const rows = parseJsonBatches(output);
-    expect(rows.map((row) => row.year)).toEqual([2026, 2023, 2026]);
+    expect(rows.slice(0, 2).map((row) => row.round)).toEqual([4, 3]);
+    expect(rows.slice(2).map((row) => row.round)).toEqual([3, 1]);
     rmSync(dir, { recursive: true, force: true });
   });
 });

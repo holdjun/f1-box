@@ -452,7 +452,7 @@ function tabFragments(
     "FROM free_practice_1_result": [],
     "FROM free_practice_2_result": [],
     "FROM free_practice_3_result": [],
-    "FROM session_result_snapshot": [],
+    "session_result_snapshot s": [],
     ...extra,
   };
 }
@@ -807,10 +807,44 @@ describe("createRaceResultsRepository getRacePage", () => {
         q3Ms: 81000,
         laps: 18,
       },
+      {
+        key: "race",
+        fetchedAt: "2026-09-11T09:20:00Z",
+        driverNumber: "63",
+        position: 1,
+        positionText: "1",
+        driverId: "george-russell",
+        driverName: "George Russell",
+        driverCode: "RUS",
+        constructorId: "mercedes",
+        constructorName: "Mercedes",
+        totalTimeMs: 3923000,
+        gapMs: null,
+        laps: 57,
+        status: "Finished",
+        points: 25,
+      },
+      {
+        key: "race",
+        fetchedAt: "2026-09-11T09:20:00Z",
+        driverNumber: "1",
+        position: 2,
+        positionText: "2",
+        driverId: "max-verstappen",
+        driverName: "Max Verstappen",
+        driverCode: "VER",
+        constructorId: "red-bull",
+        constructorName: "Red Bull Racing",
+        totalTimeMs: null,
+        gapMs: 377,
+        laps: 57,
+        status: "Finished",
+        points: 18,
+      },
     ]);
     const db = fakeDbBySql(
       tabFragments({
-        "FROM session_result_snapshot": [{ session_snapshots: snapshots }],
+        "session_result_snapshot s": [{ session_snapshots: snapshots }],
       }),
     );
     const page = await createRaceResultsRepository(db).getRacePage(
@@ -848,6 +882,18 @@ describe("createRaceResultsRepository getRacePage", () => {
         laps: 18,
       },
     ]);
+    expect(page?.tabs.raceResult).toEqual([
+      expect.objectContaining({
+        time: "1:05:23.000",
+        gap: null,
+        points: 25,
+      }),
+      expect.objectContaining({
+        time: null,
+        gap: "+0.377",
+        points: 18,
+      }),
+    ]);
     expect(page?.sources["practice-1"]).toEqual({
       source: "fastf1",
       provisional: true,
@@ -858,7 +904,11 @@ describe("createRaceResultsRepository getRacePage", () => {
       provisional: true,
       fetchedAt: "2026-09-11T06:20:00Z",
     });
-    expect(page?.sources["race-result"]).toBeUndefined();
+    expect(page?.sources["race-result"]).toEqual({
+      source: "fastf1",
+      provisional: true,
+      fetchedAt: "2026-09-11T09:20:00Z",
+    });
   });
 
   it("prefers f1db rows over FastF1 snapshots", async () => {
@@ -879,7 +929,7 @@ describe("createRaceResultsRepository getRacePage", () => {
             laps: 20,
           },
         ],
-        "FROM session_result_snapshot": [
+        "session_result_snapshot s": [
           {
             session_snapshots: JSON.stringify([
               {
@@ -1149,7 +1199,7 @@ describe("createRaceResultsRepository getRacePage", () => {
       "FROM free_practice_2_result": [],
       "FROM free_practice_3_result": [],
       "SELECT fl.time, d.name AS driver_name": [],
-      "FROM session_result_snapshot": [],
+      "session_result_snapshot s": [],
     });
     const page = await createRaceResultsRepository(db).getRacePage(
       2026,

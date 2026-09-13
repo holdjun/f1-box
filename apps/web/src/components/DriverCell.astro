@@ -14,11 +14,14 @@ const { driverId, driverName, driverCode, constructorId, year } = Astro.props;
 const style = monogramStyle(colorForYear(vendorIndexes, constructorId, year));
 ---
 
-<a
-  class="vendor-cell"
-  href={driverId === null ? undefined : `/drivers/${driverId}`}
-  style={style}
->
-  <span class="vendor-cell__monogram" aria-hidden="true">{driverCode}</span>
-  <span class="vendor-cell__name">{driverName}</span>
-</a>
+{driverId === null ? (
+  <span class="vendor-cell" style={style}>
+    <span class="vendor-cell__monogram" aria-hidden="true">{driverCode}</span>
+    <span class="vendor-cell__name">{driverName}</span>
+  </span>
+) : (
+  <a class="vendor-cell" href={`/drivers/${driverId}`} style={style}>
+    <span class="vendor-cell__monogram" aria-hidden="true">{driverCode}</span>
+    <span class="vendor-cell__name">{driverName}</span>
+  </a>
+)}

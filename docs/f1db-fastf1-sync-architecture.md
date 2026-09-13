@@ -2,7 +2,7 @@
 
 ## 目标
 
-比赛周末需要“先看到实时结果，赛后自动切换到 f1db 正式结果”。FastF1 适合赛后数分钟提供 Practice、Qualifying、Race 的 session 结果；f1db 适合作为稳定、完整、可长期查询的正式数据源，通常在比赛结束后数小时到数天发布 release。
+比赛周末需要“赛后尽快看到临时结果，随后自动切换到 f1db 正式结果”。FastF1 适合赛后提供 Practice、Qualifying、Race 的 session 结果；f1db 适合作为稳定、完整、可长期查询的正式数据源，通常在比赛结束后数小时到数天发布 release。
 
 ## 数据职责
 
@@ -24,7 +24,7 @@
 
 当 f1db 新 release 导入后，下一次请求自然优先返回 f1db；旧 FastF1 provisional 行可以保留用于审计，或在确认正式结果覆盖后清理。不要在请求路径实时访问 FastF1。
 
-站点表 `session_result_snapshot` 保存 `year`、`round`、`session_key`、外部 driver/team key、`position`、`position_text`、`best_lap_ms`、`lap_count`、`status`、`fetched_at`、`source_revision`。缺失车手实体时保留 FastF1 的 driver number/code/name，读取侧按 source id → 车号 + 赛季 → 缩写映射。
+站点表 `session_result_snapshot` 保存 `year`、`round`、`session_key`、外部 driver/team key、`position`、`position_text`、`best_lap_ms`、`laps`、`status`、`points`、`fetched_at`、`source_revision`。缺失车手实体时保留 FastF1 的 driver number/code/name，读取侧按 source id → 车号 + 赛季 → 缩写映射。
 
 ## 同步时序
 
@@ -32,16 +32,16 @@
 
 由现有 weather-sync Worker/Container 扩展为 session-sync，按 `session_source_ref` 处理已结束 session。天气与结果可共用引用、锁、重试和 outbox，但建议逻辑上分开状态表，避免结果失败阻塞天气成功。
 
-- 采集窗口：session 结束后延迟 10–20 分钟首次尝试。
+- 采集窗口：天气沿用开始后 4 小时的稳定窗口；结果按 session 类型使用保守的最大时长，再留出发布缓冲（Practice/Sprint Qualifying 90 分钟、Qualifying/Sprint 2 小时、Race 4 小时），绝不在 session 进行中把当前排序写成终态。
 - 失败退避：15 分钟、1 小时、6 小时、24 小时，最多 5 次。
 - 只有 `results` 非空且至少有有效 driver/position 或 best lap 才写 success。
 - FastF1 无结果写 `empty`，二次确认后才写 `no_data`。
-- 结果写入后刷新 `results:<year>` 或 `results:<year>:<round>` 缓存。
+- 结果写入后通过现有 `weather_cache_outbox` 刷新 `results:<year>` 与 `results:<year>:<round>` 缓存。表名保留历史命名，避免为语义改名引入破坏性迁移。
 - 快照替换先删除同一 session 的旧批次，再写入新行；瞬时失败不删除上一版成功快照。
 
 ### f1db release 同步
 
-继续以官方 release tag 为门禁，导入成功后记录 tag 并刷新 `f1db` 与当年 `results:<year>` 缓存。导入必须是可重试、幂等、可回滚的整库流程；导入期间避免让半成品数据对请求可见。
+继续以官方 release tag 为门禁，导入成功后记录 tag 并刷新 `f1db` 缓存标签。所有 f1db 页面（包括带 `results:<year>` 标签的历史比赛页）也带有该标签，因此一次 purge 会使全部正式结果更新生效。导入必须是可重试、幂等、可回滚的整库流程；导入期间避免让半成品数据对请求可见。
 
 ## Cloudflare 与 GitHub Actions 的边界
 
