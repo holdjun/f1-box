@@ -204,7 +204,7 @@ describe("weather deployment configuration", () => {
 
   it("requires the canary to request and persist exactly one session", () => {
     expect(weatherPreviewJob).toContain("result.requested !== 1");
-    expect(weatherPreviewJob).toContain("result.success !== 1");
+    expect(weatherPreviewJob).toContain("result.weather?.success !== 1");
     expect(weatherPreviewJob).toContain(
       'readFileSync("/tmp/weather-status.json"',
     );
