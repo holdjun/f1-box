@@ -2,7 +2,7 @@
 import { logoSrcFor, logoVariantFor, vendorIndexes } from "../lib/vendor.js";
 
 interface Props {
-  constructorId: string;
+  constructorId: string | null;
   constructorName: string;
 }
 const { constructorId, constructorName } = Astro.props;
@@ -15,7 +15,7 @@ const logo = logoSrcFor(vendorIndexes, constructorId);
     // 无 logo 的老赛季车队窄屏不能收成纯 logo，否则单元格一片空白
     logo && "vendor-cell--compact",
   ]}
-  href={`/teams/${constructorId}`}
+  href={constructorId === null ? undefined : `/teams/${constructorId}`}
 >
   {logo ? (
     <img

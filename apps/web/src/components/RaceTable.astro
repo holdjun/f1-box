@@ -1,8 +1,9 @@
 ---
 import type {
   FastestLapRow, GridRow, PitStopRow, PracticeRow, QualifyingRow,
-  RaceResultRow, RaceTabKey,
+  RaceResultRow, RaceTabKey, ResultSource,
 } from "../lib/race-results-repository.js";
+import { formatUtcDateTime } from "../lib/time.js";
 import DriverCell from "./DriverCell.astro";
 import TeamCell from "./TeamCell.astro";
 
@@ -10,8 +11,9 @@ interface Props {
   tab: RaceTabKey;
   rows: readonly (RaceResultRow | QualifyingRow | GridRow | FastestLapRow | PitStopRow | PracticeRow)[];
   year: number;
+  source?: ResultSource;
 }
-const { tab, rows, year } = Astro.props;
+const { tab, rows, year, source } = Astro.props;
 
 const CONFIG: Record<RaceTabKey, { label: string; empty: string }> = {
   "race-result": { label: "Race classification", empty: "Race results are not available yet." },
@@ -42,6 +44,21 @@ const isQualifyingShape = tab === "qualifying" || tab === "sprint-qualifying";
 
 <!-- biome-ignore lint/a11y/noNoninteractiveTabindex: 横滚表容器需要 tabindex，键盘用户才能滚动查看溢出列 -->
 <section class="table-scroll" aria-label={`${label}, scrollable`} tabindex="0">
+  {source ? (
+    <p
+      class:list={[
+        "source-badge",
+        source.source === "fastf1" && "source-badge--provisional",
+      ]}
+      data-result-source
+    >
+      {
+        source.source === "fastf1"
+          ? `FastF1 · provisional${source.fetchedAt ? ` · ${formatUtcDateTime(source.fetchedAt)}` : ""}`
+          : "f1db · official"
+      }
+    </p>
+  ) : null}
   <table class="result-table" aria-label={label}>
     {isRaceShape ? (
       <>

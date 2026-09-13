@@ -23,6 +23,10 @@ const [availableYears, page] = await Promise.all([
 // 数据异常（year 不在已知年份）时按 404 渲染，不缓存
 const found = tab !== null && page !== null && availableYears.includes(year);
 if (!found) Astro.response.status = 404;
+if (page) {
+  // middleware 用它生成分站级 cache tag，读取后立即删除，不对外暴露。
+  Astro.response.headers.set("X-F1-Race-Round", String(page.meta.round));
+}
 // getRacePage 本就一次性取回所有 tab 的数据；全量渲染成面板后
 // 客户端可就地切换，不再为每个 tab 走一次路由
 const visibleTabs =
@@ -71,7 +75,12 @@ const weekendNodes = page
         )}
         {visibleTabs.map((key) => (
           <div data-race-tab-panel={key} hidden={key !== tab ? true : undefined}>
-            <RaceTable tab={key} rows={page.tabs[RACE_TAB_FIELDS[key]]} year={year} />
+            <RaceTable
+              tab={key}
+              rows={page.tabs[RACE_TAB_FIELDS[key]]}
+              source={page.sources[key]}
+              year={year}
+            />
           </div>
         ))}
       </div>

@@ -66,9 +66,10 @@ export function latestColor(
 // （data lookup 语义：colors(team, year)，year < oldest → oldest）
 export function colorForYear(
   indexes: VendorIndexes,
-  teamId: string,
+  teamId: string | null,
   year: number,
 ): string | null {
+  if (teamId === null) return null;
   const team = indexes.colors[teamId];
   if (!team) return null;
   const containing = team.periods.find(
@@ -84,16 +85,18 @@ export function colorForYear(
 
 export function logoSrcFor(
   indexes: VendorIndexes,
-  teamId: string,
+  teamId: string | null,
 ): string | null {
+  if (teamId === null) return null;
   const logo = logoFor(indexes, teamId);
   return logo ? logoUrl(logo.file) : null;
 }
 
 export function logoVariantFor(
   indexes: VendorIndexes,
-  teamId: string,
+  teamId: string | null,
 ): LogoVariant | null {
+  if (teamId === null) return null;
   return logoFor(indexes, teamId)?.variant ?? null;
 }
 

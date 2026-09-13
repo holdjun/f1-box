@@ -6,10 +6,13 @@ import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import {
-  candidateSql,
   lockAcquireSql,
   lockReleaseSql,
-  stateUpsertSql,
+  resultCandidateSql,
+  resultStateUpsertSql,
+  snapshotUpsertSql,
+  weatherCandidateSql,
+  weatherStateUpsertSql,
   weatherUpsertSql,
 } from "../src/domain";
 
@@ -36,6 +39,22 @@ function bindSql(sql: string, values: string[]): string {
   );
 }
 
+function parseJsonBatches(output: string): Array<Record<string, unknown>> {
+  const batches: string[] = [];
+  let depth = 0;
+  let start = -1;
+  for (const [index, char] of output.trim().split("").entries()) {
+    if (char === "[" && depth === 0) {
+      depth = 1;
+      start = index;
+    } else if (char === "]" && depth === 1) {
+      depth = 0;
+      batches.push(output.trim().slice(start, index + 1));
+    }
+  }
+  return batches.flatMap((batch) => JSON.parse(batch));
+}
+
 beforeAll(() => {
   const dir = mkdtempSync(path.join(tmpdir(), "f1box-weather-plan-"));
   dbPath = path.join(dir, "weather.db");
@@ -56,10 +75,13 @@ describe("weather ingestion query plans", () => {
   it("collects the read queries", () => {
     expect(queries.map((query) => query.key)).toEqual(
       expect.arrayContaining([
-        "candidateSql",
-        "statusSql",
+        "weatherCandidateSql",
+        "resultCandidateSql",
+        "weatherStatusSql",
+        "resultStatusSql",
         "outboxSql",
         "weatherCountSql",
+        "snapshotCountSql",
         "referenceCountSql",
         "failuresSql",
       ]),
@@ -85,7 +107,7 @@ describe("weather ingestion query plans", () => {
     }
   });
 
-  it("only persists results for the reference that was collected", () => {
+  it("only persists derived rows for the reference that was collected", () => {
     const identity = [
       "2023",
       "14",
@@ -121,6 +143,55 @@ describe("weather ingestion query plans", () => {
     staleIdentity[14] = "'/static/stale/'";
     const staleState = [...state];
     staleState[9] = "'/static/stale/'";
+    const resultState = [
+      "2023",
+      "14",
+      "'race'",
+      "'success'",
+      "1",
+      "NULL",
+      "'2026-09-12T12:00:00Z'",
+      "NULL",
+      "'2026-09-12T12:00:00Z'",
+      "'/static/current/'",
+      "'2023-09-03'",
+      "'2023-09-03T14:00:00Z'",
+    ];
+    const snapshotRows = JSON.stringify([
+      {
+        driverNumber: "44",
+        driverSourceId: null,
+        driverName: "Lewis Hamilton",
+        driverCode: "HAM",
+        constructorSourceId: null,
+        constructorName: "Mercedes",
+        position: 1,
+        positionText: "1",
+        bestLapMs: 82123,
+        q1Ms: null,
+        q2Ms: null,
+        q3Ms: null,
+        totalTimeMs: null,
+        gapMs: null,
+        gapText: null,
+        laps: 58,
+        status: null,
+        points: null,
+      },
+    ]);
+    const snapshot = [
+      "2023",
+      "14",
+      "'race'",
+      `'${snapshotRows.replaceAll("'", "''")}'`,
+      "'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'",
+      "'2026-09-12T12:00:00Z'",
+      "'/static/current/'",
+      "'2023-09-03'",
+      "'2023-09-03T14:00:00Z'",
+    ];
+    const staleSnapshot = [...snapshot];
+    staleSnapshot[6] = "'/static/stale/'";
     const output = execFileSync("sqlite3", ["-json", dbPath], {
       encoding: "utf8",
       input: `
@@ -128,27 +199,88 @@ describe("weather ingestion query plans", () => {
           (2023, 14, 'race', '/static/current/', '2023-09-03',
            '2023-09-03T14:00:00Z', 'fastf1-schedule');
         ${bindSql(weatherUpsertSql, identity)};
-        ${bindSql(stateUpsertSql, state)};
+        ${bindSql(weatherStateUpsertSql, state)};
+        ${bindSql(resultStateUpsertSql, resultState)};
+        ${bindSql(snapshotUpsertSql, snapshot)};
         SELECT
           (SELECT COUNT(*) FROM session_weather) AS weather,
-          (SELECT COUNT(*) FROM weather_sync_state) AS state;
+          (SELECT COUNT(*) FROM weather_sync_state) AS weatherState,
+          (SELECT COUNT(*) FROM session_result_snapshot) AS snapshot,
+          (SELECT COUNT(*) FROM session_result_sync_state) AS resultState;
         DELETE FROM session_weather;
         DELETE FROM weather_sync_state;
+        DELETE FROM session_result_snapshot;
+        DELETE FROM session_result_sync_state;
         ${bindSql(weatherUpsertSql, staleIdentity)};
-        ${bindSql(stateUpsertSql, staleState)};
+        ${bindSql(weatherStateUpsertSql, staleState)};
+        ${bindSql(resultStateUpsertSql, staleState)};
+        ${bindSql(snapshotUpsertSql, staleSnapshot)};
         SELECT
           (SELECT COUNT(*) FROM session_weather) AS weather,
-          (SELECT COUNT(*) FROM weather_sync_state) AS state;
+          (SELECT COUNT(*) FROM weather_sync_state) AS weatherState,
+          (SELECT COUNT(*) FROM session_result_snapshot) AS snapshot,
+          (SELECT COUNT(*) FROM session_result_sync_state) AS resultState;
       `,
     });
-    const rows = output
-      .trim()
-      .split("\n")
-      .flatMap((line) => JSON.parse(line));
+    const rows = parseJsonBatches(output);
     expect(rows).toEqual([
-      { weather: 1, state: 1 },
-      { weather: 0, state: 0 },
+      { weather: 1, weatherState: 1, snapshot: 1, resultState: 1 },
+      { weather: 0, weatherState: 0, snapshot: 0, resultState: 0 },
     ]);
+  });
+
+  it("replaces an entire session snapshot so removed drivers disappear", () => {
+    const twoRows = JSON.stringify([
+      {
+        driverNumber: "44",
+        driverName: "Lewis Hamilton",
+        driverCode: "HAM",
+        constructorName: "Ferrari",
+        positionText: "1",
+      },
+      {
+        driverNumber: "14",
+        driverName: "Fernando Alonso",
+        driverCode: "ALO",
+        constructorName: "Aston Martin",
+        positionText: "2",
+      },
+    ]);
+    const oneRow = JSON.stringify([
+      {
+        driverNumber: "44",
+        driverName: "Lewis Hamilton",
+        driverCode: "HAM",
+        constructorName: "Ferrari",
+        positionText: "1",
+      },
+    ]);
+    const bind = (rows: string, revision: string) =>
+      bindSql(snapshotUpsertSql, [
+        "2024",
+        "15",
+        "'qualifying'",
+        `'${rows.replaceAll("'", "''")}'`,
+        `'${revision}'`,
+        "'2026-09-12T12:00:00Z'",
+        "'/static/current/'",
+        "'2023-09-03'",
+        "'2023-09-03T14:00:00Z'",
+      ]);
+    const output = execFileSync("sqlite3", ["-json", dbPath], {
+      encoding: "utf8",
+      input: `
+        INSERT INTO session_source_ref VALUES
+          (2024, 15, 'qualifying', '/static/current/', '2023-09-03',
+           '2023-09-03T14:00:00Z', 'fastf1-schedule');
+        ${bind(twoRows, "a".repeat(64))};
+        DELETE FROM session_result_snapshot
+          WHERE year = 2024 AND round = 15 AND session_key = 'qualifying';
+        ${bind(oneRow, "b".repeat(64))};
+        SELECT driver_number FROM session_result_snapshot;
+      `,
+    });
+    expect(parseJsonBatches(output)).toEqual([{ driver_number: "44" }]);
   });
 
   it("lets only one ingestion owner hold the lease", () => {
@@ -165,10 +297,7 @@ describe("weather ingestion query plans", () => {
         SELECT COUNT(*) AS locks FROM weather_sync_lock;
       `,
     });
-    const rows = output
-      .trim()
-      .split("\n")
-      .flatMap((line) => JSON.parse(line));
+    const rows = parseJsonBatches(output);
     expect(rows).toEqual([
       { owner: "owner-a" },
       { owner: "owner-a" },
@@ -177,11 +306,18 @@ describe("weather ingestion query plans", () => {
     ]);
   });
 
-  it("prioritizes a recent due retry over historical backlog", () => {
+  it("prioritizes recent retries and scopes results to the lookback window", () => {
     const dir = mkdtempSync(path.join(tmpdir(), "weather-priority-"));
     const priorityDb = path.join(dir, "weather.db");
-    const sql = bindSql(candidateSql, [
+    const weatherSql = bindSql(weatherCandidateSql, [
       "'2026-09-12T00:00:00Z'",
+      "5",
+      "'2026-09-12T00:00:00Z'",
+      "2",
+    ]);
+    const resultSql = bindSql(resultCandidateSql, [
+      "'2026-09-12T00:00:00Z'",
+      "'2026-08-29T00:00:00Z'",
       "5",
       "'2026-09-12T00:00:00Z'",
       "2",
@@ -190,8 +326,8 @@ describe("weather ingestion query plans", () => {
       encoding: "utf8",
       input: `${siteTables}
         INSERT INTO session_source_ref VALUES
-          (2026, 1, 'race', '/static/2026/race/', '2026-03-08',
-           '2026-03-08T04:00:00Z', 'fastf1-schedule'),
+          (2026, 1, 'race', '/static/2026/race/', '2026-09-11',
+           '2026-09-11T04:00:00Z', 'fastf1-schedule'),
           (2023, 1, 'race', '/static/2023/race-1/', '2023-03-05',
            '2023-03-05T15:00:00Z', 'fastf1-schedule'),
           (2023, 2, 'race', '/static/2023/race-2/', '2023-03-19',
@@ -200,12 +336,12 @@ describe("weather ingestion query plans", () => {
           (2026, 1, 'race', 'failed', 1, 'HTTP 503',
            '2026-09-11T23:00:00Z', '2026-09-11T23:15:00Z',
            '2026-09-11T23:00:00Z');
-        ${sql};
+        ${weatherSql};
+        ${resultSql};
       `,
     });
-    expect(JSON.parse(output).map((row: { year: number }) => row.year)).toEqual(
-      [2026, 2023],
-    );
+    const rows = parseJsonBatches(output);
+    expect(rows.map((row) => row.year)).toEqual([2026, 2023, 2026]);
     rmSync(dir, { recursive: true, force: true });
   });
 });

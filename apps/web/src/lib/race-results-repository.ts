@@ -38,6 +38,12 @@ export interface RaceSession {
   weather?: SessionWeather;
 }
 
+export interface ResultSource {
+  source: "f1db" | "fastf1";
+  provisional: boolean;
+  fetchedAt: string | null;
+}
+
 export interface SessionWeather {
   tempC: number | null;
   trackTempC: number | null;
@@ -88,10 +94,10 @@ export interface RaceResultRow {
   position: number | null;
   positionText: string;
   driverNumber: string | null;
-  driverId: string;
+  driverId: string | null;
   driverName: string;
   driverCode: string;
-  constructorId: string;
+  constructorId: string | null;
   constructorName: string;
   laps: number | null;
   time: string | null;
@@ -103,10 +109,10 @@ export interface QualifyingRow {
   position: number | null;
   positionText: string;
   driverNumber: string | null;
-  driverId: string;
+  driverId: string | null;
   driverName: string;
   driverCode: string;
-  constructorId: string;
+  constructorId: string | null;
   constructorName: string;
   q1: string | null;
   q2: string | null;
@@ -117,10 +123,10 @@ export interface GridRow {
   position: number | null;
   positionText: string;
   driverNumber: string | null;
-  driverId: string;
+  driverId: string | null;
   driverName: string;
   driverCode: string;
-  constructorId: string;
+  constructorId: string | null;
   constructorName: string;
   time: string | null;
 }
@@ -128,10 +134,10 @@ export interface FastestLapRow {
   position: number | null;
   positionText: string;
   driverNumber: string | null;
-  driverId: string;
+  driverId: string | null;
   driverName: string;
   driverCode: string;
-  constructorId: string;
+  constructorId: string | null;
   constructorName: string;
   lap: number | null;
   time: string | null;
@@ -139,10 +145,10 @@ export interface FastestLapRow {
 }
 export interface PitStopRow {
   driverNumber: string | null;
-  driverId: string;
+  driverId: string | null;
   driverName: string;
   driverCode: string;
-  constructorId: string;
+  constructorId: string | null;
   constructorName: string;
   stops: number;
   totalSeconds: string | null;
@@ -151,10 +157,10 @@ export interface PracticeRow {
   position: number | null;
   positionText: string;
   driverNumber: string | null;
-  driverId: string;
+  driverId: string | null;
   driverName: string;
   driverCode: string;
-  constructorId: string;
+  constructorId: string | null;
   constructorName: string;
   time: string | null;
   gap: string | null;
@@ -195,6 +201,7 @@ interface RacePage {
     sprintRace: RaceResultRow[];
     sprintQualifying: QualifyingRow[];
   };
+  sources: Partial<Record<RaceTabKey, ResultSource>>;
 }
 
 // tab key → tabs 字段，RaceTabsNav 与 [tab].astro 共用
@@ -367,6 +374,57 @@ WHERE ra.circuit_id = (SELECT ra2.circuit_id FROM race ra2 WHERE ra2.year = ?1 A
   AND fl.time_millis IS NOT NULL
 ORDER BY fl.time_millis
 LIMIT 1`;
+
+// FastF1 快照只作为 f1db 未发布前的 fallback；车手/车队实体在读取侧按年份映射，
+// 映射不上时保留源名并渲染为纯文本，不伪造可点击的目录链接。
+const sessionSnapshotsSql = `SELECT json_group_array(json_object(
+         'key', s.session_key,
+         'fetchedAt', s.fetched_at,
+         'driverNumber', s.driver_number,
+         'driverSourceId', s.driver_source_id,
+         'driverId', COALESCE(
+           (SELECT id FROM driver
+             WHERE id = replace(s.driver_source_id, '_', '-')),
+           (SELECT sed.driver_id
+              FROM season_entrant_driver sed
+              JOIN driver dnumber ON dnumber.id = sed.driver_id
+             WHERE sed.year = s.year
+               AND dnumber.permanent_number = s.driver_number
+             ORDER BY sed.test_driver
+             LIMIT 1),
+           (SELECT dcode.id FROM driver dcode
+             WHERE dcode.abbreviation = s.driver_code
+               AND EXISTS (
+                 SELECT 1 FROM season_entrant_driver sed
+                 WHERE sed.year = s.year AND sed.driver_id = dcode.id
+               )
+             ORDER BY dcode.id
+             LIMIT 1)
+         ),
+         'driverName', s.driver_name,
+         'driverCode', s.driver_code,
+         'constructorSourceId', s.constructor_source_id,
+         'constructorId', COALESCE(
+           (SELECT id FROM constructor
+             WHERE id = replace(s.constructor_source_id, '_', '-')),
+           (SELECT id FROM constructor WHERE name = s.constructor_name)
+         ),
+         'constructorName', s.constructor_name,
+         'position', s.position_number,
+         'positionText', s.position_text,
+         'bestLapMs', s.best_lap_ms,
+         'q1Ms', s.q1_ms,
+         'q2Ms', s.q2_ms,
+         'q3Ms', s.q3_ms,
+         'totalTimeMs', s.total_time_ms,
+         'gapMs', s.gap_ms,
+         'gapText', s.gap_text,
+         'laps', s.laps,
+         'status', s.status
+       )) AS session_snapshots
+FROM session_result_snapshot s
+JOIN race ra ON ra.year = s.year AND ra.round = s.round
+WHERE ra.year = ?1 AND ra.grand_prix_id = ?2`;
 
 const raceResultSql = `SELECT rr.position_number, rr.position_text, rr.driver_number,
        d.id AS driver_id, d.name AS driver_name, d.abbreviation AS driver_code,
@@ -788,6 +846,124 @@ function mapPracticeRow(row: unknown): PracticeRow {
   };
 }
 
+interface SessionSnapshotRow {
+  key: string;
+  fetchedAt: string;
+  driverNumber: string;
+  driverSourceId: string | null;
+  driverId: string | null;
+  driverName: string;
+  driverCode: string;
+  constructorId: string | null;
+  constructorSourceId: string | null;
+  constructorName: string;
+  position: number | null;
+  positionText: string;
+  bestLapMs: number | null;
+  q1Ms: number | null;
+  q2Ms: number | null;
+  q3Ms: number | null;
+  totalTimeMs: number | null;
+  gapMs: number | null;
+  gapText: string | null;
+  laps: number | null;
+  status: string | null;
+}
+
+function parseSessionSnapshots(
+  raw: string | null,
+): Map<string, { fetchedAt: string; rows: SessionSnapshotRow[] }> {
+  if (raw === null) return new Map();
+  try {
+    const grouped = new Map<
+      string,
+      { fetchedAt: string; rows: SessionSnapshotRow[] }
+    >();
+    for (const row of JSON.parse(raw) as SessionSnapshotRow[]) {
+      const group = grouped.get(row.key) ?? {
+        fetchedAt: row.fetchedAt,
+        rows: [],
+      };
+      group.fetchedAt = row.fetchedAt;
+      group.rows.push(row);
+      grouped.set(row.key, group);
+    }
+    for (const group of grouped.values()) {
+      group.rows.sort(
+        (a, b) =>
+          (a.position ?? Number.POSITIVE_INFINITY) -
+            (b.position ?? Number.POSITIVE_INFINITY) ||
+          a.driverNumber.localeCompare(b.driverNumber, undefined, {
+            numeric: true,
+          }),
+      );
+    }
+    return grouped;
+  } catch {
+    return new Map();
+  }
+}
+
+// FastF1 的毫秒值是站点自有数据；f1db 的 text 仍是展示口径。这里只给 fallback
+// 行补齐 f1db 相同的时间文本，避免 RaceTable 分叉。
+function formatLapMs(totalMs: number | null): string | null {
+  if (totalMs === null || totalMs < 0) return null;
+  const totalSeconds = Math.floor(totalMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = `${totalSeconds % 60}`.padStart(2, "0");
+  const millis = `${totalMs % 1000}`.padStart(3, "0");
+  return `${hours > 0 ? `${hours}:` : ""}${minutes}:${seconds}.${millis}`;
+}
+
+function mapSnapshotIdentity(row: SessionSnapshotRow) {
+  return {
+    driverNumber: row.driverNumber,
+    driverId: row.driverId,
+    driverName: row.driverName,
+    driverCode: row.driverCode,
+    constructorId: row.constructorId,
+    constructorName: row.constructorName,
+  };
+}
+
+function mapSnapshotRaceRow(row: SessionSnapshotRow): RaceResultRow {
+  return {
+    ...mapSnapshotIdentity(row),
+    position: row.position,
+    positionText: row.positionText,
+    laps: row.laps,
+    time: formatLapMs(row.totalTimeMs),
+    retiredReason: row.status,
+    gap:
+      row.gapText ?? (row.gapMs === null ? null : `+${formatLapMs(row.gapMs)}`),
+    points: null,
+  };
+}
+
+function mapSnapshotQualifyingRow(row: SessionSnapshotRow): QualifyingRow {
+  return {
+    ...mapSnapshotIdentity(row),
+    position: row.position,
+    positionText: row.positionText,
+    q1: formatLapMs(row.q1Ms),
+    q2: formatLapMs(row.q2Ms),
+    q3: formatLapMs(row.q3Ms),
+    laps: row.laps,
+  };
+}
+
+function mapSnapshotPracticeRow(row: SessionSnapshotRow): PracticeRow {
+  return {
+    ...mapSnapshotIdentity(row),
+    position: row.position,
+    positionText: row.positionText,
+    time: formatLapMs(row.bestLapMs),
+    gap: row.gapMs === null ? null : `+${formatLapMs(row.gapMs)}`,
+    laps: row.laps,
+  };
+}
+
 export interface RaceResultsRepository {
   getSeasonCalendar(year: number): Promise<RaceSummary[]>;
   listRaces(year: number): Promise<RaceSummary[]>;
@@ -858,7 +1034,10 @@ export function createRaceResultsRepository(
         const { default: fixture } = await import(
           "./fixtures/race-australia-2026.json"
         );
-        const page = fixture as RacePage;
+        const page: RacePage = {
+          ...(fixture as unknown as RacePage),
+          sources: {},
+        };
         if (slug === "australia") return page;
         // DEV 预览：赛前/赛中形态没有独立 fixture。换上目标站的赛程元信息，
         // 再按站次裁掉尚未产生的结果——china 停在排位赛后，其余为赛前
@@ -919,6 +1098,7 @@ export function createRaceResultsRepository(
                   sprintQualifying: page.tabs.qualifying,
                 }
               : empty,
+          sources: {},
         };
       }
       const values = [year, slug];
@@ -936,6 +1116,7 @@ export function createRaceResultsRepository(
         sprintQualifyingRows,
         circuitInfoRows,
         recordLapRows,
+        snapshotRows,
       ] = await db.batch([
         { sql: raceMetaSql, values },
         { sql: raceResultSql, values },
@@ -950,28 +1131,119 @@ export function createRaceResultsRepository(
         { sql: sprintQualifyingSql, values },
         { sql: circuitInfoSql, values },
         { sql: recordLapSql, values },
+        { sql: sessionSnapshotsSql, values },
       ]);
       if (metaRows.results.length === 0) return null;
       const meta: RaceMeta = {
         ...mapRaceMeta(metaRows.results[0]),
         ...mapCircuitInfo(circuitInfoRows.results[0], recordLapRows.results[0]),
       };
+      const snapshots = parseSessionSnapshots(
+        rowReader(snapshotRows.results[0] ?? {}, "session snapshots").strOrNull(
+          "session_snapshots",
+        ),
+      );
+      const sources: RacePage["sources"] = {};
+      const f1dbSource: ResultSource = {
+        source: "f1db",
+        provisional: false,
+        fetchedAt: null,
+      };
+      const sessionTabs: Record<string, RaceTabKey> = {
+        race: "race-result",
+        qualifying: "qualifying",
+        sprint: "sprint",
+        "sprint-qualifying": "sprint-qualifying",
+        "practice-1": "practice-1",
+        "practice-2": "practice-2",
+        "practice-3": "practice-3",
+      };
+      const fallbackRows = <T>(
+        officialRows: unknown[],
+        sessionKey: string,
+        mapOfficial: (row: unknown) => T,
+        mapSnapshot: (row: SessionSnapshotRow) => T,
+      ): T[] => {
+        const tab = sessionTabs[sessionKey];
+        if (officialRows.length > 0) {
+          if (tab !== undefined) sources[tab] = f1dbSource;
+          return officialRows.map(mapOfficial);
+        }
+        const snapshot = snapshots.get(sessionKey);
+        if (snapshot === undefined) return [];
+        if (tab !== undefined)
+          sources[tab] = {
+            source: "fastf1" as const,
+            provisional: true,
+            fetchedAt: snapshot.fetchedAt,
+          };
+        return snapshot.rows.map(mapSnapshot);
+      };
+      const setOfficialSource = <T>(tab: RaceTabKey, rows: T[]): T[] => {
+        if (rows.length > 0) sources[tab] = f1dbSource;
+        return rows;
+      };
       return {
         meta,
         tabs: {
-          raceResult: raceRows.results.map(mapRaceResultRow),
-          qualifying: qualifyingRows.results.map(mapQualifyingRow),
-          startingGrid: gridRows.results.map(mapGridRow),
-          fastestLaps: fastestLapRows.results.map((row) =>
-            mapFastestLapRow(row, meta.courseLength),
+          raceResult: fallbackRows(
+            raceRows.results,
+            "race",
+            mapRaceResultRow,
+            mapSnapshotRaceRow,
           ),
-          pitStops: pitStopRows.results.map(mapPitStopRow),
-          practice1: practice1Rows.results.map(mapPracticeRow),
-          practice2: practice2Rows.results.map(mapPracticeRow),
-          practice3: practice3Rows.results.map(mapPracticeRow),
-          sprintRace: sprintRaceRows.results.map(mapRaceResultRow),
-          sprintQualifying: sprintQualifyingRows.results.map(mapQualifyingRow),
+          qualifying: fallbackRows(
+            qualifyingRows.results,
+            "qualifying",
+            mapQualifyingRow,
+            mapSnapshotQualifyingRow,
+          ),
+          startingGrid: setOfficialSource(
+            "starting-grid",
+            gridRows.results.map(mapGridRow),
+          ),
+          fastestLaps: setOfficialSource(
+            "fastest-laps",
+            fastestLapRows.results.map((row) =>
+              mapFastestLapRow(row, meta.courseLength),
+            ),
+          ),
+          pitStops: setOfficialSource(
+            "pit-stop-summary",
+            pitStopRows.results.map(mapPitStopRow),
+          ),
+          practice1: fallbackRows(
+            practice1Rows.results,
+            "practice-1",
+            mapPracticeRow,
+            mapSnapshotPracticeRow,
+          ),
+          practice2: fallbackRows(
+            practice2Rows.results,
+            "practice-2",
+            mapPracticeRow,
+            mapSnapshotPracticeRow,
+          ),
+          practice3: fallbackRows(
+            practice3Rows.results,
+            "practice-3",
+            mapPracticeRow,
+            mapSnapshotPracticeRow,
+          ),
+          sprintRace: fallbackRows(
+            sprintRaceRows.results,
+            "sprint",
+            mapRaceResultRow,
+            mapSnapshotRaceRow,
+          ),
+          sprintQualifying: fallbackRows(
+            sprintQualifyingRows.results,
+            "sprint-qualifying",
+            mapQualifyingRow,
+            mapSnapshotQualifyingRow,
+          ),
         },
+        sources,
       };
     },
 

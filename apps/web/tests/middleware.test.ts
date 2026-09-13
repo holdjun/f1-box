@@ -29,7 +29,13 @@ function makeContext(
   const locals: { app?: unknown } = {};
   // 与运行时 CacheLike 对齐：AstroCache.enabled=true，dev 的 NoopAstroCache 为 false
   const cache = { set: vi.fn(), enabled: cacheEnabled };
-  const next = vi.fn(async () => new Response(null, { status, headers }));
+  const next = vi.fn(async () => {
+    const response = new Response(null, { status, headers });
+    if (path === "/results/2026/races/australia/race-result") {
+      response.headers.set("X-F1-Race-Round", "1");
+    }
+    return response;
+  });
   return {
     context: { locals, request, cache, url: new URL(request.url) } as never,
     next,
@@ -102,12 +108,15 @@ describe("middleware 默认缓存", () => {
     expect(cache.set).not.toHaveBeenCalled();
   });
 
-  it("比赛详情页追加所在年份的天气缓存标签", async () => {
-    const { cache } = await run("/results/2026/races/australia/race-result");
+  it("比赛详情页追加所在年份的天气与成绩缓存标签", async () => {
+    const { cache, response } = await run(
+      "/results/2026/races/australia/race-result",
+    );
     expect(cache.set).toHaveBeenCalledWith({
       ...CACHE_OPTIONS,
-      tags: ["f1db", "weather:2026"],
+      tags: ["f1db", "weather:2026", "results:2026", "results:2026:1"],
     });
+    expect(response.headers.get("X-F1-Race-Round")).toBeNull();
   });
 
   it("裸 slug 重定向仍只使用 f1db 标签", async () => {

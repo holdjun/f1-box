@@ -49,8 +49,53 @@ CREATE TABLE IF NOT EXISTS session_weather (
   PRIMARY KEY (year, round, session_key)
 );
 
+-- FastF1 临时成绩快照：只作为 f1db 未发布前的 fallback，不写入 f1db 成绩表。
+-- 车手/车队保留源身份与显示名；f1db 实体映射在读取侧按年份完成。
+CREATE TABLE IF NOT EXISTS session_result_snapshot (
+  year INTEGER NOT NULL,
+  round INTEGER NOT NULL,
+  session_key TEXT NOT NULL,
+  driver_number TEXT NOT NULL,
+  position_number INTEGER,
+  position_text TEXT NOT NULL,
+  driver_source_id TEXT,
+  driver_name TEXT NOT NULL,
+  driver_code TEXT NOT NULL,
+  constructor_source_id TEXT,
+  constructor_name TEXT NOT NULL,
+  best_lap_ms INTEGER,
+  q1_ms INTEGER,
+  q2_ms INTEGER,
+  q3_ms INTEGER,
+  total_time_ms INTEGER,
+  gap_ms INTEGER,
+  gap_text TEXT,
+  laps INTEGER,
+  status TEXT,
+  points REAL,
+  source_revision TEXT NOT NULL,
+  fetched_at TEXT NOT NULL,
+  PRIMARY KEY (year, round, session_key, driver_number)
+);
+
 -- D1 是唯一任务状态源；empty 需要二次确认后才转为 no_data。
 CREATE TABLE IF NOT EXISTS weather_sync_state (
+  year INTEGER NOT NULL,
+  round INTEGER NOT NULL,
+  session_key TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (
+    status IN ('success', 'empty', 'no_data', 'failed', 'exhausted', 'mismatch')
+  ),
+  attempts INTEGER NOT NULL,
+  last_error TEXT,
+  last_attempt_at TEXT NOT NULL,
+  next_attempt_at TEXT,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (year, round, session_key)
+);
+
+-- 天气与成绩状态分表：一类失败不能阻塞另一类已经成功的落库。
+CREATE TABLE IF NOT EXISTS session_result_sync_state (
   year INTEGER NOT NULL,
   round INTEGER NOT NULL,
   session_key TEXT NOT NULL,
@@ -68,14 +113,17 @@ CREATE TABLE IF NOT EXISTS weather_sync_state (
 CREATE INDEX IF NOT EXISTS weather_sync_state_status_idx
   ON weather_sync_state(status);
 
+CREATE INDEX IF NOT EXISTS session_result_sync_state_status_idx
+  ON session_result_sync_state(status);
+
 -- 缓存刷新独立于采集成功，失败时保留 outbox，下一次调度重试。
-CREATE TABLE IF NOT EXISTS weather_cache_outbox (
+CREATE TABLE IF NOT EXISTS session_cache_outbox (
   cache_tag TEXT PRIMARY KEY,
   created_at TEXT NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS weather_cache_outbox_created_idx
-  ON weather_cache_outbox(created_at, cache_tag);
+CREATE INDEX IF NOT EXISTS session_cache_outbox_created_idx
+  ON session_cache_outbox(created_at, cache_tag);
 
 CREATE INDEX IF NOT EXISTS session_source_ref_year_start_idx
   ON session_source_ref(year, starts_at_utc);
@@ -90,36 +138,56 @@ CREATE TABLE IF NOT EXISTS weather_sync_lock (
   expires_at TEXT NOT NULL
 );
 
--- 引用身份变化或被移除时，旧天气与终态不能继续遮挡新引用。
+-- 引用身份变化或被移除时，旧天气/成绩与终态不能继续遮挡新引用。
 CREATE TRIGGER IF NOT EXISTS session_source_ref_changed
 AFTER UPDATE OF api_path, race_date, starts_at_utc ON session_source_ref
 WHEN OLD.api_path IS NOT NEW.api_path
   OR OLD.race_date IS NOT NEW.race_date
   OR OLD.starts_at_utc IS NOT NEW.starts_at_utc
 BEGIN
-  INSERT OR IGNORE INTO weather_cache_outbox (cache_tag, created_at)
+  INSERT OR IGNORE INTO session_cache_outbox (cache_tag, created_at)
     SELECT 'weather:' || NEW.year, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
     WHERE EXISTS (
       SELECT 1 FROM session_weather
+      WHERE year = NEW.year AND round = NEW.round AND session_key = NEW.session_key
+    );
+  INSERT OR IGNORE INTO session_cache_outbox (cache_tag, created_at)
+    SELECT 'results:' || NEW.year, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+    WHERE EXISTS (
+      SELECT 1 FROM session_result_snapshot
       WHERE year = NEW.year AND round = NEW.round AND session_key = NEW.session_key
     );
   DELETE FROM session_weather
     WHERE year = NEW.year AND round = NEW.round AND session_key = NEW.session_key;
   DELETE FROM weather_sync_state
     WHERE year = NEW.year AND round = NEW.round AND session_key = NEW.session_key;
+  DELETE FROM session_result_snapshot
+    WHERE year = NEW.year AND round = NEW.round AND session_key = NEW.session_key;
+  DELETE FROM session_result_sync_state
+    WHERE year = NEW.year AND round = NEW.round AND session_key = NEW.session_key;
 END;
 
 CREATE TRIGGER IF NOT EXISTS session_source_ref_deleted
 AFTER DELETE ON session_source_ref
 BEGIN
-  INSERT OR IGNORE INTO weather_cache_outbox (cache_tag, created_at)
+  INSERT OR IGNORE INTO session_cache_outbox (cache_tag, created_at)
     SELECT 'weather:' || OLD.year, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
     WHERE EXISTS (
       SELECT 1 FROM session_weather
       WHERE year = OLD.year AND round = OLD.round AND session_key = OLD.session_key
     );
+  INSERT OR IGNORE INTO session_cache_outbox (cache_tag, created_at)
+    SELECT 'results:' || OLD.year, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+    WHERE EXISTS (
+      SELECT 1 FROM session_result_snapshot
+      WHERE year = OLD.year AND round = OLD.round AND session_key = OLD.session_key
+    );
   DELETE FROM session_weather
     WHERE year = OLD.year AND round = OLD.round AND session_key = OLD.session_key;
   DELETE FROM weather_sync_state
+    WHERE year = OLD.year AND round = OLD.round AND session_key = OLD.session_key;
+  DELETE FROM session_result_snapshot
+    WHERE year = OLD.year AND round = OLD.round AND session_key = OLD.session_key;
+  DELETE FROM session_result_sync_state
     WHERE year = OLD.year AND round = OLD.round AND session_key = OLD.session_key;
 END;

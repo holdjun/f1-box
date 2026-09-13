@@ -98,5 +98,8 @@ jobs:
           curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$zone/purge_cache" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -H "Content-Type: application/json" \
+            # Every f1db-backed page carries the f1db tag, including pages
+            # with a more specific results:<year> tag. Purging f1db therefore
+            # invalidates historical result pages as well as the current year.
             -d '{"tags":["f1db"]}' \
             | node -p 'JSON.parse(require("fs").readFileSync(0)).success ? "purged f1db" : (console.error(require("fs").readFileSync(0)), process.exit(1))'

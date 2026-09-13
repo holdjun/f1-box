@@ -240,6 +240,25 @@
     white-space: normal;
   }
 
+  .source-badge {
+    display: inline-block;
+    margin-bottom: 0.7rem;
+    padding: 0.2rem 0.45rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface-raised);
+    color: var(--ink-muted);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .source-badge--provisional {
+    border-color: color-mix(in oklab, var(--accent) 35%, var(--line));
+    background: color-mix(in oklab, var(--accent) 10%, var(--surface));
+    color: var(--ink-strong);
+  }
+
   /* 信息面板：车队/车手/赛道详情的统计卡 */
   .info-panels {
     display: flex;

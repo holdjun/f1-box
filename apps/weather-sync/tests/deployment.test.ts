@@ -38,6 +38,10 @@ const weatherMigrationPath = path.join(
   "migrations/0001_session_weather_fields.sql",
 );
 const weatherMigration = readFileSync(weatherMigrationPath, "utf8");
+const resultMigration = readFileSync(
+  path.join(repoRoot, "migrations/0002_session_result_snapshots.sql"),
+  "utf8",
+);
 const weatherPreviewJob = ci.slice(
   ci.indexOf("  weather-preview:"),
   ci.indexOf("\n  production:", ci.indexOf("  weather-preview:")),
@@ -111,6 +115,7 @@ describe("weather deployment configuration", () => {
           DELETE FROM session_weather;
         END;
         ${weatherMigration}
+        ${resultMigration}
         SELECT temp_c, track_temp_c, humidity_pct, pressure_hpa, wind_speed_kph,
                wind_direction_deg, rainfall, sample_count, observed_at_utc,
                weather_code, source, fetched_at,
@@ -161,7 +166,7 @@ describe("weather deployment configuration", () => {
     );
     expect(resetStep).toContain("DELETE FROM weather_sync_state;");
     expect(resetStep).toContain("DELETE FROM session_weather;");
-    expect(resetStep).toContain("DELETE FROM weather_cache_outbox;");
+    expect(resetStep).toContain("DELETE FROM session_cache_outbox;");
     expect(resetStep).toContain("DELETE FROM weather_sync_lock;");
     expect(
       weatherPreviewJob.indexOf("Apply preview session references"),
