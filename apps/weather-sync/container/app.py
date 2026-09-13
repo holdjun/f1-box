@@ -162,21 +162,6 @@ def text_value(value) -> str | None:
     return text or None
 
 
-def boolean_value(value) -> bool | None:
-    if isinstance(value, bool):
-        return value
-    if type(value).__name__ == "bool_":
-        return bool(value)
-    return None
-
-
-def integer_text(value) -> str | None:
-    if isinstance(value, bool):
-        return None
-    number = integer_value(value)
-    return None if number is None else str(number)
-
-
 def observed_at_utc(weather, starts_at: datetime) -> str | None:
     offsets = [
         seconds
