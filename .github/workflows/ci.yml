@@ -191,7 +191,7 @@ jobs:
           const status = JSON.parse(
             require("fs").readFileSync("/tmp/weather-status.json", "utf8"),
           );
-          const success = status.statuses.find((row) => row.status === "success");
+          const success = status.weatherStatuses.find((row) => row.status === "success");
           if (
             result.requested !== 1 ||
             result.success !== 1 ||
