@@ -179,6 +179,32 @@ describe("session ingestion domain", () => {
         [collectCandidate(candidate)],
       ),
     ).toThrow(/results adapter/i);
+
+    const unavailableDuringRollout = {
+      ...containerResponse,
+      sessions: [
+        {
+          ...successfulResult,
+          results: {
+            ...successfulResult.results,
+            status: "unavailable",
+            rowCount: 0,
+            rows: [],
+            adapter: undefined,
+            schemaVersion: undefined,
+          },
+        },
+      ],
+    };
+    expect(
+      parseContainerResponse(unavailableDuringRollout, [
+        collectCandidate(candidate),
+      ]).sessions[0].results,
+    ).toMatchObject({
+      status: "unavailable",
+      adapter: "extended-timing-fallback",
+      schemaVersion: 1,
+    });
   });
 
   it("writes successful weather, results and cache tags together", () => {

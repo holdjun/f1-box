@@ -543,13 +543,21 @@ function parseResultsResult(raw: unknown): ContainerResultsResult {
   ) {
     throw new Error("container results source revision is invalid");
   }
+  const adapter =
+    value.adapter === undefined && status !== "success"
+      ? "extended-timing-fallback"
+      : value.adapter;
   if (
-    value.adapter !== "fastf1-session-results" &&
-    value.adapter !== "extended-timing-fallback"
+    adapter !== "fastf1-session-results" &&
+    adapter !== "extended-timing-fallback"
   ) {
     throw new Error("container results adapter is invalid");
   }
-  if (value.schemaVersion !== 1) {
+  const schemaVersion =
+    value.schemaVersion === undefined && status !== "success"
+      ? 1
+      : value.schemaVersion;
+  if (schemaVersion !== 1) {
     throw new Error("container results schema version is invalid");
   }
   return {
@@ -559,7 +567,7 @@ function parseResultsResult(raw: unknown): ContainerResultsResult {
     sourceRevision: value.sourceRevision,
     fetchedAt: parseTimestamp(value.fetchedAt, "fetched timestamp"),
     error: parseError(value.error),
-    adapter: value.adapter as ContainerResultsResult["adapter"],
+    adapter,
     schemaVersion: 1,
   };
 }
