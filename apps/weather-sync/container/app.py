@@ -3,6 +3,7 @@ import json
 import math
 import os
 import re
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -13,8 +14,14 @@ import requests
 fastf1.Cache.set_disabled()
 fastf1.set_log_level("WARNING")
 
-RESULTS_ADAPTER_VERSION = "session-results-v1"
-RESULTS_SCHEMA_VERSION = 1
+with Path(__file__).with_name("contract-version.json").open(
+    encoding="utf-8"
+) as contract_file:
+    CONTRACT = json.load(contract_file)
+
+CONTAINER_API_VERSION = CONTRACT["containerApiVersion"]
+RESULTS_ADAPTER_VERSION = CONTRACT["resultsAdapterVersion"]
+RESULTS_SCHEMA_VERSION = CONTRACT["resultsSchemaVersion"]
 SESSION_IDENTIFIERS = {
     "practice-1": "FP1",
     "practice-2": "FP2",
@@ -36,6 +43,15 @@ def empty_results_payload(status: str, error: str | None) -> dict:
         "error": error,
         "adapter": "extended-timing-fallback",
         "schemaVersion": RESULTS_SCHEMA_VERSION,
+}
+
+
+def health_payload() -> dict:
+    return {
+        "ok": True,
+        "containerApiVersion": CONTAINER_API_VERSION,
+        "resultsAdapterVersion": RESULTS_ADAPTER_VERSION,
+        "resultsSchemaVersion": RESULTS_SCHEMA_VERSION,
     }
 
 def utc_now() -> str:
@@ -840,6 +856,7 @@ def collect_payload(payload: dict) -> dict:
         "fastf1Version": fastf1.__version__,
         "requestsVersion": requests.__version__,
         "resultsAdapterVersion": RESULTS_ADAPTER_VERSION,
+        "containerApiVersion": CONTAINER_API_VERSION,
         "sessions": [collect_session(session) for session in sessions],
     }
 
@@ -858,7 +875,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         if self.path == "/health":
-            self.send_json({"ok": True})
+            self.send_json(health_payload())
             return
         self.send_json({"error": "not found"}, 404)
 

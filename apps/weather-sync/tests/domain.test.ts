@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -23,6 +26,19 @@ import {
 } from "../src/domain";
 
 const now = new Date("2026-09-12T12:00:00.000Z");
+const contract = JSON.parse(
+  readFileSync(
+    path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "../container/contract-version.json",
+    ),
+    "utf8",
+  ),
+) as {
+  containerApiVersion: number;
+  resultsAdapterVersion: string;
+  resultsSchemaVersion: number;
+};
 
 const candidate: SessionCandidate = {
   year: 2023,
@@ -84,14 +100,15 @@ const successfulResult: ContainerSessionResult = {
     fetchedAt: "2026-09-12T12:00:02.000Z",
     error: null,
     adapter: "fastf1-session-results",
-    schemaVersion: 1,
+    schemaVersion: contract.resultsSchemaVersion,
   },
 };
 
 const containerResponse = {
   fastf1Version: "3.8.3",
   requestsVersion: "2.34.2",
-  resultsAdapterVersion: "session-results-v1",
+  resultsAdapterVersion: contract.resultsAdapterVersion,
+  containerApiVersion: contract.containerApiVersion,
   sessions: [successfulResult],
 };
 
@@ -148,6 +165,12 @@ describe("session ingestion domain", () => {
         [collectCandidate(candidate)],
       ),
     ).toThrow(/results adapter version/i);
+    expect(() =>
+      parseContainerResponse(
+        { ...containerResponse, containerApiVersion: undefined },
+        [collectCandidate(candidate)],
+      ),
+    ).toThrow(/container api version/i);
     expect(() =>
       parseContainerResponse(
         {

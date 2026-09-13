@@ -50,6 +50,7 @@ const weatherPreviewJob = ci.slice(
   ci.indexOf("  weather-preview:"),
   ci.indexOf("\n  production:", ci.indexOf("  weather-preview:")),
 );
+const weatherProductionJob = ci.slice(ci.indexOf("  weather-production:"));
 
 describe("weather deployment configuration", () => {
   it("keeps fresh schemas and existing databases on the same weather shape", () => {
@@ -175,22 +176,51 @@ describe("weather deployment configuration", () => {
     expect(dockerfile).toContain("USER nobody");
   });
 
-  it("clears preview weather state before the canary", () => {
-    const resetIndex = weatherPreviewJob.indexOf("Reset preview weather state");
-    const resetStep = weatherPreviewJob.slice(
-      resetIndex,
-      weatherPreviewJob.indexOf("Run weather canary"),
+  it("gates both deployed environments on the shared container contract", () => {
+    expect(containerSource).toContain("async health()");
+    expect(workerSource).toContain('"/container-health"');
+    expect(weatherPreviewJob).toContain("Verify preview container contract");
+    expect(
+      weatherPreviewJob.indexOf("Verify preview container contract"),
+    ).toBeLessThan(weatherPreviewJob.indexOf("Run weather canary"));
+    expect(weatherProductionJob).toContain(
+      "Verify production container contract",
     );
+    expect(weatherProductionJob).toContain("/container-health");
+    for (const job of [weatherPreviewJob, weatherProductionJob]) {
+      expect(job).toContain("--retry 30 --retry-delay 10 --retry-all-errors");
+    }
+  });
+
+  it("runs a read-only production result canary", () => {
+    expect(workerSource).toContain('"/canary"');
+    expect(weatherProductionJob).toContain("Run production result canary");
+    expect(weatherProductionJob).toContain('canary.status !== "success"');
+    expect(weatherProductionJob).toContain(
+      'adapter !== "fastf1-session-results"',
+    );
+    expect(weatherProductionJob).toContain(
+      "canary.schemaVersion !== contract.resultsSchemaVersion",
+    );
+  });
+
+  it("clears preview derived state before references and seeds result state", () => {
+    const resetIndex = weatherPreviewJob.indexOf("Reset preview derived data");
+    const applyIndex = weatherPreviewJob.indexOf(
+      "Apply preview session references",
+    );
+    const seedIndex = weatherPreviewJob.indexOf("Seed preview result state");
+    const deployIndex = weatherPreviewJob.indexOf("Deploy weather preview");
+    const resetStep = weatherPreviewJob.slice(resetIndex, applyIndex);
     expect(resetStep).toContain("DELETE FROM weather_sync_state;");
     expect(resetStep).toContain("DELETE FROM session_weather;");
+    expect(resetStep).toContain("DELETE FROM session_result_snapshot;");
     expect(resetStep).toContain("DELETE FROM weather_cache_outbox;");
     expect(resetStep).toContain("DELETE FROM weather_sync_lock;");
-    expect(
-      weatherPreviewJob.indexOf("Apply preview session references"),
-    ).toBeLessThan(resetIndex);
-    expect(resetIndex).toBeLessThan(
-      weatherPreviewJob.indexOf("Run weather canary"),
-    );
+    expect(resetStep).toContain("CLOUDFLARE_API_TOKEN");
+    expect(resetIndex).toBeLessThan(applyIndex);
+    expect(applyIndex).toBeLessThan(seedIndex);
+    expect(seedIndex).toBeLessThan(deployIndex);
   });
 
   it("keeps the existing outbox as the active cache invalidation queue", () => {
@@ -213,6 +243,7 @@ describe("weather deployment configuration", () => {
     expect(weatherPreviewJob).toContain("status.snapshotRows < 1");
     expect(weatherPreviewJob).toContain("status.pendingCachePurges < 1");
     expect(weatherPreviewJob).toContain("status.resultStatuses.find");
+    expect(weatherPreviewJob).toContain("!row.lastError");
     expect(weatherPreviewJob).toContain("Run weather canary");
     expect(weatherPreviewJob).toContain("Run result canary");
   });

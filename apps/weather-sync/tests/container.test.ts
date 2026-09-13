@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, it } from "vitest";
@@ -8,6 +9,16 @@ const repoRoot = path.resolve(
   "../../..",
 );
 const appPath = path.join(repoRoot, "apps/weather-sync/container/app.py");
+const contract = JSON.parse(
+  readFileSync(
+    path.join(repoRoot, "apps/weather-sync/container/contract-version.json"),
+    "utf8",
+  ),
+) as {
+  containerApiVersion: number;
+  resultsAdapterVersion: string;
+  resultsSchemaVersion: number;
+};
 
 function runPython(source: string): void {
   execFileSync("python3", [
@@ -78,6 +89,22 @@ function installTiming(
 }
 
 describe("session container", () => {
+  it("publishes the shared contract on health and collect", () => {
+    runPython(`
+health = app.health_payload()
+assert health == {
+    "ok": True,
+    "containerApiVersion": ${JSON.stringify(contract.containerApiVersion)},
+    "resultsAdapterVersion": ${JSON.stringify(contract.resultsAdapterVersion)},
+    "resultsSchemaVersion": ${JSON.stringify(contract.resultsSchemaVersion)},
+}, health
+
+result = app.collect_payload({"sessions": []})
+assert result["containerApiVersion"] == ${JSON.stringify(contract.containerApiVersion)}, result
+assert result["resultsAdapterVersion"] == ${JSON.stringify(contract.resultsAdapterVersion)}, result
+`);
+  });
+
   it("prefers public FastF1 session results for qualifying", () => {
     runPython(`
 class Duration:

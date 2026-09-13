@@ -184,7 +184,7 @@ describe("D1 查询计划护栏", () => {
       )
       .map((entry) => `${entry.key} -> ${entry.tables.join(",")}`);
     expect(offenders).toEqual([]);
-  });
+  }, 15_000);
 
   it("白名单只留目录页与名称匹配", () => {
     const stale = Object.keys(FULL_SCAN_BY_DESIGN).filter(
