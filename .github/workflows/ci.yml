@@ -159,7 +159,8 @@ jobs:
           printf 'WEATHER_SYNC_TOKEN=%s\nWEATHER_CONTAINER_TOKEN=%s\n' \
             "$WEATHER_SYNC_TOKEN" "$WEATHER_CONTAINER_TOKEN" > "$secrets_file"
           pnpm --filter @f1-box/weather-sync exec wrangler deploy \
-            --config wrangler.preview.jsonc --secrets-file "$secrets_file"
+            --config wrangler.preview.jsonc --containers-rollout immediate \
+            --secrets-file "$secrets_file"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -265,7 +266,8 @@ jobs:
             "$WEATHER_SYNC_TOKEN" "$WEATHER_CONTAINER_TOKEN" "$CLOUDFLARE_API_TOKEN" \
             > "$secrets_file"
           pnpm --filter @f1-box/weather-sync exec wrangler deploy \
-            --config wrangler.jsonc --secrets-file "$secrets_file"
+            --config wrangler.jsonc --containers-rollout immediate \
+            --secrets-file "$secrets_file"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
