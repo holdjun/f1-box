@@ -218,7 +218,7 @@ jobs:
           current_year=$(date -u +%Y)
           apps/web/node_modules/.bin/wrangler d1 execute f1db-weather-preview --remote \
             -c apps/weather-sync/wrangler.preview.jsonc \
-            --command "DELETE FROM session_result_snapshot; DELETE FROM session_result_sync_state; UPDATE session_source_ref SET starts_at_utc = datetime('now', '-5 hours') WHERE year = $current_year AND starts_at_utc = (SELECT MAX(starts_at_utc) FROM session_source_ref WHERE year = $current_year AND unixepoch(starts_at_utc) <= unixepoch('now', '-2 days')); DELETE FROM weather_cache_outbox; INSERT OR REPLACE INTO weather_sync_state (year, round, session_key, status, attempts, last_attempt_at, updated_at) SELECT year, round, session_key, 'no_data', 2, datetime('now'), datetime('now') FROM session_source_ref;"
+            --command "DELETE FROM session_result_snapshot; DELETE FROM session_result_sync_state; UPDATE session_source_ref SET starts_at_utc = strftime('%Y-%m-%dT%H:%M:%SZ', 'now', '-5 hours') WHERE year = $current_year AND starts_at_utc = (SELECT MAX(starts_at_utc) FROM session_source_ref WHERE year = $current_year AND unixepoch(starts_at_utc) <= unixepoch('now', '-2 days')); DELETE FROM weather_cache_outbox; INSERT OR REPLACE INTO weather_sync_state (year, round, session_key, status, attempts, last_attempt_at, updated_at) SELECT year, round, session_key, 'no_data', 2, datetime('now'), datetime('now') FROM session_source_ref;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
