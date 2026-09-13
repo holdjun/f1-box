@@ -194,7 +194,7 @@ jobs:
           const success = status.weatherStatuses.find((row) => row.status === "success");
           if (
             result.requested !== 1 ||
-            result.success !== 1 ||
+            result.weather?.success !== 1 ||
             status.weatherRows !== 1 ||
             success?.count !== 1
           ) {
