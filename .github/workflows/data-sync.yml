@@ -95,6 +95,8 @@ jobs:
             "https://api.cloudflare.com/client/v4/zones?name=f1-box.com" \
             | node -p 'JSON.parse(require("fs").readFileSync(0)).result?.[0]?.id ?? ""')
           [ -n "$zone" ] || { echo "zone lookup failed" >&2; exit 1; }
+          # 所有 f1db 页面（包括带 results:<year> 的比赛页）也带 f1db 标签，
+          # 因此一次 purge 同时覆盖当前与历史结果。
           curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$zone/purge_cache" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -H "Content-Type: application/json" \

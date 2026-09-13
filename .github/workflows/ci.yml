@@ -32,7 +32,7 @@ jobs:
         run: |
           base=$(git merge-base "$BASE_SHA" "$HEAD_SHA")
           if git diff --quiet "$base" "$HEAD_SHA" -- \
-            apps/weather-sync scripts/site-tables.sql scripts/sync-session-refs.py \
+            apps/weather-sync migrations scripts/site-tables.sql scripts/sync-session-refs.py \
             scripts/f1_session_keys.py .github/workflows/ci.yml \
             .github/workflows/weather-data.yml pnpm-lock.yaml; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -89,6 +89,8 @@ jobs:
             -c apps/web/wrangler.preview.jsonc --file scripts/site-tables.sql
           apps/web/node_modules/.bin/wrangler d1 migrations apply f1db --remote \
             -c apps/web/wrangler.preview.jsonc
+          apps/web/node_modules/.bin/wrangler d1 execute f1db --remote \
+            -c apps/web/wrangler.preview.jsonc --file scripts/f1db-d1-indexes.sql
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -132,7 +134,10 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Generate preview session references
-        run: uv run scripts/sync-session-refs.py --out /tmp/session-refs.sql --years 2023
+        run: |
+          current_year=$(date -u +%Y)
+          uv run scripts/sync-session-refs.py --out /tmp/session-refs.sql \
+            --years "2023,$current_year"
 
       - name: Apply preview session references
         run: |
@@ -146,7 +151,7 @@ jobs:
         run: |
           apps/web/node_modules/.bin/wrangler d1 execute f1db-weather-preview --remote \
             -c apps/weather-sync/wrangler.preview.jsonc \
-            --command "DELETE FROM weather_sync_state; DELETE FROM session_weather; DELETE FROM weather_cache_outbox; DELETE FROM weather_sync_lock;"
+            --command "DELETE FROM weather_sync_state; DELETE FROM session_weather; DELETE FROM session_result_snapshot; DELETE FROM session_result_sync_state; DELETE FROM weather_cache_outbox; DELETE FROM session_cache_outbox; DELETE FROM weather_sync_lock; INSERT INTO session_result_sync_state (year, round, session_key, status, attempts, last_attempt_at, updated_at) SELECT year, round, session_key, 'no_data', 2, datetime('now'), datetime('now') FROM session_source_ref;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -159,7 +164,8 @@ jobs:
           printf 'WEATHER_SYNC_TOKEN=%s\nWEATHER_CONTAINER_TOKEN=%s\n' \
             "$WEATHER_SYNC_TOKEN" "$WEATHER_CONTAINER_TOKEN" > "$secrets_file"
           pnpm --filter @f1-box/weather-sync exec wrangler deploy \
-            --config wrangler.preview.jsonc --secrets-file "$secrets_file"
+            --config wrangler.preview.jsonc --containers-rollout immediate \
+            --secrets-file "$secrets_file"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -171,7 +177,7 @@ jobs:
           curl --retry 10 --retry-delay 5 --retry-all-errors -fsS \
             "https://f1-box-weather-sync-preview.rj7c4mhzcp.workers.dev/health" > /dev/null
 
-      - name: Run one-session canary
+      - name: Run weather canary
         run: |
           curl --retry 5 --retry-delay 10 --retry-all-errors -fsS -X POST \
             -H "Authorization: Bearer $WEATHER_SYNC_TOKEN" \
@@ -190,15 +196,62 @@ jobs:
           const status = JSON.parse(
             require("fs").readFileSync("/tmp/weather-status.json", "utf8"),
           );
-          const success = status.statuses.find((row) => row.status === "success");
+          const success = status.weatherStatuses.find((row) => row.status === "success");
           if (
-            result.requested !== 1 ||
-            result.success !== 1 ||
+            result.sessions !== 1 ||
+            result.weather?.success !== 1 ||
             status.weatherRows !== 1 ||
+            status.pendingCachePurges < 1 ||
             success?.count !== 1
           ) {
             console.error(
               `weather canary did not persist one row: ${JSON.stringify({ result, status })}`,
+            );
+            process.exit(1);
+          }
+          NODE
+        env:
+          WEATHER_SYNC_TOKEN: ${{ secrets.WEATHER_SYNC_TOKEN }}
+
+      - name: Prepare result canary
+        run: |
+          current_year=$(date -u +%Y)
+          apps/web/node_modules/.bin/wrangler d1 execute f1db-weather-preview --remote \
+            -c apps/weather-sync/wrangler.preview.jsonc \
+            --command "DELETE FROM session_result_snapshot; DELETE FROM session_result_sync_state; UPDATE session_source_ref SET starts_at_utc = strftime('%Y-%m-%dT%H:%M:%SZ', 'now', '-5 hours') WHERE year = $current_year AND starts_at_utc = (SELECT MAX(starts_at_utc) FROM session_source_ref WHERE year = $current_year AND unixepoch(starts_at_utc) <= unixepoch('now', '-2 days')); DELETE FROM weather_cache_outbox; INSERT OR REPLACE INTO weather_sync_state (year, round, session_key, status, attempts, last_attempt_at, updated_at) SELECT year, round, session_key, 'no_data', 2, datetime('now'), datetime('now') FROM session_source_ref;"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Run result canary
+        run: |
+          curl --retry 5 --retry-delay 10 --retry-all-errors -fsS -X POST \
+            -H "Authorization: Bearer $WEATHER_SYNC_TOKEN" \
+            -H "content-type: application/json" \
+            -d '{"limit":1}' \
+            "https://f1-box-weather-sync-preview.rj7c4mhzcp.workers.dev/run" > /tmp/result-run.json
+          curl --retry 5 --retry-delay 2 --retry-all-errors -fsS \
+            -H "Authorization: Bearer $WEATHER_SYNC_TOKEN" \
+            "https://f1-box-weather-sync-preview.rj7c4mhzcp.workers.dev/status" > /tmp/result-status.json
+          cat /tmp/result-run.json
+          cat /tmp/result-status.json
+          node <<'NODE'
+          const result = JSON.parse(
+            require("fs").readFileSync("/tmp/result-run.json", "utf8"),
+          );
+          const status = JSON.parse(
+            require("fs").readFileSync("/tmp/result-status.json", "utf8"),
+          );
+          const success = status.resultStatuses.find((row) => row.status === "success");
+          if (
+            result.sessions !== 1 ||
+            result.results?.success !== 1 ||
+            status.snapshotRows < 1 ||
+            status.pendingCachePurges < 1 ||
+            success?.count !== 1
+          ) {
+            console.error(
+              `result canary did not persist a snapshot: ${JSON.stringify({ result, status })}`,
             );
             process.exit(1);
           }
@@ -227,6 +280,8 @@ jobs:
             -c apps/web/wrangler.jsonc --file scripts/site-tables.sql
           apps/web/node_modules/.bin/wrangler d1 migrations apply f1db --remote \
             -c apps/web/wrangler.jsonc
+          apps/web/node_modules/.bin/wrangler d1 execute f1db --remote \
+            -c apps/web/wrangler.jsonc --file scripts/f1db-d1-indexes.sql
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -265,7 +320,8 @@ jobs:
             "$WEATHER_SYNC_TOKEN" "$WEATHER_CONTAINER_TOKEN" "$CLOUDFLARE_API_TOKEN" \
             > "$secrets_file"
           pnpm --filter @f1-box/weather-sync exec wrangler deploy \
-            --config wrangler.jsonc --secrets-file "$secrets_file"
+            --config wrangler.jsonc --containers-rollout immediate \
+            --secrets-file "$secrets_file"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

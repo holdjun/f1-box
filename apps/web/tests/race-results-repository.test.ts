@@ -452,6 +452,7 @@ function tabFragments(
     "FROM free_practice_1_result": [],
     "FROM free_practice_2_result": [],
     "FROM free_practice_3_result": [],
+    "session_result_snapshot s": [],
     ...extra,
   };
 }
@@ -771,6 +772,198 @@ describe("createRaceResultsRepository getRacePage", () => {
     });
   });
 
+  it("maps FastF1 snapshots to provisional result rows when f1db is missing", async () => {
+    const snapshots = JSON.stringify([
+      {
+        key: "practice-1",
+        fetchedAt: "2026-09-11T02:20:00Z",
+        driverNumber: "1",
+        driverSourceId: "max_verstappen",
+        position: 1,
+        positionText: "1",
+        driverId: "max-verstappen",
+        driverName: "Max Verstappen",
+        driverCode: "VER",
+        constructorId: "red-bull",
+        constructorName: "Red Bull Racing",
+        bestLapMs: 83456,
+        gapMs: null,
+        laps: 22,
+      },
+      {
+        key: "qualifying",
+        fetchedAt: "2026-09-11T06:20:00Z",
+        driverNumber: "4",
+        driverSourceId: "not-in-f1db",
+        position: 2,
+        positionText: "2",
+        driverId: null,
+        driverName: "Lando Norris",
+        driverCode: "NOR",
+        constructorId: null,
+        constructorName: "McLaren",
+        q1Ms: 84123,
+        q2Ms: 82001,
+        q3Ms: 81000,
+        laps: 18,
+      },
+      {
+        key: "race",
+        fetchedAt: "2026-09-11T09:20:00Z",
+        driverNumber: "63",
+        position: 1,
+        positionText: "1",
+        driverId: "george-russell",
+        driverName: "George Russell",
+        driverCode: "RUS",
+        constructorId: "mercedes",
+        constructorName: "Mercedes",
+        totalTimeMs: 3923000,
+        gapMs: null,
+        laps: 57,
+        status: "Finished",
+        points: 25,
+      },
+      {
+        key: "race",
+        fetchedAt: "2026-09-11T09:20:00Z",
+        driverNumber: "1",
+        position: 2,
+        positionText: "2",
+        driverId: "max-verstappen",
+        driverName: "Max Verstappen",
+        driverCode: "VER",
+        constructorId: "red-bull",
+        constructorName: "Red Bull Racing",
+        totalTimeMs: null,
+        gapMs: 377,
+        laps: 57,
+        status: "Finished",
+        points: 18,
+      },
+    ]);
+    const db = fakeDbBySql(
+      tabFragments({
+        "session_result_snapshot s": [{ session_snapshots: snapshots }],
+      }),
+    );
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2026,
+      "australia",
+    );
+    expect(page?.tabs.practice1).toEqual([
+      {
+        position: 1,
+        positionText: "1",
+        driverNumber: "1",
+        driverId: "max-verstappen",
+        driverName: "Max Verstappen",
+        driverCode: "VER",
+        constructorId: "red-bull",
+        constructorName: "Red Bull Racing",
+        time: "1:23.456",
+        gap: null,
+        laps: 22,
+      },
+    ]);
+    expect(page?.tabs.qualifying).toEqual([
+      {
+        position: 2,
+        positionText: "2",
+        driverNumber: "4",
+        driverId: null,
+        driverName: "Lando Norris",
+        driverCode: "NOR",
+        constructorId: null,
+        constructorName: "McLaren",
+        q1: "1:24.123",
+        q2: "1:22.001",
+        q3: "1:21.000",
+        laps: 18,
+      },
+    ]);
+    expect(page?.tabs.raceResult).toEqual([
+      expect.objectContaining({
+        time: "1:05:23.000",
+        gap: null,
+        points: 25,
+      }),
+      expect.objectContaining({
+        time: null,
+        gap: "+0.377",
+        points: 18,
+      }),
+    ]);
+    expect(page?.sources["practice-1"]).toEqual({
+      source: "fastf1",
+      provisional: true,
+      fetchedAt: "2026-09-11T02:20:00Z",
+    });
+    expect(page?.sources.qualifying).toEqual({
+      source: "fastf1",
+      provisional: true,
+      fetchedAt: "2026-09-11T06:20:00Z",
+    });
+    expect(page?.sources["race-result"]).toEqual({
+      source: "fastf1",
+      provisional: true,
+      fetchedAt: "2026-09-11T09:20:00Z",
+    });
+  });
+
+  it("prefers f1db rows over FastF1 snapshots", async () => {
+    const db = fakeDbBySql(
+      tabFragments({
+        "FROM free_practice_1_result": [
+          {
+            position_number: 1,
+            position_text: "1",
+            driver_number: "44",
+            driver_id: "lewis-hamilton",
+            driver_name: "Lewis Hamilton",
+            driver_code: "HAM",
+            constructor_id: "ferrari",
+            constructor_name: "Ferrari",
+            time: "1:20.000",
+            gap: null,
+            laps: 20,
+          },
+        ],
+        "session_result_snapshot s": [
+          {
+            session_snapshots: JSON.stringify([
+              {
+                key: "practice-1",
+                fetchedAt: "2026-09-11T02:20:00Z",
+                driverNumber: "44",
+                position: 1,
+                positionText: "1",
+                driverId: null,
+                driverName: "Lewis Hamilton",
+                driverCode: "HAM",
+                constructorId: null,
+                constructorName: "Ferrari",
+                bestLapMs: 99999,
+                gapMs: null,
+                laps: 19,
+              },
+            ]),
+          },
+        ],
+      }),
+    );
+    const page = await createRaceResultsRepository(db).getRacePage(
+      2026,
+      "australia",
+    );
+    expect(page?.tabs.practice1[0].time).toBe("1:20.000");
+    expect(page?.sources["practice-1"]).toEqual({
+      source: "f1db",
+      provisional: false,
+      fetchedAt: null,
+    });
+  });
+
   it("renders the anti-clockwise direction without the raw underscore", async () => {
     const db = fakeDbBySql(
       tabFragments({
@@ -1006,6 +1199,7 @@ describe("createRaceResultsRepository getRacePage", () => {
       "FROM free_practice_2_result": [],
       "FROM free_practice_3_result": [],
       "SELECT fl.time, d.name AS driver_name": [],
+      "session_result_snapshot s": [],
     });
     const page = await createRaceResultsRepository(db).getRacePage(
       2026,

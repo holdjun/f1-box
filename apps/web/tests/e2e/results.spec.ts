@@ -68,6 +68,26 @@ test.describe("race detail", () => {
     await expect(
       table.locator("tbody tr").first().locator(".vendor-cell__monogram"),
     ).toHaveText("RUS");
+    await expect(page.locator("[data-result-source]")).toHaveText(
+      "f1db · official",
+    );
+  });
+
+  test("@desktop labels provisional FastF1 results", async ({ page }) => {
+    await page.goto("/results/2026/races/china/qualifying");
+    await expect(
+      page.locator('[data-race-tab-panel="qualifying"] [data-result-source]'),
+    ).toContainText("FastF1 · provisional");
+    const firstRow = page
+      .getByRole("table", { name: "Qualifying classification" })
+      .locator("tbody tr")
+      .first();
+    await expect(firstRow.locator("td").nth(2).getByRole("link")).toHaveCount(
+      0,
+    );
+    await expect(firstRow.locator("td").nth(3).getByRole("link")).toHaveCount(
+      0,
+    );
   });
 
   test("@desktop finished race keeps the weekend schedule without result links", async ({
@@ -86,12 +106,16 @@ test.describe("race detail", () => {
     await page.goto("/results/2026/races/australia/race-result");
     const weather = page.locator("[data-session-weather]");
     await expect(weather).toHaveCount(5);
-    await expect(weather.nth(0)).toHaveText("🌡 23.4°C · 💧 48% · 💨 14.2 km/h");
+    await expect(weather.nth(0)).toHaveText("🌡 23.4°C · 💧 48% · ☔ Dry");
     await expect(weather.nth(1)).toHaveText("🌡 0°C · 🛣 0°C");
     await expect(weather.nth(2)).toHaveText("");
     await expect(weather.nth(3)).toHaveText("🛣 31.3°C · 💧 72% · 🌧 Rain");
     await expect(weather.nth(4)).toHaveText(
-      "🌡 24.6°C · 🛣 32.5°C · 💧 61% · 🌧 Rain · 💨 9.6 km/h",
+      "🌡 24.6°C · 🛣 32.5°C · 💧 61% · 🌧 Rain",
+    );
+    await expect(weather.nth(0)).toHaveAttribute(
+      "aria-label",
+      "Practice 1 weather: Air 23.4°C, Humidity 48%, No rain",
     );
   });
 

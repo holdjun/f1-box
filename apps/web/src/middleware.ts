@@ -3,13 +3,17 @@ import { env } from "cloudflare:workers";
 
 import { getAppData } from "./lib/repositories.js";
 
-// 比赛详情会展示 session_weather；采集器按 weather:<year> 精确失效。
+// 比赛详情会展示 session_weather 与 FastF1 session 结果；
+// 采集器分别按 weather:<year>/results:<year> 精确失效。
 // 裸 slug 是稳定重定向，还没有渲染天气，不能拿年份标签放大失效范围。
 const RACE_DETAIL_PATH = /^\/results\/(\d{4})\/races\/[^/]+\/[^/]+\/?$/;
 
 export const onRequest = defineMiddleware(async (context, next) => {
   context.locals.app = await getAppData(env);
   const response = await next();
+  // 页面用内部头把分站号传给缓存标签逻辑；不论是否启用边缘缓存都不能向客户端暴露。
+  const raceRound = response.headers.get("x-f1-race-round");
+  response.headers.delete("x-f1-race-round");
   // 默认缓存只对 GET 页面响应生效；API、错误、页面已显式设置（如列表页空数据时的
   // no-store 信号）一律不覆盖。稳定重定向（301/302）同样 opt-in：首页 302 到当前
   // 赛季占生产总流量三分之一，不缓存时每次都要唤醒 Worker 并查一次 season 表
@@ -29,8 +33,18 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // 主动 purge。短 TTL 在这个流量量下几乎等于不缓存（2026-09-03 实测 23h 内
     // 命中 198 次、未命中 41066 次）
     const raceDetail = RACE_DETAIL_PATH.exec(context.url.pathname);
+    // 分站号由页面写入内部头：URL 只有 slug，middleware 不为 cache tag 再查 D1。
     const tags =
-      raceDetail === null ? ["f1db"] : ["f1db", `weather:${raceDetail[1]}`];
+      raceDetail === null
+        ? ["f1db"]
+        : [
+            "f1db",
+            `weather:${raceDetail[1]}`,
+            `results:${raceDetail[1]}`,
+            ...(raceRound === null
+              ? []
+              : [`results:${raceDetail[1]}:${raceRound}`]),
+          ];
     context.cache.set({ maxAge: 3600, swr: 86400, tags });
     // ClientRouter 后退导航用普通 fetch 重拉整页 HTML，只认浏览器可见的
     // Cache-Control；必须在此写入（边缘命中时后续中间件不执行）。预算

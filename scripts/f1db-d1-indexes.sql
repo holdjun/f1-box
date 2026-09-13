@@ -12,6 +12,12 @@
 --   一条以该实体列打头的索引；复合列顺序取 [实体, 分区判别列, 输出列]，让最热的查询
 --   覆盖不回表。新增查询照此规则推导，`pnpm test` 的查询计划护栏会兜住遗漏。
 
+-- 维度族零：FastF1 临时结果回填稳定实体链接。
+-- 快照按 driver_code / constructor_name 显示，目录链接仍要回到 f1db 实体；
+-- 两张小维度表的映射索引避免每个 fallback 表都全扫。
+CREATE INDEX IF NOT EXISTS idx_driver_abbreviation ON driver (abbreviation, id);
+CREATE INDEX IF NOT EXISTS idx_constructor_name ON constructor (name, id);
+
 -- 维度族一：race_data 的实体入口。
 -- 这一张表被 17 个视图按 type 分区共享（race_result、fastest_lap、pit_stop ……），
 -- 主键 (race_id, type, position_display_order) 只服务"某场比赛的某类成绩"。

@@ -103,7 +103,7 @@ assert keys == [(14, "practice-1"), (14, "race")], keys
 `);
   });
 
-  it("invalidates derived weather when a session reference changes", () => {
+  it("invalidates derived weather and results when a session reference changes", () => {
     const dir = mkdtempSync(path.join(tmpdir(), "weather-ref-trigger-"));
     const db = path.join(dir, "weather.db");
     const schema = readFileSync(
@@ -121,17 +121,25 @@ assert keys == [(14, "practice-1"), (14, "race")], keys
           (2026, 1, 'race', 20, 30, NULL, 'fastf1', '2026-03-08T08:00:00Z');
         INSERT INTO weather_sync_state VALUES
           (2026, 1, 'race', 'success', 1, NULL, '2026-03-08T08:00:00Z', NULL, '2026-03-08T08:00:00Z');
+        INSERT INTO session_result_snapshot VALUES
+          (2026, 1, 'race', '44', 1, '1', 'lewis-hamilton', 'Lewis Hamilton',
+           'HAM', NULL, 'Mercedes', 82123, NULL, NULL, NULL, NULL, NULL, NULL,
+           58, NULL, NULL, '0123', '2026-03-08T08:00:00Z');
+        INSERT INTO session_result_sync_state VALUES
+          (2026, 1, 'race', 'success', 1, NULL, '2026-03-08T08:00:00Z', NULL,
+           '2026-03-08T08:00:00Z');
         UPDATE session_source_ref SET api_path = '/static/new/'
           WHERE year = 2026 AND round = 1 AND session_key = 'race';
         SELECT
           (SELECT COUNT(*) FROM session_weather) AS weather,
-          (SELECT COUNT(*) FROM weather_sync_state) AS state,
-          (SELECT COUNT(*) FROM weather_cache_outbox) AS outbox,
-          (SELECT cache_tag FROM weather_cache_outbox) AS cacheTag;
+          (SELECT COUNT(*) FROM weather_sync_state) AS weatherState,
+          (SELECT COUNT(*) FROM session_result_snapshot) AS snapshot,
+          (SELECT COUNT(*) FROM session_result_sync_state) AS resultState,
+          (SELECT COUNT(*) FROM weather_cache_outbox) AS outbox;
       `,
     });
     expect(JSON.parse(result)).toEqual([
-      { weather: 0, state: 0, outbox: 1, cacheTag: "weather:2026" },
+      { weather: 0, weatherState: 0, snapshot: 0, resultState: 0, outbox: 2 },
     ]);
     rmSync(dir, { recursive: true, force: true });
   });

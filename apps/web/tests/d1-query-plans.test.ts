@@ -196,6 +196,8 @@ describe("D1 查询计划护栏", () => {
 
 describe("D1 查询计划的结构性属性", () => {
   const recordLap = () => query("race-results-repository.ts:recordLapSql");
+  const sessionSnapshots = () =>
+    query("race-results-repository.ts:sessionSnapshotsSql");
   const teammate = () => query("driver-repository.ts:teammateResultsSql");
 
   // 赛道纪录圈要跨该赛道的全部场次，规划器一旦从 race_data 起步就会拉满 FASTEST_LAP
@@ -207,6 +209,19 @@ describe("D1 查询计划的结构性属性", () => {
       "SEARCH ra USING COVERING INDEX idx_race_circuit_year",
     );
     expect(recordLapPlan).toContain("SEARCH race_data USING INDEX");
+  });
+
+  it("FastF1 快照按单场比赛探针读取", () => {
+    const snapshotPlan = plan(sessionSnapshots());
+    expect(snapshotPlan).toContain(
+      "SEARCH ra USING INDEX sqlite_autoindex_race_1 (year=?)",
+    );
+    expect(snapshotPlan).toContain(
+      "SEARCH s USING INDEX sqlite_autoindex_session_result_snapshot_1 (year=? AND round=?)",
+    );
+    expect(snapshotPlan.indexOf("SEARCH ra USING INDEX")).toBeLessThan(
+      snapshotPlan.indexOf("SEARCH s USING INDEX"),
+    );
   });
 
   // 队友对比同样靠 CROSS JOIN 锁顺序：先按年份取该年的 race，再用
@@ -364,5 +379,122 @@ describe("D1 查询计划的结构性属性", () => {
     expect(standings).toHaveLength(1);
     expect(standings[0].team_id).toBe("team-new");
     expect(standings[0].team_name).toBe("New Team");
+  });
+
+  it("FastF1 snapshot identity mapping prefers source id, then season number, then code", () => {
+    insertRow("country", {
+      id: "'map'",
+      alpha2_code: "'MA'",
+      alpha3_code: "'MAP'",
+      name: "'Mapping'",
+    });
+    insertRow("circuit", { id: "'map-circuit'", country_id: "'map'" });
+    insertRow("grand_prix", { id: "'map-gp'", country_id: "'map'" });
+    insertRow("constructor", {
+      id: "'team-source'",
+      name: "'Source Team'",
+      country_id: "'map'",
+    });
+    insertRow("constructor", {
+      id: "'team-name'",
+      name: "'Name Team'",
+      country_id: "'map'",
+    });
+    insertRow("driver", {
+      id: "'driver-source'",
+      name: "'Source Driver'",
+      abbreviation: "'OLD'",
+      permanent_number: "'99'",
+      country_of_birth_country_id: "'map'",
+      nationality_country_id: "'map'",
+    });
+    insertRow("driver", {
+      id: "'driver-abbreviation'",
+      name: "'Code Driver'",
+      abbreviation: "'COD'",
+      country_of_birth_country_id: "'map'",
+      nationality_country_id: "'map'",
+    });
+    insertRow("driver", {
+      id: "'driver-number'",
+      name: "'Number Driver'",
+      abbreviation: "'NUM'",
+      permanent_number: "'22'",
+      country_of_birth_country_id: "'map'",
+      nationality_country_id: "'map'",
+    });
+    insertRow("race", {
+      id: 31,
+      year: 2031,
+      round: 1,
+      grand_prix_id: "'map-gp'",
+      circuit_id: "'map-circuit'",
+      circuit_layout_id: "'map-layout'",
+    });
+    insertRow("season_entrant_driver", {
+      year: 2031,
+      entrant_id: "'map-entrant'",
+      constructor_id: "'team-source'",
+      engine_manufacturer_id: "'map-engine'",
+      driver_id: "'driver-source'",
+      test_driver: 0,
+    });
+    insertRow("season_entrant_driver", {
+      year: 2031,
+      entrant_id: "'map-entrant'",
+      constructor_id: "'team-source'",
+      engine_manufacturer_id: "'map-engine'",
+      driver_id: "'driver-number'",
+      test_driver: 0,
+    });
+    insertRow("season_entrant_driver", {
+      year: 2031,
+      entrant_id: "'map-entrant'",
+      constructor_id: "'team-source'",
+      engine_manufacturer_id: "'map-engine'",
+      driver_id: "'driver-abbreviation'",
+      test_driver: 0,
+    });
+    run(`
+      INSERT INTO session_result_snapshot
+        (year, round, session_key, driver_number, position_number, position_text,
+         driver_source_id, driver_name, driver_code, constructor_source_id,
+         constructor_name, source_revision, fetched_at)
+      VALUES
+        (2031, 1, 'practice-1', '99', 1, '1', 'driver_source',
+         'Source Driver', 'SRC', 'team_source', 'Source Team', '${"c".repeat(64)}',
+         '2026-09-12T12:00:00Z'),
+        (2031, 1, 'practice-1', '22', 2, '2', 'missing_driver',
+         'Number Driver', 'COD', 'missing_team', 'Name Team', '${"c".repeat(64)}',
+         '2026-09-12T12:00:00Z'),
+        (2031, 1, 'practice-1', '77', 3, '3', NULL,
+         'Code Driver', 'COD', NULL, 'Unknown Team', '${"c".repeat(64)}',
+         '2026-09-12T12:00:00Z');
+    `);
+    const result = JSON.parse(
+      run(
+        query("race-results-repository.ts:sessionSnapshotsSql")
+          .replace("?", "2031")
+          .replace("?", "'map-gp'"),
+      ),
+    )[0] as { session_snapshots: string };
+    const snapshots = JSON.parse(result.session_snapshots) as Array<{
+      driverNumber: string;
+      driverId: string | null;
+      constructorId: string | null;
+    }>;
+    const byNumber = new Map(snapshots.map((row) => [row.driverNumber, row]));
+    expect(byNumber.get("99")).toMatchObject({
+      driverId: "driver-source",
+      constructorId: "team-source",
+    });
+    expect(byNumber.get("22")).toMatchObject({
+      driverId: "driver-number",
+      constructorId: "team-name",
+    });
+    expect(byNumber.get("77")).toMatchObject({
+      driverId: "driver-abbreviation",
+      constructorId: null,
+    });
   });
 });

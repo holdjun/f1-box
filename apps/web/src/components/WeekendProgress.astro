@@ -53,15 +53,11 @@ const weatherParts = (weather: NonNullable<WeekendNode["weather"]>) => {
     const value = `${numberFormatter.format(weather.humidityPct)}%`;
     parts.push({ icon: "💧", visual: value, aria: `Humidity ${value}` });
   }
-  if (weather.weatherCode === "rain" || weather.rainfall === true) {
+  if (weather.rainfall === true) {
     parts.push({ icon: "🌧", visual: "Rain", aria: "Rain" });
   }
-  if (weather.windSpeedKph !== null) {
-    const value = `${numberFormatter.format(weather.windSpeedKph)} km/h`;
-    parts.push({ icon: "💨", visual: value, aria: `Wind ${value}` });
-  }
-  if (parts.length === 0 && weather.rainfall === false) {
-    parts.push({ icon: "🌧", visual: "No rain", aria: "No rain" });
+  if (weather.rainfall === false) {
+    parts.push({ icon: "☔", visual: "Dry", aria: "No rain" });
   }
   return parts;
 };
@@ -192,10 +188,12 @@ const windDetail = (weather: NonNullable<WeekendNode["weather"]>) => {
                   <dd class="tabular-nums text-ink-strong">{windDetail(node.weather)}</dd>
                 </div>
               ) : null}
-              {node.weather.rainfall !== null || node.weather.weatherCode === "rain" ? (
+              {node.weather.rainfall !== null ? (
                 <div class="flex justify-between gap-4">
                   <dt class="text-ink-muted">Rainfall</dt>
-                  <dd class="text-ink-strong">{node.weather.rainfall === false && node.weather.weatherCode !== "rain" ? "No rain" : "Rain"}</dd>
+                  <dd class="text-ink-strong">
+                    {node.weather.rainfall === false ? "No rain" : "Rain"}
+                  </dd>
                 </div>
               ) : null}
             </dl>
