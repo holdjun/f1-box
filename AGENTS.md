@@ -31,6 +31,8 @@
 6. D1 每日读取配额极易被读放大撑爆。定位第 1 步用 `wrangler d1 insights f1db -c apps/web/wrangler.jsonc --time-period 12h --sort-by reads`，直接看哪条 SQL 被跑多少次、每次读多少行。索引全集在 `scripts/f1db-d1-indexes.sql`，按访问维度族设计而非逐条查询打补丁：逐表 `sqlite3 .dump` 只带 CREATE TABLE 与 INSERT，上游 f1db 那 164 条索引一条都进不了 D1，库里除主键自动索引外只有这个文件建的。`pnpm test` 的查询计划护栏会遍历全部仓储 SQL，在真实 schema 上验证没有无索引全表扫，新增查询漏配索引会直接变红。导入末尾的 `ANALYZE` 负责刷新 `sqlite_stat1`，缺了它规划器只能靠启发式。`SELECT year FROM season`（seasonYearsSql）几乎所有页面渲染都会查，天然是高频小读写，若被跑到每秒 1 次的频率，说明有 bot/本地残留 dev server 在轮询，先查流量源再考虑加缓存。改 D1 配额前先杀本地 `wrangler dev --remote` 残留进程。
 7. 回滚：数据问题重跑 data-sync 或恢复旧 D1 导入；代码问题重新部署旧提交。
 
+8. FastF1 Container 与 Worker 必须视为同一个发布单元：结果协议版本、Container 镜像和 Worker 构建必须来自同一 git SHA；禁止只部署其中一侧。涉及 `apps/weather-sync/container`、`apps/weather-sync/src` 或结果契约的改动，CI 必须执行 Container health 版本校验和真实结果 canary；preview canary 必须确认 `session_result_snapshot` 已写入，生产部署后还必须执行只读 canary。详细方案见 [docs/fastf1-container-ci-deployment-solution.md](docs/fastf1-container-ci-deployment-solution.md)。
+
 # 提交与分支规范
 
 - 分支：从 origin/main 切出，命名 `<type>/<slug>`（feat/fix/docs/chore）；一个需求一条分支，合并后自动删除，不复用过期分支。

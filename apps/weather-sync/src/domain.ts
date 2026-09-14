@@ -1,3 +1,9 @@
+import {
+  CONTAINER_API_VERSION,
+  RESULTS_ADAPTER_VERSION,
+  RESULTS_SCHEMA_VERSION,
+} from "./contract";
+
 export const MAX_ATTEMPTS = 5;
 export const WEATHER_SETTLE_DELAY_MS = 4 * 60 * 60 * 1000;
 export const RESULT_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
@@ -76,7 +82,7 @@ export interface ContainerResultsResult {
   fetchedAt: string;
   error: string | null;
   adapter: "fastf1-session-results" | "extended-timing-fallback";
-  schemaVersion: 1;
+  schemaVersion: number;
 }
 
 export interface ContainerSessionResult {
@@ -91,6 +97,7 @@ export interface ContainerResponse {
   fastf1Version: string;
   requestsVersion: string;
   resultsAdapterVersion: string;
+  containerApiVersion: number;
   sessions: ContainerSessionResult[];
 }
 
@@ -241,6 +248,12 @@ WHERE unixepoch(sr.starts_at_utc) + CASE sr.session_key
   )
 ORDER BY sr.starts_at_utc DESC, sr.year DESC, sr.round DESC, sr.session_key
 LIMIT ?5`;
+
+export const resultCanarySql = `SELECT sr.year, sr.round,
+       sr.session_key AS sessionKey, sr.api_path AS apiPath,
+       sr.race_date AS raceDate, sr.starts_at_utc AS startsAtUtc
+FROM session_source_ref sr
+WHERE sr.year = ?1 AND sr.round = ?2 AND sr.session_key = ?3`;
 
 export const lockAcquireSql = `INSERT INTO weather_sync_lock
   (name, owner, expires_at)
@@ -551,14 +564,18 @@ function parseResultsResult(raw: unknown): ContainerResultsResult {
     adapter !== "fastf1-session-results" &&
     adapter !== "extended-timing-fallback"
   ) {
-    throw new Error("container results adapter is invalid");
+    throw new Error(
+      `container results adapter is invalid: got ${String(value.adapter)}`,
+    );
   }
   const schemaVersion =
     value.schemaVersion === undefined && status !== "success"
       ? 1
       : value.schemaVersion;
-  if (schemaVersion !== 1) {
-    throw new Error("container results schema version is invalid");
+  if (schemaVersion !== RESULTS_SCHEMA_VERSION) {
+    throw new Error(
+      `container results schema version is invalid: expected ${RESULTS_SCHEMA_VERSION}, got ${String(value.schemaVersion)}`,
+    );
   }
   return {
     status,
@@ -568,7 +585,7 @@ function parseResultsResult(raw: unknown): ContainerResultsResult {
     fetchedAt: parseTimestamp(value.fetchedAt, "fetched timestamp"),
     error: parseError(value.error),
     adapter,
-    schemaVersion: 1,
+    schemaVersion,
   };
 }
 
@@ -630,10 +647,22 @@ export function parseContainerResponse(
   if (
     typeof value.fastf1Version !== "string" ||
     typeof value.requestsVersion !== "string" ||
-    value.resultsAdapterVersion !== "session-results-v1" ||
+    value.resultsAdapterVersion !== RESULTS_ADAPTER_VERSION ||
+    value.containerApiVersion !== CONTAINER_API_VERSION ||
     !Array.isArray(value.sessions)
   ) {
-    throw new Error("container response or results adapter version is invalid");
+    const actual = {
+      fastf1Version: value.fastf1Version,
+      requestsVersion: value.requestsVersion,
+      resultsAdapterVersion: value.resultsAdapterVersion,
+      containerApiVersion: value.containerApiVersion,
+      sessions: Array.isArray(value.sessions)
+        ? value.sessions.length
+        : value.sessions,
+    };
+    throw new Error(
+      `container response, container api version or results adapter version is invalid: got ${JSON.stringify(actual)}`,
+    );
   }
   const rawSessions = value.sessions as unknown[];
   const identities = rawSessions.map(parseResultIdentity);
@@ -668,6 +697,7 @@ export function parseContainerResponse(
     fastf1Version: value.fastf1Version,
     requestsVersion: value.requestsVersion,
     resultsAdapterVersion: value.resultsAdapterVersion,
+    containerApiVersion: value.containerApiVersion,
     sessions,
   };
 }
@@ -712,7 +742,7 @@ export function buildCollectionFailureResults(
         fetchedAt,
         error: message.slice(0, 1000),
         adapter: "extended-timing-fallback",
-        schemaVersion: 1,
+        schemaVersion: RESULTS_SCHEMA_VERSION,
       };
     }
     return result;

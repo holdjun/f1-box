@@ -1,9 +1,15 @@
 import { getContainer } from "@cloudflare/containers";
 import type { WeatherContainer } from "./container";
 import {
+  CONTAINER_API_VERSION,
+  RESULTS_ADAPTER_VERSION,
+  RESULTS_SCHEMA_VERSION,
+} from "./contract";
+import {
   BATCH_LIMIT,
   buildCollectionFailureResults,
   buildPersistPlan,
+  type CollectRequestSession,
   type ContainerSessionResult,
   failuresSql,
   LOCK_TTL_MS,
@@ -16,6 +22,7 @@ import {
   parseRunRequest,
   RESULT_LOOKBACK_MS,
   referenceCountSql,
+  resultCanarySql,
   resultCandidateSql,
   resultStateUpsertSql,
   resultStatusSql,
@@ -124,6 +131,48 @@ interface CandidateKindRow {
   startsAtUtc: string;
   attempts: number;
   previousStatus: SessionCandidate["weather"]["previousStatus"];
+}
+
+async function resultCanary(env: Env) {
+  const reference = await env.F1_DB.prepare(resultCanarySql)
+    .bind(2023, 14, "qualifying")
+    .first<CandidateKindRow>();
+  if (reference === null) {
+    throw new Error("result canary reference is missing");
+  }
+  const request: CollectRequestSession = {
+    year: reference.year,
+    round: reference.round,
+    sessionKey: reference.sessionKey,
+    apiPath: reference.apiPath,
+    startsAtUtc: reference.startsAtUtc,
+    weather: false,
+    results: true,
+  };
+  const response = await getContainer<WeatherContainer>(
+    env.WEATHER_CONTAINER,
+    "weather-sync",
+  ).collect({ sessions: [request] });
+  const result = response.sessions[0]?.results;
+  if (
+    result?.status !== "success" ||
+    result.rowCount < 1 ||
+    result.adapter !== "fastf1-session-results" ||
+    result.schemaVersion !== RESULTS_SCHEMA_VERSION
+  ) {
+    throw new Error(
+      `result canary did not collect a public result: ${JSON.stringify(result ?? null)}`,
+    );
+  }
+  return {
+    year: request.year,
+    round: request.round,
+    sessionKey: request.sessionKey,
+    status: result.status,
+    rowCount: result.rowCount,
+    adapter: result.adapter,
+    schemaVersion: result.schemaVersion,
+  };
 }
 
 function candidateIdentity(row: CandidateKindRow): string {
@@ -363,6 +412,11 @@ async function status(env: Env): Promise<Response> {
     env.F1_DB.prepare(outboxSql),
   ])) as Array<D1Result<Record<string, unknown>>>;
   return jsonResponse({
+    contract: {
+      containerApiVersion: CONTAINER_API_VERSION,
+      resultsAdapterVersion: RESULTS_ADAPTER_VERSION,
+      resultsSchemaVersion: RESULTS_SCHEMA_VERSION,
+    },
     weatherStatuses: weatherStates.results,
     resultStatuses: resultStates.results,
     sessionReferences: references.results[0]?.count ?? 0,
@@ -377,10 +431,26 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (request.method === "GET" && url.pathname === "/health") {
-      return jsonResponse({ ok: true });
+      return jsonResponse({
+        ok: true,
+        containerApiVersion: CONTAINER_API_VERSION,
+        resultsAdapterVersion: RESULTS_ADAPTER_VERSION,
+        resultsSchemaVersion: RESULTS_SCHEMA_VERSION,
+      });
     }
     if (!authorized(request, env.WEATHER_SYNC_TOKEN)) {
       return jsonResponse({ error: "unauthorized" }, 401);
+    }
+    if (request.method === "GET" && url.pathname === "/container-health") {
+      return jsonResponse(
+        await getContainer<WeatherContainer>(
+          env.WEATHER_CONTAINER,
+          "weather-sync",
+        ).health(),
+      );
+    }
+    if (request.method === "GET" && url.pathname === "/canary") {
+      return jsonResponse(await resultCanary(env));
     }
     if (request.method === "POST" && url.pathname === "/run") {
       const params = parseRunRequest(await request.json());

@@ -139,6 +139,15 @@ jobs:
           uv run scripts/sync-session-refs.py --out /tmp/session-refs.sql \
             --years "2023,$current_year"
 
+      - name: Reset preview derived data
+        run: |
+          apps/web/node_modules/.bin/wrangler d1 execute f1db-weather-preview --remote \
+            -c apps/weather-sync/wrangler.preview.jsonc \
+            --command "DELETE FROM weather_sync_state; DELETE FROM session_weather; DELETE FROM session_result_snapshot; DELETE FROM session_result_sync_state; DELETE FROM weather_cache_outbox; DELETE FROM session_cache_outbox; DELETE FROM weather_sync_lock;"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
       - name: Apply preview session references
         run: |
           apps/web/node_modules/.bin/wrangler d1 execute f1db-weather-preview --remote \
@@ -147,11 +156,11 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Reset preview weather state
+      - name: Seed preview result state
         run: |
           apps/web/node_modules/.bin/wrangler d1 execute f1db-weather-preview --remote \
             -c apps/weather-sync/wrangler.preview.jsonc \
-            --command "DELETE FROM weather_sync_state; DELETE FROM session_weather; DELETE FROM session_result_snapshot; DELETE FROM session_result_sync_state; DELETE FROM weather_cache_outbox; DELETE FROM session_cache_outbox; DELETE FROM weather_sync_lock; INSERT INTO session_result_sync_state (year, round, session_key, status, attempts, last_attempt_at, updated_at) SELECT year, round, session_key, 'no_data', 2, datetime('now'), datetime('now') FROM session_source_ref;"
+            --command "INSERT INTO session_result_sync_state (year, round, session_key, status, attempts, last_attempt_at, updated_at) SELECT year, round, session_key, 'no_data', 2, datetime('now'), datetime('now') FROM session_source_ref;"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -176,6 +185,21 @@ jobs:
         run: |
           curl --retry 10 --retry-delay 5 --retry-all-errors -fsS \
             "https://f1-box-weather-sync-preview.rj7c4mhzcp.workers.dev/health" > /dev/null
+
+      - name: Verify preview container contract
+        run: |
+          curl --retry 30 --retry-delay 10 --retry-all-errors -fsS \
+            -H "Authorization: Bearer $WEATHER_SYNC_TOKEN" \
+            "https://f1-box-weather-sync-preview.rj7c4mhzcp.workers.dev/container-health" \
+            > /tmp/container-health.json
+          node <<'NODE'
+          const { deepStrictEqual } = require("node:assert");
+          const health = JSON.parse(require("fs").readFileSync("/tmp/container-health.json", "utf8"));
+          const contract = require("./apps/weather-sync/container/contract-version.json");
+          deepStrictEqual(health, { ok: true, ...contract });
+          NODE
+        env:
+          WEATHER_SYNC_TOKEN: ${{ secrets.WEATHER_SYNC_TOKEN }}
 
       - name: Run weather canary
         run: |
@@ -243,12 +267,16 @@ jobs:
             require("fs").readFileSync("/tmp/result-status.json", "utf8"),
           );
           const success = status.resultStatuses.find((row) => row.status === "success");
+          const unexplainedFailure = status.failures?.find(
+            (row) => row.status === "failed" && !row.lastError,
+          );
           if (
             result.sessions !== 1 ||
             result.results?.success !== 1 ||
             status.snapshotRows < 1 ||
             status.pendingCachePurges < 1 ||
-            success?.count !== 1
+            success?.count !== 1 ||
+            unexplainedFailure !== undefined
           ) {
             console.error(
               `result canary did not persist a snapshot: ${JSON.stringify({ result, status })}`,
@@ -331,3 +359,42 @@ jobs:
         run: |
           curl --retry 10 --retry-delay 5 --retry-all-errors -fsS \
             "https://f1-box-weather-sync.rj7c4mhzcp.workers.dev/health" > /dev/null
+
+      - name: Verify production container contract
+        run: |
+          curl --retry 30 --retry-delay 10 --retry-all-errors -fsS \
+            -H "Authorization: Bearer $WEATHER_SYNC_TOKEN" \
+            "https://f1-box-weather-sync.rj7c4mhzcp.workers.dev/container-health" \
+            > /tmp/container-health.json
+          node <<'NODE'
+          const { deepStrictEqual } = require("node:assert");
+          const health = JSON.parse(require("fs").readFileSync("/tmp/container-health.json", "utf8"));
+          const contract = require("./apps/weather-sync/container/contract-version.json");
+          deepStrictEqual(health, { ok: true, ...contract });
+          NODE
+        env:
+          WEATHER_SYNC_TOKEN: ${{ secrets.WEATHER_SYNC_TOKEN }}
+
+      - name: Run production result canary
+        run: |
+          curl --retry 3 --retry-delay 10 --retry-all-errors -fsS \
+            --max-time 120 \
+            -H "Authorization: Bearer $WEATHER_SYNC_TOKEN" \
+            "https://f1-box-weather-sync.rj7c4mhzcp.workers.dev/canary" \
+            > /tmp/result-canary.json
+          cat /tmp/result-canary.json
+          node <<'NODE'
+          const canary = JSON.parse(require("fs").readFileSync("/tmp/result-canary.json", "utf8"));
+          const contract = require("./apps/weather-sync/container/contract-version.json");
+          if (
+            canary.status !== "success" ||
+            canary.rowCount < 1 ||
+            canary.adapter !== "fastf1-session-results" ||
+            canary.schemaVersion !== contract.resultsSchemaVersion
+          ) {
+            console.error(`production result canary failed: ${JSON.stringify(canary)}`);
+            process.exit(1);
+          }
+          NODE
+        env:
+          WEATHER_SYNC_TOKEN: ${{ secrets.WEATHER_SYNC_TOKEN }}

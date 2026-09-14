@@ -7,6 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir --requirement requirements.txt
+COPY contract-version.json .
 COPY app.py .
 
 RUN install -d -m 0700 -o nobody -g nogroup /tmp/fastf1
